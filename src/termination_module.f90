@@ -210,7 +210,7 @@ contains
         if (present(message)) then
           write(6,*) message
         else
-          write(6,*) "No Error message given"
+          write(6,*) "No Error message given - Format should be <ERR #> <Messsage>"
         end if
     end select
 

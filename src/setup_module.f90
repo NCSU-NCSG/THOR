@@ -306,7 +306,7 @@ contains
 
     ! --- Arguments
     integer(kind=li) :: reflective(3,2)
-    integer(kind=li) :: xd,yd,zd
+    integer(kind=li) :: xd = 0,yd = 0,zd=0
 
     ! --- Set ordering
     !  -- x-dir
@@ -392,7 +392,7 @@ contains
     optimal_tasks = ceiling((nangle*8.0)/(num_p)) 
 
     do i=1, optimal_tasks
-
+      
       k = parallel_map_l2g(i, rank+1)
       if (k .eq. 0) exit
       oct = mod(k,8)+1
@@ -444,7 +444,7 @@ contains
       ! End timer and print message
 
       call cpu_time(te)
-      
+!FIX ME - Only prints angles belonging to root process  
       if (rank .eq. 0) then
         write(6,101) ' - Computation of sweep path for octant: ',octant,' angle: ',q,' . Ex. Time(sec.): ',te-ts  
       end if
@@ -479,7 +479,7 @@ contains
     integer(kind=1)  :: idegr(num_cells) 
     integer(kind=1)  :: odegr(num_cells) 
     integer(kind=li) :: qmarker,iqmarker,fmarker,ifmarker,finished
-    integer(kind=li) :: g,i,j,neigh,pvt,cell,face
+    integer(kind=li) :: g,i,j,neigh,pvt=0,cell,face
     integer(kind=1)  :: solved(num_cells) 
     integer(kind=li) :: dadj(0:3,num_cells) 
     type(vector)     :: onor
@@ -949,16 +949,19 @@ contains
 
     optimal_tasks = ceiling((nangle*8.0)/(num_p))  
   
-    !write(*,*) 'optimal tasks: ', optimal_tasks
     allocate(parallel_map_g2l(8*nangle,2) , parallel_map_l2g(optimal_tasks, num_p))
     
     do i=1, optimal_tasks 
       do p = 1, num_p
         k=k+1
-        if (k .gt. 8*nangle) exit
+        if (k .gt. 8*nangle) then 
+          parallel_map_l2g(i,p) = 0
+          cycle
+        end if
         parallel_map_g2l(k,1) = p
         parallel_map_g2l(k,2) = i
         parallel_map_l2g(i,p) = k
+        
       end do
     end do
 
