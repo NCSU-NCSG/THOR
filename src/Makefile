@@ -93,7 +93,7 @@ global_variables.o global_variables.mod: global_variables.f90 types.mod \
 	$(CC) $(OPT1) global_variables.f90
 #-------------------------------------------------------------------------------
 inner_iteration_module.o inner_iteration_module.mod: \
- inner_iteration_module.f90 /usr/lib/mpi.mod types.mod \
+ inner_iteration_module.f90 mpi.mod types.mod \
  parameter_types.mod filename_types.mod vector_types.mod \
  cross_section_types.mod geometry_types.mod angle_types.mod \
  multindex_types.mod global_variables.mod sweep_module.mod \
@@ -114,11 +114,11 @@ jfnk_module.o jfnk_module.mod: jfnk_module.f90 types.mod \
  dump_inguess_module.mod
 	$(CC) $(OPT1) jfnk_module.f90
 #-------------------------------------------------------------------------------
-main.o: main.f90 /usr/lib/mpi.mod types.mod parameter_types.mod \
+main.o: main.f90 mpi.mod types.mod parameter_types.mod \
  filename_types.mod vector_types.mod cross_section_types.mod \
  geometry_types.mod angle_types.mod multindex_types.mod \
  global_variables.mod termination_module.mod setup_module.mod \
- execution_module.mod wrapup_module.mod /usr/lib/mpi.mod \
+ execution_module.mod wrapup_module.mod mpi.mod \
  global_variables.mod
 	$(CC) $(OPT1) main.f90
 #-------------------------------------------------------------------------------
@@ -156,7 +156,7 @@ read_inflow_module.o read_inflow_module.mod: read_inflow_module.f90 \
  global_variables.mod termination_module.mod
 	$(CC) $(OPT1) read_inflow_module.f90
 #-------------------------------------------------------------------------------
-read_module.o read_module.mod: read_module.f90 /usr/lib/mpi.mod \
+read_module.o read_module.mod: read_module.f90 mpi.mod \
  strings.mod types.mod parameter_types.mod filename_types.mod \
  vector_types.mod cross_section_types.mod geometry_types.mod \
  angle_types.mod multindex_types.mod global_variables.mod \
@@ -171,12 +171,12 @@ read_source_module.o read_source_module.mod: read_source_module.f90 \
 	$(CC) $(OPT1) read_source_module.f90
 #-------------------------------------------------------------------------------
 readmesh_module.o readmesh_module.mod: readmesh_module.f90 \
- /usr/lib/mpi.mod types.mod parameter_types.mod filename_types.mod \
+ mpi.mod types.mod parameter_types.mod filename_types.mod \
  vector_types.mod geometry_types.mod global_variables.mod \
  termination_module.mod
 	$(CC) $(OPT1) readmesh_module.f90
 #-------------------------------------------------------------------------------
-setup_module.o setup_module.mod: setup_module.f90 /usr/lib/mpi.mod \
+setup_module.o setup_module.mod: setup_module.f90 mpi.mod \
  types.mod parameter_types.mod filename_types.mod vector_types.mod \
  cross_section_types.mod geometry_types.mod angle_types.mod \
  multindex_types.mod global_variables.mod read_module.mod \
@@ -199,7 +199,7 @@ sph_harmonics_module.o sph_harmonics_module.mod: sph_harmonics_module.f90 \
 stringmod.o strings.mod: stringmod.f90 precision.mod
 	$(CC) $(OPT1) stringmod.f90
 #-------------------------------------------------------------------------------
-sweep_module.o sweep_module.mod: sweep_module.f90 /usr/lib/mpi.mod \
+sweep_module.o sweep_module.mod: sweep_module.f90 mpi.mod \
  types.mod parameter_types.mod filename_types.mod vector_types.mod \
  cross_section_types.mod geometry_types.mod angle_types.mod \
  multindex_types.mod global_variables.mod cell_splitting_module.mod
