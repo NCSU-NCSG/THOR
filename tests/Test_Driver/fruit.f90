@@ -282,7 +282,7 @@ module fruit
   logical, private, save :: case_passed = DEFAULT_CASE_PASSED
   integer, private, save :: case_time_from = 0
   integer, private, save :: linechar_count = 0
-  logical, private, save :: if_show_dots = .true.
+  logical, private, save :: if_show_dots = .false.
 
   integer, parameter :: FRUIT_PREFIX_LEN_MAX = 50
   character(len = FRUIT_PREFIX_LEN_MAX) :: prefix = ""
