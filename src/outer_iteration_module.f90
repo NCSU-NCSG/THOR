@@ -715,7 +715,7 @@ contains
 
     outer=outer-1
 
-    10  continue
+    10 continue
 
     k_error=keff_error
     f_error=fiss_error
