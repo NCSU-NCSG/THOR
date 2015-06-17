@@ -271,7 +271,6 @@ contains
 
     if(page_refl .eq. 1_li) close(unit=98)
 
-    ! Deallocate temporary arrays
 
     if( allocated(reflected_flux) ) deallocate(reflected_flux)
 
@@ -286,12 +285,6 @@ contains
   !> thermal iterations. The group sweep is explicitly handled by a loop
   !> in the subroutine.
   subroutine outer_iteration_eig(flux,keff,LL,U,Lf,Uf)
-    !**********************************************************************
-    !
-    ! Subroutine outer iteration calls inner iteration and loops over all
-    ! energy groups
-    !
-    !**********************************************************************
 
     ! Pass eigenvalue
 
@@ -541,10 +534,8 @@ contains
              do i=1,num_cells
                 do n=1,namom
                    do l=1,num_moments_v
-                      a=flux(l,n,i,eg,1)
                       !FIXME - Does this line go before or after acceleration? flux(l,n,i,eg,1)=flux(l,n,i,eg,2)
-                      flux(l,n,i,eg,2)=flux(l,n,i,eg,2)+thet*(flux(l,n,i,eg,2)-a)
-                      flux(l,n,i,eg,1)=flux(l,n,i,eg,2)
+                      flux(l,n,i,eg,2)=flux(l,n,i,eg,2)+thet*(flux(l,n,i,eg,2)-flux(l,n,i,eg,1))
                    end do
                 end do
              end do
@@ -557,8 +548,13 @@ contains
        end if
 
        !========================================================================
-       ! Recompute fission source using new update
+       ! Zero fission source. Then, recompute fission source using new update
        !========================================================================
+       do i=1, num_cells
+          do l=1, num_moments_v
+             fiss_src(l,i,2)=zero
+          end do
+       end do
        do eg=1, egmax
           do i=1, num_cells
              do l=1, num_moments_v
@@ -613,7 +609,6 @@ contains
        ! compute the convergence based on error in group fluxes
        !========================================================================
        flux_error=0.0_d_t
-
        do eg =1,egmax
           do i=1,num_cells
              if( abs(flux(1,1,i,eg,niter)) > 1.0e-12_d_t) then
@@ -622,7 +617,7 @@ contains
              else
                 t_error = abs( flux(1,1,i,eg,niter)-flux(1,1,i,eg,niter-1))
              end if
-             if( t_error > max_outer_error ) then
+             if( t_error > flux_error ) then
                 flux_error=t_error
              end if
           end do
@@ -634,8 +629,6 @@ contains
        theta(1)=theta(2)
        theta(2)=theta(3)
        theta(3)=fiss_dist_error(2)/fiss_dist_error(1)
-       !spectral_r = theta(3)
-       !theta(3)=theta(3)/(1.0_d_t-theta(3))
 
        !========================================================================
        ! stop timer
@@ -659,10 +652,10 @@ contains
              flush(21)
           end if
        end if
-       101    format(1X,A)
-       102    format(1X,2I6,5ES12.4,I12,ES12.4,A)
-       103    format(1X,A,ES12.4)
-       104    format(1X,A,I5,3ES12.4)
+        101    format(1X,A)
+        102    format(1X,2I6,5ES12.4,I12,ES12.4,A)
+        103    format(1X,A,ES12.4)
+        104    format(1X,A,I5,3ES12.4)
 
        !========================================================================
        ! write iteration results to file if desired
@@ -681,7 +674,6 @@ contains
           suffix = "odd"
           open(unit=49,file='intermediate_output_odd.dat',status='unknown',action='write')
        end if
-
        call wrapup(flux = flux ,keff = keff_new, unit_number = 49, suffix = suffix)
        close(unit=49)
 
@@ -695,22 +687,19 @@ contains
        end if
 
        !========================================================================
-       ! If flux was not accelerated, copy over iterates
+       ! Copy over iterates of flux
        !========================================================================
-       if(.not. (extra_flag .eq. 1_li .and. outer_acc.eq.2)) then
-          ! copy over iterates of the flux
-          do ii=2,niter
-             do eg=1, egmax
-                do i=1,num_cells
-                   do n=1,namom
-                      do l=1,num_moments_v
-                         flux(l,n,i,eg,ii-1)=flux(l,n,i,eg,ii)
-                      end do
+       do ii=2,niter
+          do eg=1, egmax
+             do i=1,num_cells
+                do n=1,namom
+                   do l=1,num_moments_v
+                      flux(l,n,i,eg,ii-1)=flux(l,n,i,eg,ii)
                    end do
                 end do
              end do
           end do
-       end if
+       end do
 
        !========================================================================
        ! copy over the fission source: Note, that if the flux is accelerated the
@@ -719,7 +708,6 @@ contains
        do i=1, num_cells
           do l=1, num_moments_v
              fiss_src(l,i,1)=fiss_src(l,i,2)
-             fiss_src(l,i,2)=zero
           end do
        end do
 
