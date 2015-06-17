@@ -680,8 +680,8 @@ contains
        !========================================================================
        ! check convergence and quit if criteria are satisfied
        !========================================================================
-       if(outer > 2 .and. fiss_error < outer_conv .and. flux_error < outer_conv .and. &
-            keff_error < k_conv) then
+       if(outer > 2 .and. (fiss_error < outer_conv .or. flux_error < outer_conv .or. &
+            keff_error < k_conv)) then
           conv_flag=1
           go to 10
        end if
