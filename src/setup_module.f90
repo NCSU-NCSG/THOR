@@ -6,7 +6,7 @@ module setup_module
 !***********************************************************************
 
 ! Use derived-type modules
-    
+
   use mpi
   use types
   use parameter_types
@@ -21,7 +21,7 @@ module setup_module
 ! Use modules that pertain setting up problem
 
   use read_module
-  use quadrature_module 
+  use quadrature_module
   use sweep_module
   use termination_module
 
@@ -33,7 +33,7 @@ contains
   subroutine setup
   !*********************************************************************
   !
-  ! Subroutine setup calls routines to read and prepare input for 
+  ! Subroutine setup calls routines to read and prepare input for
   ! execution
   !
   !*********************************************************************
@@ -41,9 +41,9 @@ contains
   ! Local variables
 
     integer(kind=li) :: i,alloc_stat
-    integer(kind=li) :: q,oct,summe 
+    integer(kind=li) :: q,oct,summe
     type(vector) :: v0, v1, v2, v3, n0, n1, n2, n3
-    integer(kind=li) :: reflective(3,2) 
+    integer(kind=li) :: reflective(3,2)
     real(kind=d_t) :: ts,te
     real(kind=d_t), dimension(3,3) :: J, J_inv
     real(kind=d_t)                 :: det_J,tot_vol
@@ -54,13 +54,13 @@ contains
   ! Read input
 
     call read
-    
+
   ! Assign local angles for parallel analysis
-  
+
     call assign_work
 
   ! Allocate and initialize density factors and region volume
-   
+
     allocate(dens_fact(minreg:maxreg));dens_fact=1.0_d_t
     allocate(reg_vol  (minreg:maxreg));reg_vol  =0.0_d_t
 
@@ -73,13 +73,13 @@ contains
        cells(i)%volume=(1.0_d_t/6.0_d_t)*det_J
        reg_vol(cells(i)%reg)=reg_vol(cells(i)%reg)+cells(i)%volume
     end do
-        
+
     if(dfact_opt.ne.0) then
       call read_density_factors
       if(dfact_opt.eq.1) then
         do i=minreg,maxreg
           if(dens_fact(i)<0.0_d_t .or. reg_vol(i)<2.24d-12) then
-            dens_fact(i)=1.0_d_t 
+            dens_fact(i)=1.0_d_t
           else
             dens_fact(i)=dens_fact(i)/reg_vol(i)
           end if
@@ -87,12 +87,12 @@ contains
       else
         do i=minreg,maxreg
           if(dens_fact(i)<0.0_d_t) dens_fact(i)=1.0_d_t
-        end do  
-      end if 
-    end if 
+        end do
+      end if
+    end if
 
-    call write_reg_info   
- 
+    call write_reg_info
+
   ! Set comvergence flag to 0 => no convergence
 
     conv_flag=0_li
@@ -105,27 +105,27 @@ contains
     nit         = 0_li
 
   ! Set number of angular flux moments to be computed
- 
+
     namom=(scatt_ord+1)**2
 
   ! Set number of retained flux iterates
 
-    niter=2_li
+    niter=3_li
 
   ! Estimate memory consumption
     if (rank .eq. 0) then
-      call memory_estimate(mem_req) 
+      call memory_estimate(mem_req)
       write(6,*) "--------------------------------------------------------"
       write(6,*) "   Memory estimate   "
       write(6,*) "--------------------------------------------------------"
       write(6,102) 'Memory estimate: ',mem_req,' MB'
-      write(6,*)   
+      write(6,*)
       102 FORMAT(1X,A18,ES12.4,A3)
     end if
   ! Pre-compute the cell outward normal vectors
 
     allocate(outward_normal(num_cells,0:3),stat=alloc_stat)
-    if(alloc_stat /=0) call stop_thor(2_li) 
+    if(alloc_stat /=0) call stop_thor(2_li)
 
   ! Generate outward normal vectors for all cells for performance
 
@@ -145,47 +145,47 @@ contains
 
     ! Check reflective boundary faces: They need to be on a face that is
     ! perpendicuar to either x,y or z-axis.
-  
-      call check_reflective    
-  
+
+      call check_reflective
+
     ! Classify reflective boundary faces by axis they are orthogonal to:
     ! +1 = outward normal along positive x axis, -1 = outward normal along negative x-axis
     ! +2 = outward normal along positive y axis, -2 = outward normal along negative y-axis
     ! +3 = outward normal along positive z axis, -3 = outward normal along negative z-axis
 
-      call classify_reflective 
- 
+      call classify_reflective
+
     end if
 
     ! Set up the variables to memorize rings in the mesh sweep
 
     allocate(neldep(8,nangle),stat=alloc_stat)
-    if(alloc_stat /=0) call stop_thor(1_li)    
+    if(alloc_stat /=0) call stop_thor(1_li)
     neldep=0_li
-    allocate(eldep(8,nangle,egmax) ,stat=alloc_stat) 
-    if(alloc_stat /=0) call stop_thor(1_li)    
+    allocate(eldep(8,nangle,egmax) ,stat=alloc_stat)
+    if(alloc_stat /=0) call stop_thor(1_li)
     allocate( is_cycle(0:3,num_cells) )
 
     ! Pre-compute sweep if sweep_tpe = 1
-    
+
     if (sweep_tpe .eq. 1) then
 
-       ! allocate sweep path 
-         if      (page_sweep .eq. 0) then  
+       ! allocate sweep path
+         if      (page_sweep .eq. 0) then
            allocate( sweep_path(num_cells,8,nangle),stat=alloc_stat)
            if(alloc_stat /=0) call stop_thor(1_li)
          else if (page_sweep .eq. 1) then
            allocate( sweep_path(num_cells,1,1),stat=alloc_stat)
            if(alloc_stat /=0) call stop_thor(1_li)
            ! open scratch file that contains sweep path
-           inquire(file="sweep_path.pg",exist=existence) 
+           inquire(file="sweep_path.pg",exist=existence)
            if( existence .eqv. .true.) then
               open(unit=99,file='sweep_path.pg',status='replace',form='unformatted',access='direct',recl=4*num_cells)
-           else 
+           else
               open(unit=99,file='sweep_path.pg',status='new'    ,form='unformatted',access='direct',recl=4*num_cells)
            end if
          end if
-         sweep_path=0_li 
+         sweep_path=0_li
 
        ! pre-compute sweep
          if (rank .eq. 0) then
@@ -198,13 +198,13 @@ contains
          call pre_sweep
          call cpu_time(te)
          if (rank .eq. 0) then
-           write(6,101) '-- Finished precomputing sweep path. Time (sec.) ', te-ts       
+           write(6,101) '-- Finished precomputing sweep path. Time (sec.) ', te-ts
            write(6,*)
          end if
     end if
 
     ! Determine which boundary faces are reflective and save in reflective
-  
+
     reflective=0_li
     do i=1,rside_cells
        q=abs(refl_face_tpe(i))
@@ -216,7 +216,7 @@ contains
     end do
 
     ! Determine ordering of octants
-    
+
     call set_ordering(reflective)
 
     ! Make sure that if JFNK is selected reflective BC in opposite faces is not
@@ -234,7 +234,7 @@ contains
 
     exmax = 0.5_d_t
     extol = 0.05_d_t
- 
+
   end subroutine setup
 
 !------------------------------------------------------------------------------------------------------------------------!
@@ -263,8 +263,8 @@ contains
          write(6,104) i,reg2mat(i),reg_vol(i),dens_fact(i)
       end do
     end if
-    
-    104 FORMAT(1X,I14,I14,3ES15.4)  
+
+    104 FORMAT(1X,I14,I14,3ES15.4)
 
   end subroutine
 
@@ -277,7 +277,7 @@ contains
   ! Reads density factor file
   !
   !*********************************************************************
- 
+
     ! Local variables
     logical :: ex
     integer(kind=li) :: i
@@ -290,8 +290,8 @@ contains
       read(51,*) (dens_fact(i),i=minreg,maxreg)
       close(unit=51)
     else
-      call stop_thor(34_li)    
-      return 
+      call stop_thor(34_li)
+      return
     end if
   end subroutine
 !------------------------------------------------------------------------------------------------------------------------!
@@ -364,12 +364,12 @@ contains
 !------------------------------------------------------------------------------------------------------------------------!
 !------------------------------------------------------------------------------------------------------------------------!
 
-  !> This subroutine pre-computes the sweep path and saves it in  
+  !> This subroutine pre-computes the sweep path and saves it in
   !> variable sweep_path
   subroutine pre_sweep
   !*********************************************************************
   !
-  ! Subroutine pre-sweep pre-computes the sweep path and saves it in 
+  ! Subroutine pre-sweep pre-computes the sweep path and saves it in
   ! variable sweep_path
   !
   !*********************************************************************
@@ -383,24 +383,24 @@ contains
 
     integer(kind=li) :: tpe, mate
     real(kind=d_t) :: te,ts
-    
+
     integer ::rank,mpi_err, localunit, num_p, optimal_tasks
     call MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
     call MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
 
   ! Begin parallel loop over quadrature octant
-    optimal_tasks = ceiling((nangle*8.0)/(num_p)) 
+    optimal_tasks = ceiling((nangle*8.0)/(num_p))
 
     do i=1, optimal_tasks
-      
+
       k = parallel_map_l2g(i, rank+1)
       if (k .eq. 0) exit
       oct = mod(k,8)+1
       q = ceiling(k/8.0)
-      
+
 !FIX ME - Octant ordering is lost here
       octant= oct !ordering(oct)
-      
+
       if(octant == 1)then
          omega%x1=quadrature(q)%mu%x1
          omega%x2=quadrature(q)%mu%x2
@@ -444,9 +444,9 @@ contains
       ! End timer and print message
 
       call cpu_time(te)
-!FIX ME - Only prints angles belonging to root process  
+!FIX ME - Only prints angles belonging to root process
       if (rank .eq. 0) then
-        write(6,101) ' - Computation of sweep path for octant: ',octant,' angle: ',q,' . Ex. Time(sec.): ',te-ts  
+        write(6,101) ' - Computation of sweep path for octant: ',octant,' angle: ',q,' . Ex. Time(sec.): ',te-ts
       end if
 
 
@@ -459,29 +459,29 @@ contains
 !------------------------------------------------------------------------------------------------------------------------!
 
   !> This subroutine performs a BFS of the mesh along direction omega.
-  !> It deals with rings by severing the connection across one face 
-  !> within the ring and saving the cell/face #. 
+  !> It deals with rings by severing the connection across one face
+  !> within the ring and saving the cell/face #.
   subroutine pre_queue(q,octant,omega)
   !*********************************************************************
-  ! 
+  !
   ! This subroutine performs a BFS of the mesh along direction omega.
-  ! It deals with rings by severing the connection across one face 
-  ! within the ring and saving the cell/face #.  
+  ! It deals with rings by severing the connection across one face
+  ! within the ring and saving the cell/face #.
   !
   !*********************************************************************
 
-    ! --- Arguments  
+    ! --- Arguments
     integer(kind=li) :: q,octant
     type(vector) :: omega
 
     ! --- Local variables
     integer(kind=li) :: queue(num_cells)
-    integer(kind=1)  :: idegr(num_cells) 
-    integer(kind=1)  :: odegr(num_cells) 
+    integer(kind=1)  :: idegr(num_cells)
+    integer(kind=1)  :: odegr(num_cells)
     integer(kind=li) :: qmarker,iqmarker,fmarker,ifmarker,finished
     integer(kind=li) :: g,i,j,neigh,pvt=0,cell,face
-    integer(kind=1)  :: solved(num_cells) 
-    integer(kind=li) :: dadj(0:3,num_cells) 
+    integer(kind=1)  :: solved(num_cells)
+    integer(kind=li) :: dadj(0:3,num_cells)
     type(vector)     :: onor
     type(upstream_face_le),pointer :: cycle_list,current_el,next
 
@@ -500,18 +500,18 @@ contains
     dadj=0_li
     do cell=1,num_cells
        do face=0,3
-          ! -- get current normal 
+          ! -- get current normal
           onor=outward_normal(cell,face)
           ! -- decide if inflow or outflow
           if      ( (omega .dot. onor) > 0.0_d_t) then   ! - outflow
              dadj(face,cell)=adjacency_list(cell,face)%cell
           else if ( (omega .dot. onor) < 0.0_d_t) then   ! - inflow
              dadj(face,cell)=-adjacency_list(cell,face)%cell
-          end if 
+          end if
        end do
-    end do   
+    end do
 
-    ! --- Start algorithm by setting indegree and outdegree: 
+    ! --- Start algorithm by setting indegree and outdegree:
     !     indegree : # upstream dependencies
     !     outdegree: # downstream dependencies
 
@@ -523,9 +523,9 @@ contains
            odegr(cell)=odegr(cell)+1
         else if (dadj(face,cell)<0) then
            idegr(cell)=idegr(cell)+1
-        end if 
+        end if
       end do
-    end do 
+    end do
 
     ! --- Start main loop
     finished=0
@@ -537,7 +537,7 @@ contains
 
     do while(finished<num_cells)
 
-      ! - Fill queue with all tets that initially have no upstream 
+      ! - Fill queue with all tets that initially have no upstream
       !   dependencies
       do i=1,num_cells
          if(idegr(i) .eq. 0 .and. solved(i) .eq. 0) then
@@ -579,14 +579,14 @@ contains
       ! -- If downstream trim did not touch all cells, then there are cycles
       if(finished<num_cells) then
 
-      ! - Fill queue reversely with all tets that initially have no downstream 
+      ! - Fill queue reversely with all tets that initially have no downstream
       !   dependencies
         do i=1,num_cells
           if(odegr(i) .eq. 0 .and. solved(i) .eq. 0) then
             iqmarker=iqmarker-1
             queue(iqmarker)=i
           end if
-        end do 
+        end do
 
       ! -- Upstream trim
         do while(ifmarker .gt. iqmarker)
@@ -622,21 +622,21 @@ contains
 
       if(finished<num_cells) then
 
-      ! -- Find element with only one upstream dependence or use 
+      ! -- Find element with only one upstream dependence or use
       !    and element with two upstream dependencies
         j=3;i=0
         do while(j>1 .and. i.lt.num_cells)
-           i=i+1 
+           i=i+1
            if(solved(i) .eq. 0) then
              if(idegr(i)<j) then
                 j=idegr(i)
-                pvt=i   
-             end if    
+                pvt=i
+             end if
            end if
         end do
 
       ! -- List pvt in order and increment finished counter
-      ! 
+      !
         finished=finished+1
         fmarker=fmarker+1
         qmarker=qmarker+1
@@ -647,7 +647,7 @@ contains
         end if
         solved(pvt)  = 1
 
-      ! -- decrement upstream and downstream dependencies  
+      ! -- decrement upstream and downstream dependencies
         do j=0,3
           neigh=dadj(j,pvt);i=abs(neigh)
           if(i > 0) then
@@ -663,25 +663,25 @@ contains
             end if
           end if
         end do
-          
+
       end if
-    
+
     end do
   ! --- End main loop
 
-  ! --- Copy over the eliminated dependencies into 
-    j=max(neldep(octant,q),1) 
+  ! --- Copy over the eliminated dependencies into
+    j=max(neldep(octant,q),1)
     if(j>1) write(6,*) '  -- Cycles detected. Number: ',j
     do g=1,egmax
       allocate( eldep(octant,q,g)%cells(j) )
       allocate( eldep(octant,q,g)%faces(j) )
       allocate( eldep(octant,q,g)%face_fluxes(num_moments_f,j) )
-    end do   
+    end do
     i=0
     current_el=>cycle_list
     do while( associated(current_el%next) )
-      i=i+1_li 
-      do g=1,egmax 
+      i=i+1_li
+      do g=1,egmax
         eldep(octant,q,g)%cells(i)=current_el%cell
         eldep(octant,q,g)%faces(i)=current_el%face
         eldep(octant,q,g)%face_fluxes(:,i)=0.0_d_t
@@ -690,23 +690,23 @@ contains
     end do
 
   ! --- Deallocate linked list
-  
+
     current_el=>cycle_list
     do while( associated(current_el) )
        next=>current_el%next
-       deallocate(current_el)   
-       nullify(current_el)   
+       deallocate(current_el)
+       nullify(current_el)
        current_el=>next
     end do
 
-  ! --- If page_sweep == 1 then write path to disk 
+  ! --- If page_sweep == 1 then write path to disk
 
     if(page_sweep.eq.1) then
          write(99,rec=8*(q-1)+octant) sweep_path(:,1,1)
     end if
     101 FORMAT(1X,I12)
 
-  end subroutine 
+  end subroutine
 
 !------------------------------------------------------------------------------------------------------------------------!
 !------------------------------------------------------------------------------------------------------------------------!
@@ -714,7 +714,7 @@ contains
   subroutine classify_reflective
 
     ! local variables
-    
+
       integer(kind=li) :: f,face,c,alloc_stat
       type(vector)     :: normal
       real(kind=d_t)   :: d1,d2,d3,magn
@@ -724,13 +724,13 @@ contains
     ! allocate refl_face_tpe
 
       allocate( refl_face_tpe(rside_cells) , stat=alloc_stat)
-      if(alloc_stat /=0) call stop_thor(2_li) 
+      if(alloc_stat /=0) call stop_thor(2_li)
 
-    ! run through all boundary faces and check their type 
+    ! run through all boundary faces and check their type
 
       do face=1,rside_cells
         c = rb_cells(face)%cell
-        f = rb_cells(face)%face    
+        f = rb_cells(face)%face
         normal=outward_normal(c,f)
         magn=sqrt(normal%x1**2+normal%x2**2+normal%x3**2)
         x1=abs( normal%x1 ) / magn
@@ -738,7 +738,7 @@ contains
         x3=abs( normal%x3 ) / magn
         d1 = sqrt( (x1-one)**2 + (x2)**2 + (x3)**2 )
         d2 = sqrt( (x1)**2 + (x2-one)**2 + (x3)**2 )
-        d3 = sqrt( (x1)**2 + (x2)**2 + (x3-one)**2 ) 
+        d3 = sqrt( (x1)**2 + (x2)**2 + (x3-one)**2 )
         if      (d1 < tol .and. normal%x1 > zero) then
            refl_face_tpe(face)=1_li
         else if (d1 < tol .and. normal%x1 < zero) then
@@ -754,9 +754,9 @@ contains
         else
            call stop_thor(14_li)
         end if
-      end do    
+      end do
 
-  end subroutine 
+  end subroutine
 
 !------------------------------------------------------------------------------------------------------------------------!
 !------------------------------------------------------------------------------------------------------------------------!
@@ -766,24 +766,24 @@ contains
   ! This subroutine ensures that reflective boundary faces are perpendicular
   ! to one of the coordinate axis
   !*********************************************************************
-   
+
   ! Local variables
-  
+
     integer(kind=li) :: face,f,c
     real(kind=d_t)   :: x1,x2,x3
     real(kind=d_t)   :: d1,d2,d3
     real(kind=d_t)   :: magn
     real(kind=d_t)   :: tol=1e-6_d_t
     type(vector)     :: normal
- 
+
     do face=1,rside_cells
-       c = rb_cells(face)%cell 
+       c = rb_cells(face)%cell
        f = rb_cells(face)%face
        normal=outward_normal(c,f)
-       magn=sqrt(normal%x1**2+normal%x2**2+normal%x3**2) 
+       magn=sqrt(normal%x1**2+normal%x2**2+normal%x3**2)
        x1=abs( normal%x1 ) / magn
-       x2=abs( normal%x2 ) / magn 
-       x3=abs( normal%x3 ) / magn  
+       x2=abs( normal%x2 ) / magn
+       x3=abs( normal%x3 ) / magn
        d1 = sqrt( (x1-one)**2 + (x2)**2 + (x3)**2 )
        d2 = sqrt( (x1)**2 + (x2-one)**2 + (x3)**2 )
        d3 = sqrt( (x1)**2 + (x2)**2 + (x3-one)**2 )
@@ -794,7 +794,7 @@ contains
           101 FORMAT(1X,A,2I8)
        end if
     end do
-   
+
   end subroutine
 
 !------------------------------------------------------------------------------------------------------------------------!
@@ -817,61 +817,61 @@ contains
 
   ! Compute vector normal to each face
 
-    n0=(v2-v1) .cross. (v3-v1) 
+    n0=(v2-v1) .cross. (v3-v1)
     n1=(v3-v0) .cross. (v2-v0)
-    n2=(v1-v0) .cross. (v3-v0) 
+    n2=(v1-v0) .cross. (v3-v0)
     n3=(v2-v0) .cross. (v1-v0)
 
   ! make sure the normal is an outward normal: compute face midpoint, then
   ! compute vector from point outside of face to midpoint and dot with outer
-  ! normal. Results must be positive. 
+  ! normal. Results must be positive.
 
     ! a. n0
-    dmy%x1 = third * (v1%x1+v2%x1+v3%x1) - v0%x1      
-    dmy%x2 = third * (v1%x2+v2%x2+v3%x2) - v0%x2     
-    dmy%x3 = third * (v1%x3+v2%x3+v3%x3) - v0%x3 
+    dmy%x1 = third * (v1%x1+v2%x1+v3%x1) - v0%x1
+    dmy%x2 = third * (v1%x2+v2%x2+v3%x2) - v0%x2
+    dmy%x3 = third * (v1%x3+v2%x3+v3%x3) - v0%x3
     if( (n0 .dot. dmy) < zero) then
-      n0%x1 = -n0%x1 
-      n0%x2 = -n0%x2 
-      n0%x3 = -n0%x3 
-    end if  
+      n0%x1 = -n0%x1
+      n0%x2 = -n0%x2
+      n0%x3 = -n0%x3
+    end if
     ! b. n1
-    dmy%x1 = third * (v0%x1+v2%x1+v3%x1) - v1%x1      
-    dmy%x2 = third * (v0%x2+v2%x2+v3%x2) - v1%x2     
-    dmy%x3 = third * (v0%x3+v2%x3+v3%x3) - v1%x3 
+    dmy%x1 = third * (v0%x1+v2%x1+v3%x1) - v1%x1
+    dmy%x2 = third * (v0%x2+v2%x2+v3%x2) - v1%x2
+    dmy%x3 = third * (v0%x3+v2%x3+v3%x3) - v1%x3
     if( (n1 .dot. dmy) < zero) then
-      n1%x1 = -n1%x1 
-      n1%x2 = -n1%x2 
-      n1%x3 = -n1%x3 
-    end if  
+      n1%x1 = -n1%x1
+      n1%x2 = -n1%x2
+      n1%x3 = -n1%x3
+    end if
     ! b. n2
-    dmy%x1 = third * (v1%x1+v0%x1+v3%x1) - v2%x1      
-    dmy%x2 = third * (v1%x2+v0%x2+v3%x2) - v2%x2     
-    dmy%x3 = third * (v1%x3+v0%x3+v3%x3) - v2%x3 
+    dmy%x1 = third * (v1%x1+v0%x1+v3%x1) - v2%x1
+    dmy%x2 = third * (v1%x2+v0%x2+v3%x2) - v2%x2
+    dmy%x3 = third * (v1%x3+v0%x3+v3%x3) - v2%x3
     if( (n2 .dot. dmy) < zero) then
-      n2%x1 = -n2%x1 
-      n2%x2 = -n2%x2 
-      n2%x3 = -n2%x3 
-    end if  
+      n2%x1 = -n2%x1
+      n2%x2 = -n2%x2
+      n2%x3 = -n2%x3
+    end if
     ! b. n3
-    dmy%x1 = third * (v1%x1+v2%x1+v0%x1) - v3%x1      
-    dmy%x2 = third * (v1%x2+v2%x2+v0%x2) - v3%x2     
-    dmy%x3 = third * (v1%x3+v2%x3+v0%x3) - v3%x3 
+    dmy%x1 = third * (v1%x1+v2%x1+v0%x1) - v3%x1
+    dmy%x2 = third * (v1%x2+v2%x2+v0%x2) - v3%x2
+    dmy%x3 = third * (v1%x3+v2%x3+v0%x3) - v3%x3
     if( (n3 .dot. dmy) < zero) then
-      n3%x1 = -n3%x1 
-      n3%x2 = -n3%x2 
-      n3%x3 = -n3%x3 
-    end if  
+      n3%x1 = -n3%x1
+      n3%x2 = -n3%x2
+      n3%x3 = -n3%x3
+    end if
 
   end subroutine generate_normals
 
 !------------------------------------------------------------------------------------------------------------------------!
 !------------------------------------------------------------------------------------------------------------------------!
- 
+
   subroutine memory_estimate(mem)
   !*********************************************************************
-  ! 
-  ! Computes an estimate of the consumption of memory based on the 
+  !
+  ! Computes an estimate of the consumption of memory based on the
   ! largest arrays used in THOR
   !
   !*********************************************************************
@@ -897,71 +897,71 @@ contains
     ! --- Reflected flux
     if(page_refl.eq.0_li) then
       mem = mem +&
-          8.0d0*8.0d0*real(nangle,d_t)*real(rside_cells,d_t)*real(egmax*num_moments_v,d_t)        ! reflected flux         
+          8.0d0*8.0d0*real(nangle,d_t)*real(rside_cells,d_t)*real(egmax*num_moments_v,d_t)        ! reflected flux
     else
       mem = mem +&
-          8.0d0*8.0d0*real(nangle,d_t)*real(rside_cells,d_t)*real(num_moments_v,d_t)              ! reflected flux         
+          8.0d0*8.0d0*real(nangle,d_t)*real(rside_cells,d_t)*real(num_moments_v,d_t)              ! reflected flux
     end if
 
     ! --- Sweep path
 
     if(page_sweep.eq.0) then
        mem = mem +&
-             4.0d0*8.0d0*real(nangle,d_t)*real(num_cells,d_t) 
-    else 
+             4.0d0*8.0d0*real(nangle,d_t)*real(num_cells,d_t)
+    else
        mem = mem + 4.0d0*real(num_cells,d_t)
     end if
 
     ! --- Go through execution modii
     if(problem.eq.0) then
        if(page_iflw.eq.0_li) then
-         mem = mem +&  
+         mem = mem +&
                8.0d0*real(nangle,d_t)*real(fside_cells,d_t)*real(egmax*num_moments_f,d_t)  ! binflx
-       else 
-         mem = mem +&  
+       else
+         mem = mem +&
                8.0d0*real(nangle,d_t)*real(fside_cells,d_t)*real(num_moments_f,d_t)        ! binflx
        end if
-    else 
+    else
        if(eig_switch.eq.0) then
           mem = mem +&
-                8.0d0*2.0d0*real(num_cells,d_t)*real(num_moments_v,d_t)                  ! fiss_src       
-       else 
+                8.0d0*2.0d0*real(num_cells,d_t)*real(num_moments_v,d_t)                  ! fiss_src
+       else
           nvar = egmax*num_moments_v*namom*num_cells
-          mem = mem +&  
+          mem = mem +&
                 8.0d0 * 3.0d0 * real(nvar,d_t) +&                                        ! residual,du and dflx
-                8.0d0 * real( (nvar+4)*(rd_restart+2)+(rd_restart+1)*rd_restart/2,d_t)   ! work  
+                8.0d0 * real( (nvar+4)*(rd_restart+2)+(rd_restart+1)*rd_restart/2,d_t)   ! work
        end if
     end if
 
     ! --- Divide by 1E6 to get MB
-    mem = mem * 1.0d-6 
+    mem = mem * 1.0d-6
 
-  end subroutine 
-  
+  end subroutine
+
   subroutine assign_work
-    
+
     implicit none
-    
+
     integer:: i, p, k=0
     integer ::rank,mpi_err, localunit, num_p, optimal_tasks
     call MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
     call MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
 
-    optimal_tasks = ceiling((nangle*8.0)/(num_p))  
-  
+    optimal_tasks = ceiling((nangle*8.0)/(num_p))
+
     allocate(parallel_map_g2l(8*nangle,2) , parallel_map_l2g(optimal_tasks, num_p))
-    
-    do i=1, optimal_tasks 
+
+    do i=1, optimal_tasks
       do p = 1, num_p
         k=k+1
-        if (k .gt. 8*nangle) then 
+        if (k .gt. 8*nangle) then
           parallel_map_l2g(i,p) = 0
           cycle
         end if
         parallel_map_g2l(k,1) = p
         parallel_map_g2l(k,2) = i
         parallel_map_l2g(i,p) = k
-        
+
       end do
     end do
 
@@ -971,4 +971,3 @@ contains
 ! The end
 !------------------------------------------------------------------------------------------------------------------------!
 end module setup_module
-  
