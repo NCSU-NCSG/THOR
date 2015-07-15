@@ -335,7 +335,6 @@ contains
     !---------------------------------------------------------------------------
     !integer:
     !---p: Index of current chebychev iteration
-    !---n_entry: Index of global iteration number when chebychev cycle began
     !---power_iter_count: Count of total # of corrective PIs performed
     !---cheby_pi: Number of PIs to perform per corrective cycle
     !---cheby_pi_rem: Number of PIs remaining to perform this corrective cycle
@@ -343,7 +342,7 @@ contains
     !---alpha, beta, gamma: Coefficients of Chebychev Acceleration term
     !---chebychev_error: Iteration error ratio / entry error ratio
     !---entry_error: Ratio of error at iteration n_entry
-    !---entry_theta: Spectral radius at n_entry
+    !---entry_theta: Spectral radius at p=0
     !---theor_err: Maximum theoretical error reduction, f(theta, p)
     !
     !TEMPORARY // TO BE REMOVED
@@ -353,7 +352,7 @@ contains
     !TEMPORARY // TO BE REMOVED
     !
     !---------------------------------------------------------------------------
-    integer (kind=li) :: p = 0_li, n_entry = 0_li
+    integer (kind=li) :: p = 0_li
     integer (kind=li) :: power_iter_count = 0_li, cheby_pi=5_li, cheby_pi_rem
     real(kind=d_t)    :: alpha = zero, beta = zero, gamma = zero
     real(kind=d_t)    :: chebychev_error = zero, entry_error = zero
@@ -564,15 +563,11 @@ contains
         else
           extra_flag=0_li
         end if
-      else if (outer_acc.eq.3 .and. outer.gt.5) then                            !If more than 5 iterations, accelerate
-        if (extra_flag .eq. 0_li) then                                          !Only if chebychev is not already active
-          if (theta(3) .gt. .4_d_t .and. theta(3) .lt. 1_li) then               !And if spectral radius is large enough
-            p=1
-            n_entry = outer
-            entry_theta = theta(3)                                              !Set sigma hat to previous guess of sp. rad
-            extra_flag=1_li
-
-          end if
+      else if (outer_acc.eq.3 .and. outer.gt.5) then                                       !If more than 5 iterations, accelerate
+        if (extra_flag .eq. 0_li .and. theta(3) .gt. .4_d_t .and. theta(3) .lt. 1_li) then !And if spectral radius is large enough
+          p=1
+          entry_theta = theta(3)                                              !Set sigma hat to previous guess of sp. rad
+          extra_flag=1_li
         end if
       end if
 
@@ -598,7 +593,6 @@ contains
           do eg=1, egmax
             do i=1,num_cells
               entry_error=entry_error+ cells(i)%volume*(flux(1,1,i,eg,niter)- flux(1,1,i,eg,niter-1))**2
-
             end do
           end do
           entry_error = sqrt(entry_error)
