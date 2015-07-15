@@ -239,8 +239,8 @@ contains
         write(21,*)   '---------------------------------------'
         flush(21)
       end if
-      103   format(1X,A)
-      102   format(1X,2I6,2ES12.4,A)
+      103 format(1X,A)
+      102 format(1X,2I6,2ES12.4,A)
 
       ! Convergence check
 
@@ -260,7 +260,7 @@ contains
 
     outer=outer-one
 
-    10  continue
+    10 continue
 
     if (rank .eq. 0) then
       write(6,*) '========================================================'
@@ -273,7 +273,6 @@ contains
 
 
     if( allocated(reflected_flux) ) deallocate(reflected_flux)
-
   end subroutine outer_iteration_ext
 
   !=============================================================================
@@ -331,6 +330,36 @@ contains
     ! Variables for calling wrapup
 
     character(100)   :: suffix
+
+    !Chebychev Acceleration Variables///////////////////////////////////////////
+    !---------------------------------------------------------------------------
+    !integer:
+    !---p: Index of current chebychev iteration
+    !---power_iter_count: Count of total # of corrective PIs performed
+    !---cheby_pi: Number of PIs to perform per corrective cycle
+    !---cheby_pi_rem: Number of PIs remaining to perform this corrective cycle
+    !real:
+    !---alpha, beta, gamma: Coefficients of Chebychev Acceleration term
+    !---chebychev_error: Iteration error ratio / entry error ratio
+    !---entry_error: Ratio of error at iteration n_entry
+    !---entry_theta: Spectral radius at p=0
+    !---theor_err: Maximum theoretical error reduction, f(theta, p)
+    !
+    !TEMPORARY // TO BE REMOVED
+    !temp:
+    !---temp_arg: number of command line args (to override accel mode)
+    !---temp_accel: value of override argument
+    !TEMPORARY // TO BE REMOVED
+    !
+    !---------------------------------------------------------------------------
+    integer (kind=li) :: p = 0_li
+    integer (kind=li) :: power_iter_count = 0_li, cheby_pi=5_li, cheby_pi_rem
+    real(kind=d_t)    :: alpha = zero, beta = zero, gamma = zero
+    real(kind=d_t)    :: chebychev_error = zero, entry_error = zero
+    real(kind=d_t)    :: entry_theta = zero, theor_err = zero
+
+    integer:: temp_arg
+    character:: temp_accel
 
     ! Prepare array reflected_flux
     rs=max(1_li,rside_cells)
@@ -454,16 +483,35 @@ contains
     !===========================================================================
     ! Begin outer iteration
     !===========================================================================
+
+    temp_arg = command_argument_count()                                         !FIXME - REMOVE AND IMPLEMENT SWITCH INTO INPUT FILE
+    if (temp_arg .eq. 2) then
+      call get_command_argument(2, temp_accel)
+      if ( temp_accel .eq. '1') then
+        outer_acc = 1_li
+        write(*,*) "NO ACCELERATION"
+      else if ( temp_accel .eq. '2') then
+        outer_acc = 2_li
+        write(*,*) "FISSION SOURCE ACCELERATION"
+      else if ( temp_accel .eq. '3') then
+        outer_acc = 3_li
+        write(*,*) "CHEBYCHEV ACCELERATION"
+      else
+        write(*,*) "Invalid command line acceleration parameter"
+        write(*,*) "Using value from input file"
+      end if
+    end if                                                                      !FIXME - REMOVE AND IMPLEMENT SWITCH INTO INPUT FILE
+
     do outer=1, max_outer
 
-      !========================================================================
+      !=========================================================================
       ! Start timer
-      !========================================================================
+      !=========================================================================
       call cpu_time(ts)
 
-      !========================================================================
+      !=========================================================================
       ! Compute fission and set all angular moments >0 to zero...
-      !========================================================================
+      !=========================================================================
       src = zero
       do eg=1,egmax
         do i=1,num_cells
@@ -474,19 +522,19 @@ contains
         end do
       end do
 
-      !========================================================================
+      !=========================================================================
       ! Compute upscattering
-      !========================================================================
+      !=========================================================================
       call compute_upscattering(flux, src)
 
-      !========================================================================
+      !=========================================================================
       !Begin Group sweep
-      !========================================================================
+      !=========================================================================
       do eg=1, egmax
 
-        !=====================================================================
+        !=======================================================================
         ! Call inner iteration
-        !=====================================================================
+        !=======================================================================
         if      (page_refl.eq.0_li) then
           call inner_iteration(eg,flux(:,:,:,eg,niter),src(:,:,:,eg),LL,U,Lf,Uf,rs,reflected_flux(:,:,:,:,eg),.true.)
         else if  (page_refl.eq.1_li) then
@@ -515,11 +563,11 @@ contains
         else
           extra_flag=0_li
         end if
-      else if (outer_acc.eq.3 .and. outer.ge.3) then
-        if (extra_flag .eq. 0_li) then
-          !Check to enter chebychev accel
-        else if (extra_flag .eq. 1_li) then
-          !Check to exit Chebychev accel
+      else if (outer_acc.eq.3 .and. outer.gt.5) then                                       !If more than 5 iterations, accelerate
+        if (extra_flag .eq. 0_li .and. theta(3) .gt. .4_d_t .and. theta(3) .lt. 1_li) then !And if spectral radius is large enough
+          p=1
+          entry_theta = theta(3)                                              !Set sigma hat to previous guess of sp. rad
+          extra_flag=1_li
         end if
       end if
 
@@ -534,18 +582,81 @@ contains
           do i=1,num_cells
             do n=1,namom
               do l=1,num_moments_v
-                !FIXME - Does this line go before or after acceleration? flux(l,n,i,eg,1)=flux(l,n,i,eg,2)
-                flux(l,n,i,eg,2)=flux(l,n,i,eg,2)+thet*(flux(l,n,i,eg,2)-flux(l,n,i,eg,1))
+                flux(l,n,i,eg,niter)=flux(l,n,i,eg,niter)+thet*(flux(l,n,i,eg,niter)-flux(l,n,i,eg,niter-1))
               end do
             end do
           end do
         end do
       else if (extra_flag .eq. 1_li .and. outer_acc.eq.3) then
-        !Do Chebychev
-        ! alpha
-        ! beta
-        !
+        if (p .eq. 1) then                                                      !First iteration only
+          entry_error = zero                                                    !Entry error is the 2 norm of the (n - (n-1)) flux error
+          do eg=1, egmax
+            do i=1,num_cells
+              entry_error=entry_error+ cells(i)%volume*(flux(1,1,i,eg,niter)- flux(1,1,i,eg,niter-1))**2
+            end do
+          end do
+          entry_error = sqrt(entry_error)
+
+          alpha = two/(two-entry_theta)                                         !Hebert Eq. B.5
+          beta  = zero                                                          !^
+          gamma = zero
+          chebychev_error = zero
+          theor_err = zero
+        else                                                                    !For all iteration p!=1
+
+          gamma = dacosh((two/entry_theta) - one)                               !Hebert Eq. B.5
+          alpha = (four/entry_theta) * dcosh((p-one)*gamma)/dcosh(p*gamma)      !Hebert Eq. B.5
+          beta  = (one-(entry_theta/two))-(one/alpha)                           !Hebert Eq. B.5
+
+        end if
+
+        chebychev_error = zero                                                  !Chebychev_err is the two norm of (n - (n-1)) flux error
+        do eg=1, egmax                                                          !divided by the enty error (error === 1 for p=1)
+          do i=1,num_cells
+            chebychev_error=chebychev_error+cells(i)%volume  *&
+                 (flux(1,1,i,eg,niter)- flux(1,1,i,eg,niter-1))**2
+          end do
+        end do
+        chebychev_error = sqrt(chebychev_error)
+        chebychev_error = chebychev_error/entry_error
+
+
+        do eg=1, egmax                                                          !Accelerate flux
+          do i=1,num_cells
+            do n=1,namom
+              do l=1,num_moments_v
+                flux(l,n,i,eg,niter)=flux(l,n,i,eg,niter-1)             + &
+                     alpha*(flux(l,n,i,eg,niter)-flux(l,n,i,eg,niter-1))+ &
+                     beta*(flux(l,n,i,eg,niter-1)-flux(l,n,i,eg,niter-2))
+              end do
+            end do
+          end do
+        end do
+
+
+        theor_err = (dcosh((real(p,d_t)-one)*dacosh((two - entry_theta) /&      !Theretical error
+             entry_theta)))**(-one)
+
+        if(chebychev_error > theor_err .and. &
+             p .ge. 3*(power_iter_count+3)) then                                !If insufficient decrease in error,
+          !write(*,*) "RESTART FLAG THROWN"                                      !reset chebychev
+          extra_flag = 0_li
+          !write(*,*) "BEGIN SPECTRAL RADIUS BACKTRACK"
+          extra_flag = -1_li                                                    !Set flag to acceleration interrupt
+          cheby_pi_rem = cheby_pi
+        end if
+
+        p=p+1                                                                   !Increment p
+      else if(extra_flag .eq. -1_li) then                                       !If acceleration is interrupted
+        !write(*,*) "Performing Between-Chebychev-Cycle Power Iteration"
+        power_iter_count = power_iter_count + 1_li
+        cheby_pi_rem = cheby_pi_rem -1_li                                       !Track remaining interrupts
+        p=0
+        if (cheby_pi_rem .eq. 0) extra_flag = 0_li                              !Reactivate acceleration
       end if
+
+
+
 
       !========================================================================
       ! Zero fission source. Then, recompute fission source using new update
@@ -626,9 +737,9 @@ contains
       !========================================================================
       ! compute theta (Spectral Radius)
       !========================================================================
-      theta(1)=theta(2)
-      theta(2)=theta(3)
-      theta(3)=fiss_dist_error(2)/fiss_dist_error(1)
+      if (p.eq.0)theta(1)=theta(2)
+      if (p.eq.0)theta(2)=theta(3)
+      if (p.eq.0) theta(3)=fiss_dist_error(2)/fiss_dist_error(1)
 
       !========================================================================
       ! stop timer
@@ -652,10 +763,10 @@ contains
           flush(21)
         end if
       end if
-      101   format(1X,A)
-      102   format(1X,2I6,5ES12.4,I12,ES12.4,A)
-      103   format(1X,A,ES12.4)
-      104   format(1X,A,I5,3ES12.4)
+      101 format(1X,A)
+      102 format(1X,2I6,5ES12.4,I12,ES12.4,A)
+      103 format(1X,A,ES12.4)
+      104 format(1X,A,I5,3ES12.4)
 
       !========================================================================
       ! write iteration results to file if desired
@@ -680,8 +791,8 @@ contains
       !========================================================================
       ! check convergence and quit if criteria are satisfied
       !========================================================================
-      if(outer > 2 .and. (fiss_error < outer_conv .or. flux_error < outer_conv .or. &
-           keff_error < k_conv)) then
+      if(outer > 2 .and. (fiss_error < outer_conv .or. flux_error < outer_conv) .and. &
+           keff_error < k_conv) then
         conv_flag=1
         go to 10
       end if
@@ -735,7 +846,6 @@ contains
     ! Deallocate temporary arrays
 
     if( allocated(reflected_flux) ) deallocate(reflected_flux)
-
   end subroutine outer_iteration_eig
 
   !=============================================================================
