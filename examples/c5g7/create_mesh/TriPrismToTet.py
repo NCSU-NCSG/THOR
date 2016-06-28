@@ -351,17 +351,30 @@ def writeTHORMesh(nodes, elems, subdomains, src_regions, boundary_conditions, fi
     fid.close()
 
 """
+  Read input data
+"""
+inp_mesh = sys.argv[1]
+out_mesh = sys.argv[2]
+n_layer = int(sys.argv[3])
+
+"""
  Some data
 """
 # xmin, xmax, ymin, ymax, zmin, zmax
 boundary_conditions = {"-x" : 0, "+x" : 1, "-y" : 0,"+y" : 1, "-z" : 0,"+z" : 1}
-modify_z_coordinates = {57.12 : 64.26}
-
+if n_layer == 4:
+    modify_z_coordinates = {57.12 : 64.26}
+elif n_layer == 8:
+    modify_z_coordinates = {49.98 : 53.55, 57.12 : 64.26}
+elif n_layer == 16:
+    modify_z_coordinates = {46.41 : 48.195, 49.98 : 53.55, 53.55 : 58.905, 57.12 : 64.26}
+else:
+    modify_z_coordinates = {}
 """
  Start actual script
 """
 start_time = time.time()
-nodes, prism_subdomains, prism_src_regions, prism_elems = readTriPrismMesh("c5g7_3d_hex.dat", mesh_format = "simple")
+nodes, prism_subdomains, prism_src_regions, prism_elems = readTriPrismMesh(inp_mesh, mesh_format = "simple")
 
 for node_id in nodes.keys():
     node = nodes[node_id]
@@ -379,5 +392,5 @@ for j in range(1000):
     if all_subdomains[j] ==1:
         print j
 print "Processing took ", time.time() - start_time, " seconds"
-writeTHORMesh(nodes, tet_elems, tet_subdomains, tet_src_regions, boundary_conditions, "c5g7_3d_tet.dat")
+writeTHORMesh(nodes, tet_elems, tet_subdomains, tet_src_regions, boundary_conditions, out_mesh)
 print "Writing took ", time.time() - start_time, " seconds"
