@@ -785,7 +785,7 @@ contains
         suffix = "odd"
         open(unit=49,file='intermediate_output_odd.dat',status='unknown',action='write')
       end if
-      call wrapup(flux = flux ,keff = keff_new, unit_number = 49, suffix = suffix)
+      call wrapup(flux = flux ,keff = keff_new, unit_number = 49, suffix = suffix, is_final = .false.)
       close(unit=49)
 
       !========================================================================

@@ -17,7 +17,7 @@ program ahot_c_ug
 
 !#########
   use mpi
-!#########  
+!#########
   use types
   use parameter_types
   use filename_types
@@ -28,7 +28,7 @@ program ahot_c_ug
   use multindex_types
   use global_variables
 
-! Use modules that contain necessary subroutines and functions to 
+! Use modules that contain necessary subroutines and functions to
 ! execute transport code
 
   use termination_module
@@ -49,36 +49,36 @@ program ahot_c_ug
 ! Declare temporary variables
 
   integer(kind=li) :: alloc_stat, eg, i, ii, l, it, n, m
-  
-  !######### MPI variables 
+
+  !######### MPI variables
   integer :: mpi_err , mpi_sig_size(MPI_STATUS_SIZE), num_p
-  !#########  
-  
+  !#########
+
   ! timing variables
   integer:: do_timing = 0
-  
+
   logical          :: existence
   character(100):: temp
 
-  
+
   call GET_COMMAND_ARGUMENT(2,temp)
   if (trim(temp) .eq. '-t') do_timing = 1
-  
-  !#########  
+
+  !#########
   call MPI_INIT(mpi_err)
-  
+
   if (do_timing .eq. 1) parallel_timing(1,1) = MPI_WTIME()
-  
+
   call MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
   call MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
-  !#########  
-  
+  !#########
+
   if (rank .EQ. 0) then
-    
+
   ! Print banner for THOR
 
     write(6,*) "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-    write(6,*) 
+    write(6,*)
     write(6,*) "   TTTTTTT  HH     HH  OOOOO  RRRRRR "
     write(6,*) "     TTT    HH     HH OOOOOOO RRRRRRR"
     write(6,*) "     TTT    HH     HH OO   OO RR   RR"
@@ -87,11 +87,11 @@ program ahot_c_ug
     write(6,*) "     TTT    HH     HH OO   OO RR RR  "
     write(6,*) "     TTT    HH     HH 0000000 RR  RR "
     write(6,*) "     TTT    HH     HH  OOOOO  RR   RR"
-    write(6,*) 
+    write(6,*)
     write(6,*) "   Tetrahedral High Order Radiation Transport Code"
     write(6,*)
     write(6,*) "   By R. M. Ferrer"
-    write(6,*) 
+    write(6,*)
     write(6,*) "   Version 1.0 BETA - Update 05/10/2012"
     write(6,*) "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
     write(6,*)
@@ -104,20 +104,20 @@ program ahot_c_ug
   call setup
   if (do_timing .eq. 1) parallel_timing(2,2) = MPI_WTIME()
 !***********************************************************************
-! Allocate scalar flux 
+! Allocate scalar flux
 !***********************************************************************
 
   allocate(flux(num_moments_v,namom,num_cells,egmax,niter),stat=alloc_stat)
   if(alloc_stat /= 0) call stop_thor(2_li)
   flux = zero
 
-  
+
 !***********************************************************************
 ! Do some preliminary stuff
 !***********************************************************************
 
   if(print_conv.eq.1 .and. rank .eq. 0) then
-    inquire(file = "thor.convergence", exist = existence)  
+    inquire(file = "thor.convergence", exist = existence)
     if(existence) then
       open (unit = 21, file = "thor.convergence", status = "OLD", action = "WRITE")
     else
@@ -129,8 +129,8 @@ program ahot_c_ug
   end if
 
 
-  
-  
+
+
 !***********************************************************************
 ! Call execution to perform the actual computation
 !***********************************************************************
@@ -144,11 +144,11 @@ program ahot_c_ug
 !***********************************************************************
 ! Call wrapup to finish up post-processing and output results
 !***********************************************************************
-  
+
   if(print_conv.eq.1) close(unit=21)
-  
+
   if (do_timing .eq. 1) parallel_timing(4,1) = MPI_WTIME()
-  call wrapup(flux = flux,keff = keffective, unit_number = 6, suffix = "")
+  call wrapup(flux = flux,keff = keffective, unit_number = 6, suffix = "", is_final = .true.)
   if (do_timing .eq. 1) parallel_timing(4,2) = MPI_WTIME()
 !***********************************************************************
 ! Cleanup
@@ -161,14 +161,14 @@ program ahot_c_ug
 !***********************************************************************
 ! Terminate execution
 !***********************************************************************
-  
+
   if (do_timing .eq. 1) parallel_timing(1,2) = MPI_WTIME()
   call MPI_BARRIER(MPI_COMM_WORLD, mpi_err)
-  
+
   call write_timing
   call MPI_FINALIZE(mpi_err)
   call stop_thor(1_li)
-  
+
 end program ahot_c_ug
 
 subroutine write_timing
@@ -179,14 +179,14 @@ subroutine write_timing
 
   integer :: i, num_p, mpi_err, err_size(MPI_STATUS_SIZE), do_timing=0
   real*8:: print_timing(4,2)
-	character(100):: temp  
+	character(100):: temp
   call GET_COMMAND_ARGUMENT(2,temp)
   if (trim(temp) .eq. '-t') do_timing = 1
   flush(6)
   call MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
   call MPI_SEND(parallel_timing, 8, MPI_DOUBLE, 0, rank, MPI_COMM_WORLD, mpi_err)
-  
-  if (rank .eq. 0 .and. do_timing .eq. 1) then 
+
+  if (rank .eq. 0 .and. do_timing .eq. 1) then
     do i =0, num_p-1
       call MPI_RECV(print_timing, 8, MPI_DOUBLE, i, i, MPI_COMM_WORLD, err_size, mpi_err )
       write(*,*)
@@ -206,5 +206,3 @@ subroutine write_timing
   end if
 
 end subroutine
-
-

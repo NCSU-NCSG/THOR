@@ -438,6 +438,7 @@ subroutine set_default
     scat_mult_flag=0
 
     glob_do_cartesian_mesh = .false.
+    cartesian_map_filename = "cartesian_map_output.dat"
 
 end subroutine
 
@@ -780,13 +781,22 @@ subroutine read_postprocess_field
                            trim(wwords(2)),' has ', nwwwords, ' entries.'
              end if
              glob_cmap_min_x = string_to_real(wwwords(1), 'Conversion to cartesian map xmin failed')
-             glob_cmap_max_x = string_to_real(wwwords(1), 'Conversion to cartesian map xmax failed')
+             glob_cmap_max_x = string_to_real(wwwords(2), 'Conversion to cartesian map xmax failed')
+             if (abs(glob_cmap_max_x - glob_cmap_min_x) < small_real) then
+               write(6, *) "cartesian_map xmin and xmax are too close to each other"
+             end if
              glob_cmap_nx = string_to_int(wwwords(3), 'Conversion to cartesian map nx failed', 1)
              glob_cmap_min_y = string_to_real(wwwords(4), 'Conversion to cartesian map ymin failed')
              glob_cmap_max_y = string_to_real(wwwords(5), 'Conversion to cartesian map ymax failed')
+             if (abs(glob_cmap_max_y - glob_cmap_min_y) < small_real) then
+               write(6, *) "cartesian_map xmin and xmax are too close to each other"
+             end if
              glob_cmap_ny = string_to_int(wwwords(6), 'Conversion to cartesian map ny failed', 1)
              glob_cmap_min_z = string_to_real(wwwords(7), 'Conversion to cartesian map zmin failed')
              glob_cmap_max_z = string_to_real(wwwords(8), 'Conversion to cartesian map zmax failed')
+             if (abs(glob_cmap_max_z - glob_cmap_min_z) < small_real) then
+               write(6, *) "cartesian_map zmin and zmax are too close to each other"
+             end if
              glob_cmap_nz = string_to_int(wwwords(9), 'Conversion to cartesian map nz failed', 1)
           else
              write(6,*) 'Unknown keyword in postprocess specification -- ',trim(wwords(1)),' --'
@@ -975,6 +985,9 @@ subroutine read_inout
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'inguess_file'
             else if( trim(lowercase(wwords(1))) .eq. 'inguess_file' ) then
                inguess_file=trim(wwords(2))
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'inguess_file'
+            else if( trim(lowercase(wwords(1))) .eq. 'cartesian_map_file' ) then
+              cartesian_map_filename = trim(wwords(2))
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'print_xs'
             else if( trim(lowercase(wwords(1))) .eq. 'print_xs' ) then
                wwords(2)=trim(lowercase(wwords(2)))

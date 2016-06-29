@@ -22,7 +22,7 @@ module wrapup_module
 
 contains
 
-  subroutine wrapup(flux,keff,unit_number,suffix)
+  subroutine wrapup(flux, keff, unit_number, suffix, is_final)
   !**********************************************************************
   !
   ! Subroutine wrapup calls routines that print output into file(s)
@@ -41,12 +41,17 @@ contains
 
     integer(kind=li) :: unit_number
     character(100)   :: suffix
+    logical :: is_final
 
   ! Declare temporary variables
 
-    integer(kind=li) :: i, eg, l, region
+    integer(kind=li) :: i, eg, l, region, ix, iy, iz
     real(kind=d_t)   :: reac_rates(4,minreg:maxreg,egmax+1)
     real(kind=d_t)   :: reg_volume(minreg:maxreg)
+    real(kind=d_t), allocatable :: cartesian_map(:,:,:,:)
+    real(kind=d_t) :: centroid(3)
+    type(vector) :: vertex
+    real(kind=d_t) :: delx, dely, delz, cartesian_vol
 
   ! Print runtime
     if (rank .eq. 0) then
@@ -92,12 +97,14 @@ contains
         write(unit_number,*) "Maximum scalar group flux error:                            ", max_outer_error
       end if
     end if
+
   ! Formats
 
     101 FORMAT(1X,A60,I5)
     102 FORMAT(A60,ES25.16)
     202 FORMAT(1X,A60,ES25.16)
     103 FORMAT(1X,I5,ES25.16)
+
   ! Open angular flux file and write volume and face flux in file
 
     if(vtk_flux_output /= 0 .and. rank .eq. 0)then
@@ -219,10 +226,111 @@ contains
       end do
     end if
 
+  ! if desired print cartesian flux map to file
+
+    if (rank .eq. 0 .and. glob_do_cartesian_mesh .and. is_final) then
+
+      ! compute reaction rates for each cartesian cell
+      ! computes flux(1), total(2), absorption(3), total scattering (4),
+      ! fission(5), fission production(6)
+
+      ! allocate the array holding the data
+      allocate(cartesian_map(6, glob_cmap_nx, glob_cmap_ny, glob_cmap_nz))
+
+      ! compute the spacing
+      delx = (glob_cmap_max_x - glob_cmap_min_x) / real(glob_cmap_nx)
+      dely = (glob_cmap_max_y - glob_cmap_min_y) / real(glob_cmap_ny)
+      delz = (glob_cmap_max_z - glob_cmap_min_z) / real(glob_cmap_nz)
+      cartesian_vol = delx * dely * delz
+
+      ! make sure it's properly initialized
+      cartesian_map = zero
+
+      ! computation of the averaged reaction rates (only energy integrated!)
+      ! TODO: might want to consider a flag for providing group fluxes/reac_rates?
+      do eg = 1, egmax
+        do i = 1, num_cells
+
+          ! this is the current cell with index i, first we need to find out
+          ! which x/y/z cartesian this cell belongs to
+          centroid = zero
+
+          do l = 0, 3
+            vertex = vertices(cells(i)%R(l))%v
+            centroid(1) = centroid(1) + vertex%x1
+            centroid(2) = centroid(2) + vertex%x2
+            centroid(3) = centroid(3) + vertex%x3
+          end do
+          centroid = centroid * fourth
+
+          ! get the correct entry in the cartesian_map array but note that
+          ! numbering starts from 1 so we need to add one
+          ix = floor((centroid(1) - glob_cmap_min_x) / delx) + 1
+          iy = floor((centroid(2) - glob_cmap_min_y) / dely) + 1
+          iz = floor((centroid(3) - glob_cmap_min_z) / delz) + 1
+
+          ! we have to make sure that the x/y/z coordinates are permissible
+          if (ix .gt. 0 .and. ix .le. glob_cmap_nx .and.&
+              iy .gt. 0 .and. iy .le. glob_cmap_ny .and.&
+              iz .gt. 0 .and. iz .le. glob_cmap_nz) then
+
+            ! Now go through all reaction types and accumulate into cartesian_map
+            ! 1. the scalar flux
+            cartesian_map(1, ix, iy, iz) = cartesian_map(1, ix, iy, iz) + &
+              cells(i)%volume * flux(1, 1, i, eg, niter) / cartesian_vol
+            ! 2. total interaction rate
+            cartesian_map(2, ix, iy, iz) = cartesian_map(2, ix, iy, iz) + &
+              cells(i)%volume * flux(1, 1, i, eg, niter) * &
+              sigma_t(reg2mat(cells(i)%reg), eg)%xs / cartesian_vol
+            ! 3. absorption rate
+            cartesian_map(3, ix, iy, iz) = cartesian_map(3, ix, iy, iz) + &
+              cells(i)%volume * flux(1, 1, i, eg, niter) * &
+              (sigma_t(reg2mat(cells(i)%reg), eg)%xs - tsigs(reg2mat(cells(i)%reg), eg)%xs) / &
+              cartesian_vol
+            ! 4. total scattering rate
+            cartesian_map(4, ix, iy, iz) = cartesian_map(4, ix, iy, iz) + &
+              cells(i)%volume * flux(1, 1, i, eg, niter) * &
+              tsigs(reg2mat(cells(i)%reg), eg)%xs / cartesian_vol
+            ! 5. fission rate
+            cartesian_map(5, ix, iy, iz) = cartesian_map(5, ix, iy, iz) + &
+              cells(i)%volume * flux(1, 1, i, eg, niter) * &
+              fiss(reg2mat(cells(i)%reg), eg)%xs / cartesian_vol
+            ! 6. fission source rate
+            cartesian_map(6, ix, iy, iz) = cartesian_map(6, ix, iy, iz) + &
+              cells(i)%volume * flux(1, 1, i, eg, niter) * &
+              nu(reg2mat(cells(i)%reg), eg)%xs * fiss(reg2mat(cells(i)%reg), eg)%xs / &
+              cartesian_vol
+          end if
+        end do
+      end do
+
+      ! write it to file
+      open(unit=30, file = trim(cartesian_map_filename), status='unknown', action='write')
+      write(30, *) "     ix    iy    iz             flux             total&
+                    &        absorption        scattering           fission&
+                    &       fission src"
+      do iz = 1, glob_cmap_nz
+        do iy = 1, glob_cmap_ny
+          do ix = 1, glob_cmap_nx
+            write(30, 505) ix, iy, iz, cartesian_map(1, ix, iy, iz),&
+                           cartesian_map(2, ix, iy, iz), cartesian_map(3, ix, iy, iz),&
+                           cartesian_map(4, ix, iy, iz), cartesian_map(5, ix, iy, iz),&
+                           cartesian_map(6, ix, iy, iz)
+          end do
+        end do
+      end do
+
+      close(30)
+
+      ! wrap up
+      deallocate(cartesian_map)
+    end if
+
     501 FORMAT(1X,A,I4,A,ES14.6)
     502 FORMAT(1X,A)
     503 FORMAT(1X,I8,4ES14.6)
     504 FORMAT(1X,A8,4ES14.6)
+    505 FORMAT(1X,3I6,6ES18.8)
   end subroutine wrapup
 
 
