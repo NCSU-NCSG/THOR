@@ -109,8 +109,11 @@ contains
     namom=(scatt_ord+1)**2
 
   ! Set number of retained flux iterates
-
-    niter=3_li
+    if (eig_switch .eq. 1) then
+      niter=2_li
+    else
+      niter=3_li
+    end if
 
   ! Estimate memory consumption
     if (rank .eq. 0) then
