@@ -42,6 +42,7 @@ module jfnk_module
 
   ! Use modules that pertain setting up problem
 
+  use outer_iteration_module
   use inner_iteration_module
   use dump_inguess_module
 
@@ -181,6 +182,10 @@ contains
     real(kind=d_t) :: tot_vol
     real(kind=d_t) :: ts,te,keff_error,max_outer_error,tmp
 
+  ! Reflective flux in case ipiter > 0
+
+    real(kind=d_t), allocatable, dimension(:,:,:,:,:) :: reflected_flux
+
   ! set one two three
 
     one = 1_li
@@ -221,6 +226,13 @@ contains
       write(6,*) '========================================================'
     end if
 
+    ! note: we do not need to duplicate reflected_flux on all processors
+    ! but for simplicity we do here.
+    if (ipow .gt. 0) then
+      allocate(reflected_flux(num_moments_f,grs,8,nangle,egmax))
+      reflected_flux = 0.0_d_t
+    end if
+
     do m = 1,ipow
 
     ! start timer
@@ -229,7 +241,7 @@ contains
 
     ! call single outer iteration - it does not update keff
 
-      call single_outer_iteration(flux,keff,LL,U,Lf,Uf,.true.)
+      call single_outer_iteration(flux,keff,reflected_flux,LL,U,Lf,Uf,.true.)
 
     ! update keff
 
@@ -274,6 +286,8 @@ contains
       402 FORMAT(1X,I6,4ES12.4,A)
 
     end do
+
+    if( allocated(reflected_flux) ) deallocate(reflected_flux)
 
     if (ipow .gt. 0 .and. rank .eq. 0) then
       write(6,*)
@@ -455,18 +469,25 @@ contains
 
     ! Reflected flux array
 
-      real(kind=d_t),allocatable ::  reflected_flux(:,:,:,:)
+      real(kind=d_t),allocatable ::  reflected_flux(:,:,:,:,:)
 
     ! if method = 2 or 3 allocate and set outward_normal. allocate src
 
-      if(method==2 .or. method==3) then
+      if (method==1) then
 
       ! initialize reflected_flux
 
-        allocate(reflected_flux(num_moments_f,grs,8,nangle),stat=alloc_stat)
+        allocate(reflected_flux(num_moments_f,grs,8,nangle,egmax),stat=alloc_stat)
         if(alloc_stat /=0) call stop_thor(2_li)
         reflected_flux = 0.0_d_t
 
+      else if(method==2 .or. method==3) then
+
+      ! initialize reflected_flux
+
+        allocate(reflected_flux(num_moments_f,grs,8,nangle,1),stat=alloc_stat)
+        if(alloc_stat /=0) call stop_thor(2_li)
+        reflected_flux = 0.0_d_t
 
       ! initialize source
 
@@ -512,7 +533,7 @@ contains
 
         ! Outer iteration with lagged upscattering
 
-          call single_outer_iteration(flux,keff,LL,U,Lf,Uf,.false.)
+          call single_outer_iteration(flux,keff,reflected_flux,LL,U,Lf,Uf,.false.)
 
       else if (method==2) then
 
@@ -1253,7 +1274,7 @@ contains
 !-----------------------------------------------------------------------------------------
 !-----------------------------------------------------------------------------------------
 
-  subroutine single_outer_iteration(flx,keff,LL,U,Lf,Uf,prnt)
+  subroutine single_outer_iteration(flx,keff,reflected_flux,LL,U,Lf,Uf,prnt)
   !**********************************************************************
   !
   ! Subroutine single_outer_iteration performs a single outer
@@ -1299,8 +1320,7 @@ contains
 
   ! Define reflected flux
 
-    integer(kind=li) :: rs
-    real(kind=d_t),dimension(:,:,:,:), allocatable :: reflected_flux
+    real(kind=d_t),dimension(num_moments_f,grs,8,nangle,egmax) :: reflected_flux
 
   ! set one,two, three
 
@@ -1308,12 +1328,6 @@ contains
     two   = 2_li
     three = 3_li
     zero  = 0_li
-
-  ! Prepare array reflected_flux
-     rs=max(1_li,rside_cells)
-     allocate( reflected_flux(num_moments_f,rs,8,nangle),stat=alloc_stat )
-     if(alloc_stat /=0) call stop_thor(2_li)
-     reflected_flux=0.0_d_t
 
   ! Allocate dmax_error
 
@@ -1344,84 +1358,32 @@ contains
       end do
     end do
 
-  ! Add upscattering contribution to src
-
-     do eg=most_thermal,egmax   ! eg is the group that it is scattered to
-       do egg=eg+1,egmax        ! egg is the group that is scattered from
-         do i=1,num_cells
-           ! even contributions
-           do l=0,scatt_ord
-             do m=0,l
-               indx=1_li+m+(l+1_li)*l/2_li
-               do k=1, num_moments_v
-                 src(k,indx,i,eg) = src(k,indx,i,eg) +&
-                     scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,eg,egg)%xs  *&
-                     dens_fact(cells(i)%reg)*flx(k,indx,i,eg,1)
-               end do
-             end do
-           end do
-           ! odd contributions
-           do l=1,scatt_ord
-             do m=1,l
-               indx=neven+m+(l-1_li)*l/2_li
-               do k=1, num_moments_v
-                 src(k,indx,i,eg) = src(k,indx,i,eg) +&
-                     scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,eg,egg)%xs  *&
-                     dens_fact(cells(i)%reg)*flx(k,indx,i,eg,1)
-               end do
-             end do
-           end do
-           !
-         end do
-       end do
-    end do
+    !=========================================================================
+    ! Compute upscattering
+    !=========================================================================
+    call compute_upscattering(flx, src)
 
   ! sweep through all groups
 
     do eg=1,egmax
+      if  (page_refl.ne.0_li) then
+        write(6, *) "Reflective Boundary values must currently be saved in JFNK."
+      end if
 
-        reflected_flux=0.0_d_t
-        call inner_iteration(eg,flx(:,:,:,eg,2),src(:,:,:,eg),LL,U,Lf,Uf,rs,reflected_flux,prnt)
+      call inner_iteration(eg,flx(:,:,:,eg,2),src(:,:,:,eg),LL,U,Lf,Uf,grs,reflected_flux(:,:,:,:,eg),prnt)
 
-        do egg=eg+1, egmax
-          do i=1, num_cells
-            ! even contribution
-            do l=0, scatt_ord
-              do m=0,l
-                indx=1_li+m+(l+1_li)*l/2_li
-                do k=1, num_moments_v
-                  src(k,indx,i,egg)=src(k,indx,i,egg)                               +&
-                    scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs  *&
-                    dens_fact(cells(i)%reg)*flx(k,indx,i,eg,2)
-                end do
-              end do
-            end do
-            ! odd contribution
-            do l=1, scatt_ord
-              do m=1,l
-                indx=neven+m+(l-1_li)*l/2_li
-                do k=1, num_moments_v
-                  src(k,indx,i,egg)=src(k,indx,i,egg)                               +&
-                    scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs  *&
-                    dens_fact(cells(i)%reg)*flx(k,indx,i,eg,2)
-                end do
-              end do
-            end do
-            !
-          end do
-        end do
+      !=====================================================================
+      ! Compute downscattering from eg to egg
+      !=====================================================================
+      call compute_downscattering(eg, flx, src)
 
       ! increase iteration count
-
-        iit_count = iit_count + inner
-
+      iit_count = iit_count + inner
     end do
 
   ! deallocate dmax_error
 
     deallocate(dmax_error)
-
-    if( allocated(reflected_flux) ) deallocate(reflected_flux)
 
   end subroutine
 

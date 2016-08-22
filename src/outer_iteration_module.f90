@@ -666,7 +666,7 @@ contains
       do eg=1, egmax
         do i=1, num_cells
           do l=1, num_moments_v
-            fiss_src(l,i,2)=fiss_src(l,i,2)                                       +&
+            fiss_src(l,i,2)=fiss_src(l,i,2)                                        +&
                  nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs *&
                  dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
           end do
