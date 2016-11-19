@@ -61,7 +61,7 @@ contains
 
   ! Echo input
     if (rank.eq.0) then
-      call  echo_input
+      call echo_input
     end if
 
   ! Call read_xs to read cross-section file
@@ -723,12 +723,12 @@ subroutine read_quadrature_field
                end if
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'qdorder'
             else if( trim(lowercase(wwords(1))) .eq. 'qdorder' ) then
-              wwords(2)=trim(lowercase(wwords(2)))
-              read(wwords(2),'(i10)',iostat=ios) quad_ord
-              if(ios.ne.0 ) then
-                write(6,*) 'Invalid quadrature order -- ',trim(wwords(2)),' --'
-                stop
-              end if
+               wwords(2)=trim(lowercase(wwords(2)))
+               read(wwords(2),'(i10)',iostat=ios) quad_ord
+               if(ios.ne.0 ) then
+                 write(6,*) 'Invalid quadrature order -- ',trim(wwords(2)),' --'
+                 stop
+               end if
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > default if keyword is unknown
             else
                write(6,*) 'Unknown keyword in quadrature specification -- ',trim(wwords(1)),' --'

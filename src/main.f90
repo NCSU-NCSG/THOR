@@ -56,10 +56,8 @@ program ahot_c_ug
 
   ! timing variables
   integer:: do_timing = 0
-
-  logical          :: existence
-  character(100):: temp
-
+  logical        :: existence
+  character(100) :: temp
 
   call GET_COMMAND_ARGUMENT(2,temp)
   if (trim(temp) .eq. '-t') do_timing = 1
