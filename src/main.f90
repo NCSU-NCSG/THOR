@@ -162,8 +162,7 @@ program ahot_c_ug
 
   if (do_timing .eq. 1) parallel_timing(1,2) = MPI_WTIME()
   call MPI_BARRIER(MPI_COMM_WORLD, mpi_err)
-
-  call write_timing
+  if (do_timing .eq. 1) call write_timing
   call MPI_FINALIZE(mpi_err)
   call stop_thor(1_li)
 
