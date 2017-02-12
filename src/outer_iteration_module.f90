@@ -655,9 +655,6 @@ contains
         if (cheby_pi_rem .eq. 0) extra_flag = 0_li                              !Reactivate acceleration
       end if
 
-
-
-
       !========================================================================
       ! Zero fission source. Then, recompute fission source using new update
       !========================================================================
@@ -669,7 +666,7 @@ contains
       do eg=1, egmax
         do i=1, num_cells
           do l=1, num_moments_v
-            fiss_src(l,i,2)=fiss_src(l,i,2)                                       +&
+            fiss_src(l,i,2)=fiss_src(l,i,2)                                        +&
                  nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs *&
                  dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
           end do
@@ -737,8 +734,8 @@ contains
       !========================================================================
       ! compute theta (Spectral Radius)
       !========================================================================
-      if (p.eq.0)theta(1)=theta(2)
-      if (p.eq.0)theta(2)=theta(3)
+      if (p.eq.0) theta(1)=theta(2)
+      if (p.eq.0) theta(2)=theta(3)
       if (p.eq.0) theta(3)=fiss_dist_error(2)/fiss_dist_error(1)
 
       !========================================================================
