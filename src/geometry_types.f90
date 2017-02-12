@@ -40,14 +40,13 @@ module geometry_types
 
   type upstream_face_le
      integer(kind=li) :: cell,face
-     type(upstream_face_le),pointer :: next 
+     type(upstream_face_le),pointer :: next
   end type upstream_face_le
 
   type cycle_breaker
-     integer(kind=li),allocatable :: faces(:) 
-     integer(kind=li),allocatable :: cells(:) 
+     integer(kind=li),allocatable :: faces(:)
+     integer(kind=li),allocatable :: cells(:)
      real(kind=d_t)  ,allocatable :: face_fluxes(:,:)
   end type
 
 end module geometry_types
-

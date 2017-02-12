@@ -63,8 +63,8 @@ module parameter_types
    real(kind=d_t),parameter :: ninth   =0.11111111111111111_d_t
    real(kind=d_t),parameter :: tenth   =0.1_d_t
    real(kind=d_t),parameter :: twelfth =0.08333333333333333_d_t
-   real(kind=d_T),parameter :: twothird=0.6666666666666667_d_t   
+   real(kind=d_t),parameter :: twothird=0.6666666666666667_d_t
 
- 
+   integer(kind=li), parameter :: glob_max_int = huge(1_li)
+   real(kind=d_t), parameter :: small_real = 1.0e-10_d_t
 end module parameter_types
-

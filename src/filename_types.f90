@@ -10,6 +10,6 @@ module filename_types
        cross_section_filename, mesh_filename, flux_filename,    &
        vtk_flux_filename,quad_file,dump_file,inguess_file,      &
        vtk_mat_filename,vtk_reg_filename,vtk_src_filename,      &
-       dens_fact_filename
- 
+       dens_fact_filename, cartesian_map_filename
+
 end module filename_types

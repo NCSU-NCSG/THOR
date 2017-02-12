@@ -2,7 +2,7 @@ module read_module
 !***********************************************************************
 !
 ! The module io contains subroutines and variables pertinent to input and
-! output. 
+! output.
 !
 !***********************************************************************
 
@@ -30,12 +30,11 @@ module read_module
   use check_input
   use termination_module
 
-
-implicit none
+  implicit none
 
 contains
 
-  subroutine read 
+  subroutine read
   !*********************************************************************
   !
   ! Subroutine read calls subroutines to read input and mesh file
@@ -102,7 +101,7 @@ contains
     call quad_gen
 
   ! Call read_finflow to read fixed inflow bc
- 
+
     if(finflow /= 0 .and. problem .eq. 0)then
        call read_finflow
     end if
@@ -280,7 +279,7 @@ contains
        end do
        if(l == numf+1)then
        else
-          call stop_thor(21_li) 
+          call stop_thor(21_li)
        end if
     else
        do i=0, spord
@@ -375,7 +374,7 @@ contains
        end do
        if(l == numf+1)then
        else
-          call stop_thor(21_li)  
+          call stop_thor(21_li)
        end if
     end if
 
@@ -391,8 +390,8 @@ subroutine set_default
     finflow   = 0
     outer_acc = 1
     sweep_tpe = 1
-    page_sweep= 0 
-    page_refl = 0 
+    page_sweep= 0
+    page_refl = 0
     page_iflw = 0
     max_outer = 5
     max_inner = 10
@@ -404,7 +403,7 @@ subroutine set_default
     rd_max_kit= 250
     rd_method = 2
     inguess_flag =0
-    dump_flag    =0 
+    dump_flag    =0
     ipow         =0
     print_conv   =0
     dfact_opt    =0
@@ -424,24 +423,27 @@ subroutine set_default
     dens_fact_filename     = "density_factors.dat"
     print_xs_flag          = 1
     vtk_flux_output        = 0
-    vtk_reg_output         = 0 
-    vtk_mat_output         = 0 
+    vtk_reg_output         = 0
+    vtk_mat_output         = 0
     vtk_src_output         = 0
- 
+
     quad_ord = 4
     quad_tpe = 1
-  
+
     egmax = 1
     scatt_ord = 0
     xs_ord    = 0
-    upscattering = 1        
+    upscattering = 1
     multiplying  = 1
     scat_mult_flag=0
+
+    glob_do_cartesian_mesh = .false.
+    cartesian_map_filename = "cartesian_map_output.dat"
 
 end subroutine
 
 subroutine check_standard_input
-  
+
   ! Check the input for errors
 
     ! problem must be 0 or 1
@@ -466,7 +468,7 @@ subroutine check_standard_input
 
     if(problem .eq. 1 .and. finflow .eq. 1) then
        call stop_thor(29_li)
-    end if 
+    end if
 
     ! in case problem == 1, no vtk source file allowed
 
@@ -474,7 +476,7 @@ subroutine check_standard_input
        call stop_thor(30_li)
     end if
 
- 
+
 end subroutine
 
 subroutine echo_input
@@ -482,7 +484,7 @@ subroutine echo_input
   ! Echo out problem specifications
 
     integer :: i
-    
+
     if (rank .eq. 0) then
       write(6,*)
       write(6,*) "--------------------------------------------------------"
@@ -493,9 +495,9 @@ subroutine echo_input
          if ( eig_switch == 0 ) then
            write(6,*) "Eigenvalue calculation using PI selected"
          else
-           write(6,*) "Eigenvalue calculation using JFNK selected" 
+           write(6,*) "Eigenvalue calculation using JFNK selected"
            if(rd_method == 1) then
-             write(6,*) "Method: F(u) is evaluated using one outer iteration with lagged upscattering."  
+             write(6,*) "Method: F(u) is evaluated using one outer iteration with lagged upscattering."
            else if (rd_method == 2) then
              write(6,*) "Method: F(u) is evaluated using flat iteration scheme."
            else
@@ -507,7 +509,7 @@ subroutine echo_input
       end if
 
     ! Print rest of input
-      
+
       write(6,*)   "Problem Title:                                              ", jobname
       write(6,101) "Spatial order:                                              ", space_ord
       if      (sweep_tpe .eq. 1) then
@@ -523,9 +525,9 @@ subroutine echo_input
         write(6,101) "Level symmetric quadrature of order:                        ", quad_ord
       else if(quad_tpe == 2) then
         write(6,101) "Square Legendre-Chebychev quadrature of order:              ", quad_ord
-      else if(quad_tpe == 3) then 
+      else if(quad_tpe == 3) then
         write(6,101) "Quadrature read from file. #Angles/octant:                  ",nangle
-        write(6,*)   "Quadrature file name:                                       ",quad_file 
+        write(6,*)   "Quadrature file name:                                       ",quad_file
       end if
       write(6,101) "Cross-section order:                                        ", xs_ord
       write(6,101) "Energy groups:                                              ", egmax
@@ -579,57 +581,59 @@ subroutine echo_input
     ! Formats
 
     101 FORMAT(1X,A60,I5)
-    102 FORMAT(A60,ES12.4) 
-    202 FORMAT(1X,A60,ES12.4) 
+    102 FORMAT(A60,ES12.4)
+    202 FORMAT(1X,A60,ES12.4)
     103 FORMAT(1X,I5,ES12.4)
-    104 FORMAT(1X,I14,A,I14)  
+    104 FORMAT(1X,I14,A,I14)
 
 end subroutine
 
 subroutine read_input
 !***********************************************************************
-! 
+!
 ! This subroutine reads the standard input file
 !
 !***********************************************************************
 
- ! local variables 
+ ! local variables
 
    character(100) :: buffer, fname
    character(100000) :: regmap
-   logical :: done          
+   logical :: done
    integer :: i, rank,mpi_err, localunit
    call GET_COMMAND_ARGUMENT(1,fname)
    call MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
    localunit = rank+100
 
    open(unit = localunit, file = fname , status = 'old', action = 'read')
-   
+
  ! read title
-    
-    
+
+
     read(localunit,*) jobname
 
  ! main read loop
 
-    done = .false.      
-    do while(done .eqv. .false.) 
+    done = .false.
+    do while(done .eqv. .false.)
 
       read(localunit,101,end=999) buffer
       if     ( index( lowercase(buffer) ,'start') > 0 .and. index( lowercase(buffer) ,'problem')>0 ) then
           call read_problem
       else if( index( lowercase(buffer) ,'start') > 0 .and. index( lowercase(buffer) ,'inout')>0   ) then
-          call read_inout 
+          call read_inout
       else if( index( lowercase(buffer) ,'start') > 0 .and. index( lowercase(buffer) ,'cross_sections')>0   ) then
           call read_cross_sections
       else if( index( lowercase(buffer) ,'start') > 0 .and. index( lowercase(buffer) ,'quadrature')>0   ) then
           call read_quadrature_field
+      else if( index( lowercase(buffer) ,'start') > 0 .and. index( lowercase(buffer) ,'postprocess')>0   ) then
+          call read_postprocess_field
       else if( index( lowercase(buffer) ,'start') > 0 .and. index( lowercase(buffer) ,'regionmap')>0   ) then
-          call read_regionmap_field(regmap)   
+          call read_regionmap_field(regmap)
       else if( index( lowercase(buffer) ,'end') > 0   .and. index( lowercase(buffer) ,'file')   >0 ) then
          done=.true.
       end if
-             
+
     end do
 
 999 continue
@@ -638,7 +642,7 @@ subroutine read_input
 
    call read_tetmesh
 
- ! Read reg2mat 
+ ! Read reg2mat
 
     allocate(reg2mat(minreg:maxreg))
     read(regmap,*) (reg2mat(i),i=minreg,maxreg)
@@ -648,7 +652,7 @@ subroutine read_input
 end subroutine
 
 subroutine read_regionmap_field(regmap)
-    
+
   ! reads the regionmap into array regmap
 
   ! Arguments
@@ -673,9 +677,9 @@ subroutine read_regionmap_field(regmap)
         return
       else
         l      = len(trim(regmap))
-        lr     = len(trim(line)) 
+        lr     = len(trim(line))
         regmap(l+1:l+1+lr) = trim(line)
-      end if 
+      end if
     end do
 
 101 FORMAT(A100)
@@ -683,7 +687,7 @@ subroutine read_regionmap_field(regmap)
 end subroutine
 
 subroutine read_quadrature_field
- 
+
   ! local variables
   integer :: nwords,ntmp,i,nwwords,ios
   character(100) :: buffer, fname
@@ -710,44 +714,111 @@ subroutine read_quadrature_field
                   quad_tpe=1
                else if ( wwords(2) .eq. 'legcheb') then
                   quad_tpe=2
-               else if ( wwords(2) .eq. 'fromfile') then   
-                  quad_tpe=3            
+               else if ( wwords(2) .eq. 'fromfile') then
+                  quad_tpe=3
                else
                   write(6,*) 'Error. This is not a valid quadrature type -- ',wwords(2),' --'
                   write(6,*) 'Execution will terminate.'
                   stop
-               end if 
+               end if
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'qdorder'
             else if( trim(lowercase(wwords(1))) .eq. 'qdorder' ) then
               wwords(2)=trim(lowercase(wwords(2)))
-               read(wwords(2),'(i10)',iostat=ios) quad_ord
-               if(ios.ne.0 ) then
-                  write(6,*) 'Invalid quadrature order -- ',trim(wwords(2)),' --'
-                  stop
-               end if          
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > default if keyword is unknown 
+              read(wwords(2),'(i10)',iostat=ios) quad_ord
+              if(ios.ne.0 ) then
+                write(6,*) 'Invalid quadrature order -- ',trim(wwords(2)),' --'
+                stop
+              end if
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > default if keyword is unknown
             else
                write(6,*) 'Unknown keyword in quadrature specification -- ',trim(wwords(1)),' --'
                write(6,*) 'Execution will terminate.'
                stop
-            end if  
+            end if
           else
              write(6,*) 'Error while reading cross section specification'
              write(6,*) 'Do not understand entry: ',trim(words(i))
              write(6,*) 'Execution will terminate.'
              stop
-          end if 
-       end do 
-     end if 
+          end if
+       end do
+     end if
   end do
 
-101 FORMAT(A100) 
+101 FORMAT(A100)
 
 end subroutine
 
+subroutine read_postprocess_field
+
+  ! local variables
+  integer :: nwords, ntmp, i, nwwords, ios, nwwwords
+  character(100) :: buffer, fname
+  character(100) :: words(100), wwords(2), wwwords(100)
+  integer :: rank, mpi_err, localunit
+  call GET_COMMAND_ARGUMENT(1,fname)
+  call MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+  localunit = rank+100
+
+  ! read loop over inout block
+  do while(.true.)
+    read(localunit,101) buffer
+    if ( index( lowercase(buffer) ,'end') > 0 ) then
+       return
+    else
+      call parse(buffer,";",words,nwords)
+      do i=1,nwords
+        call parse(words(i),"=",wwords,nwwords)
+        if(nwwords .eq. 2) then
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'qdtype'
+          if( trim(lowercase(wwords(1))) .eq. 'cartesian_map' ) then
+             wwords(2)=trim(lowercase(wwords(2)))
+             glob_do_cartesian_mesh = .true.
+             ! wwords must be an array with of length 6
+             call parse(wwords(2), " ", wwwords, nwwwords)
+             if (nwwwords .ne. 9) then
+               write(6,*) 'Following cartesian map nine entries are required; Found: ',&
+                           trim(wwords(2)),' has ', nwwwords, ' entries.'
+             end if
+             glob_cmap_min_x = string_to_real(wwwords(1), 'Conversion to cartesian map xmin failed')
+             glob_cmap_max_x = string_to_real(wwwords(2), 'Conversion to cartesian map xmax failed')
+             if (abs(glob_cmap_max_x - glob_cmap_min_x) < small_real) then
+               write(6, *) "cartesian_map xmin and xmax are too close to each other"
+             end if
+             glob_cmap_nx = string_to_int(wwwords(3), 'Conversion to cartesian map nx failed', 1)
+             glob_cmap_min_y = string_to_real(wwwords(4), 'Conversion to cartesian map ymin failed')
+             glob_cmap_max_y = string_to_real(wwwords(5), 'Conversion to cartesian map ymax failed')
+             if (abs(glob_cmap_max_y - glob_cmap_min_y) < small_real) then
+               write(6, *) "cartesian_map xmin and xmax are too close to each other"
+             end if
+             glob_cmap_ny = string_to_int(wwwords(6), 'Conversion to cartesian map ny failed', 1)
+             glob_cmap_min_z = string_to_real(wwwords(7), 'Conversion to cartesian map zmin failed')
+             glob_cmap_max_z = string_to_real(wwwords(8), 'Conversion to cartesian map zmax failed')
+             if (abs(glob_cmap_max_z - glob_cmap_min_z) < small_real) then
+               write(6, *) "cartesian_map zmin and zmax are too close to each other"
+             end if
+             glob_cmap_nz = string_to_int(wwwords(9), 'Conversion to cartesian map nz failed', 1)
+          else
+             write(6,*) 'Unknown keyword in postprocess specification -- ',trim(wwords(1)),' --'
+             write(6,*) 'Execution will terminate.'
+             stop
+          end if
+        else
+          write(6,*) 'Error while reading postprocess specification'
+          write(6,*) 'Do not understand entry: ',trim(words(i))
+          write(6,*) 'Execution will terminate.'
+          stop
+        end if
+      end do
+    end if
+  end do
+
+101 FORMAT(A100)
+
+end subroutine
 
 subroutine read_cross_sections
- 
+
   ! local variables
   integer :: nwords,ntmp,nwwords,ios
   character(100) :: buffer, fname
@@ -802,7 +873,7 @@ subroutine read_cross_sections
                   write(6,*) 'Error. This is not a valid upscattering flag -- ',wwords(2),' --'
                   write(6,*) 'Execution will terminate.'
                   stop
-               end if  
+               end if
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword !'multiplying'
             else if( trim(lowercase(wwords(1))) .eq. 'multiplying' ) then
                wwords(2)=trim(lowercase(wwords(2)))
@@ -827,28 +898,28 @@ subroutine read_cross_sections
                   write(6,*) 'Execution will terminate.'
                   stop
                end if
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > default if keyword is unknown 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > default if keyword is unknown
             else
                write(6,*) 'Unknown keyword in cross section specification -- ',trim(wwords(1)),' --'
                write(6,*) 'Execution will terminate.'
                stop
-            end if              
+            end if
           else
              write(6,*) 'Error while reading cross section specification'
              write(6,*) 'Do not understand entry: ',trim(words(i))
              write(6,*) 'Execution will terminate.'
              stop
-          end if 
-       end do 
-     end if 
+          end if
+       end do
+     end if
   end do
 
-101 FORMAT(A100) 
+101 FORMAT(A100)
 
 end subroutine
 
 subroutine read_inout
- 
+
   ! local variables
   integer :: nwords,ntmp,i,nwwords,ios
   character(100) :: buffer, fname
@@ -882,7 +953,7 @@ subroutine read_inout
                flux_filename=trim(wwords(2))
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'xs_file'
             else if( trim(lowercase(wwords(1))) .eq. 'xs_file' ) then
-               cross_section_filename=trim(wwords(2))   
+               cross_section_filename=trim(wwords(2))
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'quad_file'
             else if( trim(lowercase(wwords(1))) .eq. 'density_factor_file' ) then
                dens_fact_filename=trim(wwords(2))
@@ -914,6 +985,9 @@ subroutine read_inout
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'inguess_file'
             else if( trim(lowercase(wwords(1))) .eq. 'inguess_file' ) then
                inguess_file=trim(wwords(2))
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'inguess_file'
+            else if( trim(lowercase(wwords(1))) .eq. 'cartesian_map_file' ) then
+              cartesian_map_filename = trim(wwords(2))
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'print_xs'
             else if( trim(lowercase(wwords(1))) .eq. 'print_xs' ) then
                wwords(2)=trim(lowercase(wwords(2)))
@@ -925,24 +999,24 @@ subroutine read_inout
                   write(6,*) 'Error. This is not a valid cross section print option (yes/no) -- ',wwords(2),' --'
                   write(6,*) 'Execution will terminate.'
                   stop
-               end if    
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > default if keyword is unknown 
+               end if
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > default if keyword is unknown
             else
                write(6,*) 'Unknown keyword in inout field -- ',trim(wwords(1)),' --'
                write(6,*) 'Execution will terminate.'
                stop
-            end if              
+            end if
           else
              write(6,*) 'Error while reading inout specification'
              write(6,*) 'Do not understand entry: ',trim(words(i))
              write(6,*) 'Execution will terminate.'
              stop
-          end if 
-       end do 
-     end if 
+          end if
+       end do
+     end if
   end do
 
-101 FORMAT(A100) 
+101 FORMAT(A100)
 
 end subroutine
 
@@ -961,25 +1035,25 @@ subroutine read_problem
   do while(.true.)
      read(localunit,101) buffer
      if ( index( lowercase(buffer) ,'end') > 0 ) then
-       return  
+       return
      else
-       call parse(buffer,";",words,nwords)   
+       call parse(buffer,";",words,nwords)
        do i=1,nwords
           call parse(words(i),"=",wwords,nwwords)
           if(nwwords .eq. 2) then
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'type' 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'type'
             if( trim(lowercase(wwords(1))) .eq. 'type' ) then
                wwords(2)=trim(lowercase(wwords(2)))
                if      ( wwords(2) .eq. 'keig') then
                   problem=1
-               else if ( wwords(2) .eq. 'fsrc') then  
-                  problem=0 
+               else if ( wwords(2) .eq. 'fsrc') then
+                  problem=0
                else
                   write(6,*) 'Error. This is not a valid problem type -- ',wwords(2),' --'
                   write(6,*) 'Execution will terminate.'
                   stop
                end if
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'keigsolver' 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'keigsolver'
             else if( trim(lowercase(wwords(1))) .eq. 'keigsolver' ) then
                wwords(2)=trim(lowercase(wwords(2)))
                if      ( wwords(2) .eq. 'pi') then
@@ -990,7 +1064,7 @@ subroutine read_problem
                   write(6,*) 'Error. This is not a valid eigenvalue solver -- ',wwords(2),' --'
                   write(6,*) 'Execution will terminate.'
                   stop
-               end if  
+               end if
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'lambda'
             else if( trim(lowercase(wwords(1))) .eq. 'lambda' ) then
                wwords(2)=trim(lowercase(wwords(2)))
@@ -1010,7 +1084,7 @@ subroutine read_problem
                   write(6,*) 'Error. This is not a valid inflow flag -- ',wwords(2),' --'
                   write(6,*) 'Execution will terminate.'
                   stop
-               end if  
+               end if
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'PIacc'
             else if( trim(lowercase(wwords(1))) .eq. 'piacc' ) then
                wwords(2)=trim(lowercase(wwords(2)))
@@ -1192,7 +1266,7 @@ subroutine read_problem
                wwords(2)=trim(lowercase(wwords(2)))
                if      ( wwords(2) .eq. 'no') then
                   dfact_opt = 0
-               else 
+               else
                  if      ( wwords(2) .eq. 'byvolume') then
                    dfact_opt = 1
                  else if ( wwords(2) .eq. 'fromfile') then
@@ -1216,9 +1290,9 @@ subroutine read_problem
                   write(6,*) 'Execution will terminate.'
                   stop
                end if
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > default if keyword is unknown 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > default if keyword is unknown
             else
-               write(6,*) 'Unknown keyword in problem specification -- ',trim(wwords(1)),' --' 
+               write(6,*) 'Unknown keyword in problem specification -- ',trim(wwords(1)),' --'
                write(6,*) 'Execution will terminate.'
                stop
             end if
@@ -1228,17 +1302,40 @@ subroutine read_problem
             write(6,*) 'Execution will terminate.'
             stop
           end if
-       end do        
-     end if 
+       end do
+     end if
 
   end do
 
-101 FORMAT(A100) 
-
-
-
+101 FORMAT(A100)
 end subroutine
 
+real(kind=d_t) function string_to_real(string, msg)
+  character(100), intent(in) :: string
+  character(100), intent(in) :: msg
 
+  integer(kind=li) :: ios
+
+  read(string, *, iostat=ios) string_to_real
+  if(ios .ne. 0) then
+     write(6,*) trim(msg), trim(string)
+     stop
+  end if
+end function
+
+integer(kind=li) function string_to_int(string, msg, min_int)
+  character(100), intent(in) :: string
+  character(100), intent(in) :: msg
+  integer(kind=li), optional, intent(inout) :: min_int
+
+  integer(kind=li) :: ios
+
+  if (.not. present(min_int)) min_int = -glob_max_int
+  read(string, '(i10)', iostat=ios) string_to_int
+  if(ios .ne. 0 .or. string_to_int < min_int) then
+     write(6,*) trim(msg), trim(string)
+     stop
+  end if
+end function
 
 end module
