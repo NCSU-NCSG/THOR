@@ -53,6 +53,10 @@ contains
     type(vector) :: vertex
     real(kind=d_t) :: delx, dely, delz, cartesian_vol
 
+  ! input file name for convenience
+
+    character(100) :: fname
+
   ! Print runtime
     if (rank .eq. 0) then
       write(unit_number,*)
@@ -176,7 +180,6 @@ contains
       write(unit_number,*)
       write(unit_number,*) "--------------------------------------------------------"
       write(unit_number,*) "   Region averaged reaction rates  "
-      write(unit_number,*) "   (not corrected by )  "
       write(unit_number,*) "--------------------------------------------------------"
       write(unit_number,*)
       reg_volume=0.0_d_t
@@ -312,7 +315,7 @@ contains
       do iz = 1, glob_cmap_nz
         do iy = 1, glob_cmap_ny
           do ix = 1, glob_cmap_nx
-            write(30, 505) ix, iy, iz, cartesian_map(1, ix, iy, iz),&
+            write(30, 499) ix, iy, iz, cartesian_map(1, ix, iy, iz),&
                            cartesian_map(2, ix, iy, iz), cartesian_map(3, ix, iy, iz),&
                            cartesian_map(4, ix, iy, iz), cartesian_map(5, ix, iy, iz),&
                            cartesian_map(6, ix, iy, iz)
@@ -326,11 +329,35 @@ contains
       deallocate(cartesian_map)
     end if
 
+    ! write a csv output file containing all region averaged
+    ! TODO: make this more flexible, currently this is for testing only
+    call GET_COMMAND_ARGUMENT(1,fname)
+    open(unit=20, file=trim(fname)//trim('_out.csv'), status='unknown', action='write')
+    write(20, 502, ADVANCE = "NO") "Region,"
+    do eg = 1, egmax - 1
+      write(20, 505, ADVANCE = "NO") "flux g = ", eg, ","
+    end do
+    write(20, 506) "flux g = ", eg
+
+    do region=minreg,maxreg
+       write(20, 509, ADVANCE = "NO") region, ","
+       do eg= 1, egmax - 1
+         write(20, 507, ADVANCE = "NO") reac_rates(1, region, eg), ","
+       end do
+       write(20, 508) reac_rates(1, region, egmax)
+    end do
+    close(20)
+
+    499 FORMAT(1X,3I6,6ES18.8)
     501 FORMAT(1X,A,I4,A,ES14.6)
     502 FORMAT(1X,A)
     503 FORMAT(1X,I8,4ES14.6)
     504 FORMAT(1X,A8,4ES14.6)
-    505 FORMAT(1X,3I6,6ES18.8)
+    505 FORMAT(1X,A9,I3,A1)
+    506 FORMAT(1X,A9,I3)
+    507 FORMAT(1X,ES25.16,A1)
+    508 FORMAT(1X,ES25.16)
+    509 FORMAT(1X,I3,A1)
   end subroutine wrapup
 
 

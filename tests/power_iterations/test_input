@@ -1,0 +1,4 @@
+start godiva_PI_S4
+  input = godiva_PI_S4.inp
+  gold_file_name = godiva_PI_S4.inp_out.csv
+end

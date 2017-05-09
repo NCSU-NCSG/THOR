@@ -56,10 +56,8 @@ program ahot_c_ug
 
   ! timing variables
   integer:: do_timing = 0
-
-  logical          :: existence
-  character(100):: temp
-
+  logical        :: existence
+  character(100) :: temp
 
   call GET_COMMAND_ARGUMENT(2,temp)
   if (trim(temp) .eq. '-t') do_timing = 1
@@ -164,8 +162,7 @@ program ahot_c_ug
 
   if (do_timing .eq. 1) parallel_timing(1,2) = MPI_WTIME()
   call MPI_BARRIER(MPI_COMM_WORLD, mpi_err)
-
-  call write_timing
+  if (do_timing .eq. 1) call write_timing
   call MPI_FINALIZE(mpi_err)
   call stop_thor(1_li)
 
