@@ -1,10 +1,15 @@
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 ! THOR MESH GENERATION UTILITY
-!   THOR_mesh module:
-!     Handles output of *.thrm (thor_mesh) files
-!     This is intended to enable an *.e (exodus II) to *.thm toolchain for
-!     probelm development purposes
+!   THOR Mesh Module:
+!
+!> This module contains the functionality necessary to output a file in the
+!! Thor_mesh format (.thrm)
+!
+!> @author Raffi Yessayan
+!> @author Sebastian Schunert
+!> @version 1.0
+!> @date July, 2017
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
@@ -14,6 +19,11 @@ MODULE thor_mesh
   IMPLICIT NONE
 CONTAINS
 
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  !> Extracts elements, node, bc, and block_id data from the gmesh file
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   SUBROUTINE outputThorMesh()
 
     INTEGER :: i
@@ -96,7 +106,13 @@ CONTAINS
     CLOSE(out_unit)
 
   END SUBROUTINE outputThorMesh
-
+  
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  !> Computes entries in the Thor adjacency list format from the adjacency_map
+  !! Thor format is element - face : neighbor - neighbor_face
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   SUBROUTINE adjacencyListEntry(element, adjacency_entry, neighbor, current_face,&
         current_neighbor_face)
 

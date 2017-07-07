@@ -7,6 +7,7 @@
 !!    This pre-processor provides mesh format conversion capabilities. It is
 !!    designed to allow for a simple workflow from Exodus II to Thor Mesh
 !!    using Gmesh 3.0 as an intermediary format.
+!! @todo document how to run this code
 !
 !>   This driver provides the control structure for all entities within the
 !!   THOR_MESH_GENERATOR utility.It parses command line input, opens the input

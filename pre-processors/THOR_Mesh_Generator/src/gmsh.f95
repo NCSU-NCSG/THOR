@@ -1,24 +1,34 @@
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 ! THOR MESH GENERATION UTILITY
-!   Gmesh module:
-!     Handles ingestion of *.gmsh (Gmesh) files.
-!     This is intended to enable an *.e (exodus II) to *.thm toolchain for
-!     probelm development purposes
+!   Gmesh Module:
+!
+!> This module contains the functionality necessary to ingest a file in the
+!! Gmesh 3.0 format (.msh)
+!
+!> @author Raffi Yessayan
+!> @author Sebastian Schunert
+!> @version 1.0
+!> @date July, 2017
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
-
 MODULE gmesh
 CONTAINS
 
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+  !> Extracts elements, node, bc, and block_id data from the gmesh file
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
   SUBROUTINE ingestGmesh()
     USE globals
     IMPLICIT NONE
-
-    INTEGER:: temp_int_1, temp_int_2
-    INTEGER:: i
-    REAL:: temp_real_1
+    
+    INTEGER :: temp_int_1
+    INTEGER :: temp_int_2
+    INTEGER :: i
+    REAL :: temp_real_1
     CHARACTER(200):: line = ""
 
 
