@@ -1,0 +1,8 @@
+# Fortran modules and linking files
+*.mod
+*.o
+
+#Executable Names
+*.out
+*.exe
+Thor_Mesh_Generator/Thor_Mesh_Generator
