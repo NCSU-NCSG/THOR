@@ -5,4 +5,4 @@
 #Executable Names
 *.out
 *.exe
-Thor_Mesh_Generator/Thor_Mesh_Generator
+pre-processors/THOR_Mesh_Generator/src/Thor_Mesh_Generator
