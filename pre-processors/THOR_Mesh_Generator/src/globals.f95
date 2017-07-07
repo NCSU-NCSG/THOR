@@ -203,20 +203,6 @@ CONTAINS
       source_id_map(position, 2) = source_instructions(j, 2)
     END DO
 
-    DO j = 1, nentries_region
-      write(*,*) 'Reg instructions ', region_instructions(j, :)
-    END DO
-    DO j = 1, nblocks
-      write(*,*) 'Reg map ', block_id_map(j, :)
-    END DO
-
-    DO j = 1, nentries_source
-      write(*,*) 'Src instructions ', source_instructions(j, :)
-    END DO
-    DO j = 1, nblocks
-      write(*,*) 'Src map ', source_id_map(j, :)
-    END DO
-
     DEALLOCATE(unique_ids, order)
     IF (ALLOCATED(region_instructions)) DEALLOCATE(region_instructions)
     IF (ALLOCATED(source_instructions)) DEALLOCATE(source_instructions)
@@ -245,5 +231,53 @@ CONTAINS
       END DO
     END DO
   END SUBROUTINE getBoundaryElements
+
+  SUBROUTINE printProgramHeader()
+    ! TODO: A unified program name header?
+    WRITE(6, '(A)') "Program Name: THOR_MESH_GENERATOR"
+  END
+
+  SUBROUTINE echoIngestedInput()
+    INTEGER :: j
+    INTEGER :: s
+
+    WRITE(6, *)
+    WRITE(6, '(A)') "------------------------------------ Input ------------------------------------"
+    WRITE(6, '(A)') "Infile mesh file name: " // TRIM(in_file)
+    WRITE(6, '(A)') "Output mesh file name: " // TRIM(out_file)
+
+    WRITE(6, *)
+    IF (skip_region_map) THEN
+      WRITE(6, '(A)') "No region ID edits are provided"
+    ELSE
+      WRITE(6, '(A, A)') "Reporting Region ID reassignments from file: ", TRIM(region_id_file)
+      IF (.NOT. ALLOCATED(block_id_map)) &
+        CALL generateErrorMessage(err_code_default, err_fatal, &
+          'block id map not allocated,  echoIngestedInput called too early')
+      s = SIZE(block_id_map(:, 1))
+      DO j = 1, s
+        WRITE(6, '(A,I0,A,I0)') "Old Region ID ", block_id_map(j, 1), " New Region ID ",&
+                                block_id_map(j, 2)
+      END DO
+    END IF
+
+    WRITE(6, *)
+    IF (skip_source_map) THEN
+      WRITE(6, '(A)') "No source ID edits are provided"
+    ELSE
+      IF (.NOT. ALLOCATED(source_id_map)) &
+        CALL generateErrorMessage(err_code_default, err_fatal, &
+          'source id map not allocated,  echoIngestedInput called too early')
+      WRITE(6, '(A,A)') "Reporting Source ID reassignments from file: ", TRIM(source_id_file)
+      IF (.NOT. ALLOCATED(source_id_map)) &
+        CALL generateErrorMessage(err_code_default, err_fatal, &
+          'source id map not allocated,  echoIngestedInput called too early')
+      s = SIZE(source_id_map(:, 1))
+      DO j = 1, s
+        WRITE(6, '(A,I0,A,I0)') "Old Region ID ", source_id_map(j, 1), " Source ID ",&
+                                source_id_map(j, 2)
+      END DO
+    END IF
+  END SUBROUTINE echoIngestedInput
 
 END MODULE globals
