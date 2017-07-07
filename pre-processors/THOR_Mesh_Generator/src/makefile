@@ -1,46 +1,80 @@
 
+#Compile Options
 FC := gfortran
-
 EXE := Thor_Mesh_Generator
+
+#Directory Paths
+CONTRIB := ../../../contrib
+LIB     := ../../../lib
 
 #Add source files as necessary
 SRC := \
-      geompack.f95       \
-      tet_mesh_tet_neighbors.f95 \
-			integer_array_tools.f95 \
-			mesh_converter.f95 \
-			globals.f95        \
-			thor_mesh.f95      \
-			gmsh.f95
+				geompack.f95				      	\
+				tet_mesh_tet_neighbors.f95	\
+				mesh_converter.f95 	      	\
+				globals.f95        					\
+				thor_mesh.f95      					\
+				gmsh.f95
 
 OBJ := $(SRC:.f95=.o)
 MOD := $(OBJ:.o=.mod)
 
+#Add contrib files
+CONT_SRC :=
+
+CONT_OBJ := $(patsubst %.f95,%.o,$(notdir $(CONT_SRC)))
+
+CONT_MOD := $(CONT_OBJ:.o=.mod)
+
+#Add lib files
+LIB_SRC := \
+						$(LIB)/integer_array_tools/integer_array_tools.f95
+
+LIB_OBJ := $(patsubst %.f95,%.o,$(notdir $(LIB_SRC)))
+
+LIB_MOD := $(LIB_OBJ:.o=.mod)
+
+#Phony targets for cleaning and building
 .PHONY: all clean reset
 
 all: $(EXE)
 
 clean:
-	rm -f $(OBJ) $(MOD)
+	rm -f $(OBJ) $(MOD) $(CONT_OBJ) $(CONT_MOD) $(LIB_OBJ) $(LIB_MOD)
 
 reset:
-	rm -f $(OBJ)
-	rm -f $(MOD)
+	rm -f $(OBJ) $(CONT_OBJ) $(LIB_OBJ)
+	rm -f $(MOD) $(CONT_MOD) $(LIB_MOD)
 	rm -f $(EXE)
 
-%.o:	%.f95
+#Generics for source files
+$(OBJ): %.o:	%.f95
 	$(FC) -c $<
 
-%.mod:	%.f95
+$(MOD):	%.mod:	%.f95
 	$(FC) -c $<
 
-$(EXE): $(OBJ)
-	$(FC) -o $@ $(OBJ)
+$(EXE): $(OBJ) $(CONT_OBJ) $(LIB_OBJ)
+	$(FC) -o $@ $(OBJ) $(CONT_OBJ) $(LIB_OBJ)
 
+#Generics for contrib files
+$(CONT_OBJ): %.o: $(filter %.f95, $(CONT_SRC))
+	$(FC) -c $<
+
+$(CONT_MOD):	%.mod:	$(filter %.f95, $(CONT_SRC))
+	$(FC) -c $<
+
+#Generics for lib files
+$(LIB_OBJ):	%.o: $(filter %.f95, $(LIB_SRC))
+	$(FC) -c $<
+
+$(LIB_MOD): %.mod:	$(filter %.f95, $(LIB_SRC))
+	$(FC) -c $<
+
+#Dependency List
 #Use [gfortran -M -cpp *.f95] repeatedly until clean compile to update rules below
 geompack.o geompack.mod: geompack.f95 globals.mod
 tet_mesh_tet_neighbors.o: tet_mesh_tet_neighbors.f95
-integer_array_tools.o integer_array_tools.mod: integer_array_tools.f95
 globals.o globals.mod: globals.f95 integer_array_tools.mod
 gmsh.o gmsh.mod: gmsh.f95 globals.mod
 mesh_converter.o: mesh_converter.f95 globals.mod gmsh.mod thor_mesh.mod integer_array_tools.mod
