@@ -1,19 +1,29 @@
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 ! THOR MESH GENERATION UTILITY
-!   THOR_mesh module:
-!     Handles output of *.thrm (thor_mesh) files
-!     This is intended to enable an *.e (exodus II) to *.thm toolchain for
-!     probelm development purposes
+!   THOR Mesh Module:
+!
+!> This module contains the functionality necessary to output a file in the
+!! Thor_mesh format (.thrm)
+!
+!> @author Raffi Yessayan
+!> @author Sebastian Schunert
+!> @version 1.0
+!> @date July, 2017
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 MODULE thor_mesh
 
-USE globals
-IMPLICIT NONE
+  USE globals
+  IMPLICIT NONE
 CONTAINS
 
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  !> Extracts elements, node, bc, and block_id data from the gmesh file
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   SUBROUTINE outputThorMesh()
 
     INTEGER :: i
@@ -23,8 +33,10 @@ CONTAINS
     INTEGER :: neighbor
     INTEGER :: current_face
     INTEGER :: current_neighbor_face
-    INTEGER :: local_node_list_gmesh(3), order_gmesh(3)
-    INTEGER :: local_node_list_adjacency(4), order_adjacency(4)
+    INTEGER :: local_node_list_gmesh(3)
+    INTEGER :: order_gmesh(3)
+    INTEGER :: local_node_list_adjacency(4)
+    INTEGER :: order_adjacency(4)
 
     !Open File
     OPEN(UNIT = out_unit, file = out_file, ACTION = "write", STATUS = "replace")
@@ -45,7 +57,7 @@ CONTAINS
     DO i = 1, element_count
       position = mapIndexOf(block_id(i), block_id_map(:, 1))
       WRITE(out_unit, '(I0,2(X,I0))') i, block_id_map(position, 2),&
-                                      source_id_map(position, 2)
+            source_id_map(position, 2)
     END DO
 
     !Block III: Element Composition
@@ -59,8 +71,8 @@ CONTAINS
     ! TODO: this search can be costly for many bcs; in this case we need to
     ! come up with a better lookup [consider string-hashes]
     IF (SIZE(boundary_element_list) .NE. bc_count) &
-      CALL generateErrorMessage(err_code_default, err_fatal, &
-        'bc count from gmesh file and adjacency list are inconsistent')
+          CALL generateErrorMessage(err_code_default, err_fatal, &
+          'bc count from gmesh file and adjacency list are inconsistent')
 
     ! TODO: side set reassignment
     ! TODO: better algorithm
@@ -75,8 +87,8 @@ CONTAINS
         local_node_list_adjacency(current_face + 1) = -1
         CALL quickSortInteger(local_node_list_adjacency, order_adjacency)
         IF (local_node_list_gmesh(1) .EQ. local_node_list_adjacency(2) .AND. &
-            local_node_list_gmesh(2) .EQ. local_node_list_adjacency(3) .AND. &
-            local_node_list_gmesh(3) .EQ. local_node_list_adjacency(4)) THEN
+              local_node_list_gmesh(2) .EQ. local_node_list_adjacency(3) .AND. &
+              local_node_list_gmesh(3) .EQ. local_node_list_adjacency(4)) THEN
           WRITE(out_unit, '(I0, 2(X,I0))') element, current_face, side_set(i)
         END IF
       END DO
@@ -94,9 +106,15 @@ CONTAINS
     CLOSE(out_unit)
 
   END SUBROUTINE outputThorMesh
-
+  
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  !> Computes entries in the Thor adjacency list format from the adjacency_map
+  !! Thor format is element - face : neighbor - neighbor_face
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   SUBROUTINE adjacencyListEntry(element, adjacency_entry, neighbor, current_face,&
-                                current_neighbor_face)
+        current_neighbor_face)
 
     INTEGER, INTENT(IN) :: element
     INTEGER, INTENT(IN) :: adjacency_entry
