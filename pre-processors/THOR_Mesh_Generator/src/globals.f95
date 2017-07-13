@@ -27,6 +27,8 @@ MODULE globals
   INTEGER :: region_id_unit = 22
   !> Unit number supplied for source id input file
   INTEGER :: source_id_unit = 23
+  !> Unit number supplied for boundary id input file
+  INTEGER :: boundary_id_unit = 24
   !> Used to track I/O operation status codes
   INTEGER :: io_status = 0
   !> Default error code when generating an error message without a more specific
@@ -43,7 +45,9 @@ MODULE globals
   !> Number of boundary conditions faces defined in the mesh
   INTEGER :: bc_count
   !> Number of block ids defined in the mesh
-  INTEGER:: nblocks
+  INTEGER :: nblocks
+  !> Number of side set ids defined in the mesh
+  INTEGER :: n_side_sets
   !> Paramter defined int, width 8
   INTEGER, PARAMETER :: li = selected_int_KIND(8)
   !> Parameter defined double precision real
@@ -58,6 +62,9 @@ MODULE globals
   !> Mapping from input source ids to output source ids
   !! Defaults to a -> a
   INTEGER, ALLOCATABLE :: source_id_map(:,:)
+  !> Mapping from input sideset IDS to output boundary condition types
+  !! Defaults to a -> 0
+  INTEGER, ALLOCATABLE :: boundary_id_map(:,:)
   !> List of elements with a face on a boundary
   !! Element is repeated for each boundary face
   INTEGER, ALLOCATABLE :: boundary_element_list(:)
@@ -80,6 +87,9 @@ MODULE globals
   !> Used to skip user driven source mapping if input file not found or
   !! otherwise disabled
   LOGICAL :: skip_source_map
+  !> Used to skip user driven boundary conditions mapping if input file not
+  !! found or otherwise disabled
+  LOGICAL :: skip_boundary_map
   !> Holds the name of the standard input config file
   CHARACTER(200) :: std_in_file = ""
   !> Holds the name of the standard input mesh file
@@ -90,6 +100,8 @@ MODULE globals
   CHARACTER(200) :: region_id_file = ""
   !> Holds the name of the standard input source id file
   CHARACTER(200) :: source_id_file = ""
+  !> Holds the name of the standard input boundary id file
+  CHARACTER(200) :: boundary_id_file = ""
 
 CONTAINS
 
@@ -220,6 +232,8 @@ CONTAINS
   SUBROUTINE ingestInput()
     ! open the standard input file
     CHARACTER(len = 200):: line
+    LOGICAL :: temp_logical
+
     CALL checkFileExists(std_in_file)
     OPEN(UNIT = std_in_unit, FILE = TRIM(std_in_file), ACTION = 'READ', STATUS = 'OLD', IOSTAT = io_status)
     CALL checkStatus(io_status, 0, 'Standard input file cannot be opened')
@@ -236,25 +250,41 @@ CONTAINS
 
     ! region id mapping file
     READ(std_in_unit, '(A200)', IOSTAT = io_status) line
+    temp_logical = .FALSE.
+    IF (io_status .EQ. 0) &
+      INQUIRE(FILE = TRIM(ADJUSTL(line)), EXIST = temp_logical)
     ! region id mapping can be skipped
-    IF (io_status .NE. 0) THEN
+    IF (.NOT. temp_logical) THEN
       skip_region_map = .TRUE.
     ELSE
       skip_region_map = .FALSE.
-      region_id_file = TRIM(line)
+      region_id_file = TRIM(ADJUSTL(line))
     END IF
 
     ! src id mapping file
     READ(std_in_unit, '(A200)', IOSTAT = io_status) line
-
+    temp_logical = .FALSE.
+    IF (io_status .EQ. 0) &
+      INQUIRE(FILE = TRIM(ADJUSTL(line)), EXIST = temp_logical)
     ! region id mapping can be skipped
-    IF (io_status .NE. 0) THEN
+    IF (.NOT. temp_logical) THEN
       skip_source_map = .TRUE.
     ELSE
       skip_source_map = .FALSE.
-      source_id_file = TRIM(line)
+      source_id_file = TRIM(ADJUSTL(line))
     END IF
 
+    READ(std_in_unit, '(A200)', IOSTAT = io_status) line
+    temp_logical = .FALSE.
+    IF (io_status .EQ. 0) &
+      INQUIRE(FILE = TRIM(ADJUSTL(line)), EXIST = temp_logical)
+    ! region id mapping can be skipped
+    IF (.NOT. temp_logical) THEN
+      skip_boundary_map = .TRUE.
+    ELSE
+      skip_boundary_map = .FALSE.
+      boundary_id_file = TRIM(ADJUSTL(line))
+    END IF
     CLOSE(std_in_unit)
   END SUBROUTINE ingestInput
 
@@ -265,27 +295,40 @@ CONTAINS
   !! appropriate input files
   !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
-  SUBROUTINE setupRegionAndSourceMapping()
+  SUBROUTINE setupOptionalReMapping()
 
     INTEGER :: j, position
     INTEGER, DIMENSION(:), ALLOCATABLE :: unique_ids
     INTEGER, DIMENSION(:), ALLOCATABLE :: order
-    INTEGER :: nentries_region, nentries_source
+    INTEGER :: nentries_region, nentries_source, nentries_bc
     INTEGER, DIMENSION(:, :), ALLOCATABLE :: region_instructions
     INTEGER, DIMENSION(:, :), ALLOCATABLE :: source_instructions
+    INTEGER, DIMENSION(:, :), ALLOCATABLE :: boundary_instructions
 
     ! Set the default mapping
     nblocks = numUniqueEntries(block_id)
-    ALLOCATE(block_id_map(nblocks, 2), source_id_map(nblocks, 2), unique_ids(nblocks),&
-          order(nblocks))
-    CALL uniqueEntries(block_id, unique_ids)
-    ! sort unique ids to make block_id_map and source_id_map sorted
-    CALL quickSortInteger(unique_ids, order)
+    n_side_sets = numUniqueEntries(side_set)
 
+    ALLOCATE(block_id_map(nblocks, 2), source_id_map(nblocks, 2), boundary_id_map(n_side_sets, 2))
+
+    ! sort unique ids to make block_id_map and source_id_map sorted
+    ALLOCATE(unique_ids(nblocks), order(nblocks))
+    CALL uniqueEntries(block_id, unique_ids)
+    CALL quickSortInteger(unique_ids, order)
     ! assign defaults to block_id_map and source_id_map
     DO j = 1, nblocks
       block_id_map(j, :) = unique_ids(j)
       source_id_map(j, :) = unique_ids(j)
+    END DO
+
+    ! assign defaults to boundary_id_map
+    DEALLOCATE(unique_ids, order)
+    ALLOCATE(unique_ids(n_side_sets), order(n_side_sets))
+    CALL uniqueEntries(side_set, unique_ids)
+    CALL quickSortInteger(unique_ids, order)
+    Do j = 1, n_side_sets
+      boundary_id_map(j, 1) = unique_ids(j)
+      boundary_id_map(j, 2) = 0
     END DO
 
     ! Read region id and source id from files and override block_id_map default
@@ -293,53 +336,55 @@ CONTAINS
       nentries_region = lengthTextFile(region_id_file, region_id_unit)
       ALLOCATE(region_instructions(nentries_region, 2))
       CALL loadTextFile(region_id_file, region_id_unit, region_instructions)
+
+      ! work instructions into block_id_map
+      IF (.NOT. hasUniqueEntries(region_instructions(:, 1))) &
+            CALL generateErrorMessage(err_code_default, err_fatal, &
+            'regions instruction keys are not unique')
+
+      DO j = 1, nentries_region
+        position = mapIndexOf(region_instructions(j, 1), block_id_map(:, 1))
+        block_id_map(position, 2) = region_instructions(j, 2)
+      END DO
     END IF
-
-    ! work instructions into block_id_map
-    IF (.NOT. hasUniqueEntries(region_instructions(:, 1))) &
-          CALL generateErrorMessage(err_code_default, err_fatal, &
-          'regions instruction keys are not unique')
-
-    DO j = 1, nentries_region
-      position = mapIndexOf(region_instructions(j, 1), block_id_map(:, 1))
-      block_id_map(position, 2) = region_instructions(j, 2)
-    END DO
 
     ! Read region id and source id from files and override block_id_map default
     IF (.NOT. skip_source_map) THEN
       nentries_source = lengthTextFile(source_id_file, source_id_unit)
       ALLOCATE(source_instructions(nentries_source, 2))
       CALL loadTextFile(source_id_file, source_id_unit, source_instructions)
+      ! work instructions into source_id_map
+      IF (.NOT. hasUniqueEntries(source_instructions(:, 1))) &
+            CALL generateErrorMessage(err_code_default, err_fatal, &
+            'source instruction keys are not unique')
+
+      DO j = 1, nentries_source
+        position = mapIndexOf(source_instructions(j, 1), source_id_map(:, 1))
+        source_id_map(position, 2) = source_instructions(j, 2)
+      END DO
     END IF
 
-    ! work instructions into source_id_map
-    IF (.NOT. hasUniqueEntries(source_instructions(:, 1))) &
-          CALL generateErrorMessage(err_code_default, err_fatal, &
-          'source instruction keys are not unique')
+    ! Read boundary id and override block_id_map default
+    IF (.NOT. skip_boundary_map) THEN
+      nentries_bc = lengthTextFile(boundary_id_file, boundary_id_unit)
+      ALLOCATE(boundary_instructions(nentries_bc, 2))
+      CALL loadTextFile(boundary_id_file, boundary_id_unit, boundary_instructions)
+      ! work instructions into source_id_map
+      IF (.NOT. hasUniqueEntries(boundary_instructions(:, 1))) &
+            CALL generateErrorMessage(err_code_default, err_fatal, &
+            'boundary instruction keys are not unique')
 
-    DO j = 1, nentries_source
-      position = mapIndexOf(source_instructions(j, 1), source_id_map(:, 1))
-      source_id_map(position, 2) = source_instructions(j, 2)
-    END DO
-
-    DO j = 1, nentries_region
-      WRITE(*,*) 'Reg instructions ', region_instructions(j, :)
-    END DO
-    DO j = 1, nblocks
-      WRITE(*,*) 'Reg map ', block_id_map(j, :)
-    END DO
-
-    DO j = 1, nentries_source
-      WRITE(*,*) 'Src instructions ', source_instructions(j, :)
-    END DO
-    DO j = 1, nblocks
-      WRITE(*,*) 'Src map ', source_id_map(j, :)
-    END DO
+      DO j = 1, nentries_bc
+        position = mapIndexOf(boundary_instructions(j, 1), boundary_id_map(:, 1))
+        boundary_id_map(position, 2) = boundary_instructions(j, 2)
+      END DO
+    END IF
 
     DEALLOCATE(unique_ids, order)
     IF (ALLOCATED(region_instructions)) DEALLOCATE(region_instructions)
     IF (ALLOCATED(source_instructions)) DEALLOCATE(source_instructions)
-  END SUBROUTINE setupRegionAndSourceMapping
+    IF (ALLOCATED(boundary_instructions)) DEALLOCATE(boundary_instructions)
+  END SUBROUTINE setupOptionalReMapping
 
   !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
@@ -407,7 +452,6 @@ CONTAINS
       END DO
     END IF
 
-    WRITE(6, *)
     IF (skip_source_map) THEN
       WRITE(6, '(A)') "No source ID edits are provided"
     ELSE
@@ -415,15 +459,27 @@ CONTAINS
         CALL generateErrorMessage(err_code_default, err_fatal, &
           'source id map not allocated,  echoIngestedInput called too early')
       WRITE(6, '(A,A)') "Reporting Source ID reassignments from file: ", TRIM(source_id_file)
-      IF (.NOT. ALLOCATED(source_id_map)) &
-        CALL generateErrorMessage(err_code_default, err_fatal, &
-          'source id map not allocated,  echoIngestedInput called too early')
       s = SIZE(source_id_map(:, 1))
       DO j = 1, s
         WRITE(6, '(A,I0,A,I0)') "Old Region ID ", source_id_map(j, 1), " Source ID ",&
                                 source_id_map(j, 2)
       END DO
     END IF
+
+    IF (skip_boundary_map) THEN
+      WRITE(6, '(A)') "No boundary ID edits are provided"
+    ELSE
+      IF (.NOT. ALLOCATED(boundary_id_map)) &
+        CALL generateErrorMessage(err_code_default, err_fatal, &
+          'boundary id map not allocated,  echoIngestedInput called too early')
+      WRITE(6, '(A,A)') "Reporting Source Boundary reassignments from file: ", TRIM(boundary_id_file)
+      s = SIZE(boundary_id_map(:, 1))
+      DO j = 1, s
+        WRITE(6, '(A,I0,A,I0)') "Sideset ID ", boundary_id_map(j, 1), " Boundary Type ",&
+                                boundary_id_map(j, 2)
+      END DO
+    END IF
+    WRITE(6, *)
   END SUBROUTINE echoIngestedInput
 
 END MODULE globals

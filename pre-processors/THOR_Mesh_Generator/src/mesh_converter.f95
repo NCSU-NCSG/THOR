@@ -90,7 +90,7 @@ PROGRAM generateMesh
   END SELECT
 
   ! Prepare writing the output file
-  CALL setupRegionAndSourceMapping()
+  CALL setupOptionalReMapping()
   CALL computeAdjacencyList()
   CALL getBoundaryElements()
 
