@@ -1,5 +1,5 @@
 import sys, os
-path = os.getcwd() + "/scripts"
+path = os.getcwd() + "/../../scripts"
 sys.path.append(path)
 import thor_test_harness as th
 
@@ -7,13 +7,13 @@ import thor_test_harness as th
 counter = 0
 failures = 0
 successes = 0
-print "-"*60
-all_test_files = th.find_all_tests()
+print "-"*80
+all_test_files = th.find_all_tests(os.getcwd() + "/..")
 for f in all_test_files:
     test_objects = th.parse_test_file(f)
     for t in test_objects:
         counter += 1
-        name, result = t.execute()
+        name, result = t.execute('../')
         if result == "success":
             successes += 1
             print "Test ", counter, name, "success"
@@ -22,5 +22,5 @@ for f in all_test_files:
             print "Test ", counter, name, "failure"
             print result
 
-print "-"*60
+print "-"*80
 print 'Successes: ', successes, '          ', 'Failures: ', failures
