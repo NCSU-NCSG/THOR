@@ -1,0 +1,4 @@
+start hom_cube_fixed_src
+  input = fixed_source.inp
+  gold_file_name = fixed_source.inp_out.csv
+end

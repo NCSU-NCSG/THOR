@@ -95,36 +95,27 @@ class thor_test:
     """ Method for executing this THOR test
     :returns: csv diff results
     """
-    def execute(self):
+    def execute(self, exec_rel_path = ''):
         current_dir = os.getcwd()
-        workdir = os.getcwd() + self._params['directory'][1:]
-        command = os.getcwd() + "/" + "thor-1.0.exe" + " " + self._params['input'] + " > dummy"
+        workdir = self._params['directory']
+        command = os.getcwd() + "/" + exec_rel_path + "thor-1.0.exe" + " " + self._params['input'] + " > dummy"
         test_file = workdir + self._params['gold_file_name']
         gold_file = workdir + "gold/" + self._params['gold_file_name']
-        test_name = self._params['directory'] + ":" + self._params['name']
+        l = len(os.getcwd() + "/" + exec_rel_path)
+        test_name = self._params['directory'][l:-1] + ":" + self._params['name']
         # execute command
         os.chdir(workdir)
         os.system(command)
         os.chdir(current_dir)
-        print "Now", os.getcwd()
         # check csv diff and return
         res = csv_diff(test_file, gold_file, rel_tol = self._params['rel_tol'], abs_tol = self._params['abs_tol'])
         return test_name, res
 
 """ Finds all files named test_input in subfolders
 """
-def find_all_tests():
+def find_all_tests(root_dir = "."):
     all_test_files = []
-    for dirpath, dirnames, filenames in os.walk("."):
-        for filename in [f for f in filenames if f == "test_input"]:
-            all_test_files.append(os.path.join(dirpath, filename))
-    return all_test_files
-
-""" Finds all files named test_input in subfolders
-"""
-def find_all_tests():
-    all_test_files = []
-    for dirpath, dirnames, filenames in os.walk("."):
+    for dirpath, dirnames, filenames in os.walk(root_dir):
         for filename in [f for f in filenames if f == "test_input"]:
             all_test_files.append(os.path.join(dirpath, filename))
     return all_test_files

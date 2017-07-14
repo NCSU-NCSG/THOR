@@ -11,7 +11,7 @@ Homogeneous Cube w reflective BC
   end problem
 
   start inout
-    mesh_file     = homogeneous_fine.thrm
+    mesh_file     = homogeneous.thrm
     xs_file       = homogeneous.xs
     source_file   = homogeneous.src
     flux_file     = homogeneous.flux
@@ -24,7 +24,7 @@ Homogeneous Cube w reflective BC
   end cross_sections
 
   start quadrature
-    qdtype=levelsym ; qdorder = 8
+    qdtype=levelsym ; qdorder = 4
   end quadrature
 
   start regionmap
