@@ -1,0 +1,10 @@
+#Sample YAML Input
+---
+
+#Problem Setup
+execute: maybe
+type:    keig
+
+#Quadrature
+qdorder: 1
+qstype:  levelsym

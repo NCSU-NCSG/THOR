@@ -1,5 +1,5 @@
-../test/homogeneous_domain/homogeneous.msh
-../test/homogeneous_domain/homogeneous.thrm
+./homogeneous.msh
+./homogeneous.thrm
 
 
-../test/homogeneous_domain/boundary_remap.in
+./boundary_remap.in

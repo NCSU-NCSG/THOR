@@ -1,5 +1,15 @@
+/----------------------\
+|Execution Requirements|
+\----------------------/
 
-> Doxygen
-> Latex (not sure which)
-> Libmesh (only for exodus II to gmesh)
-> OpenMPI
+> OpenMPI   : [compliant to GNU 7.1.0]
+
+/--------------------------\
+|Documentation Requirements|
+\--------------------------/
+
+> Doxygen   :  Req'd for building automatic code documentation html and latex
+               [Tested with version 1.8.13]
+> pdflatex  :  Req'd for building pdf documentation from doxygen latex
+               [Any latex compiler may work]
+>

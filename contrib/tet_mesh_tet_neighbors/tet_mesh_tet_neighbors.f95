@@ -1,3 +1,6 @@
+MODULE tet_mesh_tet_neighbors
+
+CONTAINS
 subroutine ch_cap ( c )
 
 !*****************************************************************************80
@@ -1959,3 +1962,4 @@ subroutine timestamp ( )
 
   return
 end
+END MODULE

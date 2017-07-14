@@ -16,6 +16,7 @@
 MODULE thor_mesh
 
   USE globals
+  USE tet_mesh_tet_neighbors
   IMPLICIT NONE
 CONTAINS
 
