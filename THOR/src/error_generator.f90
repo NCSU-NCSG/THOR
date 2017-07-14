@@ -1,6 +1,6 @@
 MODULE ERROR_GENERATOR
 CONTAINS
-  SUBROUTINE GEN_ERROR(unit, message, err_code)
+  SUBROUTINE genError(unit, message, err_code)
     IMPLICIT NONE
 
     INTEGER, INTENT(IN):: unit
@@ -12,5 +12,5 @@ CONTAINS
 
     STOP message
 
-  END SUBROUTINE GEN_ERROR
+  END SUBROUTINE genError
 END MODULE ERROR_GENERATOR

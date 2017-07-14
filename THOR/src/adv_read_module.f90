@@ -30,7 +30,7 @@ CONTAINS
     !Command Line Arg Parsing
     INTEGER, INTENT(IN) :: local_unit
     !INTEGER :: arg_count = 0
-    INTEGER ::  indx
+    INTEGER :: indx
     !CHARACTER(50):: arg
 
     !Control
@@ -77,7 +77,7 @@ CONTAINS
     !     read_str = arg(indx : indx)
     !     READ(read_str, *) verbose
     !     IF (verbose .NE. 1 .AND. verbose .NE. 2) THEN
-    !       CALL GEN_ERROR(0, "--verbose=n must be specified with n=1 or n=2 ")
+    !       CALL genError(0, "--verbose=n must be specified with n=1 or n=2 ")
     !     END IF
     !   END IF
     !
@@ -98,7 +98,7 @@ CONTAINS
     !
     ! IF (verbose .EQ. 1) THEN
     !   OPEN(UNIT=14, FILE="sample_input.yaml", ACTION="WRITE", STATUS="REPLACE", IOSTAT=ioerr)
-    !   IF (ioerr .NE. 0) CALL GEN_ERROR(0, "Error opening verbose outout file")
+    !   IF (ioerr .NE. 0) CALL genError(0, "Error opening verbose outout file")
     !   WRITE(14, *) '#Sample THOR input file with all values set to default'
     !   WRITE(14, *) '#Provide as -i argument to run a THOR'
     !   WRITE(14, *) '#/////////////////////////////////////////////////////'
@@ -106,14 +106,14 @@ CONTAINS
     ! END IF
     ! IF (verbose .EQ. 2) THEN
     !   OPEN(UNIT=14, FILE="complete_input.yaml", ACTION="WRITE", STATUS="REPLACE", IOSTAT=ioerr)
-    !   IF (ioerr .NE. 0) CALL GEN_ERROR(0, "Error opening verbose outout file")
+    !   IF (ioerr .NE. 0) CALL genError(0, "Error opening verbose outout file")
     !   WRITE(14,*) '#Full THOR input specification.'
     !   WRITE(14,*) '#Select one argument per key to create in input file'
     !   WRITE(14, *) '#/////////////////////////////////////////////////////'
     !   WRITE(14, *)
     ! END IF
     !OPEN(UNIT=local_unit, FILE=in_file, ACTION="READ", STATUS="OLD", IOSTAT=ioerr)
-    !IF (ioerr .NE. 0) CALL GEN_ERROR(0, "ERROR READING INPUT FILE")
+    !IF (ioerr .NE. 0) CALL genError(0, "ERROR READING INPUT FILE")
 
     !Until file finished
     set_defaults = .TRUE.
@@ -321,14 +321,14 @@ CONTAINS
       execution = 1
     ELSE IF(sanity_check) THEN
       IF (execution .NE. 1 .AND. execution .NE. 0) &
-            CALL GEN_ERROR(0, '[execution] failed input validation')
+            CALL genError(0, '[execution] failed input validation')
     ELSE
       IF (data_string .EQ. "yes") THEN
         execution = 1
       ELSE IF (data_string .EQ. "no") THEN
         execution = 0
       ELSE
-        CALL GEN_ERROR(0, "Invalid parameter for [execute] input flag")
+        CALL genError(0, "Invalid parameter for [execute] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_execute
@@ -358,7 +358,7 @@ CONTAINS
       problem = 1
     ELSE IF(sanity_check) THEN
       IF (problem .NE. 1 .AND. problem .NE. 0) &
-            CALL GEN_ERROR(0, '[type] failed input validation')
+            CALL genError(0, '[type] failed input validation')
     ELSE
       IF (data_string .EQ. "keig") THEN
         problem = 1
@@ -366,7 +366,7 @@ CONTAINS
         problem = 0
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [type] input flag")
+        CALL genError(0, "Invalid parameter for [type] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_type
@@ -396,14 +396,14 @@ CONTAINS
       space_ord = 0
     ELSE IF(sanity_check) THEN
       IF (space_ord .LT. 0) &
-            CALL GEN_ERROR(0, "Invalid parameter for [lambda] input flag")
+            CALL genError(0, "Invalid parameter for [lambda] input flag")
     ELSE
       READ(data_string, *) data_int
       IF (data_int .GE. 0) THEN
         space_ord = data_int
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [lambda] input flag")
+        CALL genError(0, "Invalid parameter for [lambda] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_lambda
@@ -440,7 +440,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [inflow] input flag")
+        CALL genError(0, "Invalid parameter for [inflow] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_inflow
@@ -478,7 +478,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [piacc] input flag")
+        CALL genError(0, "Invalid parameter for [piacc] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_piacc
@@ -511,7 +511,7 @@ CONTAINS
       IF (data_string .EQ. "precomp") THEN
         sweep_tpe = 1
       ELSE
-        CALL GEN_ERROR(0, "Invalid parameter for [sweep] input flag")
+        CALL genError(0, "Invalid parameter for [sweep] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_sweep
@@ -548,7 +548,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [page_sweep] input flag")
+        CALL genError(0, "Invalid parameter for [page_sweep] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_page_sweep
@@ -588,7 +588,7 @@ CONTAINS
         page_refl = 2
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [page_refl] input flag")
+        CALL genError(0, "Invalid parameter for [page_refl] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_page_refl
@@ -625,7 +625,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [page_inflow] input flag")
+        CALL genError(0, "Invalid parameter for [page_inflow] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_page_inflow
@@ -660,7 +660,7 @@ CONTAINS
         max_outer = data_int
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [maxouter] input flag")
+        CALL genError(0, "Invalid parameter for [maxouter] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_maxouter
@@ -696,7 +696,7 @@ CONTAINS
         max_inner = data_int
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [maxinner] input flag")
+        CALL genError(0, "Invalid parameter for [maxinner] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_maxinner
@@ -732,7 +732,7 @@ CONTAINS
         inner_conv = data_real
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [innerconv] input flag")
+        CALL genError(0, "Invalid parameter for [innerconv] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_innerconv
@@ -768,7 +768,7 @@ CONTAINS
         outer_conv = data_real
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [outerconv] input flag")
+        CALL genError(0, "Invalid parameter for [outerconv] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_outerconv
@@ -804,7 +804,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [kconv] input flag")
+        CALL genError(0, "Invalid parameter for [kconv] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_kconv
@@ -841,7 +841,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [keigsolver] input flag")
+        CALL genError(0, "Invalid parameter for [keigsolver] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_keigsolve
@@ -877,7 +877,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [jfnk_krsze] input flag")
+        CALL genError(0, "Invalid parameter for [jfnk_krsze] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_jfnk_krsze
@@ -913,7 +913,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [jfnk_maxkr] input flag")
+        CALL genError(0, "Invalid parameter for [jfnk_maxkr] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_jfnk_maxkr
@@ -952,7 +952,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [jfnk_method] input flag")
+        CALL genError(0, "Invalid parameter for [jfnk_method] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_jfnk_method
@@ -989,7 +989,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [initial_guess] input flag")
+        CALL genError(0, "Invalid parameter for [initial_guess] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_initial_guess
@@ -1026,7 +1026,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [save_restart] input flag")
+        CALL genError(0, "Invalid parameter for [save_restart] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_save_restart
@@ -1062,7 +1062,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [ipiter] input flag")
+        CALL genError(0, "Invalid parameter for [ipiter] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_ipiter
@@ -1099,7 +1099,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [generic] input flag")
+        CALL genError(0, "Invalid parameter for [generic] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_print_conv
@@ -1137,7 +1137,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [density_factor] input flag")
+        CALL genError(0, "Invalid parameter for [density_factor] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_density_factor
@@ -1173,7 +1173,7 @@ CONTAINS
         source_filename = data_string
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [source_file] input flag")
+        CALL genError(0, "Invalid parameter for [source_file] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_source_file
@@ -1209,7 +1209,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [inflow_file] input flag")
+        CALL genError(0, "Invalid parameter for [inflow_file] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_inflow_file
@@ -1245,7 +1245,7 @@ CONTAINS
         cross_section_filename = data_string
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [xs_file] input flag")
+        CALL genError(0, "Invalid parameter for [xs_file] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_xs_file
@@ -1281,7 +1281,7 @@ CONTAINS
         mesh_filename = data_string
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [mesh_file] input flag")
+        CALL genError(0, "Invalid parameter for [mesh_file] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_mesh_file
@@ -1317,7 +1317,7 @@ CONTAINS
         flux_filename = data_string
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [flux_file] input flag")
+        CALL genError(0, "Invalid parameter for [flux_file] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_flux_file
@@ -1353,7 +1353,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [vtk_flux_file] input flag")
+        CALL genError(0, "Invalid parameter for [vtk_flux_file] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_vtk_flux_file
@@ -1389,7 +1389,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [quad_file] input flag")
+        CALL genError(0, "Invalid parameter for [quad_file] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_quad_file
@@ -1425,7 +1425,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [restart_file] input flag")
+        CALL genError(0, "Invalid parameter for [restart_file] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_restart_file
@@ -1461,7 +1461,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [inguess_file] input flag")
+        CALL genError(0, "Invalid parameter for [inguess_file] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_inguess_file
@@ -1497,7 +1497,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [vtk_mat_file] input flag")
+        CALL genError(0, "Invalid parameter for [vtk_mat_file] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_vtk_mat_file
@@ -1533,7 +1533,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [vtk_reg_file] input flag")
+        CALL genError(0, "Invalid parameter for [vtk_reg_file] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_vtk_reg_file
@@ -1569,7 +1569,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [vtk_src_file] input flag")
+        CALL genError(0, "Invalid parameter for [vtk_src_file] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_vtk_src_file
@@ -1605,7 +1605,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [generic] input flag")
+        CALL genError(0, "Invalid parameter for [generic] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_density_factor_file
@@ -1642,7 +1642,7 @@ CONTAINS
         print_xs_flag = 0
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [print_xs] input flag")
+        CALL genError(0, "Invalid parameter for [print_xs] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_print_xs
@@ -1678,7 +1678,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [vtk_flux] input flag")
+        CALL genError(0, "Invalid parameter for [vtk_flux] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_vtk_flux
@@ -1715,7 +1715,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [vtk_reg] input flag")
+        CALL genError(0, "Invalid parameter for [vtk_reg] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_vtk_reg
@@ -1752,7 +1752,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [vtk_mat] input flag")
+        CALL genError(0, "Invalid parameter for [vtk_mat] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_vtk_mat
@@ -1789,7 +1789,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [vtk_src] input flag")
+        CALL genError(0, "Invalid parameter for [vtk_src] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_vtk_src
@@ -1824,7 +1824,7 @@ CONTAINS
         quad_ord = data_int
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [qdorder] input flag")
+        CALL genError(0, "Invalid parameter for [qdorder] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_qdorder
@@ -1864,7 +1864,7 @@ CONTAINS
         quad_tpe = 3
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [qdtype] input flag")
+        CALL genError(0, "Invalid parameter for [qdtype] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_qdtype
@@ -1899,7 +1899,7 @@ CONTAINS
         egmax = data_int
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [ngroups] input flag")
+        CALL genError(0, "Invalid parameter for [ngroups] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_ngroups
@@ -1935,7 +1935,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [pnorder] input flag")
+        CALL genError(0, "Invalid parameter for [pnorder] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_pnorder
@@ -1971,7 +1971,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [pnread] input flag")
+        CALL genError(0, "Invalid parameter for [pnread] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_pnread
@@ -2008,7 +2008,7 @@ CONTAINS
         upscattering = 0
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [upscattering] input flag")
+        CALL genError(0, "Invalid parameter for [upscattering] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_upscattering
@@ -2045,7 +2045,7 @@ CONTAINS
         multiplying  = 0
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [multiplying] input flag")
+        CALL genError(0, "Invalid parameter for [multiplying] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_multiplying
@@ -2082,7 +2082,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [scatt_mult_included] input flag")
+        CALL genError(0, "Invalid parameter for [scatt_mult_included] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_scatt_mult_included
@@ -2119,7 +2119,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL GEN_ERROR(0, "Invalid parameter for [generic] input flag")
+        CALL genError(0, "Invalid parameter for [generic] input flag")
       END IF
     END IF
   END SUBROUTINE input_flag_generic

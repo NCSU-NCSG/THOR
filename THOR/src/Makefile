@@ -248,6 +248,6 @@ wrapup_module.o wrapup_module.mod: wrapup_module.f90 types.mod \
 adv_read_module.o adv_read_module.mod: adv_read_module.f90 error_generator.mod
 	$(CC) $(OPT1) adv_read_module.f90
 #-------------------------------------------------------------------------------
-error_generator.o error_generator.mod: error_generator.f90
+error_generator.o error_generator.mod: error_generator.f90 global_variables.mod
 	$(CC) $(OPT1) error_generator.f90
 #-------------------------------------------------------------------------------

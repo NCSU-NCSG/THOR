@@ -7,6 +7,9 @@
 *.out
 pre-processors/THOR_Mesh_Generator/src/Thor_Mesh_Generator
 
+#Output Files
+*.flux
+
 #Documentation Src Files
 **/html
 **/latex
