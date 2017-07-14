@@ -74,7 +74,6 @@ CONTAINS
           CALL generateErrorMessage(err_code_default, err_fatal, &
           'bc count from gmesh file and adjacency list are inconsistent')
 
-    ! TODO: side set reassignment
     ! TODO: better algorithm
     ! TODO: if no better algorithm at least make it a pretty function
     DO i = 1, bc_count
@@ -89,7 +88,8 @@ CONTAINS
         IF (local_node_list_gmesh(1) .EQ. local_node_list_adjacency(2) .AND. &
               local_node_list_gmesh(2) .EQ. local_node_list_adjacency(3) .AND. &
               local_node_list_gmesh(3) .EQ. local_node_list_adjacency(4)) THEN
-          WRITE(out_unit, '(I0, 2(X,I0))') element, current_face, side_set(i)
+          position = mapIndexOf(side_set(i), boundary_id_map(:, 1))
+          WRITE(out_unit, '(I0, 2(X,I0))') element, current_face, boundary_id_map(position, 2)
         END IF
       END DO
     END DO
@@ -106,7 +106,7 @@ CONTAINS
     CLOSE(out_unit)
 
   END SUBROUTINE outputThorMesh
-  
+
   !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
   !> Computes entries in the Thor adjacency list format from the adjacency_map
