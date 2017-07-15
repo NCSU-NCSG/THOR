@@ -1,0 +1,32 @@
+infinite medium 1 group w/ upscattering
+
+  start problem
+    execution = yes
+    lambda = 0
+    type=keig ; keigsolver = pi ; piacc=none
+    sweep=precomp
+    page_refl=save
+    kconv=1E-4; innerconv=1E-12 ; outerconv=1E-7
+    maxinner = 2 ; maxouter = 500
+  end problem
+
+  start inout
+    mesh_file     =  c5g7_3d_tet.dat
+    xs_file       =  c5g7.xs
+    flux_file     =  c5g7.flux
+    print_xs=yes
+  end inout
+
+  start cross_sections
+     ngroups=7 ; upscattering = yes
+  end cross_sections
+
+  start quadrature
+qdtype=levelsym ; qdorder = 8
+  end quadrature
+
+  start regionmap
+     1 2 3 4 5 6 7 8
+  end regionmap
+
+end file

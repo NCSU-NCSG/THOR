@@ -1,0 +1,29 @@
+IN PROGRESS. THESE STANDARDS ARE NOT FINALIZED, NOR ARE THEY YET PRESENT THROUGHOUT THOR.
+
+DOCUMENTATION::
+> All variables, functions, subroutines, and modules must be documented using Doxygen hooks
+> For subroutines and functions the parameters and return should also be appropriately hooked
+> The driver (main) file of each major code unit (pre / post / thor) should contain a more detailed description,
+an author   attribution, a timestamp, and a version number
+
+NAMING CONVENTIONS::
+>Modules & variables: lowercase /w underscores between words. Wherever possible, avoid abbreviations unless extremely obvious
+>Functions & subroutines: camelcase e.g. ThisIsAFunctionName()
+
+DECLARATIONS::
+>Declare one variable per line in the following order:
+  INTEGER
+  REAL
+  LOGICAL
+  CHARACTER
+  STRING
+> Within each category, use the following order:
+  SCALAR
+  DECLARED SIZE ARRAY
+  ALLOCATABLE ARRAY
+
+FORMATTING::
+
+TESTING::
+
+VERSION NUMBERING ::
