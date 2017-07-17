@@ -3,17 +3,17 @@
 # List of all variables
 
 #compiler
-	CC = mpif90
+	CC = mpifort
 
 #options
-	OPT1 = -c -O3 -g
-	OPT2 = -fdefault-real-8 
+	OPT1 = -c -O3 -g -fbounds-check
+	OPT2 = -fdefault-real-8
 	OPT3 = -O3 -g -o
 
 # Setting up file names
 	SRC = $(wildcard *.f90)
-	# If there are any source files in the src folder that 
-	# need to be ignored for compilation, 
+	# If there are any source files in the src folder that
+	# need to be ignored for compilation,
 	# add them here (integrate cube a b ..., $SRC))
 	SRC1 = $(filter-out integrate_cube.f90, $(SRC))
 	OBJ = $(SRC1:.f90=.o)
@@ -27,14 +27,14 @@
 all: $(EXE)
 
 $(EXE): $(OBJ) $(ARC)
-	$(CC) $(OPT3) $(EXE)  $(OBJ) $(ARC) 
-	@echo $(CC) $(OPT3) $(EXE) '*.o' $(ARC) 
-	@mv ./$(EXE) ../ 
+	$(CC) $(OPT3) $(EXE)  $(OBJ) $(ARC) adv_read_module.mod
+	@echo $(CC) $(OPT3) $(EXE) '*.o' $(ARC)
+	@mv ./$(EXE) ../
 
-clean: 
+clean:
 	rm *.mod *.o *.a
 
-libskit.a: 
+libskit.a:
 	cd ./sparskit/SPARSKIT2; make
 	mv sparskit/SPARSKIT2/libskit.a .
 
@@ -162,7 +162,7 @@ read_module.o read_module.mod: read_module.f90  \
  angle_types.mod multindex_types.mod global_variables.mod \
  read_cross_section_module.mod readmesh_module.mod read_source_module.mod \
  read_inflow_module.mod quadrature_module.mod check_input.mod \
- termination_module.mod
+ termination_module.mod adv_read_module.mod
 	$(CC) $(OPT1) read_module.f90
 #-------------------------------------------------------------------------------
 read_source_module.o read_source_module.mod: read_source_module.f90 \
@@ -244,4 +244,10 @@ wrapup_module.o wrapup_module.mod: wrapup_module.f90 types.mod \
  cross_section_types.mod geometry_types.mod angle_types.mod \
  global_variables.mod termination_module.mod
 	$(CC) $(OPT1) wrapup_module.f90
+#-------------------------------------------------------------------------------
+adv_read_module.o adv_read_module.mod: adv_read_module.f90 error_generator.mod
+	$(CC) $(OPT1) adv_read_module.f90
+#-------------------------------------------------------------------------------
+error_generator.o error_generator.mod: error_generator.f90 global_variables.mod
+	$(CC) $(OPT1) error_generator.f90
 #-------------------------------------------------------------------------------

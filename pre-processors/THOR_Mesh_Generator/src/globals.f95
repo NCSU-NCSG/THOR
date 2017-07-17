@@ -15,6 +15,7 @@
 !-------------------------------------------------------------------------------
 MODULE globals
   USE integer_array_tools
+  USE tet_mesh_tet_neighbors
   IMPLICIT NONE
 
   !> Unit number opened for primary input file
