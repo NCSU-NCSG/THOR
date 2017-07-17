@@ -1,249 +1,249 @@
-module wrapup_module
-!***********************************************************************
-!
-! Wraup module contains all subroutines to finish up problem and echo
-! output
-!
-!***********************************************************************
-
-! Use derived-type modules
-
-  use types
-  use parameter_types
-  use filename_types
-  use vector_types
-  use cross_section_types
-  use geometry_types
-  use angle_types
-  use global_variables
-  use termination_module
-
-  implicit none
-
-contains
-
-  subroutine wrapup(flux, keff, unit_number, suffix, is_final)
-  !**********************************************************************
+MODULE wrapup_module
+  !***********************************************************************
   !
-  ! Subroutine wrapup calls routines that print output into file(s)
+  ! Wraup module contains all subroutines to finish up problem and echo
+  ! output
   !
-  !**********************************************************************
+  !***********************************************************************
 
-  ! Pass eigenvalue
+  ! Use derived-type modules
 
-    real(kind=d_t), intent(in) :: keff
+  USE types
+  USE parameter_types
+  USE filename_types
+  USE vector_types
+  USE cross_section_types
+  USE geometry_types
+  USE angle_types
+  USE global_variables
+  USE termination_module
 
-  ! Pass scalar flux
+  IMPLICIT NONE
 
-    real(kind=d_t) :: flux(num_moments_v,namom,num_cells,egmax,niter)
+CONTAINS
 
-  ! Pass optional arguments
+  SUBROUTINE wrapup(flux, keff, unit_number, suffix, is_final)
+    !**********************************************************************
+    !
+    ! Subroutine wrapup calls routines that print output into file(s)
+    !
+    !**********************************************************************
 
-    integer(kind=li) :: unit_number
-    character(100)   :: suffix
-    logical :: is_final
+    ! Pass eigenvalue
 
-  ! Declare temporary variables
+    REAL(kind=d_t), INTENT(in) :: keff
 
-    integer(kind=li) :: i, eg, l, region, ix, iy, iz
-    real(kind=d_t)   :: reac_rates(4,minreg:maxreg,egmax+1)
-    real(kind=d_t)   :: reg_volume(minreg:maxreg)
-    real(kind=d_t), allocatable :: cartesian_map(:,:,:,:)
-    real(kind=d_t) :: centroid(3)
-    type(vector) :: vertex
-    real(kind=d_t) :: delx, dely, delz, cartesian_vol
+    ! Pass scalar flux
 
-  ! input file name for convenience
+    REAL(kind=d_t) :: flux(num_moments_v,namom,num_cells,egmax,niter)
 
-    character(100) :: fname
+    ! Pass optional arguments
 
-  ! Print runtime
-    if (rank .eq. 0) then
-      write(unit_number,*)
-      write(unit_number,*) "--------------------------------------------------------"
-      write(unit_number,*) "   Execution Summary   "
-      write(unit_number,*) "--------------------------------------------------------"
-      if (conv_flag==0) then
-         write(unit_number,*) "Warning! Execution finished without satisfying all stopping criteria. Warning!"
-      else if(conv_flag==1) then
-         write(unit_number,*) "Execution finished successfully. All stopping criteria satisfied."
-      end if
-      write(unit_number,202) "Runtime (seconds):                                          ", finish-start
-      if (problem == 0 .or. (problem == 1 .and. eig_switch == 0 ) ) then
-        write(unit_number,101) "Number of outer iterations:                                 ", outer
-        write(unit_number,101) "Number of inner iterations:                                 ", tot_nInners
-      else
-        write(unit_number,101) "Number of newton iterations:                                ", nit
-        if (rd_method==1) then
-          write(unit_number,101) "Number of inner iterations:                                 ", tot_nInners
-        end if
-        write(unit_number,101)   "Total number of krylov iterations:                          ", tot_kit
-        write(unit_number,*)
-      end if
+    INTEGER(kind=li) :: unit_number
+    CHARACTER(100)   :: suffix
+    LOGICAL :: is_final
 
-      if(problem == 1)then
-         write(unit_number,102) "Final eigenvalue:                                          ", keff
-      end if
-      if(problem==0) then
-        write(unit_number,*) "Maximum scalar group flux error (outer iteration):         ", max_outer_error
-        write(unit_number,*) "Maximum scalar flux error by group:"
-        do eg=1, egmax
-           write(unit_number,103) eg,max_error(eg)
-        end do
-      else if(problem==1 .and. eig_switch == 1) then
-        write(unit_number,*) "Maximum residual by group:"
-        do eg=1, egmax
-           write(unit_number,103) eg,max_error(eg)
-        end do
-      else if(problem==1 .and. eig_switch == 0) then
-        write(unit_number,*) "Eigenvalue error:                                           ", k_error
-        write(unit_number,*) "Maximum fission source error:                               ", f_error
-        write(unit_number,*) "Maximum scalar group flux error:                            ", max_outer_error
-      end if
-    end if
+    ! Declare temporary variables
 
-  ! Formats
+    INTEGER(kind=li) :: i, eg, l, region, ix, iy, iz
+    REAL(kind=d_t)   :: reac_rates(4,minreg:maxreg,egmax+1)
+    REAL(kind=d_t)   :: reg_volume(minreg:maxreg)
+    REAL(kind=d_t), ALLOCATABLE :: cartesian_map(:,:,:,:)
+    REAL(kind=d_t) :: centroid(3)
+    TYPE(vector) :: vertex
+    REAL(kind=d_t) :: delx, dely, delz, cartesian_vol
 
-    101 FORMAT(1X,A60,I5)
-    102 FORMAT(A60,ES25.16)
-    202 FORMAT(1X,A60,ES25.16)
-    103 FORMAT(1X,I5,ES25.16)
+    ! input file name for convenience
 
-  ! Open angular flux file and write volume and face flux in file
+    CHARACTER(100) :: fname
 
-    if(vtk_flux_output /= 0 .and. rank .eq. 0)then
-       open(unit=10,file=trim(vtk_flux_filename)//trim(suffix),status='unknown',action='write')
+    ! Print runtime
+    IF (rank .EQ. 0) THEN
+      WRITE(unit_number,*)
+      WRITE(unit_number,*) "--------------------------------------------------------"
+      WRITE(unit_number,*) "   Execution Summary   "
+      WRITE(unit_number,*) "--------------------------------------------------------"
+      IF (conv_flag==0) THEN
+        WRITE(unit_number,*) "Warning! Execution finished without satisfying all stopping criteria. Warning!"
+      ELSE IF(conv_flag==1) THEN
+        WRITE(unit_number,*) "Execution finished successfully. All stopping criteria satisfied."
+      END IF
+      WRITE(unit_number,202) "Runtime (seconds):                                          ", finish-start
+      IF (problem == 0 .OR. (problem == 1 .AND. eig_switch == 0 ) ) THEN
+        WRITE(unit_number,101) "Number of outer iterations:                                 ", outer
+        WRITE(unit_number,101) "Number of inner iterations:                                 ", tot_nInners
+      ELSE
+        WRITE(unit_number,101) "Number of newton iterations:                                ", nit
+        IF (rd_method==1) THEN
+          WRITE(unit_number,101) "Number of inner iterations:                                 ", tot_nInners
+        END IF
+        WRITE(unit_number,101)   "Total number of krylov iterations:                          ", tot_kit
+        WRITE(unit_number,*)
+      END IF
 
-       write(10,'(a26)') '# vtk DataFile Version 3.0'
-       write(10,'(a72)') jobname
-       write(10,'(a5)') 'ASCII'
-       write(10,'(a25)') 'DATASET UNSTRUCTURED_GRID'
-       write(10,'(a6,1x,i12,1x,a5)') 'POINTS',num_vert,'float'
+      IF(problem == 1)THEN
+        WRITE(unit_number,102) "Final eigenvalue:                                          ", keff
+      END IF
+      IF(problem==0) THEN
+        WRITE(unit_number,*) "Maximum scalar group flux error (outer iteration):         ", max_outer_error
+        WRITE(unit_number,*) "Maximum scalar flux error by group:"
+        DO eg=1, egmax
+          WRITE(unit_number,103) eg,max_error(eg)
+        END DO
+      ELSE IF(problem==1 .AND. eig_switch == 1) THEN
+        WRITE(unit_number,*) "Maximum residual by group:"
+        DO eg=1, egmax
+          WRITE(unit_number,103) eg,max_error(eg)
+        END DO
+      ELSE IF(problem==1 .AND. eig_switch == 0) THEN
+        WRITE(unit_number,*) "Eigenvalue error:                                           ", k_error
+        WRITE(unit_number,*) "Maximum fission source error:                               ", f_error
+        WRITE(unit_number,*) "Maximum scalar group flux error:                            ", max_outer_error
+      END IF
+    END IF
 
-       do i=1, num_vert
-          write(10,'(3(1x,es12.5))') vertices(i)%v%x1,vertices(i)%v%x2,&
-               vertices(i)%v%x3
-       end do
+    ! Formats
 
-       write(10,*)
-       write(10,'(a5,1x,i12,1x,i12)') 'CELLS',num_cells,num_cells+&
+101 FORMAT(1X,A60,I5)
+102 FORMAT(A60,ES25.16)
+202 FORMAT(1X,A60,ES25.16)
+103 FORMAT(1X,I5,ES25.16)
+
+    ! Open angular flux file and write volume and face flux in file
+
+    IF(vtk_flux_output /= 0 .AND. rank .EQ. 0)THEN
+      OPEN(unit=10,file=TRIM(vtk_flux_filename)//TRIM(suffix),status='unknown',action='write')
+
+      WRITE(10,'(a26)') '# vtk DataFile Version 3.0'
+      WRITE(10,'(a72)') jobname
+      WRITE(10,'(a5)') 'ASCII'
+      WRITE(10,'(a25)') 'DATASET UNSTRUCTURED_GRID'
+      WRITE(10,'(a6,1x,i12,1x,a5)') 'POINTS',num_vert,'float'
+
+      DO i=1, num_vert
+        WRITE(10,'(3(1x,es12.5))') vertices(i)%v%x1,vertices(i)%v%x2,&
+              vertices(i)%v%x3
+      END DO
+
+      WRITE(10,*)
+      WRITE(10,'(a5,1x,i12,1x,i12)') 'CELLS',num_cells,num_cells+&
             4*num_cells
 
-       do i=1, num_cells
-          write(10,'(5(i12,1x))') 4,cells(i)%R(0)-1,cells(i)%R(1)-1,&
-               cells(i)%R(2)-1,cells(i)%R(3)-1
-       end do
+      DO i=1, num_cells
+        WRITE(10,'(5(i12,1x))') 4,cells(i)%R(0)-1,cells(i)%R(1)-1,&
+              cells(i)%R(2)-1,cells(i)%R(3)-1
+      END DO
 
-       write(10,*)
-       write(10,'(a11,1x,i12)') 'CELL_TYPES',num_cells
+      WRITE(10,*)
+      WRITE(10,'(a11,1x,i12)') 'CELL_TYPES',num_cells
 
-       do i=1, num_cells
-          write(10,'(i12)') 10
-       end do
+      DO i=1, num_cells
+        WRITE(10,'(i12)') 10
+      END DO
 
-       write(10,*)
-       write(10,'(a9,1x,i12)') 'CELL_DATA', num_cells
-       write(10,'(a5,1x,a16,1x,i12)') 'FIELD','Neutronics_Edits',egmax
-
-       l=1
-       do eg=1, egmax
-          write(10,'(i12,1x,i12,1x,i12,1x,a5)') eg,1,num_cells,'float'
-          do i=1, num_cells
-             write(10,'(es12.5)') flux(1,1,i,eg,niter)
-          end do
-       end do
-
-       close(10)
-
-    end if
-
-  ! Open flux file and write volume and cell flux in file
-    if (rank .eq. 0) then
-      open(unit=20,file=trim(flux_filename)//trim(suffix),status='unknown',action='write')
+      WRITE(10,*)
+      WRITE(10,'(a9,1x,i12)') 'CELL_DATA', num_cells
+      WRITE(10,'(a5,1x,a16,1x,i12)') 'FIELD','Neutronics_Edits',egmax
 
       l=1
-      write(20,*) num_cells
-      do eg=1, egmax
-         do i=1, num_cells
-            write(20,*) cells(i)%volume,flux(1,1,i,eg,niter)
-         end do
-      end do
+      DO eg=1, egmax
+        WRITE(10,'(i12,1x,i12,1x,i12,1x,a5)') eg,1,num_cells,'float'
+        DO i=1, num_cells
+          WRITE(10,'(es12.5)') flux(1,1,i,eg,niter)
+        END DO
+      END DO
 
-      close(20)
+      CLOSE(10)
 
-      write(unit_number,*) "A flux file was been succesfully written!"
-    end if
+    END IF
 
-  ! Compute region averaged fluxes and reaction rates
+    ! Open flux file and write volume and cell flux in file
+    IF (rank .EQ. 0) THEN
+      OPEN(unit=20,file=TRIM(flux_filename)//TRIM(suffix),status='unknown',action='write')
 
-    if (rank .eq. 0) then
-      write(unit_number,*)
-      write(unit_number,*) "--------------------------------------------------------"
-      write(unit_number,*) "   Region averaged reaction rates  "
-      write(unit_number,*) "--------------------------------------------------------"
-      write(unit_number,*)
+      l=1
+      WRITE(20,*) num_cells
+      DO eg=1, egmax
+        DO i=1, num_cells
+          WRITE(20,*) cells(i)%volume,flux(1,1,i,eg,niter)
+        END DO
+      END DO
+
+      CLOSE(20)
+
+      WRITE(unit_number,*) "A flux file was been succesfully written!"
+    END IF
+
+    ! Compute region averaged fluxes and reaction rates
+
+    IF (rank .EQ. 0) THEN
+      WRITE(unit_number,*)
+      WRITE(unit_number,*) "--------------------------------------------------------"
+      WRITE(unit_number,*) "   Region averaged reaction rates  "
+      WRITE(unit_number,*) "--------------------------------------------------------"
+      WRITE(unit_number,*)
       reg_volume=0.0_d_t
       reac_rates=0.0_d_t
-      do eg=1,egmax
-        do i=1,num_cells
-          if(eg.eq.1) reg_volume(cells(i)%reg)=reg_volume(cells(i)%reg)+ cells(i)%volume
+      DO eg=1,egmax
+        DO i=1,num_cells
+          IF(eg.EQ.1) reg_volume(cells(i)%reg)=reg_volume(cells(i)%reg)+ cells(i)%volume
           reac_rates(1,cells(i)%reg,eg)=reac_rates(1,cells(i)%reg,eg)  + cells(i)%volume * &
-                                        flux(1,1,i,eg,niter)
+                flux(1,1,i,eg,niter)
           reac_rates(2,cells(i)%reg,eg)=reac_rates(2,cells(i)%reg,eg)  + cells(i)%volume * fiss(reg2mat(cells(i)%reg),eg)%xs * &
-                                        flux(1,1,i,eg,niter)
+                flux(1,1,i,eg,niter)
           reac_rates(3,cells(i)%reg,eg)=reac_rates(3,cells(i)%reg,eg)  + cells(i)%volume *  &
-                                        (sigma_t(reg2mat(cells(i)%reg),eg)%xs - tsigs(reg2mat(cells(i)%reg),eg)%xs )         * &
-                                        flux(1,1,i,eg,niter)
+                (sigma_t(reg2mat(cells(i)%reg),eg)%xs - tsigs(reg2mat(cells(i)%reg),eg)%xs )         * &
+                flux(1,1,i,eg,niter)
           reac_rates(4,cells(i)%reg,eg)=reac_rates(4,cells(i)%reg,eg)  + cells(i)%volume *  &
-                                        nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs                    * &
-                                        flux(1,1,i,eg,niter)
+                nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs                    * &
+                flux(1,1,i,eg,niter)
 
-        end do
-      end do
-      do eg=1,egmax
-         do region=minreg,maxreg
-            reac_rates(1,region,egmax+1)=reac_rates(1,region,egmax+1)+reac_rates(1,region,eg)
-            reac_rates(2,region,egmax+1)=reac_rates(2,region,egmax+1)+reac_rates(2,region,eg)
-            reac_rates(3,region,egmax+1)=reac_rates(3,region,egmax+1)+reac_rates(3,region,eg)
-            reac_rates(4,region,egmax+1)=reac_rates(4,region,egmax+1)+reac_rates(4,region,eg)
-         end do
-      end do
-      do eg=1,egmax+1
-         do region=minreg,maxreg
-            reac_rates(1,region,eg)=reac_rates(1,region,eg)/reg_volume(region)
-            reac_rates(2,region,eg)=reac_rates(2,region,eg)/reg_volume(region)
-            reac_rates(3,region,eg)=reac_rates(3,region,eg)/reg_volume(region)
-            reac_rates(4,region,eg)=reac_rates(4,region,eg)/reg_volume(region)
-         end do
-      end do
-      do region=minreg,maxreg
-         write(unit_number,501) '-- Region --',region,' Volume= ',reg_volume(region)
-         write(unit_number,*)
-         write(unit_number,502) '   Group          Flux       Fission    Absorption      Fiss Src'
-         do eg=1,egmax
-           write(unit_number,503) eg,reac_rates(1,region,eg),reac_rates(2,region,eg),&
-                           reac_rates(3,region,eg),reac_rates(4,region,eg)
-         end do
-         write(unit_number,504) 'Total   ',reac_rates(1,region,egmax+1),reac_rates(2,region,egmax+1),&
-                                 reac_rates(3,region,egmax+1),reac_rates(4,region,egmax+1)
-      end do
-    end if
+        END DO
+      END DO
+      DO eg=1,egmax
+        DO region=minreg,maxreg
+          reac_rates(1,region,egmax+1)=reac_rates(1,region,egmax+1)+reac_rates(1,region,eg)
+          reac_rates(2,region,egmax+1)=reac_rates(2,region,egmax+1)+reac_rates(2,region,eg)
+          reac_rates(3,region,egmax+1)=reac_rates(3,region,egmax+1)+reac_rates(3,region,eg)
+          reac_rates(4,region,egmax+1)=reac_rates(4,region,egmax+1)+reac_rates(4,region,eg)
+        END DO
+      END DO
+      DO eg=1,egmax+1
+        DO region=minreg,maxreg
+          reac_rates(1,region,eg)=reac_rates(1,region,eg)/reg_volume(region)
+          reac_rates(2,region,eg)=reac_rates(2,region,eg)/reg_volume(region)
+          reac_rates(3,region,eg)=reac_rates(3,region,eg)/reg_volume(region)
+          reac_rates(4,region,eg)=reac_rates(4,region,eg)/reg_volume(region)
+        END DO
+      END DO
+      DO region=minreg,maxreg
+        WRITE(unit_number,501) '-- Region --',region,' Volume= ',reg_volume(region)
+        WRITE(unit_number,*)
+        WRITE(unit_number,502) '   Group          Flux       Fission    Absorption      Fiss Src'
+        DO eg=1,egmax
+          WRITE(unit_number,503) eg,reac_rates(1,region,eg),reac_rates(2,region,eg),&
+                reac_rates(3,region,eg),reac_rates(4,region,eg)
+        END DO
+        WRITE(unit_number,504) 'Total   ',reac_rates(1,region,egmax+1),reac_rates(2,region,egmax+1),&
+              reac_rates(3,region,egmax+1),reac_rates(4,region,egmax+1)
+      END DO
+    END IF
 
-  ! if desired print cartesian flux map to file
+    ! if desired print cartesian flux map to file
 
-    if (rank .eq. 0 .and. glob_do_cartesian_mesh .and. is_final) then
+    IF (rank .EQ. 0 .AND. glob_do_cartesian_mesh .AND. is_final) THEN
 
       ! compute reaction rates for each cartesian cell
       ! computes flux(1), total(2), absorption(3), total scattering (4),
       ! fission(5), fission production(6)
 
       ! allocate the array holding the data
-      allocate(cartesian_map(6, glob_cmap_nx, glob_cmap_ny, glob_cmap_nz))
+      ALLOCATE(cartesian_map(6, glob_cmap_nx, glob_cmap_ny, glob_cmap_nz))
 
       ! compute the spacing
-      delx = (glob_cmap_max_x - glob_cmap_min_x) / real(glob_cmap_nx)
-      dely = (glob_cmap_max_y - glob_cmap_min_y) / real(glob_cmap_ny)
-      delz = (glob_cmap_max_z - glob_cmap_min_z) / real(glob_cmap_nz)
+      delx = (glob_cmap_max_x - glob_cmap_min_x) / REAL(glob_cmap_nx)
+      dely = (glob_cmap_max_y - glob_cmap_min_y) / REAL(glob_cmap_ny)
+      delz = (glob_cmap_max_z - glob_cmap_min_z) / REAL(glob_cmap_nz)
       cartesian_vol = delx * dely * delz
 
       ! make sure it's properly initialized
@@ -251,114 +251,114 @@ contains
 
       ! computation of the averaged reaction rates (only energy integrated!)
       ! TODO: might want to consider a flag for providing group fluxes/reac_rates?
-      do eg = 1, egmax
-        do i = 1, num_cells
+      DO eg = 1, egmax
+        DO i = 1, num_cells
 
           ! this is the current cell with index i, first we need to find out
           ! which x/y/z cartesian this cell belongs to
           centroid = zero
 
-          do l = 0, 3
+          DO l = 0, 3
             vertex = vertices(cells(i)%R(l))%v
             centroid(1) = centroid(1) + vertex%x1
             centroid(2) = centroid(2) + vertex%x2
             centroid(3) = centroid(3) + vertex%x3
-          end do
+          END DO
           centroid = centroid * fourth
 
           ! get the correct entry in the cartesian_map array but note that
           ! numbering starts from 1 so we need to add one
-          ix = floor((centroid(1) - glob_cmap_min_x) / delx) + 1
-          iy = floor((centroid(2) - glob_cmap_min_y) / dely) + 1
-          iz = floor((centroid(3) - glob_cmap_min_z) / delz) + 1
+          ix = FLOOR((centroid(1) - glob_cmap_min_x) / delx) + 1
+          iy = FLOOR((centroid(2) - glob_cmap_min_y) / dely) + 1
+          iz = FLOOR((centroid(3) - glob_cmap_min_z) / delz) + 1
 
           ! we have to make sure that the x/y/z coordinates are permissible
-          if (ix .gt. 0 .and. ix .le. glob_cmap_nx .and.&
-              iy .gt. 0 .and. iy .le. glob_cmap_ny .and.&
-              iz .gt. 0 .and. iz .le. glob_cmap_nz) then
+          IF (ix .GT. 0 .AND. ix .LE. glob_cmap_nx .AND.&
+                iy .GT. 0 .AND. iy .LE. glob_cmap_ny .AND.&
+                iz .GT. 0 .AND. iz .LE. glob_cmap_nz) THEN
 
             ! Now go through all reaction types and accumulate into cartesian_map
             ! 1. the scalar flux
             cartesian_map(1, ix, iy, iz) = cartesian_map(1, ix, iy, iz) + &
-              cells(i)%volume * flux(1, 1, i, eg, niter) / cartesian_vol
+                  cells(i)%volume * flux(1, 1, i, eg, niter) / cartesian_vol
             ! 2. total interaction rate
             cartesian_map(2, ix, iy, iz) = cartesian_map(2, ix, iy, iz) + &
-              cells(i)%volume * flux(1, 1, i, eg, niter) * &
-              sigma_t(reg2mat(cells(i)%reg), eg)%xs / cartesian_vol
+                  cells(i)%volume * flux(1, 1, i, eg, niter) * &
+                  sigma_t(reg2mat(cells(i)%reg), eg)%xs / cartesian_vol
             ! 3. absorption rate
             cartesian_map(3, ix, iy, iz) = cartesian_map(3, ix, iy, iz) + &
-              cells(i)%volume * flux(1, 1, i, eg, niter) * &
-              (sigma_t(reg2mat(cells(i)%reg), eg)%xs - tsigs(reg2mat(cells(i)%reg), eg)%xs) / &
-              cartesian_vol
+                  cells(i)%volume * flux(1, 1, i, eg, niter) * &
+                  (sigma_t(reg2mat(cells(i)%reg), eg)%xs - tsigs(reg2mat(cells(i)%reg), eg)%xs) / &
+                  cartesian_vol
             ! 4. total scattering rate
             cartesian_map(4, ix, iy, iz) = cartesian_map(4, ix, iy, iz) + &
-              cells(i)%volume * flux(1, 1, i, eg, niter) * &
-              tsigs(reg2mat(cells(i)%reg), eg)%xs / cartesian_vol
+                  cells(i)%volume * flux(1, 1, i, eg, niter) * &
+                  tsigs(reg2mat(cells(i)%reg), eg)%xs / cartesian_vol
             ! 5. fission rate
             cartesian_map(5, ix, iy, iz) = cartesian_map(5, ix, iy, iz) + &
-              cells(i)%volume * flux(1, 1, i, eg, niter) * &
-              fiss(reg2mat(cells(i)%reg), eg)%xs / cartesian_vol
+                  cells(i)%volume * flux(1, 1, i, eg, niter) * &
+                  fiss(reg2mat(cells(i)%reg), eg)%xs / cartesian_vol
             ! 6. fission source rate
             cartesian_map(6, ix, iy, iz) = cartesian_map(6, ix, iy, iz) + &
-              cells(i)%volume * flux(1, 1, i, eg, niter) * &
-              nu(reg2mat(cells(i)%reg), eg)%xs * fiss(reg2mat(cells(i)%reg), eg)%xs / &
-              cartesian_vol
-          end if
-        end do
-      end do
+                  cells(i)%volume * flux(1, 1, i, eg, niter) * &
+                  nu(reg2mat(cells(i)%reg), eg)%xs * fiss(reg2mat(cells(i)%reg), eg)%xs / &
+                  cartesian_vol
+          END IF
+        END DO
+      END DO
 
       ! write it to file
-      open(unit=30, file = trim(cartesian_map_filename), status='unknown', action='write')
-      write(30, *) "     ix    iy    iz             flux             total&
-                    &        absorption        scattering           fission&
-                    &       fission src"
-      do iz = 1, glob_cmap_nz
-        do iy = 1, glob_cmap_ny
-          do ix = 1, glob_cmap_nx
-            write(30, 499) ix, iy, iz, cartesian_map(1, ix, iy, iz),&
-                           cartesian_map(2, ix, iy, iz), cartesian_map(3, ix, iy, iz),&
-                           cartesian_map(4, ix, iy, iz), cartesian_map(5, ix, iy, iz),&
-                           cartesian_map(6, ix, iy, iz)
-          end do
-        end do
-      end do
+      OPEN(unit=30, file = TRIM(cartesian_map_filename), status='unknown', action='write')
+      WRITE(30, *) "     ix    iy    iz             flux             total&
+            &        absorption        scattering           fission&
+            &       fission src"
+      DO iz = 1, glob_cmap_nz
+        DO iy = 1, glob_cmap_ny
+          DO ix = 1, glob_cmap_nx
+            WRITE(30, 499) ix, iy, iz, cartesian_map(1, ix, iy, iz),&
+                  cartesian_map(2, ix, iy, iz), cartesian_map(3, ix, iy, iz),&
+                  cartesian_map(4, ix, iy, iz), cartesian_map(5, ix, iy, iz),&
+                  cartesian_map(6, ix, iy, iz)
+          END DO
+        END DO
+      END DO
 
-      close(30)
+      CLOSE(30)
 
       ! wrap up
-      deallocate(cartesian_map)
-    end if
+      DEALLOCATE(cartesian_map)
+    END IF
 
     ! write a csv output file containing all region averaged
     ! TODO: make this more flexible, currently this is for testing only
-    call GET_COMMAND_ARGUMENT(1,fname)
-    open(unit=20, file=trim(fname)//trim('_out.csv'), status='unknown', action='write')
-    write(20, 502, ADVANCE = "NO") "Region,"
-    do eg = 1, egmax - 1
-      write(20, 505, ADVANCE = "NO") "flux g = ", eg, ","
-    end do
-    write(20, 506) "flux g = ", eg
+    CALL GET_COMMAND_ARGUMENT(1,fname)
+    OPEN(unit=20, file=TRIM(fname)//TRIM('_out.csv'), status='unknown', action='write')
+    WRITE(20, 502, ADVANCE = "NO") "Region,"
+    DO eg = 1, egmax - 1
+      WRITE(20, 505, ADVANCE = "NO") "flux g = ", eg, ","
+    END DO
+    WRITE(20, 506) "flux g = ", eg
 
-    do region=minreg,maxreg
-       write(20, 509, ADVANCE = "NO") region, ","
-       do eg= 1, egmax - 1
-         write(20, 507, ADVANCE = "NO") reac_rates(1, region, eg), ","
-       end do
-       write(20, 508) reac_rates(1, region, egmax)
-    end do
-    close(20)
+    DO region=minreg,maxreg
+      WRITE(20, 509, ADVANCE = "NO") region, ","
+      DO eg= 1, egmax - 1
+        WRITE(20, 507, ADVANCE = "NO") reac_rates(1, region, eg), ","
+      END DO
+      WRITE(20, 508) reac_rates(1, region, egmax)
+    END DO
+    CLOSE(20)
 
-    499 FORMAT(1X,3I6,6ES18.8)
-    501 FORMAT(1X,A,I4,A,ES14.6)
-    502 FORMAT(1X,A)
-    503 FORMAT(1X,I8,4ES14.6)
-    504 FORMAT(1X,A8,4ES14.6)
-    505 FORMAT(1X,A9,I3,A1)
-    506 FORMAT(1X,A9,I3)
-    507 FORMAT(1X,ES25.16,A1)
-    508 FORMAT(1X,ES25.16)
-    509 FORMAT(1X,I3,A1)
-  end subroutine wrapup
+499 FORMAT(1X,3I6,6ES18.8)
+501 FORMAT(1X,A,I4,A,ES14.6)
+502 FORMAT(1X,A)
+503 FORMAT(1X,I8,4ES14.6)
+504 FORMAT(1X,A8,4ES14.6)
+505 FORMAT(1X,A9,I3,A1)
+506 FORMAT(1X,A9,I3)
+507 FORMAT(1X,ES25.16,A1)
+508 FORMAT(1X,ES25.16)
+509 FORMAT(1X,I3,A1)
+  END SUBROUTINE wrapup
 
 
-end module wrapup_module
+END MODULE wrapup_module

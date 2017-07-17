@@ -8,11 +8,11 @@
 !-------------------------------------------------------------------------------
 
 MODULE integer_array_tools
-IMPLICIT NONE
+  IMPLICIT NONE
 
-PRIVATE
-PUBLIC quickSortInteger, numUniqueEntries, isSorted, hasUniqueEntries, &
-       uniqueEntries, mapIndexOf, indexOf
+  PRIVATE
+  PUBLIC quickSortInteger, numUniqueEntries, isSorted, hasUniqueEntries, &
+        uniqueEntries, mapIndexOf, indexOf
 
 CONTAINS
 
@@ -59,8 +59,8 @@ CONTAINS
 
     IF (nA > 1) THEN
 
-      CALL random_number(random)
-      pivot = values(int(random*REAL(nA-1))+1)
+      CALL RANDOM_NUMBER(random)
+      pivot = values(INT(random*REAL(nA-1))+1)
       left = 0
       right = nA + 1
 
@@ -120,7 +120,7 @@ CONTAINS
   ! Assigns 1, 2, 3, ..., N to array of size N
   !
   ! :array: (input, output) the array to be filled with 1:N
-  SUBROUTINE range(array)
+  SUBROUTINE RANGE(array)
 
     INTEGER, DIMENSION (:), INTENT(INOUT)  :: array
     INTEGER :: s
@@ -163,14 +163,14 @@ CONTAINS
     ordered_values = values
 
     ! determine num_unique
-    CALL range(order)
+    CALL RANGE(order)
     IF (.NOT. is_sorted) CALL quickSortInteger(ordered_values, order)
 
     ! determine unique values, note first one is unique so we start with 1
     numUniqueEntries = 1
     DO j = 1, s - 1
-      IF (ordered_values(j + 1) .ne. ordered_values(j)) &
-        numUniqueEntries = numUniqueEntries + 1
+      IF (ordered_values(j + 1) .NE. ordered_values(j)) &
+            numUniqueEntries = numUniqueEntries + 1
     END DO
     DEALLOCATE(order, ordered_values)
     RETURN
@@ -209,14 +209,14 @@ CONTAINS
     ordered_values = values
 
     ! determine num_unique
-    CALL range(order)
+    CALL RANGE(order)
     IF (.NOT. is_sorted) CALL quickSortInteger(ordered_values, order)
 
     ! determine unique values, note first one is unique so we start with 1
     counter = 1
     unique_values(counter) = ordered_values(1)
     DO j = 1, s - 1
-      IF (ordered_values(j + 1) .ne. ordered_values(j)) THEN
+      IF (ordered_values(j + 1) .NE. ordered_values(j)) THEN
         counter = counter + 1
         unique_values(counter) = ordered_values(j + 1)
       END IF
@@ -275,7 +275,7 @@ CONTAINS
     ordered_array = array
     IF (.NOT. is_sorted) THEN
       ALLOCATE(order(s))
-      CALL range(order)
+      CALL RANGE(order)
       CALL quickSortInteger(ordered_array, order)
     END IF
 
@@ -313,7 +313,7 @@ CONTAINS
         EXIT
       END IF
     END DO
-  END FUNCTION
+  END FUNCTION indexOf
 
   !Returns the index of the target key in the provded array
   !Binary search assumes sorted list

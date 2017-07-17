@@ -1,19 +1,18 @@
-module angle_types
-!*********************************************************************** 
-! This is hardwired to be discrete ordinates
-!***********************************************************************
+MODULE angle_types
+  !***********************************************************************
+  ! This is hardwired to be discrete ordinates
+  !***********************************************************************
 
-  use types
-  use vector_types
+  USE types
+  USE vector_types
 
-  implicit none
+  IMPLICIT NONE
 
-! Discrete Ordinate quadrature is retrived from precomputed database
-  
-  type ordinate
-     type(vector) :: mu
-     real(kind=d_t) :: wt
-  end type ordinate
+  ! Discrete Ordinate quadrature is retrived from precomputed database
 
-end module angle_types
+  TYPE ordinate
+    TYPE(vector) :: mu
+    REAL(kind=d_t) :: wt
+  END TYPE ordinate
 
+END MODULE angle_types

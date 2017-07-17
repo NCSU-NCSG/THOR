@@ -1,81 +1,80 @@
-module execution_module
-!***********************************************************************
-!
-! Execution module contains all subroutines to run problem
-!
-!***********************************************************************
+MODULE execution_module
+  !***********************************************************************
+  !
+  ! Execution module contains all subroutines to run problem
+  !
+  !***********************************************************************
 
-! Use derived-type modules
+  ! Use derived-type modules
 
-  use types
-  use parameter_types
-  use filename_types
-  use vector_types
-  use cross_section_types
-  use geometry_types
-  use angle_types
-  use multindex_types
-  use global_variables
+  USE types
+  USE parameter_types
+  USE filename_types
+  USE vector_types
+  USE cross_section_types
+  USE geometry_types
+  USE angle_types
+  USE multindex_types
+  USE global_variables
 
-! Use modules that pertain setting up problem
+  ! Use modules that pertain setting up problem
 
-  use solver_module  
+  USE solver_module
 
-  implicit none
+  IMPLICIT NONE
 
-contains
+CONTAINS
 
   !> Is a simple calling subroutine that starts the timer and calls the fixed source solver
-  subroutine execute_ext(flux)
-  !**********************************************************************
-  !
-  ! Subroutine execution calls routines that performs computation
-  !
-  !**********************************************************************
+  SUBROUTINE execute_ext(flux)
+    !**********************************************************************
+    !
+    ! Subroutine execution calls routines that performs computation
+    !
+    !**********************************************************************
 
-  ! Declare scalar flux 
+    ! Declare scalar flux
 
-    real(kind=d_t) :: flux(num_moments_v,namom,num_cells,egmax,niter) 
+    REAL(kind=d_t) :: flux(num_moments_v,namom,num_cells,egmax,niter)
 
-  ! Call solver to initiate problem execution
+    ! Call solver to initiate problem execution
 
-    call cpu_time(start)    
+    CALL CPU_TIME(start)
 
-    call solver_ext(flux)
+    CALL solver_ext(flux)
 
-    call cpu_time(finish)
+    CALL CPU_TIME(finish)
 
-  end subroutine execute_ext
+  END SUBROUTINE execute_ext
 
-!-----------------------------------------------------------------------------------------
-!-----------------------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------------------
 
   !> Is a simple calling subroutine that starts the timer and calls the eigenvalue solver
-  subroutine execute_eig(flux,keff)
-  !**********************************************************************
-  !
-  ! Subroutine execution calls routines that performs computation
-  !
-  !**********************************************************************
+  SUBROUTINE execute_eig(flux,keff)
+    !**********************************************************************
+    !
+    ! Subroutine execution calls routines that performs computation
+    !
+    !**********************************************************************
 
-  ! Declare k-effective and scalar flux
+    ! Declare k-effective and scalar flux
 
-    real(kind=d_t), intent(inout) :: keff
-    real(kind=d_t) :: flux(num_moments_v,namom,num_cells,egmax,niter) 
-    
-  ! Call solver to initiate problem execution
+    REAL(kind=d_t), INTENT(inout) :: keff
+    REAL(kind=d_t) :: flux(num_moments_v,namom,num_cells,egmax,niter)
 
-    call cpu_time(start)    
+    ! Call solver to initiate problem execution
 
-    call solver_eig(flux,keff)
+    CALL CPU_TIME(start)
 
-    call cpu_time(finish)
+    CALL solver_eig(flux,keff)
 
-  end subroutine execute_eig
+    CALL CPU_TIME(finish)
 
-!-----------------------------------------------------------------------------------------
-! End
-!-----------------------------------------------------------------------------------------  
-  
-end module execution_module
+  END SUBROUTINE execute_eig
 
+  !-----------------------------------------------------------------------------------------
+  ! End
+  !-----------------------------------------------------------------------------------------
+
+END MODULE execution_module

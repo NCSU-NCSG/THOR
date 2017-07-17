@@ -50,9 +50,9 @@ MODULE globals
   !> Number of side set ids defined in the mesh
   INTEGER :: n_side_sets
   !> Paramter defined int, width 8
-  INTEGER, PARAMETER :: li = selected_int_KIND(8)
+  INTEGER, PARAMETER :: li = SELECTED_INT_KIND(8)
   !> Parameter defined double precision real
-  INTEGER, PARAMETER :: d_t = selected_real_KIND(15,307)
+  INTEGER, PARAMETER :: d_t = SELECTED_REAL_KIND(15,307)
   !> Mapping from input mesh block ids to output mesh block ids
   !! Defaults to a -> a
   INTEGER, ALLOCATABLE :: block_id_map(:,:)
@@ -253,7 +253,7 @@ CONTAINS
     READ(std_in_unit, '(A200)', IOSTAT = io_status) line
     temp_logical = .FALSE.
     IF (io_status .EQ. 0) &
-      INQUIRE(FILE = TRIM(ADJUSTL(line)), EXIST = temp_logical)
+          INQUIRE(FILE = TRIM(ADJUSTL(line)), EXIST = temp_logical)
     ! region id mapping can be skipped
     IF (.NOT. temp_logical) THEN
       skip_region_map = .TRUE.
@@ -266,7 +266,7 @@ CONTAINS
     READ(std_in_unit, '(A200)', IOSTAT = io_status) line
     temp_logical = .FALSE.
     IF (io_status .EQ. 0) &
-      INQUIRE(FILE = TRIM(ADJUSTL(line)), EXIST = temp_logical)
+          INQUIRE(FILE = TRIM(ADJUSTL(line)), EXIST = temp_logical)
     ! region id mapping can be skipped
     IF (.NOT. temp_logical) THEN
       skip_source_map = .TRUE.
@@ -278,7 +278,7 @@ CONTAINS
     READ(std_in_unit, '(A200)', IOSTAT = io_status) line
     temp_logical = .FALSE.
     IF (io_status .EQ. 0) &
-      INQUIRE(FILE = TRIM(ADJUSTL(line)), EXIST = temp_logical)
+          INQUIRE(FILE = TRIM(ADJUSTL(line)), EXIST = temp_logical)
     ! region id mapping can be skipped
     IF (.NOT. temp_logical) THEN
       skip_boundary_map = .TRUE.
@@ -327,7 +327,7 @@ CONTAINS
     ALLOCATE(unique_ids(n_side_sets), order(n_side_sets))
     CALL uniqueEntries(side_set, unique_ids)
     CALL quickSortInteger(unique_ids, order)
-    Do j = 1, n_side_sets
+    DO j = 1, n_side_sets
       boundary_id_map(j, 1) = unique_ids(j)
       boundary_id_map(j, 2) = 0
     END DO
@@ -427,7 +427,7 @@ CONTAINS
   SUBROUTINE printProgramHeader()
     ! TODO: A unified program name header?
     WRITE(6, '(A)') "Program Name: THOR_MESH_GENERATOR"
-  END
+  END SUBROUTINE printProgramHeader
 
   SUBROUTINE echoIngestedInput()
     INTEGER :: j
@@ -444,12 +444,12 @@ CONTAINS
     ELSE
       WRITE(6, '(A, A)') "Reporting Region ID reassignments from file: ", TRIM(region_id_file)
       IF (.NOT. ALLOCATED(block_id_map)) &
-        CALL generateErrorMessage(err_code_default, err_fatal, &
-          'block id map not allocated,  echoIngestedInput called too early')
+            CALL generateErrorMessage(err_code_default, err_fatal, &
+            'block id map not allocated,  echoIngestedInput called too early')
       s = SIZE(block_id_map(:, 1))
       DO j = 1, s
         WRITE(6, '(A,I0,A,I0)') "Old Region ID ", block_id_map(j, 1), " New Region ID ",&
-                                block_id_map(j, 2)
+              block_id_map(j, 2)
       END DO
     END IF
 
@@ -457,13 +457,13 @@ CONTAINS
       WRITE(6, '(A)') "No source ID edits are provided"
     ELSE
       IF (.NOT. ALLOCATED(source_id_map)) &
-        CALL generateErrorMessage(err_code_default, err_fatal, &
-          'source id map not allocated,  echoIngestedInput called too early')
+            CALL generateErrorMessage(err_code_default, err_fatal, &
+            'source id map not allocated,  echoIngestedInput called too early')
       WRITE(6, '(A,A)') "Reporting Source ID reassignments from file: ", TRIM(source_id_file)
       s = SIZE(source_id_map(:, 1))
       DO j = 1, s
         WRITE(6, '(A,I0,A,I0)') "Old Region ID ", source_id_map(j, 1), " Source ID ",&
-                                source_id_map(j, 2)
+              source_id_map(j, 2)
       END DO
     END IF
 
@@ -471,13 +471,13 @@ CONTAINS
       WRITE(6, '(A)') "No boundary ID edits are provided"
     ELSE
       IF (.NOT. ALLOCATED(boundary_id_map)) &
-        CALL generateErrorMessage(err_code_default, err_fatal, &
-          'boundary id map not allocated,  echoIngestedInput called too early')
+            CALL generateErrorMessage(err_code_default, err_fatal, &
+            'boundary id map not allocated,  echoIngestedInput called too early')
       WRITE(6, '(A,A)') "Reporting Source Boundary reassignments from file: ", TRIM(boundary_id_file)
       s = SIZE(boundary_id_map(:, 1))
       DO j = 1, s
         WRITE(6, '(A,I0,A,I0)') "Sideset ID ", boundary_id_map(j, 1), " Boundary Type ",&
-                                boundary_id_map(j, 2)
+              boundary_id_map(j, 2)
       END DO
     END IF
     WRITE(6, *)

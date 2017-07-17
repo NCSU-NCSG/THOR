@@ -2,7 +2,7 @@
 !>multi-group iteration operations for both eigenvalue and fixed
 !>source problems.
 !>It calls inner iteration
-module outer_iteration_module
+MODULE outer_iteration_module
   !***********************************************************************
   !
   ! Outer iteration module contains multi-group procedure and calls inner
@@ -12,26 +12,26 @@ module outer_iteration_module
 
   ! User derived-type modules
 
-  use types
-  use parameter_types
-  use filename_types
-  use vector_types
-  use cross_section_types
-  use geometry_types
-  use angle_types
-  use multindex_types
-  use global_variables
-  use wrapup_module
+  USE types
+  USE parameter_types
+  USE filename_types
+  USE vector_types
+  USE cross_section_types
+  USE geometry_types
+  USE angle_types
+  USE multindex_types
+  USE global_variables
+  USE wrapup_module
 
   ! Use modules that pertain setting up problem
 
-  use termination_module
-  use inner_iteration_module
-  use dump_inguess_module
+  USE termination_module
+  USE inner_iteration_module
+  USE dump_inguess_module
 
-  implicit none
+  IMPLICIT NONE
 
-contains
+CONTAINS
   !=============================================================================
   !Subroutine > outer_iteration_ext
   !=============================================================================
@@ -39,7 +39,7 @@ contains
   !> problem (compare Alg. 4 in the primer). Note: It does not perform
   !> thermal iterations. The group sweep is explicitly handled by a loop
   !> in the subroutine.
-  subroutine outer_iteration_ext(flux,LL,U,Lf,Uf)
+  SUBROUTINE outer_iteration_ext(flux,LL,U,Lf,Uf)
     !**********************************************************************
     !
     ! Subroutine outer iteration calls inner iteration and loops over all
@@ -49,231 +49,231 @@ contains
 
     ! Declare scalar flux types used globally
 
-    real(kind=d_t) :: flux(num_moments_v,namom,num_cells,egmax,niter)
+    REAL(kind=d_t) :: flux(num_moments_v,namom,num_cells,egmax,niter)
 
     ! Pass pre-computed matrices
 
-    real(kind=d_t), dimension(num_moments_v,num_moments_v) :: LL, U
-    real(kind=d_t), dimension(num_moments_f,num_moments_f) :: Lf, Uf
+    REAL(kind=d_t), DIMENSION(num_moments_v,num_moments_v) :: LL, U
+    REAL(kind=d_t), DIMENSION(num_moments_f,num_moments_f) :: Lf, Uf
 
 
     ! Define temporary variables
 
-    integer(kind=li)               :: alloc_stat, eg, egg, q, octant, i, l, &
-         order, n, m, ii, k, indx,face,f
-    real(kind=d_t)                 :: t_error
-    logical                        :: existence
+    INTEGER(kind=li)               :: alloc_stat, eg, egg, q, octant, i, l, &
+          order, n, m, ii, k, indx,face,f
+    REAL(kind=d_t)                 :: t_error
+    LOGICAL                        :: existence
 
     ! Define reflected flux
 
-    integer(kind=li)                                 :: rs,rg
-    real(kind=d_t),dimension(:,:,:,:,:), allocatable :: reflected_flux
+    INTEGER(kind=li)                                 :: rs,rg
+    REAL(kind=d_t),DIMENSION(:,:,:,:,:), ALLOCATABLE :: reflected_flux
 
     ! distributed source
 
-    real(kind=d_t) :: src(num_moments_v,namom,num_cells,egmax)
+    REAL(kind=d_t) :: src(num_moments_v,namom,num_cells,egmax)
 
     ! Prepare array reflected_flux
-    rs=max(1_li,rside_cells)
-    if(page_refl.eq.0_li) then
+    rs=MAX(1_li,rside_cells)
+    IF(page_refl.EQ.0_li) THEN
       rg=egmax
-    else
+    ELSE
       rg=1_li
-    end if
-    allocate( reflected_flux(num_moments_f,rs,8,nangle,rg),stat=alloc_stat )
-    if(alloc_stat /=0) call stop_thor(2_li)
+    END IF
+    ALLOCATE( reflected_flux(num_moments_f,rs,8,nangle,rg),stat=alloc_stat )
+    IF(alloc_stat /=0) CALL stop_thor(2_li)
     reflected_flux=0.0_d_t
 
     !  Allocate group-dependent maximum spatial error array
 
-    allocate(max_error(egmax),stat=alloc_stat)
-    if(alloc_stat /= 0) call stop_thor(2_li)
+    ALLOCATE(max_error(egmax),stat=alloc_stat)
+    IF(alloc_stat /= 0) CALL stop_thor(2_li)
 
     ! Open file to page out reflective BC if desired
 
-    if(page_refl.eq.1_li) then
+    IF(page_refl.EQ.1_li) THEN
 
-      inquire(file="reflected_flux.pg",exist=existence)
-      if( existence .eqv. .true.) then
-        open(unit=98,file='reflected_flux.pg',status='replace',form='unformatted',access='direct',recl=64*nangle*rs*num_moments_f)
-      else
-        open(unit=98,file='reflected_flux.pg',status='new'    ,form='unformatted',access='direct',recl=64*nangle*rs*num_moments_f)
-      end if
+      INQUIRE(file="reflected_flux.pg",exist=existence)
+      IF( existence .EQV. .TRUE.) THEN
+        OPEN(unit=98,file='reflected_flux.pg',status='replace',form='unformatted',access='direct',recl=64*nangle*rs*num_moments_f)
+      ELSE
+        OPEN(unit=98,file='reflected_flux.pg',status='new'    ,form='unformatted',access='direct',recl=64*nangle*rs*num_moments_f)
+      END IF
 
-      do eg = 1,egmax
-        write(98,rec=eg) reflected_flux(:,:,:,:,1)
-      end do
+      DO eg = 1,egmax
+        WRITE(98,rec=eg) reflected_flux(:,:,:,:,1)
+      END DO
 
-    end if
+    END IF
 
     ! Keep track of iterations
-    if (rank .eq. 0) then
-      write(6,*) '========================================================'
-      write(6,*) '   Begin outer iterations.'
-      write(6,*) '========================================================'
-    end if
+    IF (rank .EQ. 0) THEN
+      WRITE(6,*) '========================================================'
+      WRITE(6,*) '   Begin outer iterations.'
+      WRITE(6,*) '========================================================'
+    END IF
     ! Begin outer iteration
 
-    do outer=1, max_outer
+    DO outer=1, max_outer
 
       ! Initialize the src with external source ...
 
       src = zero
-      do eg=1,egmax
-        do i=1,num_cells
+      DO eg=1,egmax
+        DO i=1,num_cells
           ! imposed internal source contribution
-          do l=1,num_moments_v
+          DO l=1,num_moments_v
             src(l,1,i,eg) = src_str(cells(i)%src,eg)*src_m(l,cells(i)%src,eg)
-          end do
-        end do
-      end do
+          END DO
+        END DO
+      END DO
 
       ! ... and upscattering
 
-      call compute_upscattering(flux, src)
+      CALL compute_upscattering(flux, src)
 
-      do eg=1, egmax
+      DO eg=1, egmax
 
         ! Read binflow for group eg if necessary
 
-        if (page_iflw.eq.1_li) then
-          do q=1,nangle
-            do octant=1,8
-              do f=1,fside_cells
-                read(97,*) face
+        IF (page_iflw.EQ.1_li) THEN
+          DO q=1,nangle
+            DO octant=1,8
+              DO f=1,fside_cells
+                READ(97,*) face
                 face = b_cells(face)%ptr
-                read(97,*) (binflx(m,face,octant,q,1),m=1,num_moments_f)
-              end do
-            end do
-          end do
-        end if
+                READ(97,*) (binflx(m,face,octant,q,1),m=1,num_moments_f)
+              END DO
+            END DO
+          END DO
+        END IF
 
         ! Call inner iteration
 
-        if      (page_refl.eq.0_li) then
-          call inner_iteration(eg,flux(:,:,:,eg,niter),src(:,:,:,eg),LL,U,Lf,Uf,rs,reflected_flux(:,:,:,:,eg),.true.)
-        else if (page_refl.eq.1_li) then
-          read (98,rec=eg) reflected_flux(:,:,:,:,1)
-          call inner_iteration(eg,flux(:,:,:,eg,niter),src(:,:,:,eg),LL,U,Lf,Uf,rs,reflected_flux(:,:,:,:,1) ,.true.)
-          write(98,rec=eg) reflected_flux(:,:,:,:,1)
-        else
+        IF      (page_refl.EQ.0_li) THEN
+          CALL inner_iteration(eg,flux(:,:,:,eg,niter),src(:,:,:,eg),LL,U,Lf,Uf,rs,reflected_flux(:,:,:,:,eg),.TRUE.)
+        ELSE IF (page_refl.EQ.1_li) THEN
+          READ (98,rec=eg) reflected_flux(:,:,:,:,1)
+          CALL inner_iteration(eg,flux(:,:,:,eg,niter),src(:,:,:,eg),LL,U,Lf,Uf,rs,reflected_flux(:,:,:,:,1) ,.TRUE.)
+          WRITE(98,rec=eg) reflected_flux(:,:,:,:,1)
+        ELSE
           reflected_flux(:,:,:,:,1)=0.0_d_t
-          call inner_iteration(eg,flux(:,:,:,eg,niter),src(:,:,:,eg),LL,U,Lf,Uf,rs,reflected_flux(:,:,:,:,1),.true.)
-        end if
+          CALL inner_iteration(eg,flux(:,:,:,eg,niter),src(:,:,:,eg),LL,U,Lf,Uf,rs,reflected_flux(:,:,:,:,1),.TRUE.)
+        END IF
 
         ! Compute downscattering from eg to egg
 
-        do egg=eg+1, egmax
-          do i=1, num_cells
-            do l=0,scatt_ord
-              do m=0,l
+        DO egg=eg+1, egmax
+          DO i=1, num_cells
+            DO l=0,scatt_ord
+              DO m=0,l
                 indx=1_li+m+(l+1_li)*l/2_li
-                do k=1, num_moments_v
+                DO k=1, num_moments_v
                   src(k,indx,i,egg) = src(k,indx,i,egg)                                 +&
-                       scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs    *&
-                       dens_fact(cells(i)%reg)*flux(k,indx,i,eg,niter)
-                end do
-              end do
-            end do
+                        scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs    *&
+                        dens_fact(cells(i)%reg)*flux(k,indx,i,eg,niter)
+                END DO
+              END DO
+            END DO
             ! odd contributions
-            do l=1,scatt_ord
-              do m=1,l
+            DO l=1,scatt_ord
+              DO m=1,l
                 indx=neven+m+(l-1_li)*l/2_li
-                do k=1, num_moments_v
+                DO k=1, num_moments_v
                   src(k,indx,i,egg) = src(k,indx,i,egg)                                 +&
-                       scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs    *&
-                       dens_fact(cells(i)%reg)*flux(k,indx,i,eg,niter)
-                end do
-              end do
-            end do
-          end do
-        end do
+                        scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs    *&
+                        dens_fact(cells(i)%reg)*flux(k,indx,i,eg,niter)
+                END DO
+              END DO
+            END DO
+          END DO
+        END DO
 
         ! Rewind unit=97 (finflow) if page_iflw == 1
 
-        if(page_iflw.eq.1_li) rewind(unit=97)
-      end do
+        IF(page_iflw.EQ.1_li) REWIND(unit=97)
+      END DO
 
       ! Compute error ...
 
       max_outer_error = zero
 
-      do eg =1,egmax
-        do i=1,num_cells
-          if( abs(flux(1,1,i,eg,niter)) >  1.0e-12_d_t) then
-            t_error = abs( flux(1,1,i,eg,niter)-flux(1,1,i,eg,niter-1)) / &
-                 flux(1,1,i,eg,niter)
-          else
-            t_error = abs( flux(1,1,i,eg,niter)-flux(1,1,i,eg,niter-1))
-          end if
-          if( t_error > max_outer_error ) then
+      DO eg =1,egmax
+        DO i=1,num_cells
+          IF( ABS(flux(1,1,i,eg,niter)) >  1.0e-12_d_t) THEN
+            t_error = ABS( flux(1,1,i,eg,niter)-flux(1,1,i,eg,niter-1)) / &
+                  flux(1,1,i,eg,niter)
+          ELSE
+            t_error = ABS( flux(1,1,i,eg,niter)-flux(1,1,i,eg,niter-1))
+          END IF
+          IF( t_error > max_outer_error ) THEN
             max_outer_error=t_error
-          end if
-        end do
-      end do
+          END IF
+        END DO
+      END DO
 
       ! ... and copy over iterates
 
-      do ii=2,niter
-        do eg=1, egmax
-          do i=1,num_cells
-            do n=1,namom
-              do l=1,num_moments_v
+      DO ii=2,niter
+        DO eg=1, egmax
+          DO i=1,num_cells
+            DO n=1,namom
+              DO l=1,num_moments_v
                 flux(l,n,i,eg,ii-1)=flux(l,n,i,eg,ii)
-              end do
-            end do
-          end do
-        end do
-      end do
-      if (rank .eq. 0) then
-        write(6,*)   '---------------------------------------'
-        write(6,103) '---itn i-itn   max error   max error---'
-        write(6,102) outer,tot_nInners, max_outer_error, maxval(max_error),' %% '
-        write(6,*)   '---------------------------------------'
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
+      IF (rank .EQ. 0) THEN
+        WRITE(6,*)   '---------------------------------------'
+        WRITE(6,103) '---itn i-itn   max error   max error---'
+        WRITE(6,102) outer,tot_nInners, max_outer_error, MAXVAL(max_error),' %% '
+        WRITE(6,*)   '---------------------------------------'
         flush(6)
-      end if
-      if(print_conv.eq.1 .and. rank .eq. 0) then
-        write(21,*)   '---------------------------------------'
-        write(21,103) '---itn i-itn   max error   max error---'
-        write(21,102) outer,tot_nInners, max_outer_error, maxval(max_error),' %% '
-        write(21,*)   '---------------------------------------'
+      END IF
+      IF(print_conv.EQ.1 .AND. rank .EQ. 0) THEN
+        WRITE(21,*)   '---------------------------------------'
+        WRITE(21,103) '---itn i-itn   max error   max error---'
+        WRITE(21,102) outer,tot_nInners, max_outer_error, MAXVAL(max_error),' %% '
+        WRITE(21,*)   '---------------------------------------'
         flush(21)
-      end if
-      103 format(1X,A)
-      102 format(1X,2I6,2ES12.4,A)
+      END IF
+103   FORMAT(1X,A)
+102   FORMAT(1X,2I6,2ES12.4,A)
 
       ! Convergence check
 
-      if(most_thermal==0) then ! no upscattering
-        if(maxval(max_error)<inner_conv) then
+      IF(most_thermal==0) THEN ! no upscattering
+        IF(MAXVAL(max_error)<inner_conv) THEN
           conv_flag=1
           go to 10
-        end if
-      else
-        if(maxval(max_error)<inner_conv .and. max_outer_error<outer_conv) then
+        END IF
+      ELSE
+        IF(MAXVAL(max_error)<inner_conv .AND. max_outer_error<outer_conv) THEN
           conv_flag=1
           go to 10
-        end if
-      end if
+        END IF
+      END IF
 
-    end do
+    END DO
 
     outer=outer-one
 
-    10 continue
+10  CONTINUE
 
-    if (rank .eq. 0) then
-      write(6,*) '========================================================'
-      write(6,*) '   End outer iterations.'
-      write(6,*) '========================================================'
-    end if
+    IF (rank .EQ. 0) THEN
+      WRITE(6,*) '========================================================'
+      WRITE(6,*) '   End outer iterations.'
+      WRITE(6,*) '========================================================'
+    END IF
     ! Close reflected flux file if page_ref .eq. 1
 
-    if(page_refl .eq. 1_li) close(unit=98)
+    IF(page_refl .EQ. 1_li) CLOSE(unit=98)
 
 
-    if( allocated(reflected_flux) ) deallocate(reflected_flux)
-  end subroutine outer_iteration_ext
+    IF( ALLOCATED(reflected_flux) ) DEALLOCATE(reflected_flux)
+  END SUBROUTINE outer_iteration_ext
 
   !=============================================================================
   !Subroutine > outer_iteration_eig
@@ -283,53 +283,53 @@ contains
   !> Note: It does not perform
   !> thermal iterations. The group sweep is explicitly handled by a loop
   !> in the subroutine.
-  subroutine outer_iteration_eig(flux,keff,LL,U,Lf,Uf)
+  SUBROUTINE outer_iteration_eig(flux,keff,LL,U,Lf,Uf)
 
     ! Pass eigenvalue
 
-    real(kind=d_t), intent(inout) :: keff
+    REAL(kind=d_t), INTENT(inout) :: keff
 
     ! Declare angular and scalar flux types used globally
 
-    real(kind=d_t) :: flux(num_moments_v,namom,num_cells,egmax,niter)
+    REAL(kind=d_t) :: flux(num_moments_v,namom,num_cells,egmax,niter)
 
     ! Pass pre-computed matrices
 
-    real(kind=d_t), dimension(num_moments_v,num_moments_v) :: LL, U
-    real(kind=d_t), dimension(num_moments_f,num_moments_f) :: Lf, Uf
+    REAL(kind=d_t), DIMENSION(num_moments_v,num_moments_v) :: LL, U
+    REAL(kind=d_t), DIMENSION(num_moments_f,num_moments_f) :: Lf, Uf
 
     ! Define temporary variables
 
-    integer(kind=li)               :: alloc_stat, eg, egg, q, octant, i, l, &
-         order, ii, n, m, indx, k
-    real(kind=d_t)                 :: fiss_den_old, fiss_den_new,       &
-         keff_error, keff_old, keff_new, fiss_error, fiss_dist_error(2),&
-         flux_error,ts,te
-    real(kind=d_t)                 :: t_error
-    logical                        :: existence
+    INTEGER(kind=li)               :: alloc_stat, eg, egg, q, octant, i, l, &
+          order, ii, n, m, indx, k
+    REAL(kind=d_t)                 :: fiss_den_old, fiss_den_new,       &
+          keff_error, keff_old, keff_new, fiss_error, fiss_dist_error(2),&
+          flux_error,ts,te
+    REAL(kind=d_t)                 :: t_error
+    LOGICAL                        :: existence
 
     ! Define reflected flux
 
-    integer(kind=li)                                 :: rs,rg
-    real(kind=d_t),dimension(:,:,:,:,:), allocatable :: reflected_flux
+    INTEGER(kind=li)                                 :: rs,rg
+    REAL(kind=d_t),DIMENSION(:,:,:,:,:), ALLOCATABLE :: reflected_flux
 
     ! Define fission source
 
-    real(kind=d_t) :: fiss_src(num_moments_v,num_cells,2)
+    REAL(kind=d_t) :: fiss_src(num_moments_v,num_cells,2)
 
     ! Error mode extrapolation variables
 
-    real(kind=d_t)   :: theta(3),thet
-    integer(kind=li) :: extra_flag
-    real(kind=d_t)   :: a,b,c
+    REAL(kind=d_t)   :: theta(3),thet
+    INTEGER(kind=li) :: extra_flag
+    REAL(kind=d_t)   :: a,b,c
 
     ! Define source that is passed into inner iteration
 
-    real(kind=d_t) :: src(num_moments_v,namom,num_cells,egmax)
+    REAL(kind=d_t) :: src(num_moments_v,namom,num_cells,egmax)
 
     ! Variables for calling wrapup
 
-    character(100)   :: suffix
+    CHARACTER(100)   :: suffix
 
     !Chebychev Acceleration Variables///////////////////////////////////////////
     !---------------------------------------------------------------------------
@@ -352,24 +352,24 @@ contains
     !TEMPORARY // TO BE REMOVED
     !
     !---------------------------------------------------------------------------
-    integer (kind=li) :: p = 0_li
-    integer (kind=li) :: power_iter_count = 0_li, cheby_pi=5_li, cheby_pi_rem
-    real(kind=d_t)    :: alpha = zero, beta = zero, gamma = zero
-    real(kind=d_t)    :: chebychev_error = zero, entry_error = zero
-    real(kind=d_t)    :: entry_theta = zero, theor_err = zero
+    INTEGER (kind=li) :: p = 0_li
+    INTEGER (kind=li) :: power_iter_count = 0_li, cheby_pi=5_li, cheby_pi_rem
+    REAL(kind=d_t)    :: alpha = zero, beta = zero, gamma = zero
+    REAL(kind=d_t)    :: chebychev_error = zero, entry_error = zero
+    REAL(kind=d_t)    :: entry_theta = zero, theor_err = zero
 
-    integer:: temp_arg
-    character:: temp_accel
+    INTEGER:: temp_arg
+    CHARACTER:: temp_accel
 
     ! Prepare array reflected_flux
-    rs=max(1_li,rside_cells)
-    if(page_refl.eq.0_li) then
+    rs=MAX(1_li,rside_cells)
+    IF(page_refl.EQ.0_li) THEN
       rg=egmax
-    else
+    ELSE
       rg=1_li
-    end if
-    allocate( reflected_flux(num_moments_f,rs,8,nangle,rg),stat=alloc_stat )
-    if(alloc_stat /=0) call stop_thor(2_li)
+    END IF
+    ALLOCATE( reflected_flux(num_moments_f,rs,8,nangle,rg),stat=alloc_stat )
+    IF(alloc_stat /=0) CALL stop_thor(2_li)
     reflected_flux=0.0_d_t
 
     ! Initialize fiss_src
@@ -384,91 +384,91 @@ contains
 
     flux=zero
 
-    do ii=1, niter
-      do eg=1, egmax
-        do i=1, num_cells
+    DO ii=1, niter
+      DO eg=1, egmax
+        DO i=1, num_cells
           flux(1,1,i,eg,ii)=one
-        end do
-      end do
-    end do
+        END DO
+      END DO
+    END DO
 
     fiss_src = zero
 
-    do eg=1, egmax
-      do i=1, num_cells
-        do l=1, num_moments_v
+    DO eg=1, egmax
+      DO i=1, num_cells
+        DO l=1, num_moments_v
           fiss_src(l,i,1)=fiss_src(l,i,1)                                         +&
-               nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs  *&
-               dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
-        end do
-      end do
-    end do
+                nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs  *&
+                dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
+        END DO
+      END DO
+    END DO
 
     !  Allocate group-dependent maximum spatial error array
 
-    allocate(max_error(egmax),stat=alloc_stat)
-    if(alloc_stat /= 0) call stop_thor(2_li)
+    ALLOCATE(max_error(egmax),stat=alloc_stat)
+    IF(alloc_stat /= 0) CALL stop_thor(2_li)
 
     ! Open file to page out reflective BC if desired
 
-    if(page_refl.eq.1_li) then
+    IF(page_refl.EQ.1_li) THEN
 
-      inquire(file="reflected_flux.pg",exist=existence)
-      if( existence .eqv. .true.) then
-        open(unit=98,file='reflected_flux.pg',status='replace',form='unformatted',access='direct',recl=64*nangle*rs*num_moments_f)
-      else
-        open(unit=98,file='reflected_flux.pg',status='new'    ,form='unformatted',access='direct',recl=64*nangle*rs*num_moments_f)
-      end if
+      INQUIRE(file="reflected_flux.pg",exist=existence)
+      IF( existence .EQV. .TRUE.) THEN
+        OPEN(unit=98,file='reflected_flux.pg',status='replace',form='unformatted',access='direct',recl=64*nangle*rs*num_moments_f)
+      ELSE
+        OPEN(unit=98,file='reflected_flux.pg',status='new'    ,form='unformatted',access='direct',recl=64*nangle*rs*num_moments_f)
+      END IF
 
-      do eg = 1,egmax
-        write(98,rec=eg) reflected_flux(:,:,:,:,1)
-      end do
+      DO eg = 1,egmax
+        WRITE(98,rec=eg) reflected_flux(:,:,:,:,1)
+      END DO
 
-    end if
+    END IF
 
     ! if inguess_flag == 1
 
-    if (inguess_flag==1) then
+    IF (inguess_flag==1) THEN
 
-      call inguess_eig(flux,keff,niter)
+      CALL inguess_eig(flux,keff,niter)
       keff_new=keff
       keff_old=keff
-      if (rank .eq. 0) then
-        write(6,*)
-      end if
+      IF (rank .EQ. 0) THEN
+        WRITE(6,*)
+      END IF
 
-      do ii=1,niter-1
-        do eg =1,egmax
-          do i=1,num_cells
-            do n=1,namom
-              do l=1,num_moments_v
+      DO ii=1,niter-1
+        DO eg =1,egmax
+          DO i=1,num_cells
+            DO n=1,namom
+              DO l=1,num_moments_v
                 flux(l,n,i,eg,ii) = flux(l,n,i,eg,niter)
-              end do
-            end do
-          end do
-        end do
-      end do
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
 
       fiss_src = zero
 
-      do eg=1, egmax
-        do i=1, num_cells
-          do l=1, num_moments_v
+      DO eg=1, egmax
+        DO i=1, num_cells
+          DO l=1, num_moments_v
             fiss_src(l,i,1)=fiss_src(l,i,1)                                       +&
-                 nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs *&
-                 dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
-          end do
-        end do
-      end do
+                  nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs *&
+                  dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
+          END DO
+        END DO
+      END DO
 
-    end if
+    END IF
 
     ! Keep track of iterations
-    if (rank .eq. 0) then
-      write(6,*) '========================================================'
-      write(6,*) '   Begin outer iterations.'
-      write(6,*) '========================================================'
-    end if
+    IF (rank .EQ. 0) THEN
+      WRITE(6,*) '========================================================'
+      WRITE(6,*) '   Begin outer iterations.'
+      WRITE(6,*) '========================================================'
+    END IF
 
     ! Set error mode extrapolation parameters
     theta=0.0_d_t
@@ -476,211 +476,211 @@ contains
 
     ! Compute fission density
     fiss_den_new=zero
-    do i=1, num_cells
+    DO i=1, num_cells
       fiss_den_new=fiss_den_new+cells(i)%volume*fiss_src(1,i,1)
-    end do
+    END DO
 
     !===========================================================================
     ! Begin outer iteration
     !===========================================================================
 
     temp_arg = command_argument_count()                                         !FIXME - REMOVE AND IMPLEMENT SWITCH INTO INPUT FILE
-    if (temp_arg .eq. 2) then
-      call get_command_argument(2, temp_accel)
-      if ( temp_accel .eq. '1') then
+    IF (temp_arg .EQ. 2) THEN
+      CALL get_command_argument(2, temp_accel)
+      IF ( temp_accel .EQ. '1') THEN
         outer_acc = 1_li
-        write(*,*) "NO ACCELERATION"
-      else if ( temp_accel .eq. '2') then
+        WRITE(*,*) "NO ACCELERATION"
+      ELSE IF ( temp_accel .EQ. '2') THEN
         outer_acc = 2_li
-        write(*,*) "FISSION SOURCE ACCELERATION"
-      else if ( temp_accel .eq. '3') then
+        WRITE(*,*) "FISSION SOURCE ACCELERATION"
+      ELSE IF ( temp_accel .EQ. '3') THEN
         outer_acc = 3_li
-        write(*,*) "CHEBYCHEV ACCELERATION"
-      else
-        write(*,*) "Invalid command line acceleration parameter"
-        write(*,*) "Using value from input file"
-      end if
-    end if                                                                      !FIXME - REMOVE AND IMPLEMENT SWITCH INTO INPUT FILE
+        WRITE(*,*) "CHEBYCHEV ACCELERATION"
+      ELSE
+        WRITE(*,*) "Invalid command line acceleration parameter"
+        WRITE(*,*) "Using value from input file"
+      END IF
+    END IF                                                                      !FIXME - REMOVE AND IMPLEMENT SWITCH INTO INPUT FILE
 
-    do outer=1, max_outer
+    DO outer=1, max_outer
 
       !=========================================================================
       ! Start timer
       !=========================================================================
-      call cpu_time(ts)
+      CALL CPU_TIME(ts)
 
       !=========================================================================
       ! Compute fission and set all angular moments >0 to zero...
       !=========================================================================
       src = zero
-      do eg=1,egmax
-        do i=1,num_cells
-          do l=1,num_moments_v
+      DO eg=1,egmax
+        DO i=1,num_cells
+          DO l=1,num_moments_v
             src(l,1,i,eg)  =one/keff_new     *&
-                 chi(reg2mat(cells(i)%reg),eg)%xs*fiss_src(l,i,1)
-          end do
-        end do
-      end do
+                  chi(reg2mat(cells(i)%reg),eg)%xs*fiss_src(l,i,1)
+          END DO
+        END DO
+      END DO
 
       !=========================================================================
       ! Compute upscattering
       !=========================================================================
-      call compute_upscattering(flux, src)
+      CALL compute_upscattering(flux, src)
 
       !=========================================================================
       !Begin Group sweep
       !=========================================================================
-      do eg=1, egmax
+      DO eg=1, egmax
 
         !=======================================================================
         ! Call inner iteration
         !=======================================================================
-        if      (page_refl.eq.0_li) then
-          call inner_iteration(eg,flux(:,:,:,eg,niter),src(:,:,:,eg),LL,U,Lf,Uf,rs,reflected_flux(:,:,:,:,eg),.true.)
-        else if  (page_refl.eq.1_li) then
-          read (98,rec=eg) reflected_flux(:,:,:,:,1)
-          call inner_iteration(eg,flux(:,:,:,eg,niter),src(:,:,:,eg),LL,U,Lf,Uf,rs,reflected_flux(:,:,:,:,1) ,.true.)
-          write(98,rec=eg) reflected_flux(:,:,:,:,1)
-        else
+        IF      (page_refl.EQ.0_li) THEN
+          CALL inner_iteration(eg,flux(:,:,:,eg,niter),src(:,:,:,eg),LL,U,Lf,Uf,rs,reflected_flux(:,:,:,:,eg),.TRUE.)
+        ELSE IF  (page_refl.EQ.1_li) THEN
+          READ (98,rec=eg) reflected_flux(:,:,:,:,1)
+          CALL inner_iteration(eg,flux(:,:,:,eg,niter),src(:,:,:,eg),LL,U,Lf,Uf,rs,reflected_flux(:,:,:,:,1) ,.TRUE.)
+          WRITE(98,rec=eg) reflected_flux(:,:,:,:,1)
+        ELSE
           reflected_flux(:,:,:,:,1)=0.0_d_t
-          call inner_iteration(eg,flux(:,:,:,eg,niter),src(:,:,:,eg),LL,U,Lf,Uf,rs,reflected_flux(:,:,:,:,1) ,.true.)
-        end if
+          CALL inner_iteration(eg,flux(:,:,:,eg,niter),src(:,:,:,eg),LL,U,Lf,Uf,rs,reflected_flux(:,:,:,:,1) ,.TRUE.)
+        END IF
 
         !=====================================================================
         ! Compute downscattering from eg to egg
         !=====================================================================
-        call compute_downscattering(eg, flux, src)
-      end do
+        CALL compute_downscattering(eg, flux, src)
+      END DO
 
       !========================================================================
       ! Check to see if current cycle meets acceleration criteria
       !========================================================================
-      if(outer_acc.eq.2 .and. outer.ge.3) then
-        a=abs( ( theta(1) - theta(2) )/theta(1) )
-        b=abs( ( theta(2) - theta(3) )/theta(2) )
-        if( max(a,b) < extol .and. extra_flag.eq.0_li) then
+      IF(outer_acc.EQ.2 .AND. outer.GE.3) THEN
+        a=ABS( ( theta(1) - theta(2) )/theta(1) )
+        b=ABS( ( theta(2) - theta(3) )/theta(2) )
+        IF( MAX(a,b) < extol .AND. extra_flag.EQ.0_li) THEN
           extra_flag=1_li
-        else
+        ELSE
           extra_flag=0_li
-        end if
-      else if (outer_acc.eq.3 .and. outer.gt.5) then                                       !If more than 5 iterations, accelerate
-        if (extra_flag .eq. 0_li .and. theta(3) .gt. .4_d_t .and. theta(3) .lt. 1_li) then !And if spectral radius is large enough
+        END IF
+      ELSE IF (outer_acc.EQ.3 .AND. outer.GT.5) THEN                                       !If more than 5 iterations, accelerate
+        IF (extra_flag .EQ. 0_li .AND. theta(3) .GT. .4_d_t .AND. theta(3) .LT. 1_li) THEN !And if spectral radius is large enough
           p=1
           entry_theta = theta(3)                                              !Set sigma hat to previous guess of sp. rad
           extra_flag=1_li
-        end if
-      end if
+        END IF
+      END IF
 
       !========================================================================
       ! If yes, perform acceleration
       !========================================================================
-      if(extra_flag .eq. 1_li .and. outer_acc.eq.2) then
+      IF(extra_flag .EQ. 1_li .AND. outer_acc.EQ.2) THEN
         ! make sure that the fractional extrapolation is not larger than exmax
-        thet=min(exmax/fiss_error,theta(3)/(1.0_d_t-theta(3)))
+        thet=MIN(exmax/fiss_error,theta(3)/(1.0_d_t-theta(3)))
         ! extrapolation
-        do eg=1, egmax
-          do i=1,num_cells
-            do n=1,namom
-              do l=1,num_moments_v
+        DO eg=1, egmax
+          DO i=1,num_cells
+            DO n=1,namom
+              DO l=1,num_moments_v
                 flux(l,n,i,eg,niter)=flux(l,n,i,eg,niter)+thet*(flux(l,n,i,eg,niter)-flux(l,n,i,eg,niter-1))
-              end do
-            end do
-          end do
-        end do
-      else if (extra_flag .eq. 1_li .and. outer_acc.eq.3) then
-        if (p .eq. 1) then                                                      !First iteration only
+              END DO
+            END DO
+          END DO
+        END DO
+      ELSE IF (extra_flag .EQ. 1_li .AND. outer_acc.EQ.3) THEN
+        IF (p .EQ. 1) THEN                                                      !First iteration only
           entry_error = zero                                                    !Entry error is the 2 norm of the (n - (n-1)) flux error
-          do eg=1, egmax
-            do i=1,num_cells
+          DO eg=1, egmax
+            DO i=1,num_cells
               entry_error=entry_error+ cells(i)%volume*(flux(1,1,i,eg,niter)- flux(1,1,i,eg,niter-1))**2
-            end do
-          end do
-          entry_error = sqrt(entry_error)
+            END DO
+          END DO
+          entry_error = SQRT(entry_error)
 
           alpha = two/(two-entry_theta)                                         !Hebert Eq. B.5
           beta  = zero                                                          !^
           gamma = zero
           chebychev_error = zero
           theor_err = zero
-        else                                                                    !For all iteration p!=1
+        ELSE                                                                    !For all iteration p!=1
 
           gamma = dacosh((two/entry_theta) - one)                               !Hebert Eq. B.5
           alpha = (four/entry_theta) * dcosh((p-one)*gamma)/dcosh(p*gamma)      !Hebert Eq. B.5
           beta  = (one-(entry_theta/two))-(one/alpha)                           !Hebert Eq. B.5
 
-        end if
+        END IF
 
         chebychev_error = zero                                                  !Chebychev_err is the two norm of (n - (n-1)) flux error
-        do eg=1, egmax                                                          !divided by the enty error (error === 1 for p=1)
-          do i=1,num_cells
+        DO eg=1, egmax                                                          !divided by the enty error (error === 1 for p=1)
+          DO i=1,num_cells
             chebychev_error=chebychev_error+cells(i)%volume  *&
-                 (flux(1,1,i,eg,niter)- flux(1,1,i,eg,niter-1))**2
-          end do
-        end do
-        chebychev_error = sqrt(chebychev_error)
+                  (flux(1,1,i,eg,niter)- flux(1,1,i,eg,niter-1))**2
+          END DO
+        END DO
+        chebychev_error = SQRT(chebychev_error)
         chebychev_error = chebychev_error/entry_error
 
 
-        do eg=1, egmax                                                          !Accelerate flux
-          do i=1,num_cells
-            do n=1,namom
-              do l=1,num_moments_v
+        DO eg=1, egmax                                                          !Accelerate flux
+          DO i=1,num_cells
+            DO n=1,namom
+              DO l=1,num_moments_v
                 flux(l,n,i,eg,niter)=flux(l,n,i,eg,niter-1)             + &
-                     alpha*(flux(l,n,i,eg,niter)-flux(l,n,i,eg,niter-1))+ &
-                     beta*(flux(l,n,i,eg,niter-1)-flux(l,n,i,eg,niter-2))
-              end do
-            end do
-          end do
-        end do
+                      alpha*(flux(l,n,i,eg,niter)-flux(l,n,i,eg,niter-1))+ &
+                      beta*(flux(l,n,i,eg,niter-1)-flux(l,n,i,eg,niter-2))
+              END DO
+            END DO
+          END DO
+        END DO
 
 
-        theor_err = (dcosh((real(p,d_t)-one)*dacosh((two - entry_theta) /&      !Theretical error
-             entry_theta)))**(-one)
+        theor_err = (dcosh((REAL(p,d_t)-one)*dacosh((two - entry_theta) /&      !Theretical error
+              entry_theta)))**(-one)
 
-        if(chebychev_error > theor_err .and. &
-             p .ge. 3*(power_iter_count+3)) then                                !If insufficient decrease in error,
+        IF(chebychev_error > theor_err .AND. &
+              p .GE. 3*(power_iter_count+3)) THEN                                !If insufficient decrease in error,
           !write(*,*) "RESTART FLAG THROWN"                                      !reset chebychev
           extra_flag = 0_li
           !write(*,*) "BEGIN SPECTRAL RADIUS BACKTRACK"
           extra_flag = -1_li                                                    !Set flag to acceleration interrupt
           cheby_pi_rem = cheby_pi
-        end if
+        END IF
 
         p=p+1                                                                   !Increment p
-      else if(extra_flag .eq. -1_li) then                                       !If acceleration is interrupted
+      ELSE IF(extra_flag .EQ. -1_li) THEN                                       !If acceleration is interrupted
         !write(*,*) "Performing Between-Chebychev-Cycle Power Iteration"
         power_iter_count = power_iter_count + 1_li
         cheby_pi_rem = cheby_pi_rem -1_li                                       !Track remaining interrupts
         p=0
-        if (cheby_pi_rem .eq. 0) extra_flag = 0_li                              !Reactivate acceleration
-      end if
+        IF (cheby_pi_rem .EQ. 0) extra_flag = 0_li                              !Reactivate acceleration
+      END IF
 
       !========================================================================
       ! Zero fission source. Then, recompute fission source using new update
       !========================================================================
-      do i=1, num_cells
-        do l=1, num_moments_v
+      DO i=1, num_cells
+        DO l=1, num_moments_v
           fiss_src(l,i,2)=zero
-        end do
-      end do
-      do eg=1, egmax
-        do i=1, num_cells
-          do l=1, num_moments_v
+        END DO
+      END DO
+      DO eg=1, egmax
+        DO i=1, num_cells
+          DO l=1, num_moments_v
             fiss_src(l,i,2)=fiss_src(l,i,2)                                        +&
-                 nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs *&
-                 dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
-          end do
-        end do
-      end do
+                  nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs *&
+                  dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
+          END DO
+        END DO
+      END DO
 
       !========================================================================
       ! Compute new fission distribution and density
       !========================================================================
       fiss_den_old=fiss_den_new
       fiss_den_new=zero
-      do i=1, num_cells
+      DO i=1, num_cells
         fiss_den_new=fiss_den_new+cells(i)%volume*fiss_src(1,i,2)
-      end do
+      END DO
 
       !========================================================================
       ! Compute new eigenvalue based on fission densities
@@ -690,7 +690,7 @@ contains
       !========================================================================
       ! compute error in keff and copy new to old iterate
       !========================================================================
-      keff_error=abs(keff_new-keff_old)/keff_new
+      keff_error=ABS(keff_new-keff_old)/keff_new
       keff_old=keff_new
 
       !========================================================================
@@ -700,150 +700,150 @@ contains
       fiss_dist_error(2)=0.0_d_t
       fiss_error        =0.0_d_t
 
-      do i=1, num_cells
+      DO i=1, num_cells
         fiss_dist_error(2)=fiss_dist_error(2)+cells(i)%volume*    &
-             abs( fiss_src(1,i,2) - fiss_src(1,i,1) )
-        if(abs(fiss_src(1,i,2)) > 1e-12)then
-          t_error=abs(( fiss_src(1,i,2) - fiss_src(1,i,1) )/ fiss_src(1,i,2))
-        else
-          t_error=abs(  fiss_src(1,i,2) - fiss_src(1,i,1) )
-        end if
-        if(t_error > fiss_error)then
+              ABS( fiss_src(1,i,2) - fiss_src(1,i,1) )
+        IF(ABS(fiss_src(1,i,2)) > 1e-12)THEN
+          t_error=ABS(( fiss_src(1,i,2) - fiss_src(1,i,1) )/ fiss_src(1,i,2))
+        ELSE
+          t_error=ABS(  fiss_src(1,i,2) - fiss_src(1,i,1) )
+        END IF
+        IF(t_error > fiss_error)THEN
           fiss_error=t_error
-        end if
-      end do
+        END IF
+      END DO
 
       !========================================================================
       ! compute the convergence based on error in group fluxes
       !========================================================================
       flux_error=0.0_d_t
-      do eg =1,egmax
-        do i=1,num_cells
-          if( abs(flux(1,1,i,eg,niter)) > 1.0e-12_d_t) then
-            t_error = abs( flux(1,1,i,eg,niter)-flux(1,1,i,eg,niter-1))/&
-                 flux(1,1,i,eg,niter)
-          else
-            t_error = abs( flux(1,1,i,eg,niter)-flux(1,1,i,eg,niter-1))
-          end if
-          if( t_error > flux_error ) then
+      DO eg =1,egmax
+        DO i=1,num_cells
+          IF( ABS(flux(1,1,i,eg,niter)) > 1.0e-12_d_t) THEN
+            t_error = ABS( flux(1,1,i,eg,niter)-flux(1,1,i,eg,niter-1))/&
+                  flux(1,1,i,eg,niter)
+          ELSE
+            t_error = ABS( flux(1,1,i,eg,niter)-flux(1,1,i,eg,niter-1))
+          END IF
+          IF( t_error > flux_error ) THEN
             flux_error=t_error
-          end if
-        end do
-      end do
+          END IF
+        END DO
+      END DO
 
       !========================================================================
       ! compute theta (Spectral Radius)
       !========================================================================
-      if (p.eq.0) theta(1)=theta(2)
-      if (p.eq.0) theta(2)=theta(3)
-      if (p.eq.0) theta(3)=fiss_dist_error(2)/fiss_dist_error(1)
+      IF (p.EQ.0) theta(1)=theta(2)
+      IF (p.EQ.0) theta(2)=theta(3)
+      IF (p.EQ.0) theta(3)=fiss_dist_error(2)/fiss_dist_error(1)
 
       !========================================================================
       ! stop timer
       !========================================================================
-      call cpu_time(te)
+      CALL CPU_TIME(te)
 
       !========================================================================
       ! write information for outer iteration
       !========================================================================
-      if (rank .eq. 0) then
-        write(6,*)   '---------------------------------------------------------------------------------------------------'
-        write(6,101) '---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap        time---'
-        write(6,102) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,te-ts,' %% '
-        write(6,*)   '---------------------------------------------------------------------------------------------------'
+      IF (rank .EQ. 0) THEN
+        WRITE(6,*)   '---------------------------------------------------------------------------------------------------'
+        WRITE(6,101) '---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap        time---'
+        WRITE(6,102) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,te-ts,' %% '
+        WRITE(6,*)   '---------------------------------------------------------------------------------------------------'
         flush(6)
-        if(print_conv.eq.1) then
-          write(21,*)   '---------------------------------------------------------------------------------------------------'
-          write(21,101) '---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap        time---'
-          write(21,102) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,te-ts,' %% '
-          write(21,*)   '---------------------------------------------------------------------------------------------------'
+        IF(print_conv.EQ.1) THEN
+          WRITE(21,*)   '---------------------------------------------------------------------------------------------------'
+          WRITE(21,101) '---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap        time---'
+          WRITE(21,102) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,te-ts,' %% '
+          WRITE(21,*)   '---------------------------------------------------------------------------------------------------'
           flush(21)
-        end if
-      end if
-      101 format(1X,A)
-      102 format(1X,2I6,5ES12.4,I12,ES12.4,A)
-      103 format(1X,A,ES12.4)
-      104 format(1X,A,I5,3ES12.4)
+        END IF
+      END IF
+101   FORMAT(1X,A)
+102   FORMAT(1X,2I6,5ES12.4,I12,ES12.4,A)
+103   FORMAT(1X,A,ES12.4)
+104   FORMAT(1X,A,I5,3ES12.4)
 
       !========================================================================
       ! write iteration results to file if desired
       !========================================================================
-      if(dump_flag==1) then
-        call dump_PI(flux,keff_old)
-      end if
+      IF(dump_flag==1) THEN
+        CALL dump_PI(flux,keff_old)
+      END IF
 
       !========================================================================
       ! call wrapup even/odd
       !========================================================================
-      if (mod(outer,2) .eq. 0) then
+      IF (MOD(outer,2) .EQ. 0) THEN
         suffix = "even"
-        open(unit=49,file='intermediate_output_even.dat',status='unknown',action='write')
-      else
+        OPEN(unit=49,file='intermediate_output_even.dat',status='unknown',action='write')
+      ELSE
         suffix = "odd"
-        open(unit=49,file='intermediate_output_odd.dat',status='unknown',action='write')
-      end if
-      call wrapup(flux = flux ,keff = keff_new, unit_number = 49, suffix = suffix, is_final = .false.)
-      close(unit=49)
+        OPEN(unit=49,file='intermediate_output_odd.dat',status='unknown',action='write')
+      END IF
+      CALL wrapup(flux = flux ,keff = keff_new, unit_number = 49, suffix = suffix, is_final = .FALSE.)
+      CLOSE(unit=49)
 
       !========================================================================
       ! check convergence and quit if criteria are satisfied
       !========================================================================
-      if(outer > 2 .and. (fiss_error < outer_conv .or. flux_error < outer_conv) .and. &
-           keff_error < k_conv) then
+      IF(outer > 2 .AND. (fiss_error < outer_conv .OR. flux_error < outer_conv) .AND. &
+            keff_error < k_conv) THEN
         conv_flag=1
         go to 10
-      end if
+      END IF
 
       !========================================================================
       ! Copy over iterates of flux
       !========================================================================
-      do ii=2,niter
-        do eg=1, egmax
-          do i=1,num_cells
-            do n=1,namom
-              do l=1,num_moments_v
+      DO ii=2,niter
+        DO eg=1, egmax
+          DO i=1,num_cells
+            DO n=1,namom
+              DO l=1,num_moments_v
                 flux(l,n,i,eg,ii-1)=flux(l,n,i,eg,ii)
-              end do
-            end do
-          end do
-        end do
-      end do
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
 
       !========================================================================
       ! copy over the fission source: Note, that if the flux is accelerated the
       ! newly computed fission source will also be accelerated
       !========================================================================
-      do i=1, num_cells
-        do l=1, num_moments_v
+      DO i=1, num_cells
+        DO l=1, num_moments_v
           fiss_src(l,i,1)=fiss_src(l,i,2)
-        end do
-      end do
+        END DO
+      END DO
 
-    end do
+    END DO
 
     outer=outer-1
 
-    10 continue
+10  CONTINUE
 
     k_error=keff_error
     f_error=fiss_error
     max_outer_error = flux_error
     keff=keff_old
 
-    if (rank .eq. 0) then
-      write(6,*) '========================================================'
-      write(6,*) '   End outer iterations.'
-      write(6,*) '========================================================'
-    end if
+    IF (rank .EQ. 0) THEN
+      WRITE(6,*) '========================================================'
+      WRITE(6,*) '   End outer iterations.'
+      WRITE(6,*) '========================================================'
+    END IF
 
     ! Close reflected flux file if page_ref .eq. 1
 
-    if(page_refl .eq. 1_li) close(unit=98)
+    IF(page_refl .EQ. 1_li) CLOSE(unit=98)
 
     ! Deallocate temporary arrays
 
-    if( allocated(reflected_flux) ) deallocate(reflected_flux)
-  end subroutine outer_iteration_eig
+    IF( ALLOCATED(reflected_flux) ) DEALLOCATE(reflected_flux)
+  END SUBROUTINE outer_iteration_eig
 
   !=============================================================================
   !Subroutine > compute_upscattering
@@ -851,43 +851,43 @@ contains
   !> Computes the iteration source upscattering component based on the passed
   !> flux and  various global scattering & materials parameters.
   !> This subroutine is for both the eigenvalue and fixed source solvers
-  subroutine compute_upscattering(flux, src)
+  SUBROUTINE compute_upscattering(flux, src)
 
-    integer:: eg, egg, i, l, m, k, indx
-    real(kind=d_t) :: flux(num_moments_v,namom,num_cells,egmax,niter)
-    real(kind=d_t) :: src(num_moments_v,namom,num_cells,egmax)
+    INTEGER:: eg, egg, i, l, m, k, indx
+    REAL(kind=d_t) :: flux(num_moments_v,namom,num_cells,egmax,niter)
+    REAL(kind=d_t) :: src(num_moments_v,namom,num_cells,egmax)
 
-    do eg=most_thermal,egmax     ! eg is the group that it is scattered to
-      do i=1,num_cells
+    DO eg=most_thermal,egmax     ! eg is the group that it is scattered to
+      DO i=1,num_cells
         ! even contributions
-        do l=0,scatt_ord
-          do m=0,l
+        DO l=0,scatt_ord
+          DO m=0,l
             indx=1_li+m+(l+1_li)*l/2_li
-            do egg=eg+1,egmax  ! egg is the group that is scattered from
-              do k=1, num_moments_v
+            DO egg=eg+1,egmax  ! egg is the group that is scattered from
+              DO k=1, num_moments_v
                 src(k,indx,i,eg) =  src(k,indx,i,eg) +&
-                     scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,eg,egg)%xs  *  &
-                     dens_fact(cells(i)%reg)*flux(k,indx,i,egg,niter)
-              end do
-            end do
-          end do
-        end do
+                      scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,eg,egg)%xs  *  &
+                      dens_fact(cells(i)%reg)*flux(k,indx,i,egg,niter)
+              END DO
+            END DO
+          END DO
+        END DO
         ! odd contributions
-        do l=1,scatt_ord
-          do m=1,l
+        DO l=1,scatt_ord
+          DO m=1,l
             indx=neven+m+(l-1_li)*l/2_li
-            do egg=eg+1,egmax  ! egg is the group that is scattered from
-              do k=1, num_moments_v
+            DO egg=eg+1,egmax  ! egg is the group that is scattered from
+              DO k=1, num_moments_v
                 src(k,indx,i,eg) = src(k,indx,i,eg)                                   +&
-                     scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,eg,egg)%xs    *&
-                     dens_fact(cells(i)%reg)*flux(k,indx,i,egg,niter)
-              end do
-            end do
-          end do
-        end do
-      end do
-    end do
-  end subroutine compute_upscattering
+                      scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,eg,egg)%xs    *&
+                      dens_fact(cells(i)%reg)*flux(k,indx,i,egg,niter)
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
+  END SUBROUTINE compute_upscattering
 
   !=============================================================================
   !Subroutine > compute_downscattering
@@ -895,40 +895,40 @@ contains
   !> Computes the iteration source downscattering component based on the passed
   !> flux and  various global scattering & materials parameters.
   !> This subroutine is for both the eigenvalue and fixed source solvers
-  subroutine compute_downscattering(eg, flux, src)
+  SUBROUTINE compute_downscattering(eg, flux, src)
 
-    integer:: eg, egg, i, l, m, k, indx
-    real(kind=d_t) :: flux(num_moments_v,namom,num_cells,egmax,niter)
-    real(kind=d_t) :: src(num_moments_v,namom,num_cells,egmax)
+    INTEGER:: eg, egg, i, l, m, k, indx
+    REAL(kind=d_t) :: flux(num_moments_v,namom,num_cells,egmax,niter)
+    REAL(kind=d_t) :: src(num_moments_v,namom,num_cells,egmax)
 
-    do egg=eg+1, egmax
-      do i=1, num_cells
+    DO egg=eg+1, egmax
+      DO i=1, num_cells
         ! Even contributions
-        do l=0,scatt_ord
-          do m=0,l
+        DO l=0,scatt_ord
+          DO m=0,l
             indx=1_li+m+(l+1_li)*l/2_li
-            do k=1, num_moments_v
+            DO k=1, num_moments_v
               src(k,indx,i,egg) = src(k,indx,i,egg)                                +&
-                   scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs   *&
-                   dens_fact(cells(i)%reg)*flux(k,indx,i,eg,niter)
-            end do
-          end do
-        end do
+                    scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs   *&
+                    dens_fact(cells(i)%reg)*flux(k,indx,i,eg,niter)
+            END DO
+          END DO
+        END DO
         ! odd contributions
-        do l=1,scatt_ord
-          do m=1,l
+        DO l=1,scatt_ord
+          DO m=1,l
             indx=neven+m+(l-1_li)*l/2_li
-            do k=1, num_moments_v
+            DO k=1, num_moments_v
               src(k,indx,i,egg) = src(k,indx,i,egg)                                 +&
-                   scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs    *&
-                   dens_fact(cells(i)%reg)*flux(k,indx,i,eg,niter)
-            end do
-          end do
-        end do
-      end do
-    end do
-  end subroutine compute_downscattering
-end module outer_iteration_module
+                    scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs    *&
+                    dens_fact(cells(i)%reg)*flux(k,indx,i,eg,niter)
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
+  END SUBROUTINE compute_downscattering
+END MODULE outer_iteration_module
 !-----------------------------------------------------------------------------------------
 ! End
 !-----------------------------------------------------------------------------------------

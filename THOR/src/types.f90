@@ -1,12 +1,11 @@
-module types
-!***********************************************************************
-! This derived type sets the precision of other declared variables 
-!***********************************************************************
+MODULE types
+  !***********************************************************************
+  ! This derived type sets the precision of other declared variables
+  !***********************************************************************
 
-  implicit none
+  IMPLICIT NONE
 
-  integer, parameter :: li = selected_int_kind(8)
-  integer, parameter :: d_t = selected_real_kind(15,307)
+  INTEGER, PARAMETER :: li = SELECTED_INT_KIND(8)
+  INTEGER, PARAMETER :: d_t = SELECTED_REAL_KIND(15,307)
 
-end module types
-
+END MODULE types

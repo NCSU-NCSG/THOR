@@ -1,98 +1,97 @@
-module read_inflow_module
-!***********************************************************************
-!
-! Read source module contains all subroutines needed to read boundary 
-! source file
-!
-!***********************************************************************
-  use types
-  use parameter_types
-  use filename_types
-  use multindex_types
-  use global_variables
-  use termination_module
-
-  implicit none
-
-contains
-
-  subroutine read_finflow
-  !*********************************************************************
+MODULE read_inflow_module
+  !***********************************************************************
   !
-  ! Subroutine reads source in 'unique' ahot format
-  ! (could be adapted for other formats, of course)
+  ! Read source module contains all subroutines needed to read boundary
+  ! source file
   !
-  !*********************************************************************
+  !***********************************************************************
+  USE types
+  USE parameter_types
+  USE filename_types
+  USE multindex_types
+  USE global_variables
+  USE termination_module
 
-  ! Declare temporary variables
+  IMPLICIT NONE
 
-    integer(kind=li) :: alloc_stat, eg, q, octant, m, i, cell, f, face
-    real(kind=d_t)   :: dmy
+CONTAINS
 
-  ! Depending on page_iflw set eg_iflw
+  SUBROUTINE read_finflow
+    !*********************************************************************
+    !
+    ! Subroutine reads source in 'unique' ahot format
+    ! (could be adapted for other formats, of course)
+    !
+    !*********************************************************************
 
-    if(page_iflw .eq. 1) then
-       eg_iflw=1_li
-    else 
-       eg_iflw=egmax
-    end if 
+    ! Declare temporary variables
 
-  ! allocate binflx: indices followig column major. Fastest running index
-  ! is fixed boundary faces then octants then angles, then groups
+    INTEGER(kind=li) :: alloc_stat, eg, q, octant, m, i, cell, f, face
+    REAL(kind=d_t)   :: dmy
 
-    allocate(binflx(num_moments_f,fside_cells,8,nangle,eg_iflw),stat=alloc_stat)
-    if(alloc_stat /= 0) call stop_thor(2_li)
+    ! Depending on page_iflw set eg_iflw
 
-  ! if page_iflw == 0 then read binflow in full, otherwise just open a file
+    IF(page_iflw .EQ. 1) THEN
+      eg_iflw=1_li
+    ELSE
+      eg_iflw=egmax
+    END IF
 
-    if(page_iflw.eq.0) then
-  
-    ! Open and read source file 
+    ! allocate binflx: indices followig column major. Fastest running index
+    ! is fixed boundary faces then octants then angles, then groups
 
-      open(unit=10,file=trim(finflow_filename),status='unknown',action='read')
+    ALLOCATE(binflx(num_moments_f,fside_cells,8,nangle,eg_iflw),stat=alloc_stat)
+    IF(alloc_stat /= 0) CALL stop_thor(2_li)
 
-    ! Read source strength and moments from file
+    ! if page_iflw == 0 then read binflow in full, otherwise just open a file
 
-      do eg=1,egmax
-        do q=1,nangle
-          do octant=1,8
-            do f=1,fside_cells 
-               read(10,*) face    ! this is the face number in the b_cells array
-               if( b_cells(face)%bc .ne. 2 ) then
-                  call stop_thor(16_li) 
-               end if
-               face = b_cells(face)%ptr   ! make sure that bc are stored in the same order as in fb_cells
-               read(10,*) (binflx(m,face,octant,q,eg),m=1,num_moments_f)            
-            end do     
-          end do
-        end do
-      end do
+    IF(page_iflw.EQ.0) THEN
 
-    ! Close inflow file
- 
-      close(10)
+      ! Open and read source file
 
-    else
+      OPEN(unit=10,file=TRIM(finflow_filename),status='unknown',action='read')
 
-      open(unit=97,file=trim(finflow_filename),status='unknown',action='read')
-      do eg=1,egmax
-        do q=1,nangle
-          do octant=1,8
-            do f=1,fside_cells
-               read(97,*) face    ! this is the face number in the b_cells array
-               if( b_cells(face)%bc .ne. 2 ) then
-                  call stop_thor(16_li)
-               end if
-               read(97,*) (dmy,m=1,num_moments_f)
-            end do
-          end do
-        end do
-      end do
-      rewind(unit=97)
-   
-    end if
+      ! Read source strength and moments from file
 
-  end subroutine read_finflow
+      DO eg=1,egmax
+        DO q=1,nangle
+          DO octant=1,8
+            DO f=1,fside_cells
+              READ(10,*) face    ! this is the face number in the b_cells array
+              IF( b_cells(face)%bc .NE. 2 ) THEN
+                CALL stop_thor(16_li)
+              END IF
+              face = b_cells(face)%ptr   ! make sure that bc are stored in the same order as in fb_cells
+              READ(10,*) (binflx(m,face,octant,q,eg),m=1,num_moments_f)
+            END DO
+          END DO
+        END DO
+      END DO
 
-end module read_inflow_module
+      ! Close inflow file
 
+      CLOSE(10)
+
+    ELSE
+
+      OPEN(unit=97,file=TRIM(finflow_filename),status='unknown',action='read')
+      DO eg=1,egmax
+        DO q=1,nangle
+          DO octant=1,8
+            DO f=1,fside_cells
+              READ(97,*) face    ! this is the face number in the b_cells array
+              IF( b_cells(face)%bc .NE. 2 ) THEN
+                CALL stop_thor(16_li)
+              END IF
+              READ(97,*) (dmy,m=1,num_moments_f)
+            END DO
+          END DO
+        END DO
+      END DO
+      REWIND(unit=97)
+
+    END IF
+
+  END SUBROUTINE read_finflow
+
+END MODULE read_inflow_module
