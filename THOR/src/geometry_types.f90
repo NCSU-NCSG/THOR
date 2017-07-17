@@ -1,52 +1,52 @@
-module geometry_types
-!***********************************************************************
-! Derived types for geometry (algorithm was built around these!)
-!***********************************************************************
+MODULE geometry_types
+  !***********************************************************************
+  ! Derived types for geometry (algorithm was built around these!)
+  !***********************************************************************
 
-  use types
-  use vector_types
+  USE types
+  USE vector_types
 
-  implicit none
+  IMPLICIT NONE
 
-  type vertex
-     type(vector) :: v
-  end type vertex
+  TYPE vertex
+    TYPE(vector) :: v
+  END TYPE vertex
 
-  type cell
-     integer(kind=li), dimension(0:3) :: R
-     integer(kind=li), dimension(0:3) :: face
-     integer(kind=li) :: reg
-     integer(kind=li) :: src
-     real(kind=d_t) :: volume
-  end type cell
+  TYPE cell
+    INTEGER(kind=li), DIMENSION(0:3) :: R
+    INTEGER(kind=li), DIMENSION(0:3) :: face
+    INTEGER(kind=li) :: reg
+    INTEGER(kind=li) :: src
+    REAL(kind=d_t) :: volume
+  END TYPE cell
 
-  type boundary_cell
-     integer(kind=li) :: cell, face, bc, ptr
-  end type boundary_cell
+  TYPE boundary_cell
+    INTEGER(kind=li) :: cell, face, bc, ptr
+  END TYPE boundary_cell
 
-  type boundary_condition
-     integer(kind=li), dimension(0:3) :: bc
-  end type boundary_condition
+  TYPE boundary_condition
+    INTEGER(kind=li), DIMENSION(0:3) :: bc
+  END TYPE boundary_condition
 
-  type list
-     integer(kind=li) :: cell, face
-  end type list
+  TYPE list
+    INTEGER(kind=li) :: cell, face
+  END TYPE list
 
-  type linked_list
-     integer(kind=li) :: cell_id
-     type(linked_list), pointer :: next
-     type(linked_list), pointer :: prev
-  end type linked_list
+  TYPE linked_list
+    INTEGER(kind=li) :: cell_id
+    TYPE(linked_list), POINTER :: next
+    TYPE(linked_list), POINTER :: prev
+  END TYPE linked_list
 
-  type upstream_face_le
-     integer(kind=li) :: cell,face
-     type(upstream_face_le),pointer :: next
-  end type upstream_face_le
+  TYPE upstream_face_le
+    INTEGER(kind=li) :: cell,face
+    TYPE(upstream_face_le),POINTER :: next
+  END TYPE upstream_face_le
 
-  type cycle_breaker
-     integer(kind=li),allocatable :: faces(:)
-     integer(kind=li),allocatable :: cells(:)
-     real(kind=d_t)  ,allocatable :: face_fluxes(:,:)
-  end type
+  TYPE cycle_breaker
+    INTEGER(kind=li),ALLOCATABLE :: faces(:)
+    INTEGER(kind=li),ALLOCATABLE :: cells(:)
+    REAL(kind=d_t)  ,ALLOCATABLE :: face_fluxes(:,:)
+  END TYPE cycle_breaker
 
-end module geometry_types
+END MODULE geometry_types

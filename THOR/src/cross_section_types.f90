@@ -1,21 +1,20 @@
-module cross_section_types
-!*********************************************************************** 
-! Cross-section derived type
-!***********************************************************************
+MODULE cross_section_types
+  !***********************************************************************
+  ! Cross-section derived type
+  !***********************************************************************
 
-  use types
+  USE types
 
-  implicit none
+  IMPLICIT NONE
 
-! Define total and scattering cross-section
+  ! Define total and scattering cross-section
 
-  type cross_section_mat
-     integer(kind=li) :: mat
-  end type cross_section_mat
-  
-  type cross_section
-     real(kind=d_t) :: xs
-  end type cross_section
+  TYPE cross_section_mat
+    INTEGER(kind=li) :: mat
+  END TYPE cross_section_mat
 
-end module cross_section_types
+  TYPE cross_section
+    REAL(kind=d_t) :: xs
+  END TYPE cross_section
 
+END MODULE cross_section_types

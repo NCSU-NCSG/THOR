@@ -46,7 +46,7 @@ CONTAINS
     CHARACTER(200) :: data_string
     LOGICAL :: set_defaults
     LOGICAL :: sanity_check
-    write(*,*) "UNIT IS: ", local_unit
+    WRITE(*,*) "UNIT IS: ", local_unit
 
 
     ! !Fetch command line argument count

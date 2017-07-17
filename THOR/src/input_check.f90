@@ -1,243 +1,243 @@
-module check_input
-!***********************************************************************
-! This module contains variables and subroutines that enable writing 
-! a *.vtk file that can be used in VisIt to visualize mesh and geometry.
-!***********************************************************************
+MODULE check_input
+  !***********************************************************************
+  ! This module contains variables and subroutines that enable writing
+  ! a *.vtk file that can be used in VisIt to visualize mesh and geometry.
+  !***********************************************************************
 
-! User derived-type modules
+  ! User derived-type modules
 
-  use types
-  use parameter_types
-  use filename_types
-  use vector_types
-  use cross_section_types
-  use geometry_types
-  use angle_types
-  use multindex_types
-  use global_variables
+  USE types
+  USE parameter_types
+  USE filename_types
+  USE vector_types
+  USE cross_section_types
+  USE geometry_types
+  USE angle_types
+  USE multindex_types
+  USE global_variables
 
-  implicit none
+  IMPLICIT NONE
 
-  contains
+CONTAINS
 
-  subroutine plot_source
-  !*********************************************************************
-  !
-  ! Subroutine prints a *.vtk file containing source information
-  !
-  !*********************************************************************
+  SUBROUTINE plot_source
+    !*********************************************************************
+    !
+    ! Subroutine prints a *.vtk file containing source information
+    !
+    !*********************************************************************
 
-       ! local variables  
+    ! local variables
 
-       integer(kind=li) :: i,l,eg
+    INTEGER(kind=li) :: i,l,eg
 
-       open(unit=10,file=trim(vtk_src_filename),status='unknown',action='write')
+    OPEN(unit=10,file=TRIM(vtk_src_filename),status='unknown',action='write')
 
-       write(10,'(a26)') '# vtk DataFile Version 3.0' 
-       write(10,'(a72)') jobname
-       write(10,'(a5)') 'ASCII'
-       write(10,'(a25)') 'DATASET UNSTRUCTURED_GRID'
-       write(10,'(a6,1x,i12,1x,a5)') 'POINTS',num_vert,'float'
-       
-       do i=1, num_vert
-          write(10,'(3(1x,es12.5))') vertices(i)%v%x1,vertices(i)%v%x2,&
-               vertices(i)%v%x3
-       end do
-       
-       write(10,*)
-       write(10,'(a5,1x,i12,1x,i12)') 'CELLS',num_cells,num_cells+&
-            4*num_cells
-       
-       do i=1, num_cells
-          write(10,'(5(i12,1x))') 4,cells(i)%R(0)-1,cells(i)%R(1)-1,&
-               cells(i)%R(2)-1,cells(i)%R(3)-1
-       end do
-       
-       write(10,*)
-       write(10,'(a11,1x,i12)') 'CELL_TYPES',num_cells
-       
-       do i=1, num_cells
-          write(10,'(i12)') 10
-       end do
-       
-       write(10,*)
-       write(10,'(a9,1x,i12)') 'CELL_DATA', num_cells
-       write(10,'(a5,1x,a16,1x,i12)') 'FIELD','Neutronics_Edits',egmax
-       
-       l=1
-       do eg=1, egmax
-          write(10,'(i12,1x,i12,1x,i12,1x,a5)') eg,1,num_cells,'float'
-          do i=1, num_cells     
-             write(10,'(es12.5)') &
-                  src_str(cells(i)%src,eg)*src_m(1,cells(i)%src,eg)  
-          end do
-       end do
+    WRITE(10,'(a26)') '# vtk DataFile Version 3.0'
+    WRITE(10,'(a72)') jobname
+    WRITE(10,'(a5)') 'ASCII'
+    WRITE(10,'(a25)') 'DATASET UNSTRUCTURED_GRID'
+    WRITE(10,'(a6,1x,i12,1x,a5)') 'POINTS',num_vert,'float'
 
-       close(10)
-
-  end subroutine
-  
-  subroutine plot_region
-  !*********************************************************************
-  !
-  ! Subroutine prints a *.vtk file containing cell material (and region) IDs
-  !
-  !*********************************************************************
-
-  ! local variables  
-
-    integer(kind=li) :: i,l
-
-    open(unit=10,file=vtk_reg_filename,status='unknown',action='write')
-
-    write(10,'(a26)') '# vtk DataFile Version 3.0' 
-    write(10,'(a72)') jobname
-    write(10,'(a5)') 'ASCII'
-    write(10,'(a25)') 'DATASET UNSTRUCTURED_GRID'
-    write(10,'(a6,1x,i12,1x,a5)') 'POINTS',num_vert,'float'
-       
-    do i=1, num_vert
-      write(10,'(3(1x,es12.5))') vertices(i)%v%x1,vertices(i)%v%x2,&
+    DO i=1, num_vert
+      WRITE(10,'(3(1x,es12.5))') vertices(i)%v%x1,vertices(i)%v%x2,&
             vertices(i)%v%x3
-    end do
-       
-    write(10,*)
-    write(10,'(a5,1x,i12,1x,i12)') 'CELLS',num_cells,num_cells+&
+    END DO
+
+    WRITE(10,*)
+    WRITE(10,'(a5,1x,i12,1x,i12)') 'CELLS',num_cells,num_cells+&
           4*num_cells
-       
-    do i=1, num_cells
-      write(10,'(5(i12,1x))') 4,cells(i)%R(0)-1,cells(i)%R(1)-1,&
+
+    DO i=1, num_cells
+      WRITE(10,'(5(i12,1x))') 4,cells(i)%R(0)-1,cells(i)%R(1)-1,&
             cells(i)%R(2)-1,cells(i)%R(3)-1
-    end do
-       
-    write(10,*)
-    write(10,'(a11,1x,i12)') 'CELL_TYPES',num_cells
-       
-    do i=1, num_cells
-      write(10,'(i12)') 10
-    end do
-       
-    write(10,*)
-    write(10,'(a9,1x,i12)') 'CELL_DATA', num_cells
-    write(10,'(a5,1x,a16,1x,i12)') 'FIELD','Neutronics_Edits',1
-       
+    END DO
+
+    WRITE(10,*)
+    WRITE(10,'(a11,1x,i12)') 'CELL_TYPES',num_cells
+
+    DO i=1, num_cells
+      WRITE(10,'(i12)') 10
+    END DO
+
+    WRITE(10,*)
+    WRITE(10,'(a9,1x,i12)') 'CELL_DATA', num_cells
+    WRITE(10,'(a5,1x,a16,1x,i12)') 'FIELD','Neutronics_Edits',egmax
+
     l=1
-    write(10,'(i12,1x,i12,1x,i12,1x,a5)') 1,1,num_cells,'float'
-    do i=1, num_cells     
-      write(10,'(es12.3)') real(cells(i)%reg,d_t)
-    end do
+    DO eg=1, egmax
+      WRITE(10,'(i12,1x,i12,1x,i12,1x,a5)') eg,1,num_cells,'float'
+      DO i=1, num_cells
+        WRITE(10,'(es12.5)') &
+              src_str(cells(i)%src,eg)*src_m(1,cells(i)%src,eg)
+      END DO
+    END DO
 
-    close(10)
+    CLOSE(10)
 
-  end subroutine
+  END SUBROUTINE plot_source
 
-  subroutine plot_material
-  !*********************************************************************
-  !
-  ! Subroutine prints a *.vtk file containing cell material (and region) IDs
-  !
-  !*********************************************************************
+  SUBROUTINE plot_region
+    !*********************************************************************
+    !
+    ! Subroutine prints a *.vtk file containing cell material (and region) IDs
+    !
+    !*********************************************************************
 
-  ! local variables  
+    ! local variables
 
-    integer(kind=li) :: i,l
+    INTEGER(kind=li) :: i,l
 
-    open(unit=10,file=vtk_mat_filename,status='unknown',action='write')
+    OPEN(unit=10,file=vtk_reg_filename,status='unknown',action='write')
 
-    write(10,'(a26)') '# vtk DataFile Version 3.0' 
-    write(10,'(a72)') jobname
-    write(10,'(a5)') 'ASCII'
-    write(10,'(a25)') 'DATASET UNSTRUCTURED_GRID'
-    write(10,'(a6,1x,i12,1x,a5)') 'POINTS',num_vert,'float'
-       
-    do i=1, num_vert
-      write(10,'(3(1x,es12.5))') vertices(i)%v%x1,vertices(i)%v%x2,&
+    WRITE(10,'(a26)') '# vtk DataFile Version 3.0'
+    WRITE(10,'(a72)') jobname
+    WRITE(10,'(a5)') 'ASCII'
+    WRITE(10,'(a25)') 'DATASET UNSTRUCTURED_GRID'
+    WRITE(10,'(a6,1x,i12,1x,a5)') 'POINTS',num_vert,'float'
+
+    DO i=1, num_vert
+      WRITE(10,'(3(1x,es12.5))') vertices(i)%v%x1,vertices(i)%v%x2,&
             vertices(i)%v%x3
-    end do
-       
-    write(10,*)
-    write(10,'(a5,1x,i12,1x,i12)') 'CELLS',num_cells,num_cells+&
+    END DO
+
+    WRITE(10,*)
+    WRITE(10,'(a5,1x,i12,1x,i12)') 'CELLS',num_cells,num_cells+&
           4*num_cells
-       
-    do i=1, num_cells
-      write(10,'(5(i12,1x))') 4,cells(i)%R(0)-1,cells(i)%R(1)-1,&
+
+    DO i=1, num_cells
+      WRITE(10,'(5(i12,1x))') 4,cells(i)%R(0)-1,cells(i)%R(1)-1,&
             cells(i)%R(2)-1,cells(i)%R(3)-1
-    end do
-       
-    write(10,*)
-    write(10,'(a11,1x,i12)') 'CELL_TYPES',num_cells
-       
-    do i=1, num_cells
-      write(10,'(i12)') 10
-    end do
-       
-    write(10,*)
-    write(10,'(a9,1x,i12)') 'CELL_DATA', num_cells
-    write(10,'(a5,1x,a16,1x,i12)') 'FIELD','Neutronics_Edits',1
-       
+    END DO
+
+    WRITE(10,*)
+    WRITE(10,'(a11,1x,i12)') 'CELL_TYPES',num_cells
+
+    DO i=1, num_cells
+      WRITE(10,'(i12)') 10
+    END DO
+
+    WRITE(10,*)
+    WRITE(10,'(a9,1x,i12)') 'CELL_DATA', num_cells
+    WRITE(10,'(a5,1x,a16,1x,i12)') 'FIELD','Neutronics_Edits',1
+
     l=1
-    write(10,'(i12,1x,i12,1x,i12,1x,a5)') 1,1,num_cells,'float'
-    do i=1, num_cells     
-     write(10,'(es12.3)') real(reg2mat(cells(i)%reg),d_t)
-    end do
+    WRITE(10,'(i12,1x,i12,1x,i12,1x,a5)') 1,1,num_cells,'float'
+    DO i=1, num_cells
+      WRITE(10,'(es12.3)') REAL(cells(i)%reg,d_t)
+    END DO
 
-    close(10)
+    CLOSE(10)
 
-  end subroutine
+  END SUBROUTINE plot_region
 
-  subroutine print_xs
-  !*********************************************************************
-  !
-  ! Subroutine prints cross section sets
-  !
-  !*********************************************************************
+  SUBROUTINE plot_material
+    !*********************************************************************
+    !
+    ! Subroutine prints a *.vtk file containing cell material (and region) IDs
+    !
+    !*********************************************************************
 
-  ! Local variables
-    
-    integer :: g,gp,m,l,order 
-    real(kind=d_t) :: sigs(egmax)
- 
-  ! Print cross sections
+    ! local variables
 
-    write(6,*) 
-    write(6,*) '------------------------------------------------------------------'
-    write(6,*) '--------------------- Echoing Cross Sections ---------------------'  
-    write(6,*) '------------------------------------------------------------------'
-    write(6,*)
-    write(6,101) 'Number of materials:             ',num_mat
-    write(6,101) 'Number of groups:                ',egmax
-    write(6,101) 'Scattering expansion order read: ',xs_ord
-    if ( most_thermal>egmax ) then
-      write(6,*) 'No upscattering present.' 
-    else
-      write(6,101) 'Most thermal group:              ',most_thermal
-    end if
-    do m=1,num_mat
-       write(6,102) 'Material ',m,' with ID ',xs_mat(m)%mat
-       write(6,103) 'Group','SigT','SigF','SigS','nu*SigF','chi'
-       do g=1,egmax
-         sigs=0.0_d_t
-         do gp=1,egmax
-            sigs(g)=sigs(g)+sigma_scat(xs_mat(m)%mat,1,gp,g)%xs
-         end do
-         write(6,104) g,sigma_t(xs_mat(m)%mat,g)%xs,fiss(xs_mat(m)%mat,g)%xs, &
-                      sigs(g),fiss(xs_mat(m)%mat,g)%xs*nu(xs_mat(m)%mat,g)%xs,&
-                      chi(xs_mat(m)%mat,g)%xs
-       end do
-       write(6,*) 'Scattering Matrix, from -> columns, to -> row'
-       do order=1, xs_ord+1
-         write(6,101) 'Scattering order: ',order 
-         do g=1,egmax
-            write(6,105) (sigma_scat(xs_mat(m)%mat,order,g,gp)%xs,gp=1,egmax)
-         end do
-       end do
-    end do
-    write(6,*) 
-    101 FORMAT(1X,A,I8)
-    102 FORMAT(1X,A,I8,A,I8)
-    103 FORMAT(1X,A9,5A15)
-    104 FORMAT(1X,I9,5ES15.4)
-    105 FORMAT(1X,12ES15.4)
-  end subroutine  
+    INTEGER(kind=li) :: i,l
 
-end module
+    OPEN(unit=10,file=vtk_mat_filename,status='unknown',action='write')
+
+    WRITE(10,'(a26)') '# vtk DataFile Version 3.0'
+    WRITE(10,'(a72)') jobname
+    WRITE(10,'(a5)') 'ASCII'
+    WRITE(10,'(a25)') 'DATASET UNSTRUCTURED_GRID'
+    WRITE(10,'(a6,1x,i12,1x,a5)') 'POINTS',num_vert,'float'
+
+    DO i=1, num_vert
+      WRITE(10,'(3(1x,es12.5))') vertices(i)%v%x1,vertices(i)%v%x2,&
+            vertices(i)%v%x3
+    END DO
+
+    WRITE(10,*)
+    WRITE(10,'(a5,1x,i12,1x,i12)') 'CELLS',num_cells,num_cells+&
+          4*num_cells
+
+    DO i=1, num_cells
+      WRITE(10,'(5(i12,1x))') 4,cells(i)%R(0)-1,cells(i)%R(1)-1,&
+            cells(i)%R(2)-1,cells(i)%R(3)-1
+    END DO
+
+    WRITE(10,*)
+    WRITE(10,'(a11,1x,i12)') 'CELL_TYPES',num_cells
+
+    DO i=1, num_cells
+      WRITE(10,'(i12)') 10
+    END DO
+
+    WRITE(10,*)
+    WRITE(10,'(a9,1x,i12)') 'CELL_DATA', num_cells
+    WRITE(10,'(a5,1x,a16,1x,i12)') 'FIELD','Neutronics_Edits',1
+
+    l=1
+    WRITE(10,'(i12,1x,i12,1x,i12,1x,a5)') 1,1,num_cells,'float'
+    DO i=1, num_cells
+      WRITE(10,'(es12.3)') REAL(reg2mat(cells(i)%reg),d_t)
+    END DO
+
+    CLOSE(10)
+
+  END SUBROUTINE plot_material
+
+  SUBROUTINE print_xs
+    !*********************************************************************
+    !
+    ! Subroutine prints cross section sets
+    !
+    !*********************************************************************
+
+    ! Local variables
+
+    INTEGER :: g,gp,m,l,order
+    REAL(kind=d_t) :: sigs(egmax)
+
+    ! Print cross sections
+
+    WRITE(6,*)
+    WRITE(6,*) '------------------------------------------------------------------'
+    WRITE(6,*) '--------------------- Echoing Cross Sections ---------------------'
+    WRITE(6,*) '------------------------------------------------------------------'
+    WRITE(6,*)
+    WRITE(6,101) 'Number of materials:             ',num_mat
+    WRITE(6,101) 'Number of groups:                ',egmax
+    WRITE(6,101) 'Scattering expansion order read: ',xs_ord
+    IF ( most_thermal>egmax ) THEN
+      WRITE(6,*) 'No upscattering present.'
+    ELSE
+      WRITE(6,101) 'Most thermal group:              ',most_thermal
+    END IF
+    DO m=1,num_mat
+      WRITE(6,102) 'Material ',m,' with ID ',xs_mat(m)%mat
+      WRITE(6,103) 'Group','SigT','SigF','SigS','nu*SigF','chi'
+      DO g=1,egmax
+        sigs=0.0_d_t
+        DO gp=1,egmax
+          sigs(g)=sigs(g)+sigma_scat(xs_mat(m)%mat,1,gp,g)%xs
+        END DO
+        WRITE(6,104) g,sigma_t(xs_mat(m)%mat,g)%xs,fiss(xs_mat(m)%mat,g)%xs, &
+              sigs(g),fiss(xs_mat(m)%mat,g)%xs*nu(xs_mat(m)%mat,g)%xs,&
+              chi(xs_mat(m)%mat,g)%xs
+      END DO
+      WRITE(6,*) 'Scattering Matrix, from -> columns, to -> row'
+      DO order=1, xs_ord+1
+        WRITE(6,101) 'Scattering order: ',order
+        DO g=1,egmax
+          WRITE(6,105) (sigma_scat(xs_mat(m)%mat,order,g,gp)%xs,gp=1,egmax)
+        END DO
+      END DO
+    END DO
+    WRITE(6,*)
+101 FORMAT(1X,A,I8)
+102 FORMAT(1X,A,I8,A,I8)
+103 FORMAT(1X,A9,5A15)
+104 FORMAT(1X,I9,5ES15.4)
+105 FORMAT(1X,12ES15.4)
+  END SUBROUTINE print_xs
+
+END MODULE check_input

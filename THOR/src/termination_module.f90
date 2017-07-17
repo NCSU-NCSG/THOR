@@ -1,225 +1,225 @@
-module termination_module
-!***********************************************************************
-! This module contains subroutines for terminating the execution of 
-! THOR either successfully or unsuccessfully.
-!***********************************************************************
-use global_variables
-implicit none
+MODULE termination_module
+  !***********************************************************************
+  ! This module contains subroutines for terminating the execution of
+  ! THOR either successfully or unsuccessfully.
+  !***********************************************************************
+  USE global_variables
+  IMPLICIT NONE
 
-contains
+CONTAINS
 
-!------------------------------------------------------------------------------------------------------------!
-!------------------------------------------------------------------------------------------------------------!
+  !------------------------------------------------------------------------------------------------------------!
+  !------------------------------------------------------------------------------------------------------------!
 
-  subroutine cleanup
-  !**********************************************************************
-  !
-  ! Deallocates global allocatable variables 
-  ! 
-  !**********************************************************************
-  
+  SUBROUTINE cleanup
+    !**********************************************************************
+    !
+    ! Deallocates global allocatable variables
+    !
+    !**********************************************************************
+
     ! local variables
-  
-      integer(kind=li) :: m,eg,q,octant,f    
-  
+
+    INTEGER(kind=li) :: m,eg,q,octant,f
+
     ! src types
-     
-      if ( allocated( src_m   ) ) deallocate( src_m)
-      if ( allocated( src_mat ) ) deallocate( src_mat )  
-      if ( allocated( src_str ) ) deallocate( src_str )
+
+    IF ( ALLOCATED( src_m   ) ) DEALLOCATE( src_m)
+    IF ( ALLOCATED( src_mat ) ) DEALLOCATE( src_mat )
+    IF ( ALLOCATED( src_str ) ) DEALLOCATE( src_str )
 
     ! cross section types
-    
-      if( allocated(xs_mat) )     deallocate(xs_mat) 
-      if( allocated(chi) )        deallocate(chi) 
-      if( allocated(eg_bounds) )  deallocate(eg_bounds)
-      if( allocated(fiss) )       deallocate(fiss)
-      if( allocated(nu) )         deallocate(nu)
-      if( allocated(sigma_t) )    deallocate(sigma_t)
-      if( allocated(sigma_scat) ) deallocate(sigma_scat)        
-      if( allocated(scat_mult)  ) deallocate(scat_mult)
-      if( allocated(tsigs) )      deallocate(tsigs)
+
+    IF( ALLOCATED(xs_mat) )     DEALLOCATE(xs_mat)
+    IF( ALLOCATED(chi) )        DEALLOCATE(chi) 
+    IF( ALLOCATED(eg_bounds) )  DEALLOCATE(eg_bounds)
+    IF( ALLOCATED(fiss) )       DEALLOCATE(fiss)
+    IF( ALLOCATED(nu) )         DEALLOCATE(nu)
+    IF( ALLOCATED(sigma_t) )    DEALLOCATE(sigma_t)
+    IF( ALLOCATED(sigma_scat) ) DEALLOCATE(sigma_scat)
+    IF( ALLOCATED(scat_mult)  ) DEALLOCATE(scat_mult)
+    IF( ALLOCATED(tsigs) )      DEALLOCATE(tsigs)
 
     ! fixed inflow flux
 
-      if(allocated( binflx )) deallocate( binflx )
+    IF(ALLOCATED( binflx )) DEALLOCATE( binflx )
 
     ! mesh data types
- 
-      if( allocated(vertices) )       deallocate(vertices) 
-      if( allocated(cells) )          deallocate(cells) 
-      if( allocated(b_cells) )        deallocate(b_cells) 
-      if( allocated(rb_cells) )       deallocate(rb_cells) 
-      if( allocated(vb_cells) )       deallocate(vb_cells) 
-      if( allocated(fb_cells) )       deallocate(fb_cells) 
-      if( allocated(adjacency_list) ) deallocate(adjacency_list)
-      if( allocated(quadrature) )     deallocate(quadrature)
-      if( allocated(index_v) )        deallocate(index_v)     
-      if( allocated(index_f) )        deallocate(index_f)     
-      if( allocated(max_error) )      deallocate(max_error)
-      if( allocated(Ysh) )            deallocate(Ysh) 
-      if( allocated(outward_normal))  deallocate(outward_normal)  
-      if( allocated(refl_face_tpe) )  deallocate(refl_face_tpe)
-      if( allocated(sweep_path) )     deallocate(sweep_path)
-      if( allocated(reg2mat))         deallocate(reg2mat)   
-      if( allocated(dens_fact) )      deallocate(dens_fact) 
-      if( allocated(reg_vol) )        deallocate(reg_vol) 
+
+    IF( ALLOCATED(vertices) )       DEALLOCATE(vertices)
+    IF( ALLOCATED(cells) )          DEALLOCATE(cells)
+    IF( ALLOCATED(b_cells) )        DEALLOCATE(b_cells)
+    IF( ALLOCATED(rb_cells) )       DEALLOCATE(rb_cells)
+    IF( ALLOCATED(vb_cells) )       DEALLOCATE(vb_cells)
+    IF( ALLOCATED(fb_cells) )       DEALLOCATE(fb_cells)
+    IF( ALLOCATED(adjacency_list) ) DEALLOCATE(adjacency_list)
+    IF( ALLOCATED(quadrature) )     DEALLOCATE(quadrature)
+    IF( ALLOCATED(index_v) )        DEALLOCATE(index_v)
+    IF( ALLOCATED(index_f) )        DEALLOCATE(index_f)
+    IF( ALLOCATED(max_error) )      DEALLOCATE(max_error)
+    IF( ALLOCATED(Ysh) )            DEALLOCATE(Ysh)
+    IF( ALLOCATED(outward_normal))  DEALLOCATE(outward_normal)
+    IF( ALLOCATED(refl_face_tpe) )  DEALLOCATE(refl_face_tpe)
+    IF( ALLOCATED(sweep_path) )     DEALLOCATE(sweep_path)
+    IF( ALLOCATED(reg2mat))         DEALLOCATE(reg2mat)
+    IF( ALLOCATED(dens_fact) )      DEALLOCATE(dens_fact)
+    IF( ALLOCATED(reg_vol) )        DEALLOCATE(reg_vol)
 
     ! variables related to rings
 
-      if( allocated(neldep) )   deallocate(neldep)      
-      if( allocated( eldep) )   deallocate( eldep)      
+    IF( ALLOCATED(neldep) )   DEALLOCATE(neldep)
+    IF( ALLOCATED( eldep) )   DEALLOCATE( eldep)
 
     ! Close files that might be open
 
-      if(page_sweep.eq.1_li) close(unit=99)
-      if(page_iflw .eq.1_li) close(unit=97)
+    IF(page_sweep.EQ.1_li) CLOSE(unit=99)
+    IF(page_iflw .EQ.1_li) CLOSE(unit=97)
 
-  end subroutine cleanup
+  END SUBROUTINE cleanup
 
-!------------------------------------------------------------------------------------------------------------!
-!------------------------------------------------------------------------------------------------------------!
+  !------------------------------------------------------------------------------------------------------------!
+  !------------------------------------------------------------------------------------------------------------!
 
-  subroutine stop_thor(scode, message)
-  !**********************************************************************
-  ! 
-  ! Terminates THOR and prints message according to scode
-  !
-  !**********************************************************************
+  SUBROUTINE stop_thor(scode, message)
+    !**********************************************************************
+    !
+    ! Terminates THOR and prints message according to scode
+    !
+    !**********************************************************************
 
-  ! Pass argument
-     
-    integer(kind=li) :: scode
-    character(250), optional:: message
+    ! Pass argument
 
-  ! Print message
-    select case(scode)
+    INTEGER(kind=li) :: scode
+    CHARACTER(250), OPTIONAL:: message
 
-      case(1_li)
-            if (rank .eq. 0) then 
-             write(6,*)
-             write(6,*) "--------------------------------------------------------"
-             write(6,*) "   Execution of THOR completed successfully  "
-             write(6,*) "--------------------------------------------------------"
-             write(6,*) 
-            end if
-      case(2_li) 
-             write(6,*) '*** Not enough memory ***'
-             write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(3_li)
-             write(6,*) "Upstream face moment determination failed."
-             write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(4_li)
-             write(6,*) "Downstream face moment determination failed."
-             write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(5_li)
-          write(6,*) "Incoming face moments determination failed."
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(6_li)
-          write(6,*) "Outgoing face moments determination failed."
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(7_li)
-          write(6,*) 'Face moments transformation failed.'
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(8_li)
-          write(6,*) "Please select problem type 1 (eigenvalue search)",&
-                      "or 2 (external source) to perform calculation"
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(9_li)
-          write(6,*) 'Sweep type specification not recognized. Execution terminates.'
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(10_li)
-          write(6,*) "Unacceptable splitting in cell"
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(11_li)
-          write(6,*) "Unacceptable case from cell splitting in cell"
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(12_li)
-          write(6,*) 'Some boundary faces feature a fixed inflow flux but the inflow flag is set to false. Execution terminates.' 
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(13_li)
-          write(6,*) 'Precomputed sweep path inconsistent. Execution terminates' 
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(14_li)
-          write(6,*)  'Reflective boundary face could not be determined.' 
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(15_li)
-          write(6,*) 'SLC quadrature only available for orders 1, 2, 3 and 5'
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(16_li)
-          write(6,*) 'A fixed inflow flux value is placed in a boundary face that is not declared fixed inflow.'
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(17_li)
-          write(6,*) "Only lambda=-1 is allowed!"
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(18_li)
-          write(6,*) "Number of Krylov Iterations between restarts must be greater than 0" 
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(19_li)
-          write(6,*) "Maximum number of krylov iterations must be greater than number of",&
-                     "iterations between restarts." 
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(20_li)
-          write(6,*) "Method has to be 1 (Outer iteration with lagged upscattering)",&
-                     " 2(Flat iteration) or 3(Flat iteration with updated downscattering)." 
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(21_li)
-          write(6,*) 'Counter fail to correctly count number of moments!'
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(22_li)
-          write(6,*) 'Higher Order Spherical Harmonic Not Available!'  
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(23_li)
-          write(6,*) 'Legendre Scattering Order Limited to P7'
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(24_li)
-          write(6,*) 'Reading initial guess file failed' 
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(25_li)
-          write(6,*) "JFNK module requires niter to be equal to 2. This is a coding mistake!"    
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(26_li)
-          write(6,*) 'Method needs to be 1, 2 or 3.'
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(27_li)
-          write(6,*) 'GMRES error'  
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(28_li)
-          write(6,*) 'Only lambda=0 is allowed'  
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(29_li)
-          write(6,*) 'Inflow file only allowed for fixed source problems'
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(30_li)
-          write(6,*) 'VTK source file only allowed for fixed source problems'
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(31_li)
-          write(6,*) 'JFNK option in combination with reflective boundary conditions on opposite faces is not permitted'
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(32_li)
-          write(6,*) 'Call to associated Legendre Polynomials features impossible combination of l and m.'
-          write(6,*) 'This is a coding mistake. Contact the developers.'
-          write(6,*) '>> Execution terminates unsuccessfully!' 
-      case(33_li)
-          write(6,*) 'Associated Legendre Polynomial order limited to 5.'
-          write(6,*) '>> Execution terminates unsuccessfully!'
-      case(34_li)
-          write(6,*) 'Density factors were requested but referenced file was not found.'
-          write(6,*) '>> Execution terminates unsuccessfully!'
-      case default
-        if (present(message)) then
-          write(6,*) message
-        else
-          write(6,*) "No Error message given - Format should be <ERR #> <Messsage>"
-        end if
-    end select
+    ! Print message
+    SELECT CASE(scode)
+
+    CASE(1_li)
+      IF (rank .EQ. 0) THEN
+        WRITE(6,*)
+        WRITE(6,*) "--------------------------------------------------------"
+        WRITE(6,*) "   Execution of THOR completed successfully  "
+        WRITE(6,*) "--------------------------------------------------------"
+        WRITE(6,*)
+      END IF
+    CASE(2_li)
+      WRITE(6,*) '*** Not enough memory ***'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(3_li)
+      WRITE(6,*) "Upstream face moment determination failed."
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(4_li)
+      WRITE(6,*) "Downstream face moment determination failed."
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(5_li)
+      WRITE(6,*) "Incoming face moments determination failed."
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(6_li)
+      WRITE(6,*) "Outgoing face moments determination failed."
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(7_li)
+      WRITE(6,*) 'Face moments transformation failed.'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(8_li)
+      WRITE(6,*) "Please select problem type 1 (eigenvalue search)",&
+            "or 2 (external source) to perform calculation"
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(9_li)
+      WRITE(6,*) 'Sweep type specification not recognized. Execution terminates.'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(10_li)
+      WRITE(6,*) "Unacceptable splitting in cell"
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(11_li)
+      WRITE(6,*) "Unacceptable case from cell splitting in cell"
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(12_li)
+      WRITE(6,*) 'Some boundary faces feature a fixed inflow flux but the inflow flag is set to false. Execution terminates.'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(13_li)
+      WRITE(6,*) 'Precomputed sweep path inconsistent. Execution terminates'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(14_li)
+      WRITE(6,*)  'Reflective boundary face could not be determined.'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(15_li)
+      WRITE(6,*) 'SLC quadrature only available for orders 1, 2, 3 and 5'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(16_li)
+      WRITE(6,*) 'A fixed inflow flux value is placed in a boundary face that is not declared fixed inflow.'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(17_li)
+      WRITE(6,*) "Only lambda=-1 is allowed!"
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(18_li)
+      WRITE(6,*) "Number of Krylov Iterations between restarts must be greater than 0"
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(19_li)
+      WRITE(6,*) "Maximum number of krylov iterations must be greater than number of",&
+            "iterations between restarts."
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(20_li)
+      WRITE(6,*) "Method has to be 1 (Outer iteration with lagged upscattering)",&
+            " 2(Flat iteration) or 3(Flat iteration with updated downscattering)."
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(21_li)
+      WRITE(6,*) 'Counter fail to correctly count number of moments!'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(22_li)
+      WRITE(6,*) 'Higher Order Spherical Harmonic Not Available!'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(23_li)
+      WRITE(6,*) 'Legendre Scattering Order Limited to P7'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(24_li)
+      WRITE(6,*) 'Reading initial guess file failed'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(25_li)
+      WRITE(6,*) "JFNK module requires niter to be equal to 2. This is a coding mistake!"
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(26_li)
+      WRITE(6,*) 'Method needs to be 1, 2 or 3.'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(27_li)
+      WRITE(6,*) 'GMRES error'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(28_li)
+      WRITE(6,*) 'Only lambda=0 is allowed'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(29_li)
+      WRITE(6,*) 'Inflow file only allowed for fixed source problems'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(30_li)
+      WRITE(6,*) 'VTK source file only allowed for fixed source problems'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(31_li)
+      WRITE(6,*) 'JFNK option in combination with reflective boundary conditions on opposite faces is not permitted'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(32_li)
+      WRITE(6,*) 'Call to associated Legendre Polynomials features impossible combination of l and m.'
+      WRITE(6,*) 'This is a coding mistake. Contact the developers.'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(33_li)
+      WRITE(6,*) 'Associated Legendre Polynomial order limited to 5.'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(34_li)
+      WRITE(6,*) 'Density factors were requested but referenced file was not found.'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE default
+      IF (PRESENT(message)) THEN
+        WRITE(6,*) message
+      ELSE
+        WRITE(6,*) "No Error message given - Format should be <ERR #> <Messsage>"
+      END IF
+    END SELECT
 
 
-  ! Cleanup and terminate
+    ! Cleanup and terminate
 
-    call cleanup
-    stop
+    CALL cleanup
+    STOP
 
-  end subroutine stop_thor
+  END SUBROUTINE stop_thor
 
-end module
+END MODULE termination_module

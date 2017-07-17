@@ -1,197 +1,196 @@
-module inner_iteration_module
-!***********************************************************************
-!
-! Inner iteration module calls sweep subroutine and updates distributed
-! source
-!
-!***********************************************************************
+MODULE inner_iteration_module
+  !***********************************************************************
+  !
+  ! Inner iteration module calls sweep subroutine and updates distributed
+  ! source
+  !
+  !***********************************************************************
 
-! User derived-type modules
-  
-  use mpi
-  use types
-  use parameter_types
-  use filename_types
-  use vector_types
-  use cross_section_types
-  use geometry_types
-  use angle_types
-  use multindex_types
-  use global_variables
+  ! User derived-type modules
 
-! Use modules that pertain setting up problem
+  USE mpi
+  USE types
+  USE parameter_types
+  USE filename_types
+  USE vector_types
+  USE cross_section_types
+  USE geometry_types
+  USE angle_types
+  USE multindex_types
+  USE global_variables
 
-  use sweep_module
-  use termination_module
+  ! Use modules that pertain setting up problem
 
-  implicit none
+  USE sweep_module
+  USE termination_module
 
-contains
+  IMPLICIT NONE
+
+CONTAINS
 
   !> This subroutine performs and inner iteration (compare Alg. 1 in primer)
-  subroutine inner_iteration(eg,sc_flux,q_external,LL,U,Lf,Uf,rs,reflected_flux,prnt)
-  !*********************************************************************
-  !
-  ! Subroutine inner iteration calls sweep subroutine to compute all 
-  ! fluxes average cell scalar
-  !
-  !*********************************************************************
+  SUBROUTINE inner_iteration(eg,sc_flux,q_external,LL,U,Lf,Uf,rs,reflected_flux,prnt)
+    !*********************************************************************
+    !
+    ! Subroutine inner iteration calls sweep subroutine to compute all
+    ! fluxes average cell scalar
+    !
+    !*********************************************************************
 
-  ! Inner Iterations executed for group eg
+    ! Inner Iterations executed for group eg
 
-    integer(kind=li), intent(in) :: eg
+    INTEGER(kind=li), INTENT(in) :: eg
 
-  ! Declare angular and scalar flux types used globally
+    ! Declare angular and scalar flux types used globally
 
-    real(kind=d_t) :: sc_flux(num_moments_v,namom,num_cells)
+    REAL(kind=d_t) :: sc_flux(num_moments_v,namom,num_cells)
 
-  ! Declare source types
+    ! Declare source types
 
-    real(kind=d_t) :: q_external(num_moments_v,namom,num_cells)
+    REAL(kind=d_t) :: q_external(num_moments_v,namom,num_cells)
 
-  ! Declare pre-computed matrices
+    ! Declare pre-computed matrices
 
-    real(kind=d_t), dimension(num_moments_v,num_moments_v) :: LL, U
-    real(kind=d_t), dimension(num_moments_f,num_moments_f) :: Lf, Uf
-   
-  ! Define reflected flux array
+    REAL(kind=d_t), DIMENSION(num_moments_v,num_moments_v) :: LL, U
+    REAL(kind=d_t), DIMENSION(num_moments_f,num_moments_f) :: Lf, Uf
 
-    integer(kind=li) :: rs
-    real(kind=d_t),dimension(num_moments_f,rs,8,nangle) :: reflected_flux
+    ! Define reflected flux array
 
-  ! print convergence monitor flag
+    INTEGER(kind=li) :: rs
+    REAL(kind=d_t),DIMENSION(num_moments_f,rs,8,nangle) :: reflected_flux
 
-    logical :: prnt 
+    ! print convergence monitor flag
 
-  ! Define temporary variables
+    LOGICAL :: prnt
 
-    integer(kind=li) :: l, i, q, octant, order, alloc_stat,&
-                        n,m, k, indx  
-    real(kind=d_t) :: error,te,ts
+    ! Define temporary variables
 
-  ! Define self-scatter source
+    INTEGER(kind=li) :: l, i, q, octant, order, alloc_stat,&
+          n,m, k, indx
+    REAL(kind=d_t) :: error,te,ts
 
-    real(kind=d_t) :: self_scatter(num_moments_v,namom,num_cells)
+    ! Define self-scatter source
 
-  ! Define old scalar flux
- 
-    real(kind=d_t) :: sc_flux_old (num_moments_v,namom,num_cells)
-    
-  ! Define MPI environment and get rank
-    integer ::rank,mpi_err, localunit
-    call MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    REAL(kind=d_t) :: self_scatter(num_moments_v,namom,num_cells)
+
+    ! Define old scalar flux
+
+    REAL(kind=d_t) :: sc_flux_old (num_moments_v,namom,num_cells)
+
+    ! Define MPI environment and get rank
+    INTEGER ::rank,mpi_err, localunit
+    CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
 
 
 
-  ! Set self_scatter and old scalar flux to 0
-   
+    ! Set self_scatter and old scalar flux to 0
+
     self_scatter = zero
     sc_flux_old  = zero
 
-  ! write header for convergence monitor
-    if (rank .eq. 0) then
-      if(prnt) write(6,102) '  grp  itn       error        time'  
-    end if
-  ! Begin inner iteration
+    ! write header for convergence monitor
+    IF (rank .EQ. 0) THEN
+      IF(prnt) WRITE(6,102) '  grp  itn       error        time'
+    END IF
+    ! Begin inner iteration
 
-    do inner=1, max_inner
+    DO inner=1, max_inner
 
-  ! start timer
+      ! start timer
 
-      call cpu_time(ts) 
+      CALL CPU_TIME(ts)
 
-  ! Recompute self-scattering source and add external source
+      ! Recompute self-scattering source and add external source
 
-      do i=1,num_cells
-         ! even contribution
-         do l=0,scatt_ord
-           do m=0,l
-             indx=1_li+m+(l+1_li)*l/2_li
-             do k=1, num_moments_v
+      DO i=1,num_cells
+        ! even contribution
+        DO l=0,scatt_ord
+          DO m=0,l
+            indx=1_li+m+(l+1_li)*l/2_li
+            DO k=1, num_moments_v
               self_scatter(k,indx,i) = scat_mult(l,m)                             *&
-                               sigma_scat(reg2mat(cells(i)%reg),l+1,eg,eg)%xs     *&
-                               dens_fact(cells(i)%reg)                            *&
-                               sc_flux(k,indx,i) + q_external(k,indx,i)
-             end do
-           end do
-         end do
-         ! odd contribution
-         do l=1,scatt_ord
-           do m=1,l
-             indx=neven+m+(l-1_li)*l/2_li
-             do k=1, num_moments_v
+                    sigma_scat(reg2mat(cells(i)%reg),l+1,eg,eg)%xs     *&
+                    dens_fact(cells(i)%reg)                            *&
+                    sc_flux(k,indx,i) + q_external(k,indx,i)
+            END DO
+          END DO
+        END DO
+        ! odd contribution
+        DO l=1,scatt_ord
+          DO m=1,l
+            indx=neven+m+(l-1_li)*l/2_li
+            DO k=1, num_moments_v
               self_scatter(k,indx,i) = scat_mult(l,m) *&
-                               sigma_scat(reg2mat(cells(i)%reg),l+1,eg,eg)%xs     *&
-                               dens_fact(cells(i)%reg)                            *&
-                               sc_flux(k,indx,i) + q_external(k,indx,i)
-             end do
-           end do
-         end do
+                    sigma_scat(reg2mat(cells(i)%reg),l+1,eg,eg)%xs     *&
+                    dens_fact(cells(i)%reg)                            *&
+                    sc_flux(k,indx,i) + q_external(k,indx,i)
+            END DO
+          END DO
+        END DO
 
-      end do
+      END DO
 
-  ! Call sweep algorithm
-  
+      ! Call sweep algorithm
+
       sc_flux=zero
-      call sweep(eg,sc_flux,self_scatter,rs,reflected_flux,LL,U,Lf,Uf)
-  ! Computer error
+      CALL sweep(eg,sc_flux,self_scatter,rs,reflected_flux,LL,U,Lf,Uf)
+      ! Computer error
 
-       max_error(eg)=zero
+      max_error(eg)=zero
 
-       do i=1, num_cells
-          if(abs(sc_flux(1,1,i)) > 1e-12)then
-             error=abs( (  sc_flux(1,1,i) - sc_flux_old(1,1,i) )/&
-                           sc_flux(1,1,i) )
-          else
-             error=abs(    sc_flux(1,1,i) - sc_flux_old(1,1,i) )
-          end if
-          if(error >= max_error(eg))then
-             max_error(eg)=error
-          end if
-       end do
+      DO i=1, num_cells
+        IF(ABS(sc_flux(1,1,i)) > 1e-12)THEN
+          error=ABS( (  sc_flux(1,1,i) - sc_flux_old(1,1,i) )/&
+                sc_flux(1,1,i) )
+        ELSE
+          error=ABS(    sc_flux(1,1,i) - sc_flux_old(1,1,i) )
+        END IF
+        IF(error >= max_error(eg))THEN
+          max_error(eg)=error
+        END IF
+      END DO
 
-  ! Test convergence of current-group scalar flux
+      ! Test convergence of current-group scalar flux
 
-       if(inner > 1 .and. max_error(eg) < inner_conv)then
-          go to 10
-       end if
+      IF(inner > 1 .AND. max_error(eg) < inner_conv)THEN
+        go to 10
+      END IF
 
-       if(inner < max_inner)then
-         do i=1, num_cells
-           do n=1,namom
-             do l=1, num_moments_v
-               sc_flux_old(l,n,i)=sc_flux(l,n,i)
-             end do
-           end do
-          end do
-       end if
+      IF(inner < max_inner)THEN
+        DO i=1, num_cells
+          DO n=1,namom
+            DO l=1, num_moments_v
+              sc_flux_old(l,n,i)=sc_flux(l,n,i)
+            END DO
+          END DO
+        END DO
+      END IF
 
-    ! stop timer
+      ! stop timer
 
-      call cpu_time(te) 
+      CALL CPU_TIME(te)
 
-    ! write convergence monitor
-      if (rank .eq. 0) then
-        if(prnt) then
-          write(6,101) eg,inner,max_error(eg),te-ts,' % '
+      ! write convergence monitor
+      IF (rank .EQ. 0) THEN
+        IF(prnt) THEN
+          WRITE(6,101) eg,inner,max_error(eg),te-ts,' % '
           flush(6)
-        end if
-        if(prnt .and. print_conv.eq.1) then 
-          write(21,101) eg,inner,max_error(eg),te-ts,' % '
+        END IF
+        IF(prnt .AND. print_conv.EQ.1) THEN
+          WRITE(21,101) eg,inner,max_error(eg),te-ts,' % '
           flush(21)
-        end if
-        101 FORMAT (1X,2I5,2ES12.4,A)
-        102 FORMAT (1X,A)
-      end if
-    end do
+        END IF
+101     FORMAT (1X,2I5,2ES12.4,A)
+102     FORMAT (1X,A)
+      END IF
+    END DO
 
     inner=inner-1_li
 
-10  continue
+10  CONTINUE
 
     tot_nInners=tot_nInners+inner
 
-  end subroutine inner_iteration
+  END SUBROUTINE inner_iteration
 
-end module inner_iteration_module
-
+END MODULE inner_iteration_module

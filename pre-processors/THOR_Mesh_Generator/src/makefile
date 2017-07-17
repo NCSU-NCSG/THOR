@@ -54,7 +54,7 @@ clean:
 reset:
 	rm -f $(OBJ) $(CONT_OBJ) $(LIB_OBJ)
 	rm -f $(MOD) $(CONT_MOD) $(LIB_MOD)
-	rm -f *.gcno *.gcda 
+	rm -f *.gcno *.gcda
 	rm -f -r $(EXE)*.dSYM
 	rm -f $(EXE)*
 

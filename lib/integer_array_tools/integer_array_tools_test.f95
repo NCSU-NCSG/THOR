@@ -46,4 +46,4 @@ PROGRAM TEST
   WRITE(*,*) 'Recieved: ', mapIndexOf(11, C)
 
 
-END PROGRAM
+END PROGRAM TEST

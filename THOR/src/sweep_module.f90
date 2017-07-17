@@ -1,635 +1,634 @@
-module sweep_module
-!***********************************************************************
-!
-! Sweep module selects discrete ordinate directions and performs sweep
-! over the eight Cartesian octants. Also contains subroutines that
-! determine surface normals, incoming/outgoing declarations, and 
-! initiate infinite queue over all cells. Finally, this module prepares
-! all input data for the transport kernel to calculate angular fluxes.  
-!
-!***********************************************************************
+MODULE sweep_module
+  !***********************************************************************
+  !
+  ! Sweep module selects discrete ordinate directions and performs sweep
+  ! over the eight Cartesian octants. Also contains subroutines that
+  ! determine surface normals, incoming/outgoing declarations, and
+  ! initiate infinite queue over all cells. Finally, this module prepares
+  ! all input data for the transport kernel to calculate angular fluxes.
+  !
+  !***********************************************************************
 
-! User derived-type modules
-  use mpi
-  use types
-  use parameter_types
-  use filename_types
-  use vector_types
-  use cross_section_types
-  use geometry_types
-  use angle_types
-  use multindex_types
-  use global_variables
+  ! User derived-type modules
+  USE mpi
+  USE types
+  USE parameter_types
+  USE filename_types
+  USE vector_types
+  USE cross_section_types
+  USE geometry_types
+  USE angle_types
+  USE multindex_types
+  USE global_variables
 
-! Use modules that pertain setting up problem
+  ! Use modules that pertain setting up problem
 
-  use cell_splitting_module
+  USE cell_splitting_module
 
-  implicit none
+  IMPLICIT NONE
 
-! Define angular flux data type
+  ! Define angular flux data type
 
-  type angular_flux
-     real(kind=d_t), dimension(:,:)  , allocatable :: vol_flux
-     real(kind=d_t), dimension(:,:,:), allocatable :: face_flux
-  end type angular_flux
+  TYPE angular_flux
+    REAL(kind=d_t), DIMENSION(:,:)  , ALLOCATABLE :: vol_flux
+    REAL(kind=d_t), DIMENSION(:,:,:), ALLOCATABLE :: face_flux
+  END TYPE angular_flux
 
-contains
+CONTAINS
 
   !> This subroutine performs a transport sweep, i.e. inversion of (Omega * nabla + sigt_g)
   !> It explicitly loops over all angular directions. For each angular direction a directionally
   !> dependent source is computed (scattering + fission + fixed source). Then you do the mesh sweep
   !> on that source. The mesh sweep is done in subroutine queue. It is called queue because on an
   !> unstructured mesh the mesh sweep path is computed using a Breadth First Search algorithm that
-  !> queues up all the elements in permissible order. Note: A lot of the stuff done here is for 
+  !> queues up all the elements in permissible order. Note: A lot of the stuff done here is for
   !> reflective boundary conditions. These are implicit boundary conditions that need to be stored
-  !> to ensure convergence. Angular fluxes, in general, are not stored in THOR!  
-  subroutine sweep(eg,sc_flux,src,rs,reflected_flux,LL,U,Lf,Uf)
-  !*********************************************************************
-  !
-  ! Subroutine sweep loops over all angular directions and call 
-  ! transport solver
-  !
-  !*********************************************************************
+  !> to ensure convergence. Angular fluxes, in general, are not stored in THOR!
+  SUBROUTINE sweep(eg,sc_flux,src,rs,reflected_flux,LL,U,Lf,Uf)
+    !*********************************************************************
+    !
+    ! Subroutine sweep loops over all angular directions and call
+    ! transport solver
+    !
+    !*********************************************************************
 
-  ! Pass group number
-    
-    integer(kind=li), intent(in) :: eg,rs
+    ! Pass group number
 
-  ! Pass scalar flux
- 
-    real(kind=d_t) :: sc_flux(num_moments_v,namom,num_cells)
+    INTEGER(kind=li), INTENT(in) :: eg,rs
 
-  ! Pass source
-   
-    real(kind=d_t) :: src(num_moments_v,namom,num_cells)
+    ! Pass scalar flux
 
-  ! Pass reflected flux
+    REAL(kind=d_t) :: sc_flux(num_moments_v,namom,num_cells)
 
-    real(kind=d_t), dimension(num_moments_f,rs,8,nangle) :: reflected_flux
+    ! Pass source
 
-  ! Pass pre-computed matrices
+    REAL(kind=d_t) :: src(num_moments_v,namom,num_cells)
 
-    real(kind=d_t), dimension(num_moments_v,num_moments_v) :: LL, U
-    real(kind=d_t), dimension(num_moments_f,num_moments_f) :: Lf, Uf
+    ! Pass reflected flux
 
-  ! Declare local angular flux
+    REAL(kind=d_t), DIMENSION(num_moments_f,rs,8,nangle) :: reflected_flux
 
-    type(angular_flux) :: an_flux
+    ! Pass pre-computed matrices
 
-  ! Declare face_known array=> now pre-filled in sweep and then passed to queue 
+    REAL(kind=d_t), DIMENSION(num_moments_v,num_moments_v) :: LL, U
+    REAL(kind=d_t), DIMENSION(num_moments_f,num_moments_f) :: Lf, Uf
 
-    integer(kind=1), dimension(0:3,num_cells) :: face_known
+    ! Declare local angular flux
 
-  ! Define temporary variables
+    TYPE(angular_flux) :: an_flux
 
-    integer(kind=li) :: alloc_stat, q, oct, octt, octant, i, f, l, rcell,j,k,m,indx,nk,nf
-    type(vector) :: omega
+    ! Declare face_known array=> now pre-filled in sweep and then passed to queue
 
-  ! Define source along direction q
+    INTEGER(kind=1), DIMENSION(0:3,num_cells) :: face_known
 
-    real(kind=d_t) :: dir_src(num_moments_v,num_cells)
- 
-  ! Temporary variables
+    ! Define temporary variables
 
-    integer(kind=li) :: tpe, mate,giflx, parallel_i
-    
-    integer ::rank,mpi_err, localunit, num_p, optimal_tasks
-    
-    
-  ! Define sc_flux parallel recieve buffer & reflected buffer
+    INTEGER(kind=li) :: alloc_stat, q, oct, octt, octant, i, f, l, rcell,j,k,m,indx,nk,nf
+    TYPE(vector) :: omega
 
-    real(kind=d_t) :: sc_flux_buffer (num_moments_v,namom,num_cells)    
-    real(kind=d_t) :: reflected_buffer(num_moments_f, rs, 8, nangle)
-    call MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
-    call MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
-    optimal_tasks = ceiling((nangle*8.0)/(num_p)) 
+    ! Define source along direction q
+
+    REAL(kind=d_t) :: dir_src(num_moments_v,num_cells)
+
+    ! Temporary variables
+
+    INTEGER(kind=li) :: tpe, mate,giflx, parallel_i
+
+    INTEGER ::rank,mpi_err, localunit, num_p, optimal_tasks
+
+
+    ! Define sc_flux parallel recieve buffer & reflected buffer
+
+    REAL(kind=d_t) :: sc_flux_buffer (num_moments_v,namom,num_cells)
+    REAL(kind=d_t) :: reflected_buffer(num_moments_f, rs, 8, nangle)
+    CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
+    CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    optimal_tasks = CEILING((nangle*8.0)/(num_p))
     sc_flux_buffer =zero
     reflected_buffer= zero
-  ! Allocate angular flux
+    ! Allocate angular flux
 
-    allocate(an_flux%vol_flux(num_moments_v,num_cells)     ,stat=alloc_stat)
-    if(alloc_stat /= 0) call stop_thor(2_li)
-    allocate(an_flux%face_flux(num_moments_f,0:3,num_cells),stat=alloc_stat)
-    if(alloc_stat /= 0) call stop_thor(2_li)
-    
-  ! Begin parallel loop over quadrature octant
+    ALLOCATE(an_flux%vol_flux(num_moments_v,num_cells)     ,stat=alloc_stat)
+    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    ALLOCATE(an_flux%face_flux(num_moments_f,0:3,num_cells),stat=alloc_stat)
+    IF(alloc_stat /= 0) CALL stop_thor(2_li)
 
-    do parallel_i = 1, optimal_tasks
+    ! Begin parallel loop over quadrature octant
+
+    DO parallel_i = 1, optimal_tasks
       k = parallel_map_l2g(parallel_i, rank+1)
-      if (k .eq. 0) exit
-      oct = mod(k,8)+1
-      q = ceiling(k/8.0)
-          octant= oct !ordering(oct)
-          if(octant == 1)then
-             omega%x1=quadrature(q)%mu%x1
-             omega%x2=quadrature(q)%mu%x2
-             omega%x3=quadrature(q)%mu%x3
-          elseif(octant == 2)then
-             omega%x1=-1*quadrature(q)%mu%x1
-             omega%x2=quadrature(q)%mu%x2
-             omega%x3=quadrature(q)%mu%x3
-          elseif(octant == 3)then
-             omega%x1=-1*quadrature(q)%mu%x1
-             omega%x2=-1*quadrature(q)%mu%x2
-             omega%x3=quadrature(q)%mu%x3
-          elseif(octant == 4)then
-             omega%x1=quadrature(q)%mu%x1
-             omega%x2=-1*quadrature(q)%mu%x2
-             omega%x3=quadrature(q)%mu%x3
-          elseif(octant == 5)then
-             omega%x1=quadrature(q)%mu%x1
-             omega%x2=quadrature(q)%mu%x2
-             omega%x3=-1*quadrature(q)%mu%x3
-          elseif(octant == 6)then
-             omega%x1=-1*quadrature(q)%mu%x1
-             omega%x2=quadrature(q)%mu%x2
-             omega%x3=-1*quadrature(q)%mu%x3
-          elseif(octant == 7)then
-             omega%x1=-1*quadrature(q)%mu%x1
-             omega%x2=-1*quadrature(q)%mu%x2
-             omega%x3=-1*quadrature(q)%mu%x3
-          else
-             omega%x1=quadrature(q)%mu%x1
-             omega%x2=-1*quadrature(q)%mu%x2
-             omega%x3=-1*quadrature(q)%mu%x3
-          end if
+      IF (k .EQ. 0) EXIT
+      oct = MOD(k,8)+1
+      q = CEILING(k/8.0)
+      octant= oct !ordering(oct)
+      IF(octant == 1)THEN
+        omega%x1=quadrature(q)%mu%x1
+        omega%x2=quadrature(q)%mu%x2
+        omega%x3=quadrature(q)%mu%x3
+      ELSEIF(octant == 2)THEN
+        omega%x1=-1*quadrature(q)%mu%x1
+        omega%x2=quadrature(q)%mu%x2
+        omega%x3=quadrature(q)%mu%x3
+      ELSEIF(octant == 3)THEN
+        omega%x1=-1*quadrature(q)%mu%x1
+        omega%x2=-1*quadrature(q)%mu%x2
+        omega%x3=quadrature(q)%mu%x3
+      ELSEIF(octant == 4)THEN
+        omega%x1=quadrature(q)%mu%x1
+        omega%x2=-1*quadrature(q)%mu%x2
+        omega%x3=quadrature(q)%mu%x3
+      ELSEIF(octant == 5)THEN
+        omega%x1=quadrature(q)%mu%x1
+        omega%x2=quadrature(q)%mu%x2
+        omega%x3=-1*quadrature(q)%mu%x3
+      ELSEIF(octant == 6)THEN
+        omega%x1=-1*quadrature(q)%mu%x1
+        omega%x2=quadrature(q)%mu%x2
+        omega%x3=-1*quadrature(q)%mu%x3
+      ELSEIF(octant == 7)THEN
+        omega%x1=-1*quadrature(q)%mu%x1
+        omega%x2=-1*quadrature(q)%mu%x2
+        omega%x3=-1*quadrature(q)%mu%x3
+      ELSE
+        omega%x1=quadrature(q)%mu%x1
+        omega%x2=-1*quadrature(q)%mu%x2
+        omega%x3=-1*quadrature(q)%mu%x3
+      END IF
 
-          ! Zero angular flux and directed source
+      ! Zero angular flux and directed source
 
-          dir_src=0.0_d_t             
-          an_flux%vol_flux  = 0.0_d_t
-          an_flux%face_flux = 0.0_d_t
-          face_known = 0
+      dir_src=0.0_d_t
+      an_flux%vol_flux  = 0.0_d_t
+      an_flux%face_flux = 0.0_d_t
+      face_known = 0
 
-          ! Set boundary faces and mark as known
+      ! Set boundary faces and mark as known
 
-            ! 1. Vacuum boundary conditions
-            do i=1,vside_cells
-               k=vb_cells(i)%cell
-               f=vb_cells(i)%face
-               if ( (omega .dot. outward_normal(k,f)) < 0.0_d_t )then 
-                 face_known(f,k) = 1
-                 ! no nneed to assign 0 to face flux, already done before !!
-               end if
-            end do   
+      ! 1. Vacuum boundary conditions
+      DO i=1,vside_cells
+        k=vb_cells(i)%cell
+        f=vb_cells(i)%face
+        IF ( (omega .dot. outward_normal(k,f)) < 0.0_d_t )THEN
+          face_known(f,k) = 1
+          ! no nneed to assign 0 to face flux, already done before !!
+        END IF
+      END DO
 
-            ! 2. Reflective boundary conditions
-            
-            do i=1,rside_cells
-               k=rb_cells(i)%cell
-               f=rb_cells(i)%face
-               if ( (omega .dot. outward_normal(k,f)) < 0.0_d_t )then 
-                 face_known(f,k) = 1
-                 ! reflected flux(oct) stores outflow for octant oct
-                 ! so we need to find the mate of oct to get the right inflow
-                 tpe=refl_face_tpe(i)  
-                 if      (tpe .eq. 1_li .or. tpe .eq. -1_li) then
-                    mate = mu_mate(octant)
-                 else if (tpe .eq. 2_li .or. tpe .eq. -2_li) then
-                    mate = eta_mate(octant)
-                 else if (tpe .eq. 3_li .or. tpe .eq. -3_li) then
-                    mate = xi_mate(octant)
-                 end if
-                 an_flux%face_flux(:,f,k) = reflected_flux(:,i,mate,q)
-               end if
-            end do
-            
-            
-            ! 3. Fixed inflow boundary conditions
-           
-            if(page_iflw.eq.1_li) then
-              giflx=1_li
-            else
-              giflx=eg
-            end if
-            
-            do i=1,fside_cells
-               k=fb_cells(i)%cell
-               f=fb_cells(i)%face
-               if ( (omega .dot. outward_normal(k,f)) < 0.0_d_t )then   
-                 face_known(f,k) = 1
-                 an_flux%face_flux(:,f,k) = binflx(:,i,octant,q,giflx)
-               end if
-            end do 
+      ! 2. Reflective boundary conditions
 
-            ! 4. Faces that are assumed known for breaking cycles
- 
-            is_cycle=0 
-            do i=1, neldep(octant,q)
-               k=eldep(octant,q,eg)%cells(i)
-               f=eldep(octant,q,eg)%faces(i)
-               is_cycle(f,k)   = 1 
-               face_known(f,k) = 1
-               an_flux%face_flux(:,f,k) = eldep(octant,q,eg)%face_fluxes(:,i) 
-            end do 
+      DO i=1,rside_cells
+        k=rb_cells(i)%cell
+        f=rb_cells(i)%face
+        IF ( (omega .dot. outward_normal(k,f)) < 0.0_d_t )THEN
+          face_known(f,k) = 1
+          ! reflected flux(oct) stores outflow for octant oct
+          ! so we need to find the mate of oct to get the right inflow
+          tpe=refl_face_tpe(i)
+          IF      (tpe .EQ. 1_li .OR. tpe .EQ. -1_li) THEN
+            mate = mu_mate(octant)
+          ELSE IF (tpe .EQ. 2_li .OR. tpe .EQ. -2_li) THEN
+            mate = eta_mate(octant)
+          ELSE IF (tpe .EQ. 3_li .OR. tpe .EQ. -3_li) THEN
+            mate = xi_mate(octant)
+          END IF
+          an_flux%face_flux(:,f,k) = reflected_flux(:,i,mate,q)
+        END IF
+      END DO
 
-          ! Compute directed source - so far only isotropic 
 
-          do i=1,num_cells
-            ! even contributions
-            do l=0,scatt_ord
-              do m=0,l
-                 indx=1_li+m+(l+1_li)*l/2_li
-                 do k=1,num_moments_v
-                   dir_src(k,i)=dir_src(k,i)+Ysh(q,octant,indx)*src(k,indx,i) 
-                 end do
-              end do
-            end do
-            ! odd contributions
-            do l=1,scatt_ord
-              do m=1,l
-                 indx=neven+m+(l-1_li)*l/2_li
-                 do k=1,num_moments_v
-                   dir_src(k,i)=dir_src(k,i)+Ysh(q,octant,indx)*src(k,indx,i) 
-                 end do
-              end do
-            end do 
-          end do
+      ! 3. Fixed inflow boundary conditions
 
-          ! If page_sweep == 1 read sweep_path from file
+      IF(page_iflw.EQ.1_li) THEN
+        giflx=1_li
+      ELSE
+        giflx=eg
+      END IF
 
-          if(page_sweep.eq.1) then 
-             sweep_path=0
-             read(99,rec=8*(q-1)+octant) sweep_path(:,1,1)
-          end if
+      DO i=1,fside_cells
+        k=fb_cells(i)%cell
+        f=fb_cells(i)%face
+        IF ( (omega .dot. outward_normal(k,f)) < 0.0_d_t )THEN
+          face_known(f,k) = 1
+          an_flux%face_flux(:,f,k) = binflx(:,i,octant,q,giflx)
+        END IF
+      END DO
 
-          ! Call queue for mesh sweep 
-          
-          if (sweep_tpe .eq.1) then
-            call queue(eg,q,octant,dir_src,an_flux,LL,U,Lf,Uf,omega,face_known)
-          else  
-            call stop_thor(9_li)
-          end if
-          
-          ! Increment scalar flux using 
+      ! 4. Faces that are assumed known for breaking cycles
 
-            call angular_moments(octant,q,sc_flux,an_flux)
+      is_cycle=0
+      DO i=1, neldep(octant,q)
+        k=eldep(octant,q,eg)%cells(i)
+        f=eldep(octant,q,eg)%faces(i)
+        is_cycle(f,k)   = 1
+        face_known(f,k) = 1
+        an_flux%face_flux(:,f,k) = eldep(octant,q,eg)%face_fluxes(:,i)
+      END DO
 
-          ! update reflected flux array, loop through r           
-            do i=1,rside_cells
-               k=rb_cells(i)%cell
-               f=rb_cells(i)%face
-               if ( (omega .dot. outward_normal(k,f)) > 0.0_d_t )then
-                 ! store outflow on reflective faces 
-                 reflected_buffer(:,i,octant,q) = an_flux%face_flux(:,f,k)
-               end if
-            end do
-          ! update the faces that are assumed known for cycles
-            do i=1, neldep(octant,q)
-               k=eldep(octant,q,eg)%cells(i)
-               f=eldep(octant,q,eg)%faces(i)
-               nk=adjacency_list(k,f)%cell 
-               nf=adjacency_list(k,f)%face
-               eldep(octant,q,eg)%face_fluxes(:,i)=an_flux%face_flux(:,nf,nk)
-            end do
-    end do
+      ! Compute directed source - so far only isotropic
+
+      DO i=1,num_cells
+        ! even contributions
+        DO l=0,scatt_ord
+          DO m=0,l
+            indx=1_li+m+(l+1_li)*l/2_li
+            DO k=1,num_moments_v
+              dir_src(k,i)=dir_src(k,i)+Ysh(q,octant,indx)*src(k,indx,i)
+            END DO
+          END DO
+        END DO
+        ! odd contributions
+        DO l=1,scatt_ord
+          DO m=1,l
+            indx=neven+m+(l-1_li)*l/2_li
+            DO k=1,num_moments_v
+              dir_src(k,i)=dir_src(k,i)+Ysh(q,octant,indx)*src(k,indx,i)
+            END DO
+          END DO
+        END DO
+      END DO
+
+      ! If page_sweep == 1 read sweep_path from file
+
+      IF(page_sweep.EQ.1) THEN
+        sweep_path=0
+        READ(99,rec=8*(q-1)+octant) sweep_path(:,1,1)
+      END IF
+
+      ! Call queue for mesh sweep
+
+      IF (sweep_tpe .EQ.1) THEN
+        CALL queue(eg,q,octant,dir_src,an_flux,LL,U,Lf,Uf,omega,face_known)
+      ELSE
+        CALL stop_thor(9_li)
+      END IF
+
+      ! Increment scalar flux using
+
+      CALL angular_moments(octant,q,sc_flux,an_flux)
+
+      ! update reflected flux array, loop through r
+      DO i=1,rside_cells
+        k=rb_cells(i)%cell
+        f=rb_cells(i)%face
+        IF ( (omega .dot. outward_normal(k,f)) > 0.0_d_t )THEN
+          ! store outflow on reflective faces
+          reflected_buffer(:,i,octant,q) = an_flux%face_flux(:,f,k)
+        END IF
+      END DO
+      ! update the faces that are assumed known for cycles
+      DO i=1, neldep(octant,q)
+        k=eldep(octant,q,eg)%cells(i)
+        f=eldep(octant,q,eg)%faces(i)
+        nk=adjacency_list(k,f)%cell
+        nf=adjacency_list(k,f)%face
+        eldep(octant,q,eg)%face_fluxes(:,i)=an_flux%face_flux(:,nf,nk)
+      END DO
+    END DO
     reflected_flux=reflected_buffer
-  ! Deallocation
-    call MPI_AllREDUCE(reflected_flux, reflected_buffer, num_moments_f*rs*8*nangle, &
-                                                   MPI_REAL8, MPI_SUM, MPI_COMM_WORLD, mpi_err)
+    ! Deallocation
+    CALL MPI_AllREDUCE(reflected_flux, reflected_buffer, num_moments_f*rs*8*nangle, &
+          MPI_REAL8, MPI_SUM, MPI_COMM_WORLD, mpi_err)
     reflected_flux=reflected_buffer
-    call MPI_AllREDUCE(sc_flux, sc_flux_buffer, num_moments_v*namom*num_cells, &
-                                                   MPI_REAL8, MPI_SUM, MPI_COMM_WORLD, mpi_err)
+    CALL MPI_AllREDUCE(sc_flux, sc_flux_buffer, num_moments_v*namom*num_cells, &
+          MPI_REAL8, MPI_SUM, MPI_COMM_WORLD, mpi_err)
     sc_flux = sc_flux_buffer
-    deallocate(an_flux%vol_flux,an_flux%face_flux)
+    DEALLOCATE(an_flux%vol_flux,an_flux%face_flux)
 
-  end subroutine sweep
+  END SUBROUTINE sweep
 
-!-----------------------------------------------------------------------------------------------!
-!-----------------------------------------------------------------------------------------------!
+  !-----------------------------------------------------------------------------------------------!
+  !-----------------------------------------------------------------------------------------------!
 
   !> This subroutine performs a mesh sweep. It uses the sweep_path variable to obtain
   !> the sweep order.
-  subroutine queue(eg,q,octant,qm,an_flux,LL,U,Lf,Uf,omega,face_known)
-  !*********************************************************************
-  !
-  ! Subroutine queue uses the pre-computed sweep paths to perform a 
-  ! mesh sweep.
-  !
-  !*********************************************************************
+  SUBROUTINE queue(eg,q,octant,qm,an_flux,LL,U,Lf,Uf,omega,face_known)
+    !*********************************************************************
+    !
+    ! Subroutine queue uses the pre-computed sweep paths to perform a
+    ! mesh sweep.
+    !
+    !*********************************************************************
 
-  ! Pass group and angular indices
+    ! Pass group and angular indices
 
-    integer(kind=li), intent(in) :: eg, q, octant
+    INTEGER(kind=li), INTENT(in) :: eg, q, octant
 
-  ! Pass qm
- 
-    real(kind=d_t) :: qm(num_moments_v,num_cells)
+    ! Pass qm
 
-  ! Pass angular flux
+    REAL(kind=d_t) :: qm(num_moments_v,num_cells)
 
-    type(angular_flux), intent(inout) :: an_flux
+    ! Pass angular flux
 
-  ! Pass pre-computed matrices
+    TYPE(angular_flux), INTENT(inout) :: an_flux
 
-    real(kind=d_t), dimension(num_moments_v,num_moments_v) :: LL, U
-    real(kind=d_t), dimension(num_moments_f,num_moments_f) :: Lf, Uf
+    ! Pass pre-computed matrices
 
-  ! Pass logical array face known
+    REAL(kind=d_t), DIMENSION(num_moments_v,num_moments_v) :: LL, U
+    REAL(kind=d_t), DIMENSION(num_moments_f,num_moments_f) :: Lf, Uf
 
-    integer(kind=1), dimension(0:3,num_cells) :: face_known
+    ! Pass logical array face known
 
-  ! Pass omega
+    INTEGER(kind=1), DIMENSION(0:3,num_cells) :: face_known
 
-    type(vector) :: omega 
+    ! Pass omega
 
-  ! Local variables
+    TYPE(vector) :: omega
 
-    integer(kind=li) :: alloc_stat, i,j, oct, f, l, case
-    real(kind=d_t) :: sigmat
-    logical :: all_incoming_known
-    type(vector) :: n0, n1, n2, n3
-    integer(kind=li) :: soct,sq
-    
-    integer ::rank,mpi_err, num_p
-    call MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
-    call MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    ! Local variables
 
-  ! Set soct and sq depending on whether page_sweep=0,1
+    INTEGER(kind=li) :: alloc_stat, i,j, oct, f, l, CASE
+    REAL(kind=d_t) :: sigmat
+    LOGICAL :: all_incoming_known
+    TYPE(vector) :: n0, n1, n2, n3
+    INTEGER(kind=li) :: soct,sq
 
-    if      (page_sweep .eq. 0) then
-       soct=octant;sq=q
-    else if (page_sweep .eq. 1) then
-       soct=1_li;sq=1_li
-    end if
+    INTEGER ::rank,mpi_err, num_p
+    CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
+    CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
 
-  ! Initiate loop over all cells
-    
-    do j=1,num_cells
+    ! Set soct and sq depending on whether page_sweep=0,1
 
-       i=sweep_path(j,soct,sq)
-       
-       sigmat=dens_fact(cells(i)%reg)*sigma_t(reg2mat(cells(i)%reg),eg)%xs
+    IF      (page_sweep .EQ. 0) THEN
+      soct=octant;sq=q
+    ELSE IF (page_sweep .EQ. 1) THEN
+      soct=1_li;sq=1_li
+    END IF
 
-       n0=outward_normal(i,0)
-       n1=outward_normal(i,1)
-       n2=outward_normal(i,2)
-       n3=outward_normal(i,3)
-       
-       call cell_orientation(omega,n0,n1,n2,n3,case)
-       
-       call cell_splitting(sigmat,qm(:,i),an_flux%vol_flux,an_flux%face_flux,   &
-                           octant,LL,U,Lf,Uf,omega,i,face_known,case,n0,n1,n2,n3)
-              
-    end do
-    
+    ! Initiate loop over all cells
 
-  end subroutine queue
+    DO j=1,num_cells
 
-!-----------------------------------------------------------------------------------------------!
-!-----------------------------------------------------------------------------------------------!
+      i=sweep_path(j,soct,sq)
 
-  
+      sigmat=dens_fact(cells(i)%reg)*sigma_t(reg2mat(cells(i)%reg),eg)%xs
+
+      n0=outward_normal(i,0)
+      n1=outward_normal(i,1)
+      n2=outward_normal(i,2)
+      n3=outward_normal(i,3)
+
+      CALL cell_orientation(omega,n0,n1,n2,n3,CASE)
+
+      CALL cell_splitting(sigmat,qm(:,i),an_flux%vol_flux,an_flux%face_flux,   &
+            octant,LL,U,Lf,Uf,omega,i,face_known,CASE,n0,n1,n2,n3)
+
+    END DO
+
+
+  END SUBROUTINE queue
+
+  !-----------------------------------------------------------------------------------------------!
+  !-----------------------------------------------------------------------------------------------!
+
+
   !> This subroutine orientation determines whether cell's faces are
   !> incoming or outgoing and assigns them a 'case' for the transport
   !> calculation
-  subroutine cell_orientation(omega,n0,n1,n2,n3,case)
-  !*********************************************************************
-  !
-  ! Subroutine cell orientation determines whether cell's faces are
-  ! incoming or outgoing and assigns them a 'case' for the transport
-  ! calculation
-  !
-  !*********************************************************************
-  ! Define temporary variables
+  SUBROUTINE cell_orientation(omega,n0,n1,n2,n3,CASE)
+    !*********************************************************************
+    !
+    ! Subroutine cell orientation determines whether cell's faces are
+    ! incoming or outgoing and assigns them a 'case' for the transport
+    ! calculation
+    !
+    !*********************************************************************
+    ! Define temporary variables
 
-    integer(kind=li) :: incoming, outgoing
-    integer(kind=li), intent(inout) :: case
-    type(vector), intent(inout) :: omega
-    type(vector), intent(in) :: n0, n1, n2, n3
+    INTEGER(kind=li) :: incoming, outgoing
+    INTEGER(kind=li), INTENT(inout) :: CASE
+    TYPE(vector), INTENT(inout) :: omega
+    TYPE(vector), INTENT(in) :: n0, n1, n2, n3
 
-  ! Determine which case cell corresponds with respect to current ordinate
+    ! Determine which case cell corresponds with respect to current ordinate
 
     incoming=0
     outgoing=0
 
-    if((omega .dot. n0) < 0.0)then
-       incoming=incoming+1
-    elseif((omega .dot. n0) == 0.0)then
-    else
-       outgoing=outgoing+1
-    end if
+    IF((omega .dot. n0) < 0.0)THEN
+      incoming=incoming+1
+    ELSEIF((omega .dot. n0) == 0.0)THEN
+    ELSE
+      outgoing=outgoing+1
+    END IF
 
-    if((omega .dot. n1) < 0.0)then
-       incoming=incoming+1
-    elseif((omega .dot. n1) == 0.0)then
-    else
-       outgoing=outgoing+1
-    end if
+    IF((omega .dot. n1) < 0.0)THEN
+      incoming=incoming+1
+    ELSEIF((omega .dot. n1) == 0.0)THEN
+    ELSE
+      outgoing=outgoing+1
+    END IF
 
-    if((omega .dot. n2) < 0.0)then
-       incoming=incoming+1
-    elseif((omega .dot. n2) == 0.0)then
-    else
-       outgoing=outgoing+1
-    end if
+    IF((omega .dot. n2) < 0.0)THEN
+      incoming=incoming+1
+    ELSEIF((omega .dot. n2) == 0.0)THEN
+    ELSE
+      outgoing=outgoing+1
+    END IF
 
-    if((omega .dot. n3) < 0.0)then
-       incoming=incoming+1
-    elseif((omega .dot. n3) == 0.0)then
-    else
-       outgoing=outgoing+1
-    end if
+    IF((omega .dot. n3) < 0.0)THEN
+      incoming=incoming+1
+    ELSEIF((omega .dot. n3) == 0.0)THEN
+    ELSE
+      outgoing=outgoing+1
+    END IF
 
-    if(incoming == 3 .and. outgoing == 1)then
-       case=1
-    elseif(incoming == 1 .and. outgoing == 3)then
-       case=2
-    elseif(incoming == 2 .and. outgoing == 2)then
-       case=3
-    elseif(incoming == 2 .and. outgoing == 1)then
-       case=4
-    elseif(incoming == 1 .and. outgoing == 2)then
-       case=5
-    elseif(incoming == 1 .and. outgoing == 1)then
-       case=6
-    else
-       call stop_thor(10_li)
-    end if
+    IF(incoming == 3 .AND. outgoing == 1)THEN
+      CASE=1
+    ELSEIF(incoming == 1 .AND. outgoing == 3)THEN
+      CASE=2
+    ELSEIF(incoming == 2 .AND. outgoing == 2)THEN
+      CASE=3
+    ELSEIF(incoming == 2 .AND. outgoing == 1)THEN
+      CASE=4
+    ELSEIF(incoming == 1 .AND. outgoing == 2)THEN
+      CASE=5
+    ELSEIF(incoming == 1 .AND. outgoing == 1)THEN
+      CASE=6
+    ELSE
+      CALL stop_thor(10_li)
+    END IF
 
-  end subroutine cell_orientation
+  END SUBROUTINE cell_orientation
 
-!-----------------------------------------------------------------------------------------------!
-!-----------------------------------------------------------------------------------------------!
+  !-----------------------------------------------------------------------------------------------!
+  !-----------------------------------------------------------------------------------------------!
 
-  subroutine check_incoming(face,case,all_incoming_known)
-  !*********************************************************************
-  !
-  ! Subroutine check incoming determines if cell is ready for transport
-  ! calculation (all incoming angular fluxes are known)
-  !
-  !*********************************************************************
-  ! Define geometry variables
+  SUBROUTINE check_incoming(face,CASE,all_incoming_known)
+    !*********************************************************************
+    !
+    ! Subroutine check incoming determines if cell is ready for transport
+    ! calculation (all incoming angular fluxes are known)
+    !
+    !*********************************************************************
+    ! Define geometry variables
 
-    logical, dimension(0:3), intent(in) :: face
-    logical, intent(inout) :: all_incoming_known
-    integer(kind=li), intent(inout) :: case
+    LOGICAL, DIMENSION(0:3), INTENT(in) :: face
+    LOGICAL, INTENT(inout) :: all_incoming_known
+    INTEGER(kind=li), INTENT(inout) :: CASE
 
-  ! Define temporary variables
+    ! Define temporary variables
 
-    integer(kind=li) :: known_faces, f, l
+    INTEGER(kind=li) :: known_faces, f, l
 
     known_faces=0
 
-  ! Check if incoming face moments to all computed orders for cell are known
+    ! Check if incoming face moments to all computed orders for cell are known
 
-  ! Case 1 (3 incoming, 1 outgoing)
+    ! Case 1 (3 incoming, 1 outgoing)
 
-    if(case == 1)then
-       do f=0, 3
-          l=1
-          if(face(f) .eqv. .true.)then
-             known_faces=known_faces+1
-          end if
-       end do
+    IF(CASE == 1)THEN
+      DO f=0, 3
+        l=1
+        IF(face(f) .EQV. .TRUE.)THEN
+          known_faces=known_faces+1
+        END IF
+      END DO
 
-       if(known_faces == 3)then
-          all_incoming_known=.true.
-       else
-          all_incoming_known=.false.
-       end if
+      IF(known_faces == 3)THEN
+        all_incoming_known=.TRUE.
+      ELSE
+        all_incoming_known=.FALSE.
+      END IF
 
 
-  ! Case 2 (1 incoming, 3 outgoing)
+      ! Case 2 (1 incoming, 3 outgoing)
 
-    elseif(case == 2)then
-       do f=0, 3
-          l=1
-          if(face(f) .eqv. .true.)then
-             known_faces=known_faces+1
-          end if
-       end do
+    ELSEIF(CASE == 2)THEN
+      DO f=0, 3
+        l=1
+        IF(face(f) .EQV. .TRUE.)THEN
+          known_faces=known_faces+1
+        END IF
+      END DO
 
-       if(known_faces == 1)then
-          all_incoming_known=.true.
-       else
-          all_incoming_known=.false.
-       end if
+      IF(known_faces == 1)THEN
+        all_incoming_known=.TRUE.
+      ELSE
+        all_incoming_known=.FALSE.
+      END IF
 
-  ! Case 3 (2 incoming, 2 outgoing)
+      ! Case 3 (2 incoming, 2 outgoing)
 
-    elseif(case == 3)then
-       do f=0, 3
-          l=1
-          if(face(f) .eqv. .true.)then
-             known_faces=known_faces+1
-          end if
-       end do
+    ELSEIF(CASE == 3)THEN
+      DO f=0, 3
+        l=1
+        IF(face(f) .EQV. .TRUE.)THEN
+          known_faces=known_faces+1
+        END IF
+      END DO
 
-       if(known_faces == 2)then
-          all_incoming_known=.true.
-       else
-          all_incoming_known=.false.
-       end if
+      IF(known_faces == 2)THEN
+        all_incoming_known=.TRUE.
+      ELSE
+        all_incoming_known=.FALSE.
+      END IF
 
-  ! Case 4 (2 incoming, 1 outgoing)
+      ! Case 4 (2 incoming, 1 outgoing)
 
-    elseif(case == 4)then
-       do f=0, 3
-          l=1
-          if(face(f) .eqv. .true.)then
-             known_faces=known_faces+1
-          end if
-       end do
+    ELSEIF(CASE == 4)THEN
+      DO f=0, 3
+        l=1
+        IF(face(f) .EQV. .TRUE.)THEN
+          known_faces=known_faces+1
+        END IF
+      END DO
 
-       if(known_faces == 2)then
-          all_incoming_known=.true.
-       else
-          all_incoming_known=.false.
-       end if
+      IF(known_faces == 2)THEN
+        all_incoming_known=.TRUE.
+      ELSE
+        all_incoming_known=.FALSE.
+      END IF
 
-  ! Case 5 (1 incoming, 2 outgoing)
+      ! Case 5 (1 incoming, 2 outgoing)
 
-    elseif(case == 5)then
-       do f=0, 3
-          l=1
-          if(face(f) .eqv. .true.)then
-             known_faces=known_faces+1
-          end if
-       end do
+    ELSEIF(CASE == 5)THEN
+      DO f=0, 3
+        l=1
+        IF(face(f) .EQV. .TRUE.)THEN
+          known_faces=known_faces+1
+        END IF
+      END DO
 
-       if(known_faces == 1)then
-          all_incoming_known=.true.
-       else
-          all_incoming_known=.false.
-       end if
+      IF(known_faces == 1)THEN
+        all_incoming_known=.TRUE.
+      ELSE
+        all_incoming_known=.FALSE.
+      END IF
 
-   ! Case 6 (1 incoming, 1 outgoing)
+      ! Case 6 (1 incoming, 1 outgoing)
 
-    elseif(case == 6)then
-       do f=0, 3
-          l=1
-          if(face(f) .eqv. .true.)then
-             known_faces=known_faces+1
-          end if
-       end do
+    ELSEIF(CASE == 6)THEN
+      DO f=0, 3
+        l=1
+        IF(face(f) .EQV. .TRUE.)THEN
+          known_faces=known_faces+1
+        END IF
+      END DO
 
-       if(known_faces == 1)then
-          all_incoming_known=.true.
-       else
-          all_incoming_known=.false.
-       end if
+      IF(known_faces == 1)THEN
+        all_incoming_known=.TRUE.
+      ELSE
+        all_incoming_known=.FALSE.
+      END IF
 
-    else
-       call stop_thor(11_li)
-    end if
-    
-  end subroutine check_incoming
+    ELSE
+      CALL stop_thor(11_li)
+    END IF
 
-!-----------------------------------------------------------------------------------------------!
-!-----------------------------------------------------------------------------------------------!
- 
-  !> This subroutine evaluates angular flux moments phi_lm from the angular fluxes. 
+  END SUBROUTINE check_incoming
+
+  !-----------------------------------------------------------------------------------------------!
+  !-----------------------------------------------------------------------------------------------!
+
+  !> This subroutine evaluates angular flux moments phi_lm from the angular fluxes.
   !> Note: The angular flux moments are accumulated on-the-fly from angular fluxes so that
-  !> angular fluxes do not need to be stored.  
-  subroutine angular_moments(octant,q,sc_flux,an_flux)
-  !*********************************************************************
-  !
-  ! Subroutine angular moments computes the real spherical harmonics
-  ! angular moments of the angular flux
-  !
-  !*********************************************************************
-  ! Pass input parameters
+  !> angular fluxes do not need to be stored.
+  SUBROUTINE angular_moments(octant,q,sc_flux,an_flux)
+    !*********************************************************************
+    !
+    ! Subroutine angular moments computes the real spherical harmonics
+    ! angular moments of the angular flux
+    !
+    !*********************************************************************
+    ! Pass input parameters
 
-    integer(kind=li), intent(in) :: q,octant
+    INTEGER(kind=li), INTENT(in) :: q,octant
 
-  ! Declare angular and scalar fluxes
+    ! Declare angular and scalar fluxes
 
-    real(kind=d_t) :: sc_flux(num_moments_v,namom,num_cells)
-    type(angular_flux), intent(in) :: an_flux 
+    REAL(kind=d_t) :: sc_flux(num_moments_v,namom,num_cells)
+    TYPE(angular_flux), INTENT(in) :: an_flux
 
-  ! Define temporary variables
+    ! Define temporary variables
 
-    integer(kind=li) :: i, l, order, k, indx, m
+    INTEGER(kind=li) :: i, l, order, k, indx, m
 
-  ! Compute scalar flux angular moments, right now only isotropic
-  ! flux is accumulated
+    ! Compute scalar flux angular moments, right now only isotropic
+    ! flux is accumulated
 
-    do i=1, num_cells
-      ! even contributions  
-      do l=0,scatt_ord
-        do m=0,l
-          do k=1, num_moments_v
-             indx=1_li+m+(l+1_li)*l/2_li
-             sc_flux(k,indx,i)=sc_flux(k,indx,i)+&
+    DO i=1, num_cells
+      ! even contributions
+      DO l=0,scatt_ord
+        DO m=0,l
+          DO k=1, num_moments_v
+            indx=1_li+m+(l+1_li)*l/2_li
+            sc_flux(k,indx,i)=sc_flux(k,indx,i)+&
                   (1.0_d_t/8.0_d_t)*quadrature(q)%wt*Ysh(q,octant,indx)*an_flux%vol_flux(k,i)
-          end do
-        end do
-      end do
-      ! odd contributions  
-      do l=1,scatt_ord
-        do m=1,l
-          do k=1, num_moments_v
-             indx=neven+m+(l-1_li)*l/2_li
-             sc_flux(k,indx,i)=sc_flux(k,indx,i)+&
+          END DO
+        END DO
+      END DO
+      ! odd contributions
+      DO l=1,scatt_ord
+        DO m=1,l
+          DO k=1, num_moments_v
+            indx=neven+m+(l-1_li)*l/2_li
+            sc_flux(k,indx,i)=sc_flux(k,indx,i)+&
                   (1.0_d_t/8.0_d_t)*quadrature(q)%wt*Ysh(q,octant,indx)*an_flux%vol_flux(k,i)
-          end do
-        end do
-      end do 
-    end do
+          END DO
+        END DO
+      END DO
+    END DO
 
-  end subroutine angular_moments
+  END SUBROUTINE angular_moments
 
-end module sweep_module
-
+END MODULE sweep_module

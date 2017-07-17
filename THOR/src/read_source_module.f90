@@ -1,64 +1,63 @@
-module read_source_module
-!***********************************************************************
-!
-! Read source module contains all subroutines needed to read source file
-!
-!***********************************************************************
-  use types
-  use parameter_types
-  use filename_types
-  use multindex_types
-  use global_variables
-  use termination_module
-
-  implicit none
-
-contains
-
-  subroutine read_src
-  !*********************************************************************
+MODULE read_source_module
+  !***********************************************************************
   !
-  ! Subroutine reads source in 'unique' ahot format
-  ! (could be adapted for other formats, of course)
+  ! Read source module contains all subroutines needed to read source file
   !
-  !*********************************************************************
+  !***********************************************************************
+  USE types
+  USE parameter_types
+  USE filename_types
+  USE multindex_types
+  USE global_variables
+  USE termination_module
 
-  ! Declare temporary variables
+  IMPLICIT NONE
 
-    integer(kind=li) :: alloc_stat, eg, m, l
+CONTAINS
 
-  ! Open and read source file 
+  SUBROUTINE read_src
+    !*********************************************************************
+    !
+    ! Subroutine reads source in 'unique' ahot format
+    ! (could be adapted for other formats, of course)
+    !
+    !*********************************************************************
 
-    open(unit=10,file=trim(source_filename),status='unknown',action='read')
+    ! Declare temporary variables
 
-  ! Read source strength and moments from file
+    INTEGER(kind=li) :: alloc_stat, eg, m, l
 
-    read(10,*) num_src_mat
+    ! Open and read source file
 
-    allocate(src_mat(num_src_mat),stat=alloc_stat)
-    if(alloc_stat /= 0) call stop_thor(2_li)
+    OPEN(unit=10,file=TRIM(source_filename),status='unknown',action='read')
 
-    allocate(src_str(0:num_src_mat-1,egmax),stat=alloc_stat)
-    if(alloc_stat /= 0) call stop_thor(2_li)
+    ! Read source strength and moments from file
 
-    allocate(src_m(num_moments_v,0:num_src_mat-1,egmax),stat=alloc_stat)
-    if(alloc_stat /= 0) call stop_thor(2_li)
+    READ(10,*) num_src_mat
 
-    do m=1, num_src_mat
-       read(10,*) src_mat(m)
-       do eg=1, egmax
-          read(10,*) src_str(src_mat(m),eg)
-          do l=1, num_moments_v
-             read(10,*) src_m(l,src_mat(m),eg)  
-          end do
-       end do
-    end do
+    ALLOCATE(src_mat(num_src_mat),stat=alloc_stat)
+    IF(alloc_stat /= 0) CALL stop_thor(2_li)
 
-  ! Close mesh file
+    ALLOCATE(src_str(0:num_src_mat-1,egmax),stat=alloc_stat)
+    IF(alloc_stat /= 0) CALL stop_thor(2_li)
 
-    close(10)
- 
-  end subroutine read_src
+    ALLOCATE(src_m(num_moments_v,0:num_src_mat-1,egmax),stat=alloc_stat)
+    IF(alloc_stat /= 0) CALL stop_thor(2_li)
 
-end module read_source_module
+    DO m=1, num_src_mat
+      READ(10,*) src_mat(m)
+      DO eg=1, egmax
+        READ(10,*) src_str(src_mat(m),eg)
+        DO l=1, num_moments_v
+          READ(10,*) src_m(l,src_mat(m),eg)
+        END DO
+      END DO
+    END DO
 
+    ! Close mesh file
+
+    CLOSE(10)
+
+  END SUBROUTINE read_src
+
+END MODULE read_source_module
