@@ -1,0 +1,9 @@
+start hom_cube_keig_sc
+  input = keig_sc.inp
+  gold_file_name = keig_sc.inp_out.csv
+end
+
+start hom_cube_keig_lc
+  input = keig_lc.inp
+  gold_file_name = keig_lc.inp_out.csv
+end

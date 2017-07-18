@@ -697,6 +697,7 @@ CONTAINS
       ! compute convergence based on fission source
       !========================================================================
       fiss_dist_error(1)=fiss_dist_error(2)
+      IF (outer .LE. 1) fiss_dist_error(1) = 1
       fiss_dist_error(2)=0.0_d_t
       fiss_error        =0.0_d_t
 
