@@ -40,14 +40,14 @@ CONTAINS
     ! Pass optional arguments
 
     INTEGER(kind=li) :: unit_number
-    CHARACTER(100)   :: suffix
+    CHARACTER(*) :: suffix
     LOGICAL :: is_final
 
     ! Declare temporary variables
 
     INTEGER(kind=li) :: i, eg, l, region, ix, iy, iz
-    REAL(kind=d_t)   :: reac_rates(4,minreg:maxreg,egmax+1)
-    REAL(kind=d_t)   :: reg_volume(minreg:maxreg)
+    REAL(kind=d_t) :: reac_rates(4,minreg:maxreg,egmax+1)
+    REAL(kind=d_t) :: reg_volume(minreg:maxreg)
     REAL(kind=d_t), ALLOCATABLE :: cartesian_map(:,:,:,:)
     REAL(kind=d_t) :: centroid(3)
     TYPE(vector) :: vertex
