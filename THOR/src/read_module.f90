@@ -9,7 +9,7 @@ MODULE read_module
   ! User derived-type modules
 
   USE mpi
-  USE strings
+  USE stringmod
   USE types
   USE parameter_types
   USE filename_types

@@ -24,9 +24,9 @@ MODULE cell_splitting_module
   !        it's defined in all transport kernels...and then used in cell_splitting
   !
   USE general_utility_module
-  USE transport_kernel_module_SC, ONLY: transport_kernel_SC
-  USE transport_kernel_module_LC, ONLY: transport_kernel_LC
-  USE transport_kernel_module_CCE, ONLY: transport_kernel_CCE
+  USE transport_kernel_module_sc, ONLY: transport_kernel_sc
+  USE transport_kernel_module_lc, ONLY: transport_kernel_lc
+  USE transport_kernel_module_cce, ONLY: transport_kernel_cce
   USE termination_module
 
   IMPLICIT NONE

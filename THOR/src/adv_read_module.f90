@@ -300,7 +300,6 @@ CONTAINS
   ! [Execute] flag !==============================================================
   !===============================================================================
   SUBROUTINE input_flag_execute(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -337,7 +336,6 @@ CONTAINS
   ! [type] flag !=================================================================
   !===============================================================================
   SUBROUTINE input_flag_type(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -375,7 +373,6 @@ CONTAINS
   ! [lambda] flag !===============================================================
   !===============================================================================
   SUBROUTINE input_flag_lambda(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -412,7 +409,6 @@ CONTAINS
   ! [inflow] flag !===============================================================
   !===============================================================================
   SUBROUTINE input_flag_inflow(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -449,7 +445,6 @@ CONTAINS
   ! [piacc] flag !================================================================
   !===============================================================================
   SUBROUTINE input_flag_piacc(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -487,7 +482,6 @@ CONTAINS
   ! [sweep] flag !================================================================
   !===============================================================================
   SUBROUTINE input_flag_sweep(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -520,7 +514,6 @@ CONTAINS
   ! [page_sweep] flag !===========================================================
   !===============================================================================
   SUBROUTINE input_flag_page_sweep(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -557,7 +550,6 @@ CONTAINS
   ! [page_refl] flag !============================================================
   !===============================================================================
   SUBROUTINE input_flag_page_refl(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -597,7 +589,6 @@ CONTAINS
   ! [page_inflow] flag !==========================================================
   !===============================================================================
   SUBROUTINE input_flag_page_inflow(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -634,7 +625,6 @@ CONTAINS
   ! [maxouter] flag !=============================================================
   !===============================================================================
   SUBROUTINE input_flag_maxouter(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -669,7 +659,6 @@ CONTAINS
   ! [maxinner] flag !=============================================================
   !===============================================================================
   SUBROUTINE input_flag_maxinner(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -705,7 +694,6 @@ CONTAINS
   ! [innerconv] flag !============================================================
   !===============================================================================
   SUBROUTINE input_flag_innerconv(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -741,7 +729,6 @@ CONTAINS
   ! [outerconv] flag !============================================================
   !===============================================================================
   SUBROUTINE input_flag_outerconv(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -777,7 +764,6 @@ CONTAINS
   ! [kconv] flag !================================================================
   !===============================================================================
   SUBROUTINE input_flag_kconv(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -813,7 +799,6 @@ CONTAINS
   ! [keigsolve] flag !============================================================
   !===============================================================================
   SUBROUTINE input_flag_keigsolve(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -850,7 +835,6 @@ CONTAINS
   ! [jfnk_krsze] flag !===========================================================
   !===============================================================================
   SUBROUTINE input_flag_jfnk_krsze(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -886,7 +870,6 @@ CONTAINS
   ! [jfnk_maxkr] flag !===========================================================
   !===============================================================================
   SUBROUTINE input_flag_jfnk_maxkr(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -922,7 +905,6 @@ CONTAINS
   ! [jfnk_method] flag !==========================================================
   !===============================================================================
   SUBROUTINE input_flag_jfnk_method(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -961,7 +943,6 @@ CONTAINS
   ! [initial_guess] flag !========================================================
   !===============================================================================
   SUBROUTINE input_flag_initial_guess(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -998,7 +979,6 @@ CONTAINS
   ! [save_restart] flag !=========================================================
   !===============================================================================
   SUBROUTINE input_flag_save_restart(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1035,7 +1015,6 @@ CONTAINS
   ! [ipiter] flag !===============================================================
   !===============================================================================
   SUBROUTINE input_flag_ipiter(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1071,7 +1050,6 @@ CONTAINS
   ! [print_conv] flag !===========================================================
   !===============================================================================
   SUBROUTINE input_flag_print_conv(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1108,7 +1086,6 @@ CONTAINS
   ! [density_factor] flag !=======================================================
   !===============================================================================
   SUBROUTINE input_flag_density_factor(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1146,7 +1123,6 @@ CONTAINS
   ! [source_file] flag !==========================================================
   !===============================================================================
   SUBROUTINE input_flag_source_file(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1182,7 +1158,6 @@ CONTAINS
   ! [inflow_file] flag !==========================================================
   !===============================================================================
   SUBROUTINE input_flag_inflow_file(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1218,7 +1193,6 @@ CONTAINS
   ! [xs_file] flag !==============================================================
   !===============================================================================
   SUBROUTINE input_flag_xs_file(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1254,7 +1228,6 @@ CONTAINS
   ! [mesh_file] flag !============================================================
   !===============================================================================
   SUBROUTINE input_flag_mesh_file(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1290,7 +1263,6 @@ CONTAINS
   ! [flux_file] flag !============================================================
   !===============================================================================
   SUBROUTINE input_flag_flux_file(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1326,7 +1298,6 @@ CONTAINS
   ! [vtk_flux_file] flag !========================================================
   !===============================================================================
   SUBROUTINE input_flag_vtk_flux_file(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1362,7 +1333,6 @@ CONTAINS
   ! [quad_file] flag !============================================================
   !===============================================================================
   SUBROUTINE input_flag_quad_file(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1398,7 +1368,6 @@ CONTAINS
   ! [restart_file] flag !=========================================================
   !===============================================================================
   SUBROUTINE input_flag_restart_file(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1434,7 +1403,6 @@ CONTAINS
   ! [inguess_file] flag !=========================================================
   !===============================================================================
   SUBROUTINE input_flag_inguess_file(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1470,7 +1438,6 @@ CONTAINS
   ! [vtk_mat_file] flag !=========================================================
   !===============================================================================
   SUBROUTINE input_flag_vtk_mat_file(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1506,7 +1473,6 @@ CONTAINS
   ! [vtk_reg_file] flag !=========================================================
   !===============================================================================
   SUBROUTINE input_flag_vtk_reg_file(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1542,7 +1508,6 @@ CONTAINS
   ! [vtk_src_file] flag !=========================================================
   !===============================================================================
   SUBROUTINE input_flag_vtk_src_file(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1578,7 +1543,6 @@ CONTAINS
   ! [density_factor_file] flag !==================================================
   !===============================================================================
   SUBROUTINE input_flag_density_factor_file(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1614,7 +1578,6 @@ CONTAINS
   ! [print_xs] flag !=============================================================
   !===============================================================================
   SUBROUTINE input_flag_print_xs(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1651,7 +1614,6 @@ CONTAINS
   ! [vtk_flux] flag !=============================================================
   !===============================================================================
   SUBROUTINE input_flag_vtk_flux(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1687,7 +1649,6 @@ CONTAINS
   ! [vtk_reg] flag !==============================================================
   !===============================================================================
   SUBROUTINE input_flag_vtk_reg(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1724,7 +1685,6 @@ CONTAINS
   ! [vtk_mat] flag !==============================================================
   !===============================================================================
   SUBROUTINE input_flag_vtk_mat(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1761,7 +1721,6 @@ CONTAINS
   ! [vtk_src] flag !==============================================================
   !===============================================================================
   SUBROUTINE input_flag_vtk_src(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1798,7 +1757,6 @@ CONTAINS
   ! [qdorder] flag !==============================================================
   !===============================================================================
   SUBROUTINE input_flag_qdorder(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1833,7 +1791,6 @@ CONTAINS
   ! [qdtype] flag !===============================================================
   !===============================================================================
   SUBROUTINE input_flag_qdtype(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1873,7 +1830,6 @@ CONTAINS
   ! [ngroups] flag !==============================================================
   !===============================================================================
   SUBROUTINE input_flag_ngroups(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1908,7 +1864,6 @@ CONTAINS
   ! [pnorder] flag !==============================================================
   !===============================================================================
   SUBROUTINE input_flag_pnorder(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1944,7 +1899,6 @@ CONTAINS
   ! [pnread] flag !===============================================================
   !===============================================================================
   SUBROUTINE input_flag_pnread(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -1980,7 +1934,6 @@ CONTAINS
   ! [upscattering] flag !=========================================================
   !===============================================================================
   SUBROUTINE input_flag_upscattering(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -2017,7 +1970,6 @@ CONTAINS
   ! [multiplying] flag !==========================================================
   !===============================================================================
   SUBROUTINE input_flag_multiplying(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -2054,7 +2006,6 @@ CONTAINS
   ! [scatt_mult_included] flag !==================================================
   !===============================================================================
   SUBROUTINE input_flag_scatt_mult_included(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
@@ -2091,7 +2042,6 @@ CONTAINS
   ! [GENERIC] flag !==============================================================
   !===============================================================================
   SUBROUTINE input_flag_generic(data_string, set_defaults, sanity_check, verbose)
-    USE ERROR_GENERATOR
     IMPLICIT NONE
 
     CHARACTER(*):: data_string
