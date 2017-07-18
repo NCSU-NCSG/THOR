@@ -1,4 +1,4 @@
-module strings
+module stringmod
 
 use precision
 
@@ -780,4 +780,4 @@ end subroutine removebksl
 
 !**********************************************************************
 
-end module strings
+end module stringmod
