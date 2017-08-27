@@ -44,7 +44,7 @@ SRC :=  \
         multindex_types.f90								\
         outer_iteration_module.f90				\
         parameter_types.f90								\
-        precmod.f90												\
+        precision.f90												\
         quadrature_module.f90							\
         read_cross_section_module.f90			\
         read_inflow_module.f90						\
@@ -247,7 +247,7 @@ outer_iteration_module.o outer_iteration_module.mod: \
 
 parameter_types.o parameter_types.mod: parameter_types.f90 types.mod
 
-precmod.o precision.mod: precmod.f90
+precmod.o precision.mod: precision.f90
 
 quadrature_module.o quadrature_module.mod: quadrature_module.f90 \
   types.mod parameter_types.mod vector_types.mod angle_types.mod \
