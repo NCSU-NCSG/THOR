@@ -137,8 +137,8 @@ outer_iteration_module.o outer_iteration_module.mod: \
 parameter_types.o parameter_types.mod: parameter_types.f90 types.mod
 	$(CC) $(OPT1) parameter_types.f90
 #-------------------------------------------------------------------------------
-precmod.o precision.mod: precmod.f90
-	$(CC) $(OPT1) precmod.f90
+precmod.o precision.mod: precision.f90
+	$(CC) $(OPT1) precision.f90
 #-------------------------------------------------------------------------------
 quadrature_module.o quadrature_module.mod: quadrature_module.f90 \
  types.mod parameter_types.mod vector_types.mod angle_types.mod \

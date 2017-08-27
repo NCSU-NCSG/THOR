@@ -57,7 +57,7 @@ else
 fi
 
 if [ $execute = "yes" ]; then
-  $cmple1 precmod.f90
+  $cmple1 precision.f90
   $cmple1 stringmod.f90
   $cmple1 types.f90
   $cmple1 parameter_types.f90
