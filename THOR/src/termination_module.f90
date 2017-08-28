@@ -31,7 +31,7 @@ CONTAINS
     ! cross section types
 
     IF( ALLOCATED(xs_mat) )     DEALLOCATE(xs_mat)
-    IF( ALLOCATED(chi) )        DEALLOCATE(chi) 
+    IF( ALLOCATED(chi) )        DEALLOCATE(chi)
     IF( ALLOCATED(eg_bounds) )  DEALLOCATE(eg_bounds)
     IF( ALLOCATED(fiss) )       DEALLOCATE(fiss)
     IF( ALLOCATED(nu) )         DEALLOCATE(nu)
@@ -90,7 +90,7 @@ CONTAINS
     ! Pass argument
 
     INTEGER(kind=li) :: scode
-    CHARACTER(250), OPTIONAL:: message
+    CHARACTER(*), OPTIONAL:: message
 
     ! Print message
     SELECT CASE(scode)
