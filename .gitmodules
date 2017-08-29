@@ -1,0 +1,3 @@
+[submodule "contrib/lapack"]
+	path = contrib/lapack
+	url = https://github.com/reference-lapack/lapack
