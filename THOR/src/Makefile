@@ -99,7 +99,10 @@ LIB_MOD := $(LIB_OBJ:.o=.mod)
 #Intended for dependencies with their own makefiles or other build system
 #-----------------------------------------------------------------------------------
 COMP_DEP := \
-            libskit.a
+            libskit.a \
+            liblapack.a\
+            librefblas.a\
+            libtmglib.a
 
 #-----------------------------------------------------------------------------------
 #Phony targets for cleaning and building
@@ -160,7 +163,16 @@ $(LIB_MOD): %.mod:	$(filter %.f90, $(LIB_SRC))
 #-----------------------------------------------------------------------------------
 libskit.a:
 	cd $(CONTRIB)/SPARSKIT2; make
-	mv $(CONTRIB)/SPARSKIT2/libskit.a .
+	cp $(CONTRIB)/SPARSKIT2/libskit.a .
+
+liblapack.a:
+	cp $(CONTRIB)/libs/liblapack.a .
+
+librefblas.a:
+  cp $(CONTRIB)/libs/librefblas.a .
+
+libtmglib.a:
+  cp $(CONTRIB)/libs/libtmglib.a .
 
 #-----------------------------------------------------------------------------------
 #Dependency List
