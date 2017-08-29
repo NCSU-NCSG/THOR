@@ -56,6 +56,14 @@ CONTAINS
         eg_bounds(xs_mat(m)%mat,egmax+1)%xs=0.0_d_t
         READ(11,*) (fiss(xs_mat(m)%mat,e1)%xs,e1=1,egmax)
         READ(11,*) (nu(xs_mat(m)%mat,e1)%xs,e1=1,egmax)
+      ELSE
+        DO e1 = 1, egmax
+          chi(xs_mat(m)%mat,e1)%xs = zero
+          eg_bounds(xs_mat(m)%mat,e1)%xs = zero
+          fiss(xs_mat(m)%mat,e1)%xs = zero
+          nu(xs_mat(m)%mat,e1)%xs = zero
+        END DO
+        eg_bounds(xs_mat(m)%mat,egmax+1)%xs = zero
       END IF
       READ(11,*) (sigma_t(xs_mat(m)%mat,e1)%xs,e1=1,egmax)
 

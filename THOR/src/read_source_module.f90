@@ -46,6 +46,8 @@ CONTAINS
 
     DO m=1, num_src_mat
       READ(10,*) src_mat(m)
+      IF (src_mat(m) .ge. num_src_mat) CALL stop_thor(-1_li,&
+                                       "source region ID is 0-indexed and must be < # source regions")
       DO eg=1, egmax
         READ(10,*) src_str(src_mat(m),eg)
         DO l=1, num_moments_v
