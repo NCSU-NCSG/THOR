@@ -169,10 +169,10 @@ liblapack.a:
 	cp $(CONTRIB)/libs/liblapack.a .
 
 librefblas.a:
-  cp $(CONTRIB)/libs/librefblas.a .
+	cp $(CONTRIB)/libs/librefblas.a .
 
 libtmglib.a:
-  cp $(CONTRIB)/libs/libtmglib.a .
+	cp $(CONTRIB)/libs/libtmglib.a .
 
 #-----------------------------------------------------------------------------------
 #Dependency List
@@ -259,7 +259,7 @@ outer_iteration_module.o outer_iteration_module.mod: \
 
 parameter_types.o parameter_types.mod: parameter_types.f90 types.mod
 
-precmod.o precision.mod: precision.f90
+precision.o precision.mod: precision.f90
 
 quadrature_module.o quadrature_module.mod: quadrature_module.f90 \
   types.mod parameter_types.mod vector_types.mod angle_types.mod \
