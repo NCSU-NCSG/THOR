@@ -169,10 +169,10 @@ liblapack.a:
 	cp $(CONTRIB)/libs/liblapack.a .
 
 librefblas.a:
-  cp $(CONTRIB)/libs/librefblas.a .
+	cp $(CONTRIB)/libs/librefblas.a .
 
 libtmglib.a:
-  cp $(CONTRIB)/libs/libtmglib.a .
+	cp $(CONTRIB)/libs/libtmglib.a .
 
 #-----------------------------------------------------------------------------------
 #Dependency List
