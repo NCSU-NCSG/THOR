@@ -470,15 +470,11 @@ CONTAINS
 
     ! Solve for the upstream expansion coefficients
 
-    !!    call back_substitution(num_moments_f,upstream_moments,Lf,Uf,&
-    !!         upstream_flux)
-    CALL back_substitution(num_moments_f,upstream_moments,upstream_flux)
+    CALL back_substitution_lc(num_moments_f,upstream_moments,upstream_flux)
 
     transformed_moments=MATMUL(T,upstream_flux)
 
-    !!    call back_substitution(num_moments_f,transformed_moments,Lf,Uf,&
-    !!         transformed_flux)
-    CALL back_substitution(num_moments_f,transformed_moments,transformed_flux)
+    CALL back_substitution_lc(num_moments_f,transformed_moments,transformed_flux)
 
   END SUBROUTINE transform_incoming_moments
 
@@ -499,9 +495,7 @@ CONTAINS
     REAL(kind=d_t), DIMENSION(num_moments_f,num_moments_f), &
           INTENT(in) :: Lf, Uf
 
-    !!    call back_substitution(num_moments_f,transformed_moments,Lf,Uf,&
-    !!         transformed_flux)
-    CALL back_substitution(num_moments_f,transformed_moments,transformed_flux)
+    CALL back_substitution_lc(num_moments_f,transformed_moments,transformed_flux)
 
   END SUBROUTINE transform_boundary_moments
 
@@ -532,9 +526,7 @@ CONTAINS
 
     incoming_moments=MATMUL(p,transformed_flux)
 
-    !!    call back_substitution(num_moments_f,incoming_moments,Lf,Uf,&
-    !!         incoming_flux)
-    CALL back_substitution(num_moments_f,incoming_moments,incoming_flux)
+    CALL back_substitution_lc(num_moments_f,incoming_moments,incoming_flux)
 
   END SUBROUTINE incoming_cell_subcell_project
 
@@ -563,8 +555,7 @@ CONTAINS
       y(l)=q_moments(l)
     END DO
 
-    !!    call back_substitution(num_moments_v,y,LL,U,x)
-    CALL back_substitution(num_moments_v,y,x)
+    CALL back_substitution_lc(num_moments_v,y,x)
 
     DO l=1, num_moments_v
       q_expansion(l)=x(l)
@@ -602,9 +593,7 @@ CONTAINS
 
     subcell_moments=MATMUL(P,cell_source)
 
-    !!    call back_substitution(num_moments_v,subcell_moments,LL,U,&
-    !!         subcell_source)
-    CALL back_substitution(num_moments_v,subcell_moments,subcell_source)
+    CALL back_substitution_lc(num_moments_v,subcell_moments,subcell_source)
 
   END SUBROUTINE source_projection
 
@@ -913,14 +902,13 @@ CONTAINS
 
     ! Solve for expansion coefficient on face
 
-    !!    call back_substitution(num_moments_f,face_angular_mom,Lf,Uf,x)
-    CALL back_substitution(num_moments_f,face_angular_mom,x)
+    CALL back_substitution_lc(num_moments_f,face_angular_mom,x)
 
     face_cell_temp=MATMUL(TF,x)
 
   END SUBROUTINE face_moment_transformation
 
-  SUBROUTINE back_substitution(n,xin,xout)
+  SUBROUTINE back_substitution_lc(n,xin,xout)
     !*********************************************************************
     !
     ! Subroutine back_substitutions performs back substitution based on
@@ -949,41 +937,7 @@ CONTAINS
       xout(4)=-20.0_d_t*xin(3)+40.0_d_t*xin(4)
     END IF
 
-  END SUBROUTINE back_substitution
-
-  !!  subroutine back_substitution(n,b,L,U,x)
-  !!  !**********************************************************************
-  !!  !
-  !!  ! Subroutine back substitution solves for unknown after LU
-  !!  !
-  !!  !**********************************************************************
-  !!  ! Pass input parameters
-  !!
-  !!    integer(kind=li), intent(in) :: n
-  !!    real(kind=d_t), dimension(n), intent(in) :: b
-  !!    real(kind=d_t), dimension(n,n), intent(in) :: L, U
-  !!    real(kind=d_t), dimension(n), intent(out) :: x
-  !!
-  !!  ! Declare spatial order moments index
-  !!
-  !!    integer(kind=li) :: i, j
-  !!    real(kind=d_t), dimension(n) :: y
-  !!
-  !!    do i=1, n
-  !!       y(i)=b(i)
-  !!       do j=1, i-1
-  !!          y(i)=y(i)-L(i,j)*y(j)
-  !!       end do
-  !!    end do
-  !!
-  !!    do i=n, 1, -1
-  !!       x(i)=y(i)/U(i,i)
-  !!       do j=i+1, n
-  !!          x(i)=x(i)-U(i,j)*x(j)/U(i,i)
-  !!       end do
-  !!    end do
-  !!
-  !!  end subroutine back_substitution
+  END SUBROUTINE back_substitution_lc
 
   SUBROUTINE project_face_moments(af,bf,M)
     !*********************************************************************

@@ -28,13 +28,13 @@ MODULE global_variables
 
   ! General input variables
 
-  INTEGER(kind=li)  :: problem, space_ord, scatt_ord,quad_ord, xs_ord,       &
-        egmax, num_mat, max_outer, max_inner, num_src_mat,    &
+  INTEGER(kind=li)  :: problem, space_ord, scatt_ord,quad_ord, xs_ord,&
+        egmax, num_mat, max_outer, max_inner, num_src_mat,&
         vtk_flux_output, finflow ,num_moments_v,num_moments_f,&
         vtk_mat_output,vtk_reg_output,execution,print_xs_flag,&
         upscattering,vtk_src_output,multiplying,print_conv
 
-  REAL(kind=d_t)    :: inner_conv, outer_conv
+  REAL(kind=d_t) :: inner_conv, outer_conv
 
   ! Postprocessing variables
 
@@ -43,15 +43,18 @@ MODULE global_variables
   REAL(kind=d_t) :: glob_cmap_min_x, glob_cmap_min_y, glob_cmap_min_z
   REAL(kind=d_t) :: glob_cmap_max_x, glob_cmap_max_y, glob_cmap_max_z
 
+  INTEGER(kind=li) :: number_point_flux_locations
+  REAL(kind=d_t), ALLOCATABLE :: point_flux_locations(:,:)
+
   ! Source types
 
   INTEGER, DIMENSION(:), ALLOCATABLE :: src_mat
-  REAL(kind=d_t),ALLOCATABLE         :: src_m  (:,:,:)
-  REAL(kind=d_t),ALLOCATABLE         :: src_str(:,:)
+  REAL(kind=d_t),ALLOCATABLE :: src_m(:,:,:)
+  REAL(kind=d_t),ALLOCATABLE :: src_str(:,:)
 
   ! Inflow flux derived type
 
-  REAL(kind=d_t),DIMENSION(:,:,:,:,:),ALLOCATABLE :: binflx
+  REAL(kind=d_t), DIMENSION(:,:,:,:,:), ALLOCATABLE :: binflx
 
   !    type(bsource_mat), dimension(:), allocatable :: bsrc_mat
   !    type(bsource_str), dimension(:,:), allocatable :: bsrc_str

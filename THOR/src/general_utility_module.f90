@@ -224,4 +224,93 @@ CONTAINS
 
   END SUBROUTINE lu_decomposition
 
+  SUBROUTINE back_substitution(n,b,L,U,x)
+    !**********************************************************************
+    !
+    ! Subroutine back substitution solves for unknown after LU
+    !
+    !**********************************************************************
+    ! Pass input parameters
+
+    INTEGER(kind=li), INTENT(in) :: n
+    REAL(kind=d_t), DIMENSION(n), INTENT(in) :: b
+    REAL(kind=d_t), DIMENSION(n,n), INTENT(in) :: L, U
+    REAL(kind=d_t), DIMENSION(n), INTENT(out) :: x
+
+    ! Declare spatial order moments index
+
+    INTEGER(kind=li) :: i, j
+    REAL(kind=d_t), DIMENSION(n) :: y
+
+    DO i=1, n
+      y(i)=b(i)
+      DO j=1, i-1
+        y(i)=y(i)-L(i,j)*y(j)
+      END DO
+    END DO
+
+    DO i=n, 1, -1
+      x(i)=y(i)/U(i,i)
+      DO j=i+1, n
+        x(i)=x(i)-U(i,j)*x(j)/U(i,i)
+      END DO
+    END DO
+
+  END SUBROUTINE back_substitution
+
+  SUBROUTINE linearSolve(n, mat, rhs, sol)
+
+    ! pass variables
+    INTEGER(kind=li), INTENT(in) :: n
+    REAL(kind=d_t), INTENT(in) :: mat(n,n), rhs(n)
+    REAL(kind=d_t), INTENT(inout) :: sol(n)
+
+    ! local variables
+    REAL(kind=8) :: A(n,n), b(n, 1)
+    INTEGER :: info, ipiv(n)
+
+    ! copy over some data
+    A = mat
+    b(:, 1) = rhs
+
+    ! call lapack linear solver package
+    CALL dgesv(n, 1, A, n, ipiv, b, n, info)
+
+    sol = b(:, 1)
+
+  END SUBROUTINE linearSolve
+
+  SUBROUTINE barycentricCoordinates(p, v0, v1, v2, v3, lambda)
+
+    ! pass arguments
+    TYPE(vector), INTENT(in) :: p, v0, v1, v2, v3
+    TYPE(vector), INTENT(inout) :: lambda
+
+    ! local arguments to make math interface simpler
+    REAL(kind=d_t) :: matrix(3,3), rhs(3), x(3)
+
+    ! set the local variables
+    rhs(1) = p%x1 - v3%x1
+    rhs(2) = p%x2 - v3%x2
+    rhs(3) = p%x3 - v3%x3
+
+    matrix(1, 1) = v0%x1 - v3%x1
+    matrix(2, 1) = v0%x2 - v3%x2
+    matrix(3, 1) = v0%x3 - v3%x3
+
+    matrix(1, 2) = v1%x1 - v3%x1
+    matrix(2, 2) = v1%x2 - v3%x2
+    matrix(3, 2) = v1%x3 - v3%x3
+
+    matrix(1, 3) = v2%x1 - v3%x1
+    matrix(2, 3) = v2%x2 - v3%x2
+    matrix(3, 3) = v2%x3 - v3%x3
+
+    CALL linearSolve(3, matrix, rhs, x)
+
+    lambda%x1 = x(1)
+    lambda%x2 = x(2)
+    lambda%x3 = x(3)
+  END SUBROUTINE barycentricCoordinates
+
 END MODULE general_utility_module

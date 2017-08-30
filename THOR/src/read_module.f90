@@ -441,6 +441,8 @@ CONTAINS
     glob_do_cartesian_mesh = .FALSE.
     cartesian_map_filename = "cartesian_map_output.dat"
 
+    number_point_flux_locations = 0_li
+
   END SUBROUTINE set_default
 
   SUBROUTINE check_standard_input
@@ -762,7 +764,7 @@ CONTAINS
   SUBROUTINE read_postprocess_field
 
     ! local variables
-    INTEGER :: nwords, ntmp, i, nwwords, ios, nwwwords
+    INTEGER :: nwords, ntmp, i, l, j, nwwords, ios, nwwwords
     CHARACTER(100) :: buffer, fname
     CHARACTER(100) :: words(100), wwords(2), wwwords(100)
     INTEGER :: rank, mpi_err, localunit
@@ -784,7 +786,7 @@ CONTAINS
             IF( TRIM(lowercase(wwords(1))) .EQ. 'cartesian_map' ) THEN
               wwords(2)=TRIM(lowercase(wwords(2)))
               glob_do_cartesian_mesh = .TRUE.
-              ! wwords must be an array with of length 6
+              ! wwords must be an array with of length 9
               CALL parse(wwords(2), " ", wwwords, nwwwords)
               IF (nwwwords .NE. 9) THEN
                 WRITE(6,*) 'Following cartesian map nine entries are required; Found: ',&
@@ -808,6 +810,23 @@ CONTAINS
                 WRITE(6, *) "cartesian_map zmin and zmax are too close to each other"
               END IF
               glob_cmap_nz = string_to_int(wwwords(9), 'Conversion to cartesian map nz failed', 1)
+            ELSE IF ( TRIM(lowercase(wwords(1))) .EQ. 'point_value_locations' ) THEN
+              wwords(2)=TRIM(lowercase(wwords(2)))
+              CALL parse(wwords(2), " ", wwwords, nwwwords)
+              ! must be divisible by 3
+              IF (modulo(nwwwords, 3) .ne. 0) THEN
+                WRITE(6,*) 'point_value_locations number of entries must be divisible by 3; Found: ',&
+                      TRIM(wwords(2)),' has ', nwwwords, ' entries.'
+              ELSE
+                number_point_flux_locations = nwwwords / 3
+                ALLOCATE(point_flux_locations(number_point_flux_locations, 3))
+                DO l = 1, number_point_flux_locations
+                  DO j = 1, 3
+                    point_flux_locations(l, j) = string_to_real(wwwords((l - 1) * 3 + j),&
+                      'Conversion to point flux location failed')
+                  END DO
+                END DO
+              END IF
             ELSE
               WRITE(6,*) 'Unknown keyword in postprocess specification -- ',TRIM(wwords(1)),' --'
               WRITE(6,*) 'Execution will terminate.'
