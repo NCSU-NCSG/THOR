@@ -765,8 +765,8 @@ CONTAINS
 
     ! local variables
     INTEGER :: nwords, ntmp, i, l, j, nwwords, ios, nwwwords
-    CHARACTER(100) :: buffer, fname
-    CHARACTER(100) :: words(100), wwords(2), wwwords(100)
+    CHARACTER(1000) :: buffer, fname
+    CHARACTER(1000) :: words(100), wwords(2), wwwords(100)
     INTEGER :: rank, mpi_err, localunit
     CALL GET_COMMAND_ARGUMENT(1,fname)
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
@@ -842,7 +842,7 @@ CONTAINS
       END IF
     END DO
 
-101 FORMAT(A100)
+101 FORMAT(A1000)
 
   END SUBROUTINE read_postprocess_field
 
