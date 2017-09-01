@@ -17,6 +17,7 @@ MODULE wrapup_module
   USE angle_types
   USE global_variables
   USE termination_module
+  USE general_utility_module
 
   IMPLICIT NONE
 
@@ -45,13 +46,15 @@ CONTAINS
 
     ! Declare temporary variables
 
-    INTEGER(kind=li) :: i, eg, l, region, ix, iy, iz
+    INTEGER(kind=li) :: i, j, eg, l, region, ix, iy, iz
     REAL(kind=d_t) :: reac_rates(4,minreg:maxreg,egmax+1)
     REAL(kind=d_t) :: reg_volume(minreg:maxreg)
     REAL(kind=d_t), ALLOCATABLE :: cartesian_map(:,:,:,:)
     REAL(kind=d_t) :: centroid(3)
     TYPE(vector) :: vertex
     REAL(kind=d_t) :: delx, dely, delz, cartesian_vol
+    TYPE(vector) :: v0, v1, v2, v3, point, barycentric
+    INTEGER(kind=li) :: point_flux_location_element_indices(number_point_flux_locations)
 
     ! input file name for convenience
 
@@ -329,6 +332,49 @@ CONTAINS
       DEALLOCATE(cartesian_map)
     END IF
 
+    ! fluxes at point locations
+    IF (rank .EQ. 0 .AND. number_point_flux_locations .gt. 0 .AND. is_final) THEN
+      ! find the right tets
+      DO i = 1, num_cells
+        v0 = vertices(cells(i)%R(0))%v
+        v1 = vertices(cells(i)%R(1))%v
+        v2 = vertices(cells(i)%R(2))%v
+        v3 = vertices(cells(i)%R(3))%v
+
+        DO j = 1, number_point_flux_locations
+          point%x1 = point_flux_locations(j, 1)
+          point%x2 = point_flux_locations(j, 2)
+          point%x3 = point_flux_locations(j, 3)
+
+          ! point_flux_location_element_indices
+          CALL barycentricCoordinates(point, v0, v1, v2, v3, barycentric)
+
+          ! is the point in the tetrahedron?
+          IF (barycentric%x1 .ge. 0.0_d_t .and. barycentric%x1 .le. 1.0_d_t .and. &
+              barycentric%x2 .ge. 0.0_d_t .and. barycentric%x2 .le. 1.0_d_t .and. &
+              barycentric%x3 .ge. 0.0_d_t .and. barycentric%x3 .le. 1.0_d_t .and. &
+              1.0_d_t - barycentric%x1 - barycentric%x2 - barycentric%x3 .ge. 0.0_d_t .and. &
+              1.0_d_t - barycentric%x1 - barycentric%x2 - barycentric%x3 .le. 1.0_d_t) THEN
+              point_flux_location_element_indices(j) = i
+          END IF
+        END DO
+      END DO
+      ! print the group averages fluxes
+      WRITE(unit_number, *)
+      WRITE(unit_number, *) "--------------------------------------------------------"
+      WRITE(unit_number, *) "   Point flux values  "
+      WRITE(unit_number, *) "--------------------------------------------------------"
+      WRITE(unit_number, *)
+      DO j = 1, number_point_flux_locations
+        WRITE(unit_number, 510) "Point: ", point_flux_locations(j, :)
+        DO eg=1, egmax
+          WRITE(unit_number, 511) "Group: ", eg, flux(1, 1, point_flux_location_element_indices(j), eg, niter)
+        END DO
+      END DO
+    END IF
+
+
+
     ! write a csv output file containing all region averaged
     ! TODO: make this more flexible, currently this is for testing only
     CALL GET_COMMAND_ARGUMENT(1,fname)
@@ -358,7 +404,8 @@ CONTAINS
 507 FORMAT(1X,ES25.16,A1)
 508 FORMAT(1X,ES25.16)
 509 FORMAT(1X,I3,A1)
+510 FORMAT(1X,A,3ES14.6)
+511 FORMAT(1X,A,I3,ES14.6)
   END SUBROUTINE wrapup
-
 
 END MODULE wrapup_module

@@ -182,7 +182,7 @@ adv_read_module.o adv_read_module.mod: adv_read_module.f90 \
   error_generator.mod global_variables.mod parameter_types.mod
 
 ahotc_matrix_module.o ahotc_matrix_module.mod: ahotc_matrix_module.f90 \
-  types.mod parameter_types.mod multindex_types.mod
+  types.mod parameter_types.mod multindex_types.mod general_utility_module.mod
 
 angle_types.o angle_types.mod: angle_types.f90 types.mod vector_types.mod
 

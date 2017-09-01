@@ -70,6 +70,9 @@ CONTAINS
     IF( ALLOCATED(neldep) )   DEALLOCATE(neldep)
     IF( ALLOCATED( eldep) )   DEALLOCATE( eldep)
 
+    ! post-processing variables
+    IF( ALLOCATED(point_flux_locations) ) DEALLOCATE(point_flux_locations)
+
     ! Close files that might be open
 
     IF(page_sweep.EQ.1_li) CLOSE(unit=99)

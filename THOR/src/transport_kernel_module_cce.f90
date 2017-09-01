@@ -1028,40 +1028,6 @@ CONTAINS
 
   END SUBROUTINE face_moment_transformation
 
-  SUBROUTINE back_substitution(n,b,L,U,x)
-    !**********************************************************************
-    !
-    ! Subroutine back substitution solves for unknown after LU
-    !
-    !**********************************************************************
-    ! Pass input parameters
-
-    INTEGER(kind=li), INTENT(in) :: n
-    REAL(kind=d_t), DIMENSION(n), INTENT(in) :: b
-    REAL(kind=d_t), DIMENSION(n,n), INTENT(in) :: L, U
-    REAL(kind=d_t), DIMENSION(n), INTENT(out) :: x
-
-    ! Declare spatial order moments index
-
-    INTEGER(kind=li) :: i, j
-    REAL(kind=d_t), DIMENSION(n) :: y
-
-    DO i=1, n
-      y(i)=b(i)
-      DO j=1, i-1
-        y(i)=y(i)-L(i,j)*y(j)
-      END DO
-    END DO
-
-    DO i=n, 1, -1
-      x(i)=y(i)/U(i,i)
-      DO j=i+1, n
-        x(i)=x(i)-U(i,j)*x(j)/U(i,i)
-      END DO
-    END DO
-
-  END SUBROUTINE back_substitution
-
   FUNCTION face_moment1(gam1,gam2,e)
     !*********************************************************************
     !

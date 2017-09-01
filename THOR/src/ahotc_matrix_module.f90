@@ -11,6 +11,7 @@ MODULE ahotc_matrix_module
   USE types
   USE parameter_types
   USE multindex_types
+  USE general_utility_module
 
   IMPLICIT NONE
 
@@ -81,81 +82,5 @@ CONTAINS
     END DO
 
   END SUBROUTINE mass_matrix
-
-  SUBROUTINE lu_decomposition(n,A,L,U)
-    !**********************************************************************
-    !
-    ! Subroutine lu decomposition decomposes L and U matrices from A
-    !
-    !**********************************************************************
-    ! Pass input parameters
-
-    INTEGER(kind=li), INTENT(in) :: n
-    REAL(kind=d_t), DIMENSION(n,n), INTENT(in)  :: A
-    REAL(kind=d_t), DIMENSION(n,n), INTENT(out) :: L, U
-
-    ! Declare spatial order moments index
-
-    INTEGER(kind=li) :: i, j, k
-
-    DO j=1, n
-      U(1,j)=A(1,j)
-    END DO
-
-    DO i=1, n
-      k=i
-      L(i,k)=1.0_d_t
-    END DO
-
-    DO k=1, n
-      DO j=k, n
-        U(k,j)=A(k,j)
-        DO i=1, k-1
-          U(k,j)=U(k,j)-L(k,i)*U(i,j)
-        END DO
-      END DO
-      DO i=k+1, n
-        L(i,k)=A(i,k)/U(k,k)
-        DO j=1, k-1
-          L(i,k)=L(i,k)-(L(i,j)*U(j,k))/U(k,k)
-        END DO
-      END DO
-    END DO
-
-  END SUBROUTINE lu_decomposition
-
-  SUBROUTINE back_substitution(n,b,L,U,x)
-    !**********************************************************************
-    !
-    ! Subroutine back substitution solves for unknown after LU
-    !
-    !**********************************************************************
-    ! Pass input parameters
-
-    INTEGER(kind=li), INTENT(in) :: n
-    REAL(kind=d_t), DIMENSION(n), INTENT(in) :: b
-    REAL(kind=d_t), DIMENSION(n,n), INTENT(in) :: L, U
-    REAL(kind=d_t), DIMENSION(n), INTENT(out) :: x
-
-    ! Declare spatial order moments index
-
-    INTEGER(kind=li) :: i, j
-    REAL(kind=d_t), DIMENSION(n) :: y
-
-    DO i=1, n
-      y(i)=b(i)
-      DO j=1, i-1
-        y(i)=y(i)-L(i,j)*y(j)
-      END DO
-    END DO
-
-    DO i=n, 1, -1
-      x(i)=y(i)/U(i,i)
-      DO j=i+1, n
-        x(i)=x(i)-U(i,j)*x(j)/U(i,i)
-      END DO
-    END DO
-
-  END SUBROUTINE back_substitution
 
 END MODULE ahotc_matrix_module
