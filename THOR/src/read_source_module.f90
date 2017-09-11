@@ -50,9 +50,7 @@ CONTAINS
                                        "source region ID is 0-indexed and must be < # source regions")
       DO eg=1, egmax
         READ(10,*) src_str(src_mat(m),eg)
-        DO l=1, num_moments_v
-          READ(10,*) src_m(l,src_mat(m),eg)
-        END DO
+        READ(10,*) (src_m(l,src_mat(m),eg), l = 1, num_moments_v)
       END DO
     END DO
 

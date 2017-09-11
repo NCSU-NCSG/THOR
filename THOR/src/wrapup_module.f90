@@ -334,6 +334,7 @@ CONTAINS
 
     ! fluxes at point locations
     IF (rank .EQ. 0 .AND. number_point_flux_locations .gt. 0 .AND. is_final) THEN
+      point_flux_location_element_indices = 0_li
       ! find the right tets
       DO i = 1, num_cells
         v0 = vertices(cells(i)%R(0))%v
@@ -366,10 +367,14 @@ CONTAINS
       WRITE(unit_number, *) "--------------------------------------------------------"
       WRITE(unit_number, *)
       DO j = 1, number_point_flux_locations
-        WRITE(unit_number, 510) "Point: ", point_flux_locations(j, :)
-        DO eg=1, egmax
-          WRITE(unit_number, 511) "Group: ", eg, flux(1, 1, point_flux_location_element_indices(j), eg, niter)
-        END DO
+        IF (point_flux_location_element_indices(j) .GT. 0_li) THEN
+          WRITE(unit_number, 510) "Point: ", point_flux_locations(j, :)
+          DO eg=1, egmax
+            WRITE(unit_number, 511) "Group: ", eg, flux(1, 1, point_flux_location_element_indices(j), eg, niter)
+          END DO
+        ELSE
+          WRITE(unit_number, 510) "Warning. Point: ", point_flux_locations(j, :), " was not found."
+        END IF
       END DO
     END IF
 
@@ -406,6 +411,7 @@ CONTAINS
 509 FORMAT(1X,I3,A1)
 510 FORMAT(1X,A,3ES14.6)
 511 FORMAT(1X,A,I3,ES14.6)
+512 FORMAT(1X,A,3ES14.6,A)
   END SUBROUTINE wrapup
 
 END MODULE wrapup_module
