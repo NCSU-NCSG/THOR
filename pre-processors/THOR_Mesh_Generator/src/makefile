@@ -10,7 +10,7 @@ debug:    TYPE := _Debug
 coverage: TYPE := _Coverage
 
 all:      OPT := -O3
-debug:    OPT := -O0 -g
+debug:    OPT := -O0 -g -fbacktrace -ffpe-trap=zero,overflow,underflow 
 coverage: OPT := -O0 -g --coverage
 
 #-----------------------------------------------------------------------------------

@@ -105,7 +105,6 @@ CONTAINS
     END DO
 
     CLOSE(out_unit)
-
   END SUBROUTINE outputThorMesh
 
   !-----------------------------------------------------------------------------
