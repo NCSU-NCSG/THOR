@@ -1,0 +1,36 @@
+2r2gP1 LC
+
+  start problem
+    execution = yes
+    lambda = -1
+    type=keig ; keigsolver = pi ; piacc=none
+    sweep = precomp
+    page_refl = save
+    kconv = 1E-4; innerconv=1E-12 ; outerconv=1E-7
+    maxinner = 4 ; maxouter = 500
+  end problem
+
+  start inout
+    mesh_file     =  base.thrm
+    xs_file       =  2r2gP1.xs
+    flux_file     =  2r2gP1_LC.flux
+    print_xs=yes
+  end inout
+
+  start cross_sections
+     ngroups = 2
+     pnorder = 1
+     pnread  = 1
+     scatt_mult_included = no
+  end cross_sections
+
+  start quadrature
+    qdtype = levelsym
+    qdorder = 2
+  end quadrature
+
+  start regionmap
+     1 2
+  end regionmap
+
+end file
