@@ -91,6 +91,12 @@ MODULE globals
   !> Used to skip user driven boundary conditions mapping if input file not
   !! found or otherwise disabled
   LOGICAL :: skip_boundary_map
+  !> If true boundary conditions are all of a single type and determined by
+  !! by adjacency list
+  LOGICAL :: boundary_condition_from_adjacency
+  !> If boundary_condition_from_adjacency is true this boundary condition type
+  !! is used for all exterior faces determined by adjacency list
+  INTEGER :: single_boundary_condition_type
   !> Holds the name of the standard input config file
   CHARACTER(200) :: std_in_file = ""
   !> Holds the name of the standard input mesh file
@@ -366,6 +372,7 @@ CONTAINS
     END IF
 
     ! Read boundary id and override block_id_map default
+    boundary_condition_from_adjacency = .FALSE.
     IF (.NOT. skip_boundary_map) THEN
       nentries_bc = lengthTextFile(boundary_id_file, boundary_id_unit)
       ALLOCATE(boundary_instructions(nentries_bc, 2))
@@ -378,6 +385,13 @@ CONTAINS
       DO j = 1, nentries_bc
         position = mapIndexOf(boundary_instructions(j, 1), boundary_id_map(:, 1))
         boundary_id_map(position, 2) = boundary_instructions(j, 2)
+        ! FIXME: currently if any of the keys is < 0 we set the boundary_condition_from_adjacency
+        ! to true and get single_boundary_condition_type. That is not really logical but the easist
+        ! until better input handling is in place.
+        IF (boundary_instructions(j, 1) < 0) THEN
+          boundary_condition_from_adjacency = .TRUE.
+          single_boundary_condition_type = boundary_instructions(j, 2)
+        END IF
       END DO
     END IF
 
@@ -401,7 +415,7 @@ CONTAINS
 
   !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
-  !> Given an adjacency map has been establsihed, returns a pair of arrays
+  !> Given an adjacency map has been established, returns a pair of arrays
   !! detailing boundary faces and elements.
   !!
   !! See boundary_face_list and boundary_element_list
@@ -417,7 +431,7 @@ CONTAINS
       DO j = 1, 4
         IF (adjacency_map(i, j) .EQ. -1) THEN
           ! check if we, by error, exceeded bc_count
-          IF (counter .GT. bc_count)  &
+          IF (counter .GT. bc_count .AND. .NOT. boundary_condition_from_adjacency)  &
                 CALL generateErrorMessage(err_code_default, err_fatal, &
                 'Boundary elements and adjacency list are inconsistent: too many -1 in adjacency list')
           boundary_element_list(counter) = i
@@ -426,7 +440,7 @@ CONTAINS
         END IF
       END DO
     END DO
-    IF (counter - 1 .NE. bc_count)  &
+    IF (counter - 1 .NE. bc_count  .AND. .NOT. boundary_condition_from_adjacency)  &
           CALL generateErrorMessage(err_code_default, err_fatal, &
           'Boundary elements and adjacency list are inconsistent: not enough -1 in adjacency list')
   END SUBROUTINE getBoundaryElements
@@ -473,18 +487,23 @@ CONTAINS
               source_id_map(j, 2)
       END DO
     END IF
-    IF (skip_boundary_map) THEN
-      WRITE(6, '(A)') "No boundary ID edits are provided"
+    IF (boundary_condition_from_adjacency) THEN
+      WRITE(6, '(A)') "Boundary ID assignment is overriden. Boundaries determined by adjacency list."
+      WRITE(6, '(A,I4)') "All exterior boundaries are assigned boundary type ", single_boundary_condition_type
     ELSE
-      IF (.NOT. ALLOCATED(boundary_id_map)) &
-            CALL generateErrorMessage(err_code_default, err_fatal, &
-            'boundary id map not allocated,  echoIngestedInput called too early')
-      WRITE(6, '(A,A)') "Reporting Source Boundary reassignments from file: ", TRIM(boundary_id_file)
-      s = SIZE(boundary_id_map(:, 1))
-      DO j = 1, s
-        WRITE(6, '(A,I0,A,I0)') "Sideset ID ", boundary_id_map(j, 1), " Boundary Type ",&
-              boundary_id_map(j, 2)
-      END DO
+      IF (skip_boundary_map) THEN
+        WRITE(6, '(A)') "No boundary ID edits are provided"
+      ELSE
+        IF (.NOT. ALLOCATED(boundary_id_map)) &
+              CALL generateErrorMessage(err_code_default, err_fatal, &
+              'boundary id map not allocated,  echoIngestedInput called too early')
+        WRITE(6, '(A,A)') "Reporting Source Boundary reassignments from file: ", TRIM(boundary_id_file)
+        s = SIZE(boundary_id_map(:, 1))
+        DO j = 1, s
+          WRITE(6, '(A,I0,A,I0)') "Sideset ID ", boundary_id_map(j, 1), " Boundary Type ",&
+                boundary_id_map(j, 2)
+        END DO
+      END IF
     END IF
     WRITE(6, *)
   END SUBROUTINE echoIngestedInput
