@@ -22,11 +22,10 @@ CONTAINS
     !! in this local list. i.e. 3 1 2 is represented always as 1 2 3. This prevents
     !! redundancy in the adjancency checking protocol.
     !!
+    !! @param faces Faces of the elements
+    !! @param elements Info on elements
     !! @param numelements Number of elements
     !! @param numproc Number of threads
-    !! @param elements Info on elements
-    !! @param faces Faces of the elements
-    !! @param tempint Temporary integer used to order faces
     !-------------------------------------------------------------------------------
     !-------------------------------------------------------------------------------
     SUBROUTINE getfaces(faces,elements,numelements,numproc)
@@ -79,12 +78,11 @@ CONTAINS
     !> Find the boundary faces for a general set of faces for a general set of
     !! elements, see
     !!
-    !! @param numel Number of elements
-    !! @param numproc Number of processors
     !! @param faces Faces for each element, contains their nodes
-    !! @param totbound Total number of boundary faces
+    !! @param numel Number of elements
     !! @param boundfaces Boundary faces nodes
-    !! @param fadjcount Adjacency count for each face
+    !! @param totbound Total number of boundary faces
+    !! @param numproc Number of processors
     !-------------------------------------------------------------------------------
     !-------------------------------------------------------------------------------
     SUBROUTINE findboundaries(faces,numel,boundfaces,totbound,numproc)
@@ -139,11 +137,10 @@ CONTAINS
     !> Calculates the adjacency count for each face, this is the expensive part,
     !! optimization attempts should focus here.
     !!
-    !! @param numel Number of elements
-    !! @param numproc Number of processors
     !! @param faces Faces for each element, contains their nodes
+    !! @param numel Number of elements
     !! @param fadjcount Adjacency count for each face
-    !! @param time1,time2,clock_rate, timetaken Timer variables
+    !! @param numproc Number of processors
     !-------------------------------------------------------------------------------
     !-------------------------------------------------------------------------------
     SUBROUTINE getadjacencies(faces,numel,fadjcount,numproc)
