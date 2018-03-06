@@ -12,7 +12,7 @@ coverage: TYPE := _Coverage
 
 all:      OPT := -O3
 MPparallel: OPT := -O3 -fopenmp
-debug:    OPT := -O0 -g
+debug:    OPT := -O0 -g -fbacktrace -ffpe-trap=zero,overflow,underflow 
 coverage: OPT := -O0 -g --coverage
 
 #-----------------------------------------------------------------------------------

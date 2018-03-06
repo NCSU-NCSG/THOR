@@ -93,13 +93,15 @@ PROGRAM generateMesh
     CALL generateErrorMessage(err_code_default, err_fatal, "Input file extension not supported")
   END SELECT
 
-  ! Prepare writing the output file
+  ! Read in remapping for region, source, and boundary ids
   CALL setupOptionalReMapping()
+
+  ! Print information about the input to screen
+  CALL echoIngestedInput()
+
+  ! Actual reformatting work
   CALL computeAdjacencyList()
   CALL getBoundaryElements()
-
-  ! Print some info for the user
-  CALL echoIngestedInput()
 
   !Output File
   SELECT CASE (out_extension)
@@ -113,7 +115,7 @@ PROGRAM generateMesh
   DEALLOCATE(block_id_map, source_id_map, adjacency_map, boundary_element_list,&
         boundary_face_list)
 
-  ! TODO: replace with a termination subrouine residing in the lib folder, printing
+  ! TODO: replace with a termination subroutine residing in the lib folder, printing
   ! exec time and a general message that all went well
   WRITE(6, *) "TODO We need a successful termination message here. Maybe have that in lib too?"
 END PROGRAM generateMesh
