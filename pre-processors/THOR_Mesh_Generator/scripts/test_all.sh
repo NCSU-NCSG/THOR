@@ -57,3 +57,13 @@ cd ../test/bad_gmesh_no_format_block
   pwd
   bash ./run_test.sh
 cd -
+
+cd ../test/unv_sphere_in_shell_in_box
+  pwd
+  bash ./run_test.sh
+cd -
+
+cd ../test/bad_unv_sphere_in_shell_in_box_no_2411
+  pwd
+  bash ./run_test.sh
+cd -

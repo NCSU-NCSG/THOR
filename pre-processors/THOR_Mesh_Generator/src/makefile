@@ -31,7 +31,7 @@ SRC := \
 				globals.f95        					\
 				thor_mesh.f95      					\
 				unv.f95      					\
-				boundaryfunctions.f95      					\
+				boundary_conditions.f95      					\
 				gmesh.f95
 
 OBJ := $(SRC:.f95=.o)
@@ -133,7 +133,7 @@ $(LIB_MOD): %.mod:	$(filter %.f95, $(LIB_SRC))
 #Dependency List
 #Use [gfortran -M -cpp *.f95] repeatedly until clean compile to update rules below
 #-----------------------------------------------------------------------------------
-boundaryfunctions.o boundaryfunctions.mod: boundaryfunctions.f95
+boundary_conditions.o boundary_conditions.mod: boundary_conditions.f95
 
 globals.o globals.mod: globals.f95 integer_array_tools.mod \
  tet_mesh_tet_neighbors.mod
@@ -146,4 +146,4 @@ mesh_converter.o: mesh_converter.f95 globals.mod gmesh.mod unv.mod \
 thor_mesh.o thor_mesh.mod: thor_mesh.f95 globals.mod \
  tet_mesh_tet_neighbors.mod
 
-unv.o unv.mod: unv.f95 globals.mod boundaryfunctions.mod
+unv.o unv.mod: unv.f95 globals.mod boundary_conditions.mod

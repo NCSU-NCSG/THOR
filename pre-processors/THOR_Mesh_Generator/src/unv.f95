@@ -14,7 +14,7 @@
 !-------------------------------------------------------------------------------
 MODULE unv
     USE globals
-    USE boundaryfunctions
+    USE boundary_conditions
     IMPLICIT NONE
 CONTAINS
 
@@ -22,12 +22,15 @@ CONTAINS
     !-------------------------------------------------------------------------------
     !> Extracts elements, node, bc, and block_id data from the unv file, then
     !! converts them to proper format for the globals used in the mesh creator
+    !!
+    !! @param numproc Number of processors to use
+    !! @param faces All of the faces
     !-------------------------------------------------------------------------------
     !-------------------------------------------------------------------------------
     SUBROUTINE ingestUNV()
         !> Number of processors to use
         INTEGER::numproc
-        !> all of the faces
+        !> All of the faces
         INTEGER,ALLOCATABLE::faces(:,:,:)
 
         !read in the unv file
@@ -55,16 +58,20 @@ CONTAINS
     !-------------------------------------------------------------------------------
     !-------------------------------------------------------------------------------
     !> Extracts elements, node, and material data from the unv file
+    !!
+    !! @param delim Delimiter to find various pieces of the mesh in the unv file
+    !! @param tempcharacter Temporary character variable
+    !! @param conversion Conversion factor for unv nodes
     !-------------------------------------------------------------------------------
     !-------------------------------------------------------------------------------
     SUBROUTINE readinunv()
         !> Delimiter to find various pieces of the mesh in the unv file
         CHARACTER(64)::delim
-        !> temporary character variable
+        !> Temporary character variable
         CHARACTER(64)::tempcharacter
         !> loop control
         INTEGER::i,j
-        !> conversion factor for unv nodes
+        !> Conversion factor for unv nodes
         REAL(8)::conversion
 
         !open input mesh file
@@ -155,6 +162,11 @@ CONTAINS
     !-------------------------------------------------------------------------------
     !-------------------------------------------------------------------------------
     !> Find delimiter value in a unv file
+    !!
+    !! @param filenum File id number
+    !! @param delim Delimiter string
+    !! @param tc1,tc2,tempcharacter Temporary character variables
+    !! @param ios File io status
     !-------------------------------------------------------------------------------
     !-------------------------------------------------------------------------------
     SUBROUTINE finddelim(filenum,delim)
@@ -164,9 +176,9 @@ CONTAINS
         CHARACTER(64),INTENT(IN)::delim
         !> Temporary character variables
         CHARACTER(64)::tc1="",tc2=""
-        !> file io status
+        !> File io status
         INTEGER::ios
-        !> temporary character variable
+        !> Temporary character variable
         CHARACTER(64)::tempcharacter
 
         !go to beginning of file
@@ -182,7 +194,7 @@ CONTAINS
             READ(filenum,*,IOSTAT=ios)tempcharacter
             IF(ios .NE. 0)THEN
                 WRITE(*,'(2A)') "End of file reached without finding delimiter: ", delim
-                STOP
+                STOP "Error: delimiter not found!"
             END IF
         END DO
     END SUBROUTINE finddelim
@@ -190,6 +202,11 @@ CONTAINS
     !-------------------------------------------------------------------------------
     !-------------------------------------------------------------------------------
     !> Count the number of values in the section of the unv file
+    !!
+    !! @param filenum File id number
+    !! @param delim Delimiter string
+    !! @param count Number counted
+    !! @param tempcharacter Temporary character variable
     !-------------------------------------------------------------------------------
     !-------------------------------------------------------------------------------
     SUBROUTINE counter(filenum,delim,count)
@@ -199,7 +216,7 @@ CONTAINS
         CHARACTER(64),INTENT(IN)::delim
         !> Number counted
         INTEGER,INTENT(OUT)::count
-        !> temporary character variable
+        !> Temporary character variable
         CHARACTER(64)::tempcharacter
 
         !count number until delimiter
