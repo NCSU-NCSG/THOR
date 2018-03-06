@@ -22,9 +22,6 @@ CONTAINS
     !-------------------------------------------------------------------------------
     !> Extracts elements, node, bc, and block_id data from the unv file, then
     !! converts them to proper format for the globals used in the mesh creator
-    !!
-    !! @param numproc Number of processors to use
-    !! @param faces All of the faces
     !-------------------------------------------------------------------------------
     !-------------------------------------------------------------------------------
     SUBROUTINE ingestUNV()
@@ -58,10 +55,6 @@ CONTAINS
     !-------------------------------------------------------------------------------
     !-------------------------------------------------------------------------------
     !> Extracts elements, node, and material data from the unv file
-    !!
-    !! @param delim Delimiter to find various pieces of the mesh in the unv file
-    !! @param tempcharacter Temporary character variable
-    !! @param conversion Conversion factor for unv nodes
     !-------------------------------------------------------------------------------
     !-------------------------------------------------------------------------------
     SUBROUTINE readinunv()
@@ -165,8 +158,6 @@ CONTAINS
     !!
     !! @param filenum File id number
     !! @param delim Delimiter string
-    !! @param tc1,tc2,tempcharacter Temporary character variables
-    !! @param ios File io status
     !-------------------------------------------------------------------------------
     !-------------------------------------------------------------------------------
     SUBROUTINE finddelim(filenum,delim)
@@ -206,7 +197,6 @@ CONTAINS
     !! @param filenum File id number
     !! @param delim Delimiter string
     !! @param count Number counted
-    !! @param tempcharacter Temporary character variable
     !-------------------------------------------------------------------------------
     !-------------------------------------------------------------------------------
     SUBROUTINE counter(filenum,delim,count)

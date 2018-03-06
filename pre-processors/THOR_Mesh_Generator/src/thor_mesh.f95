@@ -121,6 +121,12 @@ CONTAINS
   !-----------------------------------------------------------------------------
   !> Computes entries in the Thor adjacency list format from the adjacency_map
   !! Thor format is element - face : neighbor - neighbor_face
+  !
+  !! @param element element operated upon
+  !! @param adjacency_entry index of adacent element
+  !! @param neighbor neighboring element
+  !! @param current_face face of element being operated upon
+  !! @current_neighbor_face face of neighbor being compared against
   !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
   SUBROUTINE adjacencyListEntry(element, adjacency_entry, neighbor, current_face,&
