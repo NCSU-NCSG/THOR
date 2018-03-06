@@ -15,9 +15,10 @@
 !!   extension.
 !
 !> @author Raffi Yessayan
+!> @author Nicholas Herring
 !> @author Sebastian Schunert
 !> @version 1.0
-!> @date July, 2017
+!> @date Mar, 2018
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
@@ -25,6 +26,7 @@ PROGRAM generateMesh
 
   USE globals
   USE gmesh
+  USE unv
   USE thor_mesh
   USE integer_array_tools
 
@@ -85,6 +87,8 @@ PROGRAM generateMesh
   CASE ('.e') !Exodus II
     !Call libtool & then call ingestGmesh on the new file
     CALL generateErrorMessage(err_code_default, err_fatal, "Exodus II file support is not yet complete")
+  CASE('.UNV','.unv')
+    CALL ingestUNV()
   CASE DEFAULT
     CALL generateErrorMessage(err_code_default, err_fatal, "Input file extension not supported")
   END SELECT

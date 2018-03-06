@@ -6,10 +6,12 @@ EXE := Thor_Mesh_Generator
 EXT := .exe
 
 all:			TYPE :=
+MPparallel:    TYPE := _MP
 debug:    TYPE := _Debug
 coverage: TYPE := _Coverage
 
 all:      OPT := -O3
+MPparallel: OPT := -O3 -fopenmp
 debug:    OPT := -O0 -g -fbacktrace -ffpe-trap=zero,overflow,underflow 
 coverage: OPT := -O0 -g --coverage
 
@@ -28,6 +30,8 @@ SRC := \
 				mesh_converter.f95 	      	\
 				globals.f95        					\
 				thor_mesh.f95      					\
+				unv.f95      					\
+				boundary_conditions.f95      					\
 				gmesh.f95
 
 OBJ := $(SRC:.f95=.o)
@@ -71,6 +75,8 @@ COMP_DEP := \
 .PHONY: all clean reset
 
 all: $(EXE)
+
+MPparallel: $(EXE)
 
 debug: $(EXE)
 
@@ -127,12 +133,17 @@ $(LIB_MOD): %.mod:	$(filter %.f95, $(LIB_SRC))
 #Dependency List
 #Use [gfortran -M -cpp *.f95] repeatedly until clean compile to update rules below
 #-----------------------------------------------------------------------------------
-globals.o globals.mod: globals.f95 tet_mesh_tet_neighbors.mod \
-  integer_array_tools.mod
+boundary_conditions.o boundary_conditions.mod: boundary_conditions.f95
+
+globals.o globals.mod: globals.f95 integer_array_tools.mod \
+ tet_mesh_tet_neighbors.mod
 
 gmesh.o gmesh.mod: gmesh.f95 globals.mod
 
-mesh_converter.o: mesh_converter.f95 globals.mod gmesh.mod thor_mesh.mod \
-  integer_array_tools.mod
+mesh_converter.o: mesh_converter.f95 globals.mod gmesh.mod unv.mod \
+ thor_mesh.mod integer_array_tools.mod
 
-thor_mesh.o thor_mesh.mod: thor_mesh.f95 tet_mesh_tet_neighbors.mod globals.mod
+thor_mesh.o thor_mesh.mod: thor_mesh.f95 globals.mod \
+ tet_mesh_tet_neighbors.mod
+
+unv.o unv.mod: unv.f95 globals.mod boundary_conditions.mod
