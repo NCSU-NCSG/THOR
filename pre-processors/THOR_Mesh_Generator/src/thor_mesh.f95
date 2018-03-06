@@ -66,34 +66,44 @@ CONTAINS
       WRITE(out_unit, '(I0, 4(X,I0))') i, element_list(i,:)
     END DO
 
-    !# Of BC Definitions
-    WRITE(out_unit, '(I0)') bc_count
-
-    ! TODO: this search can be costly for many bcs; in this case we need to
-    ! come up with a better lookup [consider string-hashes]
-    IF (SIZE(boundary_element_list) .NE. bc_count) &
-          CALL generateErrorMessage(err_code_default, err_fatal, &
-          'bc count from gmesh file and adjacency list are inconsistent')
-
-    ! TODO: better algorithm
-    ! TODO: if no better algorithm at least make it a pretty function
-    DO i = 1, bc_count
-      local_node_list_gmesh = bc_list(i, :)
-      CALL quickSortInteger(local_node_list_gmesh, order_gmesh)
-      DO j = 1, bc_count
+    ! If boundary conditions are determined from adjacency go into first branch
+    IF (boundary_condition_from_adjacency) THEN
+      WRITE(out_unit, '(I0)') SIZE(boundary_element_list)
+      DO j = 1, SIZE(boundary_element_list)
         element = boundary_element_list(j)
         current_face = boundary_face_list(j)
-        local_node_list_adjacency = element_list(element, :)
-        local_node_list_adjacency(current_face + 1) = -1
-        CALL quickSortInteger(local_node_list_adjacency, order_adjacency)
-        IF (local_node_list_gmesh(1) .EQ. local_node_list_adjacency(2) .AND. &
-              local_node_list_gmesh(2) .EQ. local_node_list_adjacency(3) .AND. &
-              local_node_list_gmesh(3) .EQ. local_node_list_adjacency(4)) THEN
-          position = mapIndexOf(side_set(i), boundary_id_map(:, 1))
-          WRITE(out_unit, '(I0, 2(X,I0))') element, current_face, boundary_id_map(position, 2)
-        END IF
+        WRITE(out_unit, '(I0, 2(X,I0))') element, current_face, single_boundary_condition_type
       END DO
-    END DO
+    ELSE
+      !# Of BC Definitions
+      WRITE(out_unit, '(I0)') bc_count
+
+      ! TODO: this search can be costly for many bcs; in this case we need to
+      ! come up with a better lookup [consider string-hashes]
+      IF (SIZE(boundary_element_list) .NE. bc_count) &
+            CALL generateErrorMessage(err_code_default, err_fatal, &
+            'bc count from gmesh file and adjacency list are inconsistent')
+
+      ! TODO: better algorithm
+      ! TODO: if no better algorithm at least make it a pretty function
+      DO i = 1, bc_count
+        local_node_list_gmesh = bc_list(i, :)
+        CALL quickSortInteger(local_node_list_gmesh, order_gmesh)
+        DO j = 1, bc_count
+          element = boundary_element_list(j)
+          current_face = boundary_face_list(j)
+          local_node_list_adjacency = element_list(element, :)
+          local_node_list_adjacency(current_face + 1) = -1
+          CALL quickSortInteger(local_node_list_adjacency, order_adjacency)
+          IF (local_node_list_gmesh(1) .EQ. local_node_list_adjacency(2) .AND. &
+                local_node_list_gmesh(2) .EQ. local_node_list_adjacency(3) .AND. &
+                local_node_list_gmesh(3) .EQ. local_node_list_adjacency(4)) THEN
+            position = mapIndexOf(side_set(i), boundary_id_map(:, 1))
+            WRITE(out_unit, '(I0, 2(X,I0))') element, current_face, boundary_id_map(position, 2)
+          END IF
+        END DO
+      END DO
+    END IF
 
     ! write adjacency list
     WRITE(out_unit, '(I0)') 4 * element_count
@@ -105,7 +115,6 @@ CONTAINS
     END DO
 
     CLOSE(out_unit)
-
   END SUBROUTINE outputThorMesh
 
   !-----------------------------------------------------------------------------

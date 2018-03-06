@@ -91,6 +91,12 @@ MODULE globals
   !> Used to skip user driven boundary conditions mapping if input file not
   !! found or otherwise disabled
   LOGICAL :: skip_boundary_map
+  !> If true boundary conditions are all of a single type and determined by
+  !! by adjacency list
+  LOGICAL :: boundary_condition_from_adjacency
+  !> If boundary_condition_from_adjacency is true this boundary condition type
+  !! is used for all exterior faces determined by adjacency list
+  INTEGER :: single_boundary_condition_type
   !> Holds the name of the standard input config file
   CHARACTER(200) :: std_in_file = ""
   !> Holds the name of the standard input mesh file
@@ -366,6 +372,7 @@ CONTAINS
     END IF
 
     ! Read boundary id and override block_id_map default
+    boundary_condition_from_adjacency = .FALSE.
     IF (.NOT. skip_boundary_map) THEN
       nentries_bc = lengthTextFile(boundary_id_file, boundary_id_unit)
       ALLOCATE(boundary_instructions(nentries_bc, 2))
@@ -378,6 +385,13 @@ CONTAINS
       DO j = 1, nentries_bc
         position = mapIndexOf(boundary_instructions(j, 1), boundary_id_map(:, 1))
         boundary_id_map(position, 2) = boundary_instructions(j, 2)
+        ! FIXME: currently if any of the keys is < 0 we set the boundary_condition_from_adjacency
+        ! to true and get single_boundary_condition_type. That is not really logical but the easist
+        ! until better input handling is in place.
+        IF (boundary_instructions(j, 1) < 0) THEN
+          boundary_condition_from_adjacency = .TRUE.
+          single_boundary_condition_type = boundary_instructions(j, 2)
+        END IF
       END DO
     END IF
 
@@ -401,7 +415,7 @@ CONTAINS
 
   !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
-  !> Given an adjacency map has been establsihed, returns a pair of arrays
+  !> Given an adjacency map has been established, returns a pair of arrays
   !! detailing boundary faces and elements.
   !!
   !! See boundary_face_list and boundary_element_list
@@ -416,12 +430,19 @@ CONTAINS
     DO i = 1, element_count
       DO j = 1, 4
         IF (adjacency_map(i, j) .EQ. -1) THEN
+          ! check if we, by error, exceeded bc_count
+          IF (counter .GT. bc_count .AND. .NOT. boundary_condition_from_adjacency)  &
+                CALL generateErrorMessage(err_code_default, err_fatal, &
+                'Boundary elements and adjacency list are inconsistent: too many -1 in adjacency list')
           boundary_element_list(counter) = i
           boundary_face_list(counter) = j - 1
           counter = counter + 1
         END IF
       END DO
     END DO
+    IF (counter - 1 .NE. bc_count  .AND. .NOT. boundary_condition_from_adjacency)  &
+          CALL generateErrorMessage(err_code_default, err_fatal, &
+          'Boundary elements and adjacency list are inconsistent: not enough -1 in adjacency list')
   END SUBROUTINE getBoundaryElements
 
   SUBROUTINE printProgramHeader()
@@ -466,21 +487,402 @@ CONTAINS
               source_id_map(j, 2)
       END DO
     END IF
-
-    IF (skip_boundary_map) THEN
-      WRITE(6, '(A)') "No boundary ID edits are provided"
+    IF (boundary_condition_from_adjacency) THEN
+      WRITE(6, '(A)') "Boundary ID assignment is overriden. Boundaries determined by adjacency list."
+      WRITE(6, '(A,I4)') "All exterior boundaries are assigned boundary type ", single_boundary_condition_type
     ELSE
-      IF (.NOT. ALLOCATED(boundary_id_map)) &
-            CALL generateErrorMessage(err_code_default, err_fatal, &
-            'boundary id map not allocated,  echoIngestedInput called too early')
-      WRITE(6, '(A,A)') "Reporting Source Boundary reassignments from file: ", TRIM(boundary_id_file)
-      s = SIZE(boundary_id_map(:, 1))
-      DO j = 1, s
-        WRITE(6, '(A,I0,A,I0)') "Sideset ID ", boundary_id_map(j, 1), " Boundary Type ",&
-              boundary_id_map(j, 2)
-      END DO
+      IF (skip_boundary_map) THEN
+        WRITE(6, '(A)') "No boundary ID edits are provided"
+      ELSE
+        IF (.NOT. ALLOCATED(boundary_id_map)) &
+              CALL generateErrorMessage(err_code_default, err_fatal, &
+              'boundary id map not allocated,  echoIngestedInput called too early')
+        WRITE(6, '(A,A)') "Reporting Source Boundary reassignments from file: ", TRIM(boundary_id_file)
+        s = SIZE(boundary_id_map(:, 1))
+        DO j = 1, s
+          WRITE(6, '(A,I0,A,I0)') "Sideset ID ", boundary_id_map(j, 1), " Boundary Type ",&
+                boundary_id_map(j, 2)
+        END DO
+      END IF
     END IF
     WRITE(6, *)
   END SUBROUTINE echoIngestedInput
+
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  !> Splits a hexahedron into six tetrahedra
+  !! Algorithm described in: HOW TO SUBDIVIDE PYRAMIDS, PRISMS
+  !! AND HEXAHEDRA INTO TETRAHEDRA. Dompierre, J. et al.
+  !! NOTE: local hex ordering required in paper identical to GMESH ordering
+  !!
+  !! @param vertex_id a vector of length 8 containing the global ids of the vertices
+  !! @param tet_split 4x6 array containing the 4 global ids of the 6 tetrahedra
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  SUBROUTINE splitHexIntoTet(vertex_id, tet_split)
+    INTEGER, INTENT(in) :: vertex_id(8)
+    INTEGER, INTENT(inout) :: tet_split(4, 6)
+
+    ! Define local variables
+    INTEGER :: smallest_pos, smallest_value, i, n_diags, bits(3), temp
+    INTEGER :: table(8)
+
+    ! Find smallest vertex id
+    smallest_pos = 1
+    smallest_value = vertex_id(1)
+    DO i = 2, 8
+      IF (smallest_value .GT. vertex_id(i)) THEN
+        smallest_value = vertex_id(i)
+        smallest_pos = i
+      END IF
+    END DO
+
+    IF (smallest_pos .EQ. 1) THEN
+      table = (/1,2,3,4,5,6,7,8/)
+    ELSE IF (smallest_pos .EQ. 2) THEN
+      table = (/2,1,5,6,3,4,8,7/)
+    ELSE IF (smallest_pos .EQ. 3) THEN
+      table = (/3,2,6,7,4,1,5,8/)
+    ELSE IF (smallest_pos .EQ. 4) THEN
+      table = (/4,1,2,3,8,5,6,7/)
+    ELSE IF (smallest_pos .EQ. 5) THEN
+      table = (/5,1,4,8,6,2,3,7/)
+    ELSE IF (smallest_pos .EQ. 6) THEN
+      table = (/6,2,1,5,7,3,4,8/)
+    ELSE IF (smallest_pos .EQ. 7) THEN
+      table = (/7,3,2,6,8,4,1,5/)
+    ELSE IF (smallest_pos .EQ. 8) THEN
+      table = (/8,4,3,7,5,1,2,6/)
+    END IF
+
+    ! Compute number of diagonal through vertex_id(table(7))
+    n_diags = 0
+    bits = 0
+    IF (min(vertex_id(table(2)), vertex_id(table(7))) < min(vertex_id(table(3)), vertex_id(table(6)))) THEN
+      n_diags = n_diags + 1
+      bits(1) = 1
+    END IF
+    IF (min(vertex_id(table(4)), vertex_id(table(7))) < min(vertex_id(table(3)), vertex_id(table(8)))) THEN
+      n_diags = n_diags + 1
+      bits(1) = 2
+    END IF
+    IF (min(vertex_id(table(5)), vertex_id(table(7))) < min(vertex_id(table(6)), vertex_id(table(8)))) THEN
+      n_diags = n_diags + 1
+      bits(3) = 1
+    END IF
+
+    ! Rotation
+    IF ((bits(1) .EQ. 0 .AND. bits(2) .EQ. 0 .AND. bits(3) .EQ. 1) .OR. &
+        (bits(1) .EQ. 1 .AND. bits(2) .EQ. 1 .AND. bits(3) .EQ. 0)) THEN
+      ! Rotation by 120 degrees
+      temp = table(2)
+      table(2) = table(5)
+      table(5) = table(4)
+      table(4) = temp
+
+      temp = table(6)
+      table(6) = table(8)
+      table(8) = table(3)
+      table(3) = temp
+    ELSE IF ((bits(1) .EQ. 0 .AND. bits(2) .EQ. 1 .AND. bits(3) .EQ. 0) .OR. &
+             (bits(1) .EQ. 1 .AND. bits(2) .EQ. 0 .AND. bits(3) .EQ. 1)) THEN
+      ! Rotation by 240 degrees
+      temp = table(2)
+      table(2) = table(4)
+      table(4) = table(5)
+      table(5) = temp
+
+      temp = table(6)
+      table(6) = table(3)
+      table(3) = table(8)
+      table(8) = temp
+    END IF
+
+    ! now split by n_diags
+    IF (n_diags .EQ. 0) THEN
+      ! tet 1
+      tet_split(1, 1) = vertex_id(table(1))
+      tet_split(2, 1) = vertex_id(table(2))
+      tet_split(3, 1) = vertex_id(table(3))
+      tet_split(4, 1) = vertex_id(table(6))
+
+      ! tet 2
+      tet_split(1, 2) = vertex_id(table(1))
+      tet_split(2, 2) = vertex_id(table(3))
+      tet_split(3, 2) = vertex_id(table(8))
+      tet_split(4, 2) = vertex_id(table(6))
+
+      ! tet 3
+      tet_split(1, 3) = vertex_id(table(1))
+      tet_split(2, 3) = vertex_id(table(3))
+      tet_split(3, 3) = vertex_id(table(4))
+      tet_split(4, 3) = vertex_id(table(8))
+
+      ! tet 4
+      tet_split(1, 4) = vertex_id(table(1))
+      tet_split(2, 4) = vertex_id(table(6))
+      tet_split(3, 4) = vertex_id(table(8))
+      tet_split(4, 4) = vertex_id(table(5))
+
+      ! tet 5
+      tet_split(1, 5) = vertex_id(table(3))
+      tet_split(2, 5) = vertex_id(table(8))
+      tet_split(3, 5) = vertex_id(table(6))
+      tet_split(4, 5) = vertex_id(table(7))
+
+      ! tet 6
+      tet_split(1, 6) = -1
+      tet_split(2, 6) = -1
+      tet_split(3, 6) = -1
+      tet_split(4, 6) = -1
+
+    ELSE IF (n_diags .EQ. 1) THEN
+      ! tet 1
+      tet_split(1, 1) = vertex_id(table(1))
+      tet_split(2, 1) = vertex_id(table(6))
+      tet_split(3, 1) = vertex_id(table(8))
+      tet_split(4, 1) = vertex_id(table(5))
+
+      ! tet 2
+      tet_split(1, 2) = vertex_id(table(1))
+      tet_split(2, 2) = vertex_id(table(2))
+      tet_split(3, 2) = vertex_id(table(8))
+      tet_split(4, 2) = vertex_id(table(6))
+
+      ! tet 3
+      tet_split(1, 3) = vertex_id(table(2))
+      tet_split(2, 3) = vertex_id(table(7))
+      tet_split(3, 3) = vertex_id(table(8))
+      tet_split(4, 3) = vertex_id(table(6))
+
+      ! tet 4
+      tet_split(1, 4) = vertex_id(table(1))
+      tet_split(2, 4) = vertex_id(table(8))
+      tet_split(3, 4) = vertex_id(table(3))
+      tet_split(4, 4) = vertex_id(table(4))
+
+      ! tet 5
+      tet_split(1, 5) = vertex_id(table(1))
+      tet_split(2, 5) = vertex_id(table(8))
+      tet_split(3, 5) = vertex_id(table(2))
+      tet_split(4, 5) = vertex_id(table(3))
+
+      ! tet 6
+      tet_split(1, 6) = vertex_id(table(2))
+      tet_split(2, 6) = vertex_id(table(8))
+      tet_split(3, 6) = vertex_id(table(7))
+      tet_split(4, 6) = vertex_id(table(3))
+
+    ELSE IF (n_diags .EQ. 2) THEN
+      ! tet 1
+      tet_split(1, 1) = vertex_id(table(1))
+      tet_split(2, 1) = vertex_id(table(5))
+      tet_split(3, 1) = vertex_id(table(6))
+      tet_split(4, 1) = vertex_id(table(7))
+
+      ! tet 2
+      tet_split(1, 2) = vertex_id(table(1))
+      tet_split(2, 2) = vertex_id(table(4))
+      tet_split(3, 2) = vertex_id(table(8))
+      tet_split(4, 2) = vertex_id(table(7))
+
+      ! tet 3
+      tet_split(1, 3) = vertex_id(table(1))
+      tet_split(2, 3) = vertex_id(table(8))
+      tet_split(3, 3) = vertex_id(table(5))
+      tet_split(4, 3) = vertex_id(table(7))
+
+      ! tet 4
+      tet_split(1, 4) = vertex_id(table(1))
+      tet_split(2, 4) = vertex_id(table(2))
+      tet_split(3, 4) = vertex_id(table(3))
+      tet_split(4, 4) = vertex_id(table(6))
+
+      ! tet 5
+      tet_split(1, 5) = vertex_id(table(1))
+      tet_split(2, 5) = vertex_id(table(4))
+      tet_split(3, 5) = vertex_id(table(7))
+      tet_split(4, 5) = vertex_id(table(3))
+
+      ! tet 6
+      tet_split(1, 6) = vertex_id(table(1))
+      tet_split(2, 6) = vertex_id(table(7))
+      tet_split(3, 6) = vertex_id(table(6))
+      tet_split(4, 6) = vertex_id(table(3))
+
+    ELSE IF (n_diags .EQ. 3) THEN
+      ! tet 1
+      tet_split(1, 1) = vertex_id(table(1))
+      tet_split(2, 1) = vertex_id(table(3))
+      tet_split(3, 1) = vertex_id(table(4))
+      tet_split(4, 1) = vertex_id(table(7))
+
+      ! tet 2
+      tet_split(1, 2) = vertex_id(table(1))
+      tet_split(2, 2) = vertex_id(table(4))
+      tet_split(3, 2) = vertex_id(table(8))
+      tet_split(4, 2) = vertex_id(table(7))
+
+      ! tet 3
+      tet_split(1, 3) = vertex_id(table(1))
+      tet_split(2, 3) = vertex_id(table(8))
+      tet_split(3, 3) = vertex_id(table(5))
+      tet_split(4, 3) = vertex_id(table(7))
+
+      ! tet 4
+      tet_split(1, 4) = vertex_id(table(1))
+      tet_split(2, 4) = vertex_id(table(6))
+      tet_split(3, 4) = vertex_id(table(7))
+      tet_split(4, 4) = vertex_id(table(5))
+
+      ! tet 5
+      tet_split(1, 5) = vertex_id(table(2))
+      tet_split(2, 5) = vertex_id(table(6))
+      tet_split(3, 5) = vertex_id(table(7))
+      tet_split(4, 5) = vertex_id(table(1))
+
+      ! tet 6
+      tet_split(1, 6) = vertex_id(table(2))
+      tet_split(2, 6) = vertex_id(table(7))
+      tet_split(3, 6) = vertex_id(table(3))
+      tet_split(4, 6) = vertex_id(table(1))
+    END IF
+
+  END SUBROUTINE splitHexIntoTet
+
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  !> Splits a triangular prism into three tets using the rule in
+  !! Algorithm described in: HOW TO SUBDIVIDE PYRAMIDS, PRISMS
+  !! AND HEXAHEDRA INTO TETRAHEDRA. Dompierre, J. et al.
+  !! A quadrilateral face is subdivided into two triangular
+  !! faces by the diagonal issuing from the smallest vertex
+  !! of the face
+  !!
+  !! @param vertex_id a vector of length 6 containing the global ids of the vertices
+  !! @param tri_split 4x3 array containing the 4 global ids of the 3 tets
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  SUBROUTINE splitPrismToTet(vertex_id, tet_split)
+    INTEGER, INTENT(in) :: vertex_id(6)
+    INTEGER, INTENT(inout) :: tet_split(4, 3)
+
+    ! Define local variables
+    INTEGER :: smallest_pos, smallest_value, i
+    INTEGER :: table(6)
+
+    ! Find smallest vertex id
+    smallest_pos = 1
+    smallest_value = vertex_id(1)
+    DO i = 2, 6
+      IF (smallest_value .GT. vertex_id(i)) THEN
+        smallest_value = vertex_id(i)
+        smallest_pos = i
+      END IF
+    END DO
+
+    IF (smallest_pos .EQ. 1) THEN
+      table = (/1,2,3,4,5,6/)
+    ELSE IF (smallest_pos .EQ. 2) THEN
+      table = (/2,3,1,5,6,4/)
+    ELSE IF (smallest_pos .EQ. 3) THEN
+      table = (/3,1,2,6,4,5/)
+    ELSE IF (smallest_pos .EQ. 4) THEN
+      table = (/4,6,5,1,3,2/)
+    ELSE IF (smallest_pos .EQ. 5) THEN
+      table = (/5,4,6,2,1,3/)
+    ELSE IF (smallest_pos .EQ. 6) THEN
+      table = (/6,5,4,3,2,1/)
+    END IF
+
+    IF (min(vertex_id(table(2)), vertex_id(table(6))) < min(vertex_id(table(3)), vertex_id(table(5)))) THEN
+      ! tet 1
+      tet_split(1, 1) = vertex_id(table(1))
+      tet_split(2, 1) = vertex_id(table(2))
+      tet_split(3, 1) = vertex_id(table(3))
+      tet_split(4, 1) = vertex_id(table(6))
+
+      ! tet 2
+      tet_split(1, 2) = vertex_id(table(1))
+      tet_split(2, 2) = vertex_id(table(2))
+      tet_split(3, 2) = vertex_id(table(6))
+      tet_split(4, 2) = vertex_id(table(5))
+
+      ! tet 3
+      tet_split(1, 3) = vertex_id(table(1))
+      tet_split(2, 3) = vertex_id(table(5))
+      tet_split(3, 3) = vertex_id(table(6))
+      tet_split(4, 3) = vertex_id(table(4))
+    ELSE
+      ! tet 1
+      tet_split(1, 1) = vertex_id(table(1))
+      tet_split(2, 1) = vertex_id(table(2))
+      tet_split(3, 1) = vertex_id(table(3))
+      tet_split(4, 1) = vertex_id(table(5))
+
+      ! tet 2
+      tet_split(1, 2) = vertex_id(table(1))
+      tet_split(2, 2) = vertex_id(table(5))
+      tet_split(3, 2) = vertex_id(table(3))
+      tet_split(4, 2) = vertex_id(table(6))
+
+      ! tet 3
+      tet_split(1, 3) = vertex_id(table(1))
+      tet_split(2, 3) = vertex_id(table(5))
+      tet_split(3, 3) = vertex_id(table(6))
+      tet_split(4, 3) = vertex_id(table(4))
+    END IF
+
+  END SUBROUTINE splitPrismToTet
+
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  !> Splits a quadrilaterial into two triangles using the rule in
+  !! Algorithm described in: HOW TO SUBDIVIDE PYRAMIDS, PRISMS
+  !! AND HEXAHEDRA INTO TETRAHEDRA. Dompierre, J. et al.
+  !! A quadrilateral face is subdivided into two triangular
+  !! faces by the diagonal issuing from the smallest vertex
+  !! of the face
+  !!
+  !! @param vertex_id a vector of length 4 containing the global ids of the vertices
+  !! @param tri_split 3x2 array containing the 3 global ids of the 2 triangles
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  SUBROUTINE splitQuadIntoTri(vertex_id, tri_split)
+    INTEGER, INTENT(in) :: vertex_id(4)
+    INTEGER, INTENT(inout) :: tri_split(3, 2)
+
+    ! Define local variables
+    INTEGER :: smallest_pos, smallest_value, i
+
+    ! Find smallest vertex id
+    smallest_pos = 1
+    smallest_value = vertex_id(1)
+    DO i = 2, 4
+      IF (smallest_value .GT. vertex_id(i)) THEN
+        smallest_value = vertex_id(i)
+        smallest_pos = i
+      END IF
+    END DO
+
+    IF (smallest_pos .EQ. 1 .OR. smallest_pos .EQ. 3) THEN
+      tri_split(1, 1) = vertex_id(1)
+      tri_split(2, 1) = vertex_id(3)
+      tri_split(3, 1) = vertex_id(4)
+
+      tri_split(1, 2) = vertex_id(1)
+      tri_split(2, 2) = vertex_id(2)
+      tri_split(3, 2) = vertex_id(3)
+    ELSE IF (smallest_pos .EQ. 2 .OR. smallest_pos .EQ. 4) THEN
+      tri_split(1, 1) = vertex_id(1)
+      tri_split(2, 1) = vertex_id(2)
+      tri_split(3, 1) = vertex_id(4)
+
+      tri_split(1, 2) = vertex_id(2)
+      tri_split(2, 2) = vertex_id(3)
+      tri_split(3, 2) = vertex_id(4)
+    END IF
+
+  END SUBROUTINE splitQuadIntoTri
 
 END MODULE globals
