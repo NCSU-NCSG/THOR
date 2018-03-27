@@ -154,7 +154,7 @@ CONTAINS
             fiss_src(l,i,1)=fiss_src(l,i,2)
           END DO
         END DO
-        CALL add_fissionsource(flux, src, keff_new, fiss_src)
+        CALL add_fissionsource(src, keff_new, fiss_src)
       END IF
 
       DO eg=1, egmax
@@ -987,11 +987,10 @@ CONTAINS
   !> Computes the iteration source fission component based on the passed
   !> flux and  various global fission & materials parameters.
   !> This subroutine is for both the eigenvalue and fixed source solvers.
-  SUBROUTINE add_fissionsource(flux, src, keff_new, fiss_src)
+  SUBROUTINE add_fissionsource(src, keff_new, fiss_src)
 
     INTEGER :: eg, egg, i, l, m, k, indx
     REAL(kind=d_t) :: keff_new
-    REAL(kind=d_t) :: flux(num_moments_v,namom,num_cells,egmax,niter)
     REAL(kind=d_t) :: src(num_moments_v,namom,num_cells,egmax)
     REAL(kind=d_t) :: fiss_src(num_moments_v,num_cells,2)
 
@@ -999,7 +998,7 @@ CONTAINS
     DO eg=1,egmax
       DO i=1,num_cells
         DO l=1,num_moments_v
-          src(l,1,i,eg)  =one/keff_new     *&
+          src(l,1,i,eg)  =src(l,1,i,eg)+one/keff_new     *&
                 chi(reg2mat(cells(i)%reg),eg)%xs*fiss_src(l,i,1)
         END DO
       END DO
