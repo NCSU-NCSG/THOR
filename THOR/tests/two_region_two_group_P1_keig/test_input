@@ -1,0 +1,4 @@
+start godiva_PI_S4
+  input = 2r2gP1_SC.in
+  gold_file_name = 2r2gP1_SC.in_out.csv
+end
