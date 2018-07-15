@@ -549,7 +549,7 @@ CONTAINS
         !=====================================================================
         ! Compute downscattering from eg to egg
         !=====================================================================
-        CALL compute_downscattering(eg, flux, src)
+        CALL update_downscattering(eg, flux, src)
       END DO
 
       !========================================================================
@@ -891,44 +891,45 @@ CONTAINS
   END SUBROUTINE compute_upscattering
 
   !=============================================================================
-  !Subroutine > compute_downscattering
+  !Subroutine > update_downscattering
   !=============================================================================
-  !> Computes the iteration source downscattering component based on the passed
-  !> flux and  various global scattering & materials parameters.
+  !> Updates all downscattering sources for groups slower than group eg, using
+  !> the flux that was just computed for group g.
   !> This subroutine is for both the eigenvalue and fixed source solvers
-  SUBROUTINE compute_downscattering(eg, flux, src)
+  SUBROUTINE update_downscattering(eg, flux, src)
 
-    INTEGER:: eg, egg, i, l, m, k, indx
+    INTEGER:: eg, eg_from, i, l, m, k, index
     REAL(kind=d_t) :: flux(num_moments_v,namom,num_cells,egmax,niter)
     REAL(kind=d_t) :: src(num_moments_v,namom,num_cells,egmax)
 
-    DO egg=eg+1, egmax
-      DO i=1, num_cells
+    DO eg_from = eg + 1, egmax
+      DO i = 1, num_cells
         ! Even contributions
-        DO l=0,scatt_ord
-          DO m=0,l
-            indx=1_li+m+(l+1_li)*l/2_li
-            DO k=1, num_moments_v
-              src(k,indx,i,egg) = src(k,indx,i,egg)                                +&
-                    scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs   *&
-                    dens_fact(cells(i)%reg)*flux(k,indx,i,eg,niter)
+        DO l = 0, scatt_ord
+          DO m = 0, l
+            index = 1_li + m + (l + 1_li) * l / 2_li
+            DO k = 1, num_moments_v
+              src(k,index,i,eg_from) = src(k,index,i,eg_from)                        +&
+                scat_mult(l,m) * sigma_scat(reg2mat(cells(i)%reg),l+1,eg_from,eg)%xs *&
+                dens_fact(cells(i)%reg) * flux(k,index,i,eg,niter)
             END DO
           END DO
         END DO
         ! odd contributions
-        DO l=1,scatt_ord
-          DO m=1,l
-            indx=neven+m+(l-1_li)*l/2_li
-            DO k=1, num_moments_v
-              src(k,indx,i,egg) = src(k,indx,i,egg)                                 +&
-                    scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs    *&
-                    dens_fact(cells(i)%reg)*flux(k,indx,i,eg,niter)
+        DO l = 1, scatt_ord
+          DO m = 1, l
+            index = neven + m + (l - 1_li) * l / 2_li
+            DO k = 1, num_moments_v
+              src(k,index,i,eg_from) = src(k,index,i,eg_from)                      +&
+                scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,eg_from,eg)%xs *&
+                dens_fact(cells(i)%reg)*flux(k,index,i,eg,niter)
             END DO
           END DO
         END DO
       END DO
     END DO
-  END SUBROUTINE compute_downscattering
+  END SUBROUTINE update_downscattering
+
 END MODULE outer_iteration_module
 !-----------------------------------------------------------------------------------------
 ! End

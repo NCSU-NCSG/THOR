@@ -1375,7 +1375,7 @@ CONTAINS
       !=====================================================================
       ! Compute downscattering from eg to egg
       !=====================================================================
-      CALL compute_downscattering(eg, flx, src)
+      CALL update_downscattering(eg, flx, src)
 
       ! increase iteration count
       iit_count = iit_count + inner
