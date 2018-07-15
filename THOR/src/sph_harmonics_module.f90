@@ -144,8 +144,7 @@ CONTAINS
 
     !     phi = acos(eta/sqrt(1.0_d_t-mu**2))
     phi = ATAN2(eta,mu)
-
-    y_e = SQRT(REAL(2*l+1,d_t)*factorial_d_t(l-m)/factorial_d_t(l+m))*aLegendreP(l,m,xi)*&
+    y_e = SQRT(REAL(2*l+1,d_t)*factorial_d_t(l-m)/factorial_d_t(l+m))*plegendre(l,m,xi)*&
           COS(REAL(m,d_t)*phi)*(-1.0_d_t)**m
 
   END FUNCTION y_e
@@ -158,159 +157,63 @@ CONTAINS
 
     !     phi = acos(eta/sqrt(1.0_d_t-mu**2))
     phi = ATAN2(eta,mu)
-
-    y_o = SQRT(REAL(2*l+1,d_t)*factorial_d_t(l-m)/factorial_d_t(l+m))*aLegendreP(l,m,xi)*&
+    y_o = SQRT(REAL(2*l+1,d_t)*factorial_d_t(l-m)/factorial_d_t(l+m))*plegendre(l,m,xi)*&
           SIN(REAL(m,d_t)*phi)*(-1.0_d_t)**m
 
   END FUNCTION y_o
 
-  FUNCTION aLegendreP(l,m,x)
+  ! adopted from numerical recipes plegendre.h
+  FUNCTION plegendre(l, m, x)
     INTEGER(kind=li), INTENT(in) :: l,m
     REAL(kind=d_t), INTENT(in) :: x
-    REAL(kind=d_t) :: aLegendreP
+    REAL(kind=d_t) :: plegendre
 
-    IF(l == 0_li) THEN
-      IF(m == 0_li) THEN
-        aLegendreP=1.0_d_t
-      ELSE
-        CALL stop_thor(32_li)
-      END IF
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    ELSE IF(l == 1_li) THEN
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      IF(m == -1_li) THEN
-        aLegendreP=0.5_d_t*SQRT(1.0_d_t-x*x)
-      ELSE IF (m == 0_li) THEN
-        aLegendreP=x
-      ELSE IF (m == 1_li) THEN
-        aLegendreP=-SQRT(1.0_d_t-x*x)
-      ELSE
-        CALL stop_thor(32_li)
-      END IF
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    ELSE IF(l == 2_li) THEN
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      IF(m == -2_li) THEN
-        aLegendreP=0.125_d_t*(1.0_d_t-x*x)
-      ELSE IF(m == -1_li) THEN
-        aLegendreP=0.5_d_t*x*SQRT(1.0_d_t-x*x)
-      ELSE IF(m == 0_li) THEN
-        aLegendreP=0.5_d_t*(3.0_d_t*x*x-1.0_d_t)
-      ELSE IF(m == 1_li) THEN
-        aLegendreP=-3.0_d_t*x*SQRT(1.0_d_t-x*x)
-      ELSE IF(m == 2_li) THEN
-        aLegendreP=-3.0_d_t*(x*x-1.0_d_t)
-      ELSE
-        CALL stop_thor(32_li)
-      END IF
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    ELSE IF(l == 3_li) THEN
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      IF(m == -3_li) THEN
-        aLegendreP=0.02083333333333333_d_t*SQRT((1.0_d_t-x*x)**3)
-      ELSE IF(m == -2_li) THEN
-        aLegendreP=-0.125_d_t*x*(x*x-1.0_d_t)
-      ELSE IF(m == -1_li) THEN
-        aLegendreP=0.125_d_t*SQRT(1.0_d_t-x*x)*(5.0_d_t*x*x-1.0_d_t)
-      ELSE IF(m == 0_li) THEN
-        aLegendreP=0.5_d_t*(-3.0_d_t*x+5.0_d_t*x*x*x)
-      ELSE IF(m == 1_li) THEN
-        aLegendreP=-1.5_d_t*SQRT(1.0_d_t-x*x)*(5.0_d_t*x*x-1.0_d_t)
-      ELSE IF(m == 2_li) THEN
-        aLegendreP=-15.0_d_t*x*(x*x-1.0_d_t)
-      ELSE IF(m == 3_li) THEN
-        aLegendreP=-15.0_d_t**SQRT((1.0_d_t-x*x)**3)
-      ELSE
-        CALL stop_thor(32_li)
-      END IF
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    ELSE IF(l == 4_li) THEN
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      IF(m == -4_li) THEN
-        aLegendreP=0.002604166666666667_d_t*(-1.0_d_t+x*x)**2
-      ELSE IF(m == -3_li) THEN
-        aLegendreP=0.02083333333333333_d_t*x*SQRT((1.0_d_t-x*x)**3)
-      ELSE IF(m == -2_li) THEN
-        aLegendreP=-0.02083333333333333_d_t*(-1.0_d_t+x*x)*(-1.0_d_t+7.0_d_t*x*x)
-      ELSE IF(m == -1_li) THEN
-        aLegendreP=0.125_d_t*SQRT(1.0_d_t-x*x)*(-3.0_d_t*x+7.0_d_t*x*x*x)
-      ELSE IF(m == 0_li) THEN
-        aLegendreP=0.125_d_t*(3.0_d_t-30.0_d_t*x*x+35.0_d_t*x*x*x*x)
-      ELSE IF(m == 1_li) THEN
-        aLegendreP=-2.5_d_t*SQRT(1.0_d_t-x*x)*(-3.0_d_t*x+7.0_d_t*x*x*x)
-      ELSE IF(m == 2_li) THEN
-        aLegendreP=-7.5_d_t*(-1.0_d_t+x*x)*(-1.0_d_t+7.0_d_t*x*x)
-      ELSE IF(m == 3_li) THEN
-        aLegendreP=-105.0_d_t*x*SQRT((1.0_d_t-x*x)**3)
-      ELSE IF(m == 4_li) THEN
-        aLegendreP=105.0_d_t*(-1.0_d_t+x*x)**2
-      ELSE
-        CALL stop_thor(32_li)
-      END IF
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    ELSE IF(l == 5_li) THEN
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      IF(m == -5_li) THEN
-        aLegendreP=0.0002604166666666667_d_t*SQRT((1.0_d_t-x*x)**5)
-      ELSE IF(m == -4_li) THEN
-        aLegendreP=0.002604166666666667_d_t*x*(-1.0_d_t+x*x)**2
-      ELSE IF(m == -3_li) THEN
-        aLegendreP=-0.002604166666666667_d_t*SQRT(1.0_d_t-x*x)*(-1.0_d_t+x*x)*(-1.0_d_t+9.0_d_t*x*x)
-      ELSE IF(m == -2_li) THEN
-        aLegendreP=-0.0625_d_t*(-1.0_d_t+x*x)*(-x+3.0_d_t*x*x*x)
-      ELSE IF(m == -1_li) THEN
-        aLegendreP=0.0625_d_t*SQRT(1.0_d_t-x*x)*(1.0_d_t-14.0_d_t*x*x+21.0_d_t*x*x*x*x)
-      ELSE IF(m == 0_li) THEN
-        aLegendreP=0.125_d_t*(15.0_d_t*x-70.0_d_t*x*x*x+63.0_d_t*x*x*x*x*x)
-      ELSE IF(m == 1_li) THEN
-        aLegendreP=-1.875_d_t*SQRT(1.0_d_t-x*x)*(1.0_d_t-14.0_d_t*x*x+21.0_d_t*x*x*x*x)
-      ELSE IF(m == 2_li) THEN
-        aLegendreP=-52.5_d_t*(-1.0_d_t+x*x)*(-x+3.0_d_t*x*x*x)
-      ELSE IF(m == 3_li) THEN
-        aLegendreP=52.5_d_t*SQRT(1.0_d_t-x*x)*(-1.0_d_t+x*x)*(-1.0_d_t+9.0_d_t*x*x)
-      ELSE IF(m == 4_li) THEN
-        aLegendreP=945.0_d_t*x*(-1.0_d_t+x*x)**2
-      ELSE IF(m == 5_li) THEN
-        aLegendreP=-945.0_d_t*SQRT((1.0_d_t-x*x)**5)
-      ELSE
-        CALL stop_thor(32_li)
-      END IF
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    ELSE
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      CALL stop_thor(33_li)
+    INTEGER(kind=li) :: i, j, ll
+    REAL(kind=d_t) :: fact, oldfact, pll, pmm, pmmp1, omx2, prod
+
+    REAL(kind=d_t), PARAMETER :: PI = 3.141592653589793_d_t
+
+    IF (m < 0 .or. m > l .or. abs(x) > 1.0_d_t) THEN
+      CALL stop_thor(1000_li, "Bad arguments in routine plegendre")
     END IF
 
-  END FUNCTION aLegendreP
-
-  FUNCTION LegendreP(l,x)
-    INTEGER(kind=li), INTENT(in) :: l
-    REAL(kind=d_t), INTENT(in) :: x
-    REAL(kind=d_t) :: LegendreP
-
-    IF(l == 0_li)THEN
-      LegendreP=1
-    ELSEIF(l == 1_li)THEN
-      LegendreP=x
-    ELSEIF(l == 2_li)THEN
-      LegendreP=0.5_d_t*(3.0_d_t*x*x-1)
-    ELSEIF(l == 3_li)THEN
-      LegendreP=0.5_d_t*(5.0_d_t*x*x*x-3.0_d_t*x)
-    ELSEIF(l == 4_li)THEN
-      LegendreP=0.125_d_t*(35.0_d_t*x*x*x*x-30.0_d_t*x*x+3.0_d_t)
-    ELSEIF(l == 5_li)THEN
-      LegendreP=0.125_d_t*(63.0_d_t*x*x*x*x*x-70.0_d_t*x*x*x+&
-            15.0_d_t*x)
-    ELSEIF(l == 6_li)THEN
-      LegendreP=0.0625_d_t*(231.0_d_t*x*x*x*x*x*x-315.0_d_t*x*x*x*x+&
-            105.0_d_t*x*x-5.0_d_t)
-    ELSEIF(l == 7_li)THEN
-      LegendreP=0.0625_d_t*(429.0_d_t*x*x*x*x*x*x*x-&
-            693.0_d_t*x*x*x*x*x+315.0_d_t*x*x*x-35.0_d_t*x)
-    ELSE
-      CALL stop_thor(23_li)
+    pmm = 1.0_d_t
+    IF (m > 0) THEN
+      omx2 = (1.0_d_t - x) * (1.0_d_t + x)
+      fact = 1.0_d_t
+      DO i = 1, m
+        pmm = pmm * omx2 * fact / (fact + 1.0_d_t)
+        fact = fact + 2.0_d_t
+      END DO
     END IF
 
-  END FUNCTION LegendreP
+    pmm = sqrt((2.0_d_t * m + 1.0_d_t) * pmm / (4.0_d_t * PI));
+    IF (m == 1) pmm = -pmm
+
+    IF (l == m) THEN
+      plegendre = pmm
+    ELSE
+      pmmp1 = x * sqrt(2.0_d_t * m + 3.0_d_t) * pmm;
+      IF (l == m + 1) THEN
+        plegendre = pmmp1
+      ELSE
+        oldfact=sqrt(2.0_d_t * m + 3.0_d_t);
+        DO ll = m + 2, l
+          fact = sqrt((4.0_d_t * ll * ll - 1.0_d_t)/(ll * ll - m * m));
+          pll = (x * pmmp1 - pmm / oldfact) * fact;
+          oldfact = fact
+          pmm = pmmp1
+          pmmp1 = pll
+        END DO
+        plegendre = pll
+      END IF
+    END IF
+
+    prod = 1.0_d_t;
+    DO j = l - m + 1, l + m
+      prod = prod * j
+    END DO
+    plegendre = plegendre * sqrt(4.0_d_t * PI * prod / (2.0_d_t * l + 1.0_d_t))
+  END FUNCTION
 
 END MODULE sph_harmonics_module
