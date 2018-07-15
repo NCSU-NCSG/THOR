@@ -73,6 +73,14 @@ CONTAINS
 
     REAL(kind=d_t) :: src(num_moments_v,namom,num_cells,egmax)
 
+    ! Define fission source
+
+    REAL(kind=d_t) :: fiss_src(num_moments_v,num_cells,2)
+
+    ! Define keff_new, so that the fission subroutines can be used in eig calc
+
+    REAL(kind=d_t) :: keff_new
+
     ! Prepare array reflected_flux
     rs=MAX(1_li,rside_cells)
     IF(page_refl.EQ.0_li) THEN
@@ -112,6 +120,12 @@ CONTAINS
       WRITE(6,*) '   Begin outer iterations.'
       WRITE(6,*) '========================================================'
     END IF
+
+    ! set keff if this is a multiplying problem
+    IF(multiplying .NE. 0)THEN
+      keff_new=one
+    END IF
+
     ! Begin outer iteration
 
     DO outer=1, max_outer
@@ -131,6 +145,17 @@ CONTAINS
       ! ... and upscattering
 
       CALL compute_upscattering(flux, src)
+
+      !calculate fission source if this is a multiplying problem
+      IF(multiplying .NE. 0)THEN
+        CALL compute_fissionsource(flux, fiss_src)
+        DO i=1, num_cells
+          DO l=1, num_moments_v
+            fiss_src(l,i,1)=fiss_src(l,i,2)
+          END DO
+        END DO
+        CALL add_fissionsource(src, keff_new, fiss_src)
+      END IF
 
       DO eg=1, egmax
 
@@ -929,6 +954,56 @@ CONTAINS
       END DO
     END DO
   END SUBROUTINE compute_downscattering
+
+  !=============================================================================
+  !Subroutine > compute_fissionsource
+  !=============================================================================
+  !> Computes the fissions from each group (fiss_src) using the most recent
+  !> data. This subroutine is for both the eigenvalue and fixed source solvers.
+  SUBROUTINE compute_fissionsource(flux, fiss_src)
+
+    INTEGER :: eg, egg, i, l, m, k, indx
+    REAL(kind=d_t) :: flux(num_moments_v,namom,num_cells,egmax,niter)
+    REAL(kind=d_t) :: fiss_src(num_moments_v,num_cells,2)
+
+    !========================================================================
+    ! Zero fission source. Then, recompute fission source using new update
+    !========================================================================
+    fiss_src(:,:,2)=zero
+    DO eg=1, egmax
+      DO i=1, num_cells
+          DO l=1, num_moments_v
+            fiss_src(l,i,2)=fiss_src(l,i,2)                                        +&
+                  nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs *&
+                  dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
+          END DO
+      END DO
+    END DO
+  END SUBROUTINE compute_fissionsource
+
+  !=============================================================================
+  !Subroutine > add_fissionsource
+  !=============================================================================
+  !> Computes the iteration source fission component based on the passed
+  !> flux and  various global fission & materials parameters.
+  !> This subroutine is for both the eigenvalue and fixed source solvers.
+  SUBROUTINE add_fissionsource(src, keff_new, fiss_src)
+
+    INTEGER :: eg, egg, i, l, m, k, indx
+    REAL(kind=d_t) :: keff_new
+    REAL(kind=d_t) :: src(num_moments_v,namom,num_cells,egmax)
+    REAL(kind=d_t) :: fiss_src(num_moments_v,num_cells,2)
+
+
+    DO eg=1,egmax
+      DO i=1,num_cells
+        DO l=1,num_moments_v
+          src(l,1,i,eg)  =src(l,1,i,eg)+one/keff_new     *&
+                chi(reg2mat(cells(i)%reg),eg)%xs*fiss_src(l,i,1)
+        END DO
+      END DO
+    END DO
+  END SUBROUTINE add_fissionsource
 END MODULE outer_iteration_module
 !-----------------------------------------------------------------------------------------
 ! End
