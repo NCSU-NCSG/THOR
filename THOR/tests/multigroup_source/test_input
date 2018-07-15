@@ -1,0 +1,4 @@
+start multigroup_source
+  input = multigroup_source.inp
+  gold_file_name = multigroup_source.inp_out.csv
+end
