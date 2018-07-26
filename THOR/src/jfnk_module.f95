@@ -375,7 +375,7 @@ CONTAINS
 
       ! Check for convergence
 
-      IF(nres<nit_conv) THEN
+      IF(nres<nit_conv .and. rank .EQ. 0) THEN
         WRITE(6,*)   '---------------------------------------------------------------------------'
         WRITE(6,104) 'Newton Iteration Convergence achieved after',nit,' iterations.'
         WRITE(6,103) 'with final residual ',nres
@@ -402,9 +402,11 @@ CONTAINS
 
     CALL norm_eigmode(flux,tot_vol)
 
-    WRITE(6,*) '========================================================'
-    WRITE(6,*) '   End JFNK iterations.'
-    WRITE(6,*) '========================================================'
+    IF (rank .EQ. 0) THEN
+      WRITE(6,*) '========================================================'
+      WRITE(6,*) '   End JFNK iterations.'
+      WRITE(6,*) '========================================================'
+    END IF
 
     ! newton iteration end, copy unknown to flux
 
@@ -923,7 +925,7 @@ CONTAINS
 
     ! Print header for Krylov convergence monitor
 
-    WRITE(6,102) '---itn         err    trgt-res        time ---'
+    IF(rank .EQ. 0) WRITE(6,102) '---itn         err    trgt-res        time ---'
 
     ! Start gmres iteration
 
@@ -979,7 +981,7 @@ CONTAINS
       CALL CPU_TIME(te)
 
       ! write convergence monitor
-      WRITE(6,101) k,fpar(5),tol*nrhs,te-ts,' %%k'
+      IF (rank .EQ. 0) WRITE(6,101) k,fpar(5),tol*nrhs,te-ts,' %%k'
 
     END DO
 
