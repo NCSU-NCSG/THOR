@@ -1,0 +1,13 @@
+brick x 10 y 10 z 10
+volume 1 Scheme Tetmesh proximity layers off
+volume 1 size auto factor 9
+mesh volume 1
+
+# set blocks
+block 1 volume 1
+
+# set sidesets
+sideset 1 surface 1 2 3 4 5 6
+
+# export
+export mesh "/Users/schus/projects/rattlesnake/Jieun_pin_problem/brick_tet_mesh.e" dimension 3 block 1 overwrite
