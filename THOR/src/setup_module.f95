@@ -48,8 +48,9 @@ CONTAINS
     REAL(kind=d_t), DIMENSION(3,3) :: J, J_inv
     REAL(kind=d_t)                 :: det_J,tot_vol
     LOGICAL :: existence
-    INTEGER ::rank,mpi_err, localunit
+    INTEGER :: rank, num_p, mpi_err, localunit
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
 
     ! Read input
 
@@ -115,16 +116,6 @@ CONTAINS
       niter=3_li
     END IF
 
-    ! Estimate memory consumption
-    IF (rank .EQ. 0) THEN
-      CALL memory_estimate(mem_req)
-      WRITE(6,*) "--------------------------------------------------------"
-      WRITE(6,*) "   Memory estimate   "
-      WRITE(6,*) "--------------------------------------------------------"
-      WRITE(6,102) 'Memory estimate: ',mem_req,' MB'
-      WRITE(6,*)
-102   FORMAT(1X,A18,ES12.4,A3)
-    END IF
     ! Pre-compute the cell outward normal vectors
 
     ALLOCATE(outward_normal(num_cells,0:3),stat=alloc_stat)
@@ -159,6 +150,37 @@ CONTAINS
       CALL classify_reflective
 
     END IF
+
+    ! Determine which boundary faces are reflective and save in reflective
+
+    reflective=0_li
+    DO i=1,rside_cells
+      q=ABS(refl_face_tpe(i))
+      IF(refl_face_tpe(i)>0) THEN
+        reflective(q,2)=1
+      ELSE
+        reflective(q,1)=1
+      END IF
+    END DO
+
+    ! Determine ordering of octants
+
+    CALL set_ordering(reflective)
+
+    ! Make sure that if JFNK is selected reflective BC in opposite faces is not
+    ! permitted
+    IF(problem .EQ. 1 .AND. eig_switch .EQ. 1 .AND. rd_method > 1) THEN
+      DO i = 1, 3
+        IF(reflective(i,1) .EQ. 1 .AND. reflective(i,2).EQ.1 ) CALL stop_thor(31_li)
+      END DO
+    END IF
+
+    ! Error out if we have reflecting BCs, JFNK, and nproc > 1
+    IF (eig_switch .EQ. one .and. SUM(reflective) .NE. zero .and. num_p > one) THEN
+      CALL stop_thor(-1_li, "Parallel execution of JFNK with reflecting BC is currently not supported in THOR.")
+    END IF
+
+101 FORMAT(1X,A,ES12.4)
 
     ! Set up the variables to memorize rings in the mesh sweep
 
@@ -205,33 +227,6 @@ CONTAINS
         WRITE(6,*)
       END IF
     END IF
-
-    ! Determine which boundary faces are reflective and save in reflective
-
-    reflective=0_li
-    DO i=1,rside_cells
-      q=ABS(refl_face_tpe(i))
-      IF(refl_face_tpe(i)>0) THEN
-        reflective(q,2)=1
-      ELSE
-        reflective(q,1)=1
-      END IF
-    END DO
-
-    ! Determine ordering of octants
-
-    CALL set_ordering(reflective)
-
-    ! Make sure that if JFNK is selected reflective BC in opposite faces is not
-    ! permitted
-
-    IF(problem .EQ. 1 .AND. eig_switch .EQ.1 .AND. rd_method > 1) THEN
-      DO i=1,3
-        IF(reflective(i,1) .EQ. 1 .AND. reflective(i,2).EQ.1 ) CALL stop_thor(31_li)
-      END DO
-    END IF
-
-101 FORMAT(1X,A,ES12.4)
 
     ! set variables that should eventually be moved to input
 
@@ -309,59 +304,82 @@ CONTAINS
 
     ! --- Arguments
     INTEGER(kind=li) :: reflective(3,2)
-    INTEGER(kind=li) :: xd = 0,yd = 0,zd=0
+
+    ! --- Local variables
+    INTEGER(kind=li) :: xd = 0, yd = 0, zd=0
+    INTEGER(kind=li) :: parallel_i, k, oct, permutation(8), q
+    INTEGER :: rank, num_p, mpi_err, localunit
+
+    CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
+    CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
 
     ! --- Set ordering
     !  -- x-dir
     IF      (reflective(1,1) .EQ. 0_li .AND. reflective(1,2) .EQ. 0_li) THEN
-      xd=1_li
+      xd = 1_li
     ELSE IF (reflective(1,1) .EQ. 1_li .AND. reflective(1,2) .EQ. 0_li) THEN
-      xd=-1_li
+      xd = -1_li
     ELSE IF (reflective(1,1) .EQ. 0_li .AND. reflective(1,2) .EQ. 1_li) THEN
-      xd=1_li
+      xd = 1_li
     ELSE IF (reflective(1,1) .EQ. 1_li .AND. reflective(1,2) .EQ. 1_li) THEN
-      xd=1_li
+      xd = 1_li
     END IF
     !  -- y-dir
     IF      (reflective(2,1) .EQ. 0_li .AND. reflective(2,2) .EQ. 0_li) THEN
-      yd=1_li
+      yd = 1_li
     ELSE IF (reflective(2,1) .EQ. 1_li .AND. reflective(2,2) .EQ. 0_li) THEN
-      yd=-1_li
+      yd = -1_li
     ELSE IF (reflective(2,1) .EQ. 0_li .AND. reflective(2,2) .EQ. 1_li) THEN
-      yd=1_li
+      yd = 1_li
     ELSE IF (reflective(2,1) .EQ. 1_li .AND. reflective(2,2) .EQ. 1_li) THEN
-      yd=1_li
+      yd = 1_li
     END IF
     !  -- z-dir
     IF      (reflective(3,1) .EQ. 0_li .AND. reflective(3,2) .EQ. 0_li) THEN
-      zd=1_li
+      zd = 1_li
     ELSE IF (reflective(3,1) .EQ. 1_li .AND. reflective(3,2) .EQ. 0_li) THEN
-      zd=-1_li
+      zd = -1_li
     ELSE IF (reflective(3,1) .EQ. 0_li .AND. reflective(3,2) .EQ. 1_li) THEN
-      zd=1_li
+      zd = 1_li
     ELSE IF (reflective(3,1) .EQ. 1_li .AND. reflective(3,2) .EQ. 1_li) THEN
-      zd=1_li
+      zd = 1_li
     END IF
 
     !  -- Chose octant ordering
+    ! TODO: check the ordering...might not be right
     IF      (xd .EQ.  1_li .AND. yd .EQ.  1_li .AND. zd .EQ.  1_li) THEN
-      ordering =(/1,2,3,4,5,6,7,8/)
+      ordering = (/1,2,3,4,5,6,7,8/)
     ELSE IF (xd .EQ.  1_li .AND. yd .EQ.  1_li .AND. zd .EQ. -1_li) THEN
-      ordering =(/5,6,7,8,1,2,3,4/)
+      ordering = (/5,6,7,8,1,2,3,4/)
     ELSE IF (xd .EQ.  1_li .AND. yd .EQ. -1_li .AND. zd .EQ.  1_li) THEN
-      ordering =(/4,3,8,7,2,1,5,4/)
+      ordering = (/4,3,1,8,7,5,2,6/)
     ELSE IF (xd .EQ. -1_li .AND. yd .EQ.  1_li .AND. zd .EQ.  1_li) THEN
-      ordering =(/2,3,6,7,1,4,5,8/)
+      ordering = (/2,3,6,7,1,4,5,8/)
     ELSE IF (xd .EQ.  1_li .AND. yd .EQ. -1_li .AND. zd .EQ. -1_li) THEN
-      ordering =(/8,7,6,5,4,3,2,1/)
+      ordering = (/8,7,6,5,4,3,2,1/)
     ELSE IF (xd .EQ. -1_li .AND. yd .EQ.  1_li .AND. zd .EQ. -1_li) THEN
-      ordering =(/6,7,8,5,2,3,4,1/)
+      ordering = (/6,7,8,5,2,3,4,1/)
     ELSE IF (xd .EQ. -1_li .AND. yd .EQ. -1_li .AND. zd .EQ.  1_li) THEN
-      ordering =(/3,4,1,2,7,8,5,6/)
+      ordering = (/3,4,1,2,7,8,5,6/)
     ELSE IF (xd .EQ. -1_li .AND. yd .EQ. -1_li .AND. zd .EQ. -1_li) THEN
-      ordering =(/7,6,8,5,3,2,4,1/)
+      ordering = (/7,6,8,5,3,2,4,1/)
     END IF
 
+    ! get the ordering of oct in the loop implemented in sweep_module
+    octants_to_sweep = 9_li
+    permutation = (/1, 2, 3, 4, 5, 6, 7, 8/)
+    q = one
+    DO parallel_i = 1, CEILING((nangle * 8.0) / (num_p))
+      k = parallel_map_l2g(parallel_i, rank + 1)
+      IF (k .EQ. 0) EXIT
+      oct = MOD(k, 8) + 1
+      IF (indexOf(oct, octants_to_sweep) == -1_li) THEN
+        octants_to_sweep(q) = oct
+        q = q + 1
+      END IF
+    END DO
+    ordered_octants_to_sweep = octants_to_sweep
+    CALL quickSortInteger(ordered_octants_to_sweep, permutation)
   END SUBROUTINE set_ordering
 
   !------------------------------------------------------------------------------------------------------------------------!
@@ -379,7 +397,8 @@ CONTAINS
 
     ! Define temporary variables
 
-    INTEGER(kind=li) :: alloc_stat, q, oct, octt, octant, i, f, l, rcell,j,k
+    INTEGER(kind=li) :: alloc_stat, q, oct, octt, octant,&
+                        i, f, l, rcell, j, k, index
     TYPE(vector) :: omega
 
     ! Temporary variables
@@ -401,8 +420,9 @@ CONTAINS
       oct = MOD(k,8)+1
       q = CEILING(k/8.0)
 
-      !FIX ME - Octant ordering is lost here
-      octant= oct !ordering(oct)
+      index = indexOf(oct, octants_to_sweep)
+      IF (index > 8_li .or. index < 1) CALL stop_thor(-1_li, "Sweep order index out of bounds")
+      octant = ordering(ordered_octants_to_sweep(index))
 
       IF(octant == 1)THEN
         omega%x1=quadrature(q)%mu%x1
@@ -870,76 +890,6 @@ CONTAINS
 
   !------------------------------------------------------------------------------------------------------------------------!
   !------------------------------------------------------------------------------------------------------------------------!
-
-  SUBROUTINE memory_estimate(mem)
-    !*********************************************************************
-    !
-    ! Computes an estimate of the consumption of memory based on the
-    ! largest arrays used in THOR
-    !
-    !*********************************************************************
-
-    ! --- Return value
-    REAL(kind=d_t) :: mem
-
-    ! --- Local variables
-    INTEGER(kind=li) :: nvar
-
-    ! --- Initialize mem
-    mem=0.0d0
-
-    ! --- Contributions for all types
-    mem = mem +&
-          4.0d0*8.0d0*REAL(num_cells,d_t)                                               +&  ! adj list
-          8.0d0*2.0d0*REAL(namom,d_t)*REAL(num_cells,d_t)*REAL(egmax*num_moments_v,d_t) +&  ! flux
-          8.0d0*3.0d0*REAL(namom,d_t)*REAL(num_cells,d_t)*REAL(egmax*num_moments_v,d_t) +&  ! flux + src
-          8.0d0*REAL(num_cells,d_t)*REAL(num_moments_v,d_t)                             +&
-          8.0d0*4.0d0*REAL(num_cells,d_t)*REAL(num_moments_f,d_t)                       +&  ! angular flux
-          8.0d0*REAL(num_cells,d_t)*REAL(num_moments_v,d_t)                                 ! directed source
-
-    ! --- Reflected flux
-    IF(page_refl.EQ.0_li) THEN
-      mem = mem +&
-            8.0d0*8.0d0*REAL(nangle,d_t)*REAL(rside_cells,d_t)*REAL(egmax*num_moments_v,d_t)        ! reflected flux
-    ELSE
-      mem = mem +&
-            8.0d0*8.0d0*REAL(nangle,d_t)*REAL(rside_cells,d_t)*REAL(num_moments_v,d_t)              ! reflected flux
-    END IF
-
-    ! --- Sweep path
-
-    IF(page_sweep.EQ.0) THEN
-      mem = mem +&
-            4.0d0*8.0d0*REAL(nangle,d_t)*REAL(num_cells,d_t)
-    ELSE
-      mem = mem + 4.0d0*REAL(num_cells,d_t)
-    END IF
-
-    ! --- Go through execution modii
-    IF(problem.EQ.0) THEN
-      IF(page_iflw.EQ.0_li) THEN
-        mem = mem +&
-              8.0d0*REAL(nangle,d_t)*REAL(fside_cells,d_t)*REAL(egmax*num_moments_f,d_t)  ! binflx
-      ELSE
-        mem = mem +&
-              8.0d0*REAL(nangle,d_t)*REAL(fside_cells,d_t)*REAL(num_moments_f,d_t)        ! binflx
-      END IF
-    ELSE
-      IF(eig_switch.EQ.0) THEN
-        mem = mem +&
-              8.0d0*2.0d0*REAL(num_cells,d_t)*REAL(num_moments_v,d_t)                  ! fiss_src
-      ELSE
-        nvar = egmax*num_moments_v*namom*num_cells
-        mem = mem +&
-              8.0d0 * 3.0d0 * REAL(nvar,d_t) +&                                        ! residual,du and dflx
-              8.0d0 * REAL( (nvar+4)*(rd_restart+2)+(rd_restart+1)*rd_restart/2,d_t)   ! work
-      END IF
-    END IF
-
-    ! --- Divide by 1E6 to get MB
-    mem = mem * 1.0d-6
-
-  END SUBROUTINE memory_estimate
 
   SUBROUTINE assign_work
 

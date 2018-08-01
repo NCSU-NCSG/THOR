@@ -127,7 +127,7 @@ MODULE global_variables
   ! ordering of the octants for sweep
 
   INTEGER(kind=li), DIMENSION(8) :: ordering=(/7,6,8,5,3,2,4,1/)
-
+  INTEGER(kind=li), DIMENSION(8) :: octants_to_sweep, ordered_octants_to_sweep
 
   ! Additional input switches
 
