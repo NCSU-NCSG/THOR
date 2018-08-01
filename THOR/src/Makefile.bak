@@ -89,7 +89,7 @@ geometry_types.o geometry_types.mod: geometry_types.f95 types.mod \
 global_variables.o global_variables.mod: global_variables.f95 types.mod \
  parameter_types.mod filename_types.mod vector_types.mod \
  cross_section_types.mod geometry_types.mod angle_types.mod \
- multindex_types.mod
+ multindex_types.mod integer_array_tools.mod
 	$(CC) $(OPT1) global_variables.f95
 #-------------------------------------------------------------------------------
 inner_iteration_module.o inner_iteration_module.mod: \

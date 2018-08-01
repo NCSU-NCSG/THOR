@@ -13,6 +13,7 @@ MODULE global_variables
   USE geometry_types
   USE angle_types
   USE multindex_types
+  USE integer_array_tools
   IMPLICIT NONE
 
   ! from parameters
