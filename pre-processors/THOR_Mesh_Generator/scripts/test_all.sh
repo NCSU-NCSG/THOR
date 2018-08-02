@@ -3,7 +3,7 @@ message2="<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 printf $message1
 echo Test 1: basic_cube_mesh_test
-cd ../test/basic_cube_mesh_test
+cd ../test/Basic_Cube_Mesh_test
   pwd
   bash ./run_test.sh
   cd -
@@ -44,14 +44,6 @@ printf $message2
 printf $message1
 echo Test 6: bad_invocation_unsupported_file_type_unknown
 cd ../test/bad_invocation_unsupported_file_type_unknown
-  pwd
-  bash ./run_test.sh
-cd -
-printf $message2
-
-printf $message1
-echo Test 7: bad_invocation_unsupported_file_type_exodus
-cd ../test/bad_invocation_unsupported_file_type_exodus
   pwd
   bash ./run_test.sh
 cd -

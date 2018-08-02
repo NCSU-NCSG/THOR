@@ -1,1 +1,1 @@
-../../src/Thor_Mesh_Generator.exe -i 
+../../Thor_Mesh_Generator_MP.exe -i 
