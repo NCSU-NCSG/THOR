@@ -11,12 +11,12 @@
 	OPT3 = -O3 -g -o
 
 # Setting up file names
-	SRC = $(wildcard *.f90)
+	SRC = $(wildcard *.f95)
 	# If there are any source files in the src folder that
 	# need to be ignored for compilation,
 	# add them here (integrate cube a b ..., $SRC))
-	SRC1 = $(filter-out integrate_cube.f90, $(SRC))
-	OBJ = $(SRC1:.f90=.o)
+	SRC1 = $(filter-out integrate_cube.f95, $(SRC))
+	OBJ = $(SRC1:.f95=.o)
 	ARC = libskit.a
 
 #Executable Name
@@ -40,214 +40,214 @@ libskit.a:
 
 #Automatic Items Shown Below
 #-------------------------------------------------------------------------------
-ahotc_matrix_module.o ahotc_matrix_module.mod: ahotc_matrix_module.f90 \
+ahotc_matrix_module.o ahotc_matrix_module.mod: ahotc_matrix_module.f95 \
  types.mod parameter_types.mod multindex_types.mod
-	$(CC) $(OPT1) ahotc_matrix_module.f90
+	$(CC) $(OPT1) ahotc_matrix_module.f95
 #-------------------------------------------------------------------------------
-angle_types.o angle_types.mod: angle_types.f90 types.mod vector_types.mod
-	$(CC) $(OPT1) angle_types.f90
+angle_types.o angle_types.mod: angle_types.f95 types.mod vector_types.mod
+	$(CC) $(OPT1) angle_types.f95
 #-------------------------------------------------------------------------------
 cell_splitting_module.o cell_splitting_module.mod: \
- cell_splitting_module.f90 types.mod parameter_types.mod \
+ cell_splitting_module.f95 types.mod parameter_types.mod \
  filename_types.mod vector_types.mod cross_section_types.mod \
  geometry_types.mod angle_types.mod multindex_types.mod \
  global_variables.mod general_utility_module.mod \
  transport_kernel_module_sc.mod transport_kernel_module_lc.mod \
  transport_kernel_module_cce.mod termination_module.mod
-	$(CC) $(OPT1) cell_splitting_module.f90
+	$(CC) $(OPT1) cell_splitting_module.f95
 #-------------------------------------------------------------------------------
-cross_section_types.o cross_section_types.mod: cross_section_types.f90 \
+cross_section_types.o cross_section_types.mod: cross_section_types.f95 \
  types.mod
-	$(CC) $(OPT1) cross_section_types.f90
+	$(CC) $(OPT1) cross_section_types.f95
 #-------------------------------------------------------------------------------
-distdot.o: distdot.f90
-	$(CC) $(OPT1) distdot.f90
+distdot.o: distdot.f95
+	$(CC) $(OPT1) distdot.f95
 #-------------------------------------------------------------------------------
-dump_inguess_module.o dump_inguess_module.mod: dump_inguess_module.f90 \
+dump_inguess_module.o dump_inguess_module.mod: dump_inguess_module.f95 \
  types.mod parameter_types.mod filename_types.mod vector_types.mod \
  cross_section_types.mod geometry_types.mod angle_types.mod \
  multindex_types.mod global_variables.mod termination_module.mod
-	$(CC) $(OPT1) dump_inguess_module.f90
+	$(CC) $(OPT1) dump_inguess_module.f95
 #-------------------------------------------------------------------------------
-execution_module.o execution_module.mod: execution_module.f90 types.mod \
+execution_module.o execution_module.mod: execution_module.f95 types.mod \
  parameter_types.mod filename_types.mod vector_types.mod \
  cross_section_types.mod geometry_types.mod angle_types.mod \
  multindex_types.mod global_variables.mod solver_module.mod
-	$(CC) $(OPT1) execution_module.f90
+	$(CC) $(OPT1) execution_module.f95
 #-------------------------------------------------------------------------------
-filename_types.o filename_types.mod: filename_types.f90
-	$(CC) $(OPT1) filename_types.f90
+filename_types.o filename_types.mod: filename_types.f95
+	$(CC) $(OPT1) filename_types.f95
 #-------------------------------------------------------------------------------
 general_utility_module.o general_utility_module.mod: \
- general_utility_module.f90 precision.mod types.mod vector_types.mod
-	$(CC) $(OPT1) general_utility_module.f90
+ general_utility_module.f95 precision.mod types.mod vector_types.mod
+	$(CC) $(OPT1) general_utility_module.f95
 #-------------------------------------------------------------------------------
-geometry_types.o geometry_types.mod: geometry_types.f90 types.mod \
+geometry_types.o geometry_types.mod: geometry_types.f95 types.mod \
  vector_types.mod
-	$(CC) $(OPT1) geometry_types.f90
+	$(CC) $(OPT1) geometry_types.f95
 #-------------------------------------------------------------------------------
-global_variables.o global_variables.mod: global_variables.f90 types.mod \
+global_variables.o global_variables.mod: global_variables.f95 types.mod \
  parameter_types.mod filename_types.mod vector_types.mod \
  cross_section_types.mod geometry_types.mod angle_types.mod \
  multindex_types.mod
-	$(CC) $(OPT1) global_variables.f90
+	$(CC) $(OPT1) global_variables.f95
 #-------------------------------------------------------------------------------
 inner_iteration_module.o inner_iteration_module.mod: \
- inner_iteration_module.f90  types.mod \
+ inner_iteration_module.f95  types.mod \
  parameter_types.mod filename_types.mod vector_types.mod \
  cross_section_types.mod geometry_types.mod angle_types.mod \
  multindex_types.mod global_variables.mod sweep_module.mod \
  termination_module.mod
-	$(CC) $(OPT1) inner_iteration_module.f90
+	$(CC) $(OPT1) inner_iteration_module.f95
 #-------------------------------------------------------------------------------
-input_check.o check_input.mod: input_check.f90 types.mod \
+input_check.o check_input.mod: input_check.f95 types.mod \
  parameter_types.mod filename_types.mod vector_types.mod \
  cross_section_types.mod geometry_types.mod angle_types.mod \
  multindex_types.mod global_variables.mod
-	$(CC) $(OPT1) input_check.f90
+	$(CC) $(OPT1) input_check.f95
 #-------------------------------------------------------------------------------
 
-jfnk_module.o jfnk_module.mod: jfnk_module.f90 types.mod \
+jfnk_module.o jfnk_module.mod: jfnk_module.f95 types.mod \
  parameter_types.mod filename_types.mod vector_types.mod \
  cross_section_types.mod geometry_types.mod angle_types.mod \
  multindex_types.mod global_variables.mod inner_iteration_module.mod \
  dump_inguess_module.mod
-	$(CC) $(OPT1) jfnk_module.f90
+	$(CC) $(OPT1) jfnk_module.f95
 #-------------------------------------------------------------------------------
-main.o: main.f90  types.mod parameter_types.mod \
+main.o: main.f95  types.mod parameter_types.mod \
  filename_types.mod vector_types.mod cross_section_types.mod \
  geometry_types.mod angle_types.mod multindex_types.mod \
  global_variables.mod termination_module.mod setup_module.mod \
  execution_module.mod wrapup_module.mod  \
  global_variables.mod
-	$(CC) $(OPT1) main.f90
+	$(CC) $(OPT1) main.f95
 #-------------------------------------------------------------------------------
-multindex_types.o multindex_types.mod: multindex_types.f90 types.mod \
+multindex_types.o multindex_types.mod: multindex_types.f95 types.mod \
  vector_types.mod
-	$(CC) $(OPT1) multindex_types.f90
+	$(CC) $(OPT1) multindex_types.f95
 #-------------------------------------------------------------------------------
 outer_iteration_module.o outer_iteration_module.mod: \
- outer_iteration_module.f90 types.mod parameter_types.mod \
+ outer_iteration_module.f95 types.mod parameter_types.mod \
  filename_types.mod vector_types.mod cross_section_types.mod \
  geometry_types.mod angle_types.mod multindex_types.mod \
  global_variables.mod wrapup_module.mod termination_module.mod \
  inner_iteration_module.mod dump_inguess_module.mod
-	$(CC) $(OPT1) outer_iteration_module.f90
+	$(CC) $(OPT1) outer_iteration_module.f95
 #-------------------------------------------------------------------------------
-parameter_types.o parameter_types.mod: parameter_types.f90 types.mod
-	$(CC) $(OPT1) parameter_types.f90
+parameter_types.o parameter_types.mod: parameter_types.f95 types.mod
+	$(CC) $(OPT1) parameter_types.f95
 #-------------------------------------------------------------------------------
-precmod.o precision.mod: precision.f90
-	$(CC) $(OPT1) precision.f90
+precmod.o precision.mod: precision.f95
+	$(CC) $(OPT1) precision.f95
 #-------------------------------------------------------------------------------
-quadrature_module.o quadrature_module.mod: quadrature_module.f90 \
+quadrature_module.o quadrature_module.mod: quadrature_module.f95 \
  types.mod parameter_types.mod vector_types.mod angle_types.mod \
  global_variables.mod termination_module.mod
-	$(CC) $(OPT1) quadrature_module.f90
+	$(CC) $(OPT1) quadrature_module.f95
 #-------------------------------------------------------------------------------
 read_cross_section_module.o read_cross_section_module.mod: \
- read_cross_section_module.f90 types.mod parameter_types.mod \
+ read_cross_section_module.f95 types.mod parameter_types.mod \
  filename_types.mod cross_section_types.mod global_variables.mod \
  termination_module.mod
-	$(CC) $(OPT1) read_cross_section_module.f90
+	$(CC) $(OPT1) read_cross_section_module.f95
 #-------------------------------------------------------------------------------
-read_inflow_module.o read_inflow_module.mod: read_inflow_module.f90 \
+read_inflow_module.o read_inflow_module.mod: read_inflow_module.f95 \
  types.mod parameter_types.mod filename_types.mod multindex_types.mod \
  global_variables.mod termination_module.mod
-	$(CC) $(OPT1) read_inflow_module.f90
+	$(CC) $(OPT1) read_inflow_module.f95
 #-------------------------------------------------------------------------------
-read_module.o read_module.mod: read_module.f90  \
+read_module.o read_module.mod: read_module.f95  \
  strings.mod types.mod parameter_types.mod filename_types.mod \
  vector_types.mod cross_section_types.mod geometry_types.mod \
  angle_types.mod multindex_types.mod global_variables.mod \
  read_cross_section_module.mod readmesh_module.mod read_source_module.mod \
  read_inflow_module.mod quadrature_module.mod check_input.mod \
  termination_module.mod adv_read_module.mod
-	$(CC) $(OPT1) read_module.f90
+	$(CC) $(OPT1) read_module.f95
 #-------------------------------------------------------------------------------
-read_source_module.o read_source_module.mod: read_source_module.f90 \
+read_source_module.o read_source_module.mod: read_source_module.f95 \
  types.mod parameter_types.mod filename_types.mod multindex_types.mod \
  global_variables.mod termination_module.mod
-	$(CC) $(OPT1) read_source_module.f90
+	$(CC) $(OPT1) read_source_module.f95
 #-------------------------------------------------------------------------------
-readmesh_module.o readmesh_module.mod: readmesh_module.f90 \
+readmesh_module.o readmesh_module.mod: readmesh_module.f95 \
   types.mod parameter_types.mod filename_types.mod \
  vector_types.mod geometry_types.mod global_variables.mod \
  termination_module.mod
-	$(CC) $(OPT1) readmesh_module.f90
+	$(CC) $(OPT1) readmesh_module.f95
 #-------------------------------------------------------------------------------
-setup_module.o setup_module.mod: setup_module.f90  \
+setup_module.o setup_module.mod: setup_module.f95  \
  types.mod parameter_types.mod filename_types.mod vector_types.mod \
  cross_section_types.mod geometry_types.mod angle_types.mod \
  multindex_types.mod global_variables.mod read_module.mod \
  quadrature_module.mod sweep_module.mod termination_module.mod
-	$(CC) $(OPT1) setup_module.f90
+	$(CC) $(OPT1) setup_module.f95
 #-------------------------------------------------------------------------------
-solver_module.o solver_module.mod: solver_module.f90 types.mod \
+solver_module.o solver_module.mod: solver_module.f95 types.mod \
  parameter_types.mod filename_types.mod vector_types.mod \
  cross_section_types.mod geometry_types.mod angle_types.mod \
  multindex_types.mod global_variables.mod ahotc_matrix_module.mod \
  sph_harmonics_module.mod outer_iteration_module.mod jfnk_module.mod \
  termination_module.mod
-	$(CC) $(OPT1) solver_module.f90
+	$(CC) $(OPT1) solver_module.f95
 #-------------------------------------------------------------------------------
-sph_harmonics_module.o sph_harmonics_module.mod: sph_harmonics_module.f90 \
+sph_harmonics_module.o sph_harmonics_module.mod: sph_harmonics_module.f95 \
  types.mod parameter_types.mod vector_types.mod angle_types.mod \
  multindex_types.mod termination_module.mod
-	$(CC) $(OPT1) sph_harmonics_module.f90
+	$(CC) $(OPT1) sph_harmonics_module.f95
 #-------------------------------------------------------------------------------
-stringmod.o strings.mod: stringmod.f90 precision.mod
-	$(CC) $(OPT1) stringmod.f90
+stringmod.o strings.mod: stringmod.f95 precision.mod
+	$(CC) $(OPT1) stringmod.f95
 #-------------------------------------------------------------------------------
-sweep_module.o sweep_module.mod: sweep_module.f90  \
+sweep_module.o sweep_module.mod: sweep_module.f95  \
  types.mod parameter_types.mod filename_types.mod vector_types.mod \
  cross_section_types.mod geometry_types.mod angle_types.mod \
  multindex_types.mod global_variables.mod cell_splitting_module.mod
-	$(CC) $(OPT1) sweep_module.f90
+	$(CC) $(OPT1) sweep_module.f95
 #-------------------------------------------------------------------------------
-termination_module.o termination_module.mod: termination_module.f90 \
+termination_module.o termination_module.mod: termination_module.f95 \
  global_variables.mod
-	$(CC) $(OPT1) termination_module.f90
+	$(CC) $(OPT1) termination_module.f95
 #-------------------------------------------------------------------------------
 transport_kernel_module_CCE.o transport_kernel_module_cce.mod: \
- transport_kernel_module_CCE.f90 types.mod parameter_types.mod \
+ transport_kernel_module_CCE.f95 types.mod parameter_types.mod \
  filename_types.mod vector_types.mod cross_section_types.mod \
  geometry_types.mod angle_types.mod multindex_types.mod \
  global_variables.mod termination_module.mod general_utility_module.mod \
  types.mod types.mod types.mod types.mod
-	$(CC) $(OPT1) transport_kernel_module_CCE.f90
+	$(CC) $(OPT1) transport_kernel_module_CCE.f95
 #-------------------------------------------------------------------------------
 transport_kernel_module_LC.o transport_kernel_module_lc.mod: \
-    transport_kernel_module_LC.f90 types.mod parameter_types.mod \
+    transport_kernel_module_LC.f95 types.mod parameter_types.mod \
     filename_types.mod vector_types.mod cross_section_types.mod \
     geometry_types.mod angle_types.mod multindex_types.mod \
     global_variables.mod termination_module.mod general_utility_module.mod
-	$(CC) $(OPT1) $(OPT2) transport_kernel_module_LC.f90
+	$(CC) $(OPT1) $(OPT2) transport_kernel_module_LC.f95
 
 #-------------------------------------------------------------------------------
 
 transport_kernel_module_SC.o transport_kernel_module_sc.mod: \
-    transport_kernel_module_SC.f90 types.mod parameter_types.mod \
+    transport_kernel_module_SC.f95 types.mod parameter_types.mod \
     filename_types.mod vector_types.mod cross_section_types.mod \
     geometry_types.mod angle_types.mod multindex_types.mod \
     global_variables.mod termination_module.mod general_utility_module.mod
-	$(CC) $(OPT1) $(OPT2) transport_kernel_module_SC.f90
+	$(CC) $(OPT1) $(OPT2) transport_kernel_module_SC.f95
 #-------------------------------------------------------------------------------
-types.o types.mod: types.f90
-	$(CC) $(OPT1) types.f90
+types.o types.mod: types.f95
+	$(CC) $(OPT1) types.f95
 #-------------------------------------------------------------------------------
-vector_types.o vector_types.mod: vector_types.f90 types.mod
-	$(CC) $(OPT1) vector_types.f90
+vector_types.o vector_types.mod: vector_types.f95 types.mod
+	$(CC) $(OPT1) vector_types.f95
 #-------------------------------------------------------------------------------
-wrapup_module.o wrapup_module.mod: wrapup_module.f90 types.mod \
+wrapup_module.o wrapup_module.mod: wrapup_module.f95 types.mod \
  parameter_types.mod filename_types.mod vector_types.mod \
  cross_section_types.mod geometry_types.mod angle_types.mod \
  global_variables.mod termination_module.mod
-	$(CC) $(OPT1) wrapup_module.f90
+	$(CC) $(OPT1) wrapup_module.f95
 #-------------------------------------------------------------------------------
-adv_read_module.o adv_read_module.mod: adv_read_module.f90 error_generator.mod
-	$(CC) $(OPT1) adv_read_module.f90
+adv_read_module.o adv_read_module.mod: adv_read_module.f95 error_generator.mod
+	$(CC) $(OPT1) adv_read_module.f95
 #-------------------------------------------------------------------------------
-error_generator.o error_generator.mod: error_generator.f90 global_variables.mod
-	$(CC) $(OPT1) error_generator.f90
+error_generator.o error_generator.mod: error_generator.f95 global_variables.mod
+	$(CC) $(OPT1) error_generator.f95
 #-------------------------------------------------------------------------------
