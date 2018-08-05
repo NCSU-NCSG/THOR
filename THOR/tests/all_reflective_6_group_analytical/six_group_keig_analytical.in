@@ -1,0 +1,35 @@
+Six group analytical test problem by Sood et al.
+
+  start problem
+    execution = yes
+    lambda = 0
+    type= keig
+    sweep = precomp
+    page_refl = save
+    innerconv=1E-12 ; outerconv=1E-7
+    maxinner = 4 ; maxouter = 500
+  end problem
+
+  start inout
+    mesh_file     = brick_tet_mesh.thrm
+    xs_file       = six_group.xs
+    flux_file     = six_group_keig_analytical.flux
+    print_xs = yes
+  end inout
+
+  start cross_sections
+     ngroups = 6
+     upscattering = yes
+     multiplying = yes
+  end cross_sections
+
+  start quadrature
+    qdtype = levelsym
+    qdorder = 2
+  end quadrature
+
+  start regionmap
+     1
+  end regionmap
+
+end file

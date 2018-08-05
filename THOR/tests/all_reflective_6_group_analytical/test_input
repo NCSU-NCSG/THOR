@@ -1,0 +1,4 @@
+start G6_analytical_keff
+  input = six_group_keig_analytical.in
+  gold_file_name = six_group_keig_analytical.in_out.csv
+end
