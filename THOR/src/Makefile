@@ -89,6 +89,7 @@ CONT_MOD := $(CONT_OBJ:.o=.mod)
 #Add lib files
 #-----------------------------------------------------------------------------------
 LIB_SRC :=  \
+            $(LIB)/integer_array_tools/integer_array_tools.f95 \
 
 LIB_OBJ := $(patsubst %.f95,%.o,$(notdir $(LIB_SRC)))
 
@@ -108,6 +109,8 @@ COMP_DEP := \
 #Phony targets for cleaning and building
 #-----------------------------------------------------------------------------------
 .PHONY: all debug coverage clean reset
+
+print-%  : ; @echo $* = $($*)
 
 all: $(EXE)
 
@@ -220,7 +223,7 @@ geometry_types.o geometry_types.mod: geometry_types.f95 types.mod \
 global_variables.o global_variables.mod: global_variables.f95 types.mod \
   parameter_types.mod filename_types.mod vector_types.mod \
   cross_section_types.mod geometry_types.mod angle_types.mod \
-  multindex_types.mod
+  multindex_types.mod integer_array_tools.mod
 
 inner_iteration_module.o inner_iteration_module.mod: \
   inner_iteration_module.f95  types.mod \
