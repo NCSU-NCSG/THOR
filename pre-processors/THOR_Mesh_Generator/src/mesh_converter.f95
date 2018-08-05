@@ -84,11 +84,17 @@ PROGRAM generateMesh
   SELECT CASE (in_extension)
   CASE ('.msh') !Gmesh 3.0
     CALL ingestGmesh()
+    execution_mode = 1
   CASE ('.e') !Exodus II
     !Call libtool & then call ingestGmesh on the new file
     CALL generateErrorMessage(err_code_default, err_fatal, "Exodus II file support is not yet complete")
+    execution_mode = 2
   CASE('.UNV','.unv')
     CALL ingestUNV()
+    execution_mode = 3
+  CASE('.LTHRM','.lthrm')
+    CALL ingestThorMesh()
+    execution_mode = 4
   CASE DEFAULT
     CALL generateErrorMessage(err_code_default, err_fatal, "Input file extension not supported")
   END SELECT
@@ -99,9 +105,13 @@ PROGRAM generateMesh
   ! Print information about the input to screen
   CALL echoIngestedInput()
 
-  ! Actual reformatting work
-  CALL computeAdjacencyList()
-  CALL getBoundaryElements()
+  IF (execution_mode .eq. 4_li) THEN
+    CALL oldToNewTHORFormat()
+  ELSE
+    ! Actual reformatting work
+    CALL computeAdjacencyList()
+    CALL getBoundaryElements()
+  END IF
 
   !Output File
   SELECT CASE (out_extension)
@@ -111,9 +121,15 @@ PROGRAM generateMesh
     CALL generateErrorMessage(err_code_default, err_fatal, "Input file extension not supported")
   END SELECT
 
-  ! Raffi: Shoudn't we deallocate?
-  DEALLOCATE(block_id_map, source_id_map, adjacency_map, boundary_element_list,&
-        boundary_face_list)
+  ! Safe deallocation
+  IF (ALLOCATED(block_id_map)) DEALLOCATE(block_id_map)
+  IF (ALLOCATED(source_id_map)) DEALLOCATE(source_id_map)
+  IF (ALLOCATED(adjacency_map)) DEALLOCATE(adjacency_map)
+  IF (ALLOCATED(boundary_element_list)) DEALLOCATE(boundary_element_list)
+  IF (ALLOCATED(boundary_face_list)) DEALLOCATE(boundary_face_list)
+  IF (ALLOCATED(block_id)) DEALLOCATE(block_id)
+  IF (ALLOCATED(source_id)) DEALLOCATE(source_id)
+  IF (ALLOCATED(side_set)) DEALLOCATE(side_set)
 
   ! TODO: replace with a termination subroutine residing in the lib folder, printing
   ! exec time and a general message that all went well

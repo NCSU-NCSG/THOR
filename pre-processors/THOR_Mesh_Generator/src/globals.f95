@@ -39,6 +39,8 @@ MODULE globals
   INTEGER :: err_warning = 0
   !> Error severity level requiring immediate termination of program
   INTEGER :: err_fatal = 1
+  !> execution_mode: 1 - gmsh, 2 - exodus, 3 - unv, 4 - old THOR mesh
+  INTEGER :: execution_mode
   !> Number of <x,y,z> nodes in the mesh
   INTEGER :: node_count
   !> Number of elements in the mesh
@@ -76,6 +78,8 @@ MODULE globals
   INTEGER, ALLOCATABLE :: element_list(:,:)
   !>The mapping of element to block id from the input file
   INTEGER, ALLOCATABLE :: block_id(:)
+  !>The mapping of element to source id from the input file
+  INTEGER, ALLOCATABLE :: source_id(:)
   !> The nodes that make up each boundary face
   INTEGER, ALLOCATABLE :: bc_list(:,:)
   !> The boundary condition assigned to the boundary face
