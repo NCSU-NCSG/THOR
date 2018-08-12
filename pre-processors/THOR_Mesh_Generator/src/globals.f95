@@ -30,6 +30,8 @@ MODULE globals
   INTEGER :: source_id_unit = 23
   !> Unit number supplied for boundary id input file
   INTEGER :: boundary_id_unit = 24
+  !> Mesh refinement level
+  INTEGER :: uniform_refine = 0
   !> Used to track I/O operation status codes
   INTEGER :: io_status = 0
   !> Default error code when generating an error message without a more specific
@@ -105,6 +107,8 @@ MODULE globals
   CHARACTER(200) :: std_in_file = ""
   !> Holds the name of the standard input mesh file
   CHARACTER(200) :: in_file = ""
+  !> Holds the original name of the standard input mesh file; can be changed during execution
+  CHARACTER(200) :: original_in_file = ""
   !> Holds the name of the standard output mesh file
   CHARACTER(200) :: out_file = ""
   !> Holds the name of the standard input region id file
@@ -460,8 +464,9 @@ CONTAINS
 
     WRITE(6, *)
     WRITE(6, '(A)') "------------------------------------ Input ------------------------------------"
-    WRITE(6, '(A)') "Infile mesh file name: " // TRIM(in_file)
+    WRITE(6, '(A)') "Infile mesh file name: " // TRIM(original_in_file)
     WRITE(6, '(A)') "Output mesh file name: " // TRIM(out_file)
+    WRITE(6, '(A23, I4)') "Mesh refinement level: ", uniform_refine
 
     WRITE(6, *)
     IF (skip_region_map) THEN

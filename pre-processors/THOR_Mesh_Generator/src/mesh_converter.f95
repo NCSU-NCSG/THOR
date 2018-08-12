@@ -32,6 +32,10 @@ PROGRAM generateMesh
 
   !> The number of provided command line arguments
   INTEGER :: arg_count = 0
+  !> An integer for status feedback
+  INTEGER :: stat
+  !> Loop variable
+  INTEGER :: j
   !> String for temporarily holding input data for validation prior to storing
   !! in globals
   CHARACTER(200) :: temp_string = ""
@@ -39,6 +43,10 @@ PROGRAM generateMesh
   CHARACTER(200) :: in_extension = ""
   !> Holds the extension of the output mesh name specified in the input file
   CHARACTER(200) :: out_extension = ""
+  !> Holds the libmesh build directory env var
+  CHARACTER(500) :: libmesh_dir
+  !> Holds command line commands
+  CHARACTER(500) :: command
 
   ! Print some information
   WRITE(6, *) "TODO: Add a general header printer in lib common to all modules"
@@ -47,17 +55,30 @@ PROGRAM generateMesh
   !Get number of command line args and check for proper invocation
   arg_count = COMMAND_ARGUMENT_COUNT()
 
-  IF (arg_count .NE. 2) &
-        CALL generateErrorMessage(err_code_default, err_fatal, 'Invocation must be: ./prog -i input.in')
+  IF (arg_count .LT. 2 .OR. MOD(arg_count, 2) .NE. 0) &
+        CALL generateErrorMessage(err_code_default, err_fatal, 'Must have an even, nonzero number of command line args.')
 
-  !Get the input command line arg & ensure it specifies input file
-  CALL GET_COMMAND_ARGUMENT(1, temp_string)
+  DO j = 1, arg_count, 2
+    !Loop through all odd command line args
+    CALL GET_COMMAND_ARGUMENT(j, temp_string)
 
-  IF(TRIM(ADJUSTL(temp_string)) .NE. '-i' ) THEN
-    CALL generateErrorMessage(err_code_default, err_fatal, 'Invocation must be: ./prog -i input.in')
-  ELSE
-    CALL GET_COMMAND_ARGUMENT(2, std_in_file)
-  END IF
+    IF (TRIM(ADJUSTL(temp_string)) .EQ. '-i' ) THEN
+      CALL GET_COMMAND_ARGUMENT(j + 1, std_in_file)
+    ELSE IF (TRIM(ADJUSTL(temp_string)) .EQ. '-r' ) THEN
+      CALL GET_COMMAND_ARGUMENT(j + 1, temp_string)
+      READ(temp_string, *, iostat = stat)  uniform_refine
+      IF (stat .NE. 0) &
+          CALL generateErrorMessage(err_code_default, err_fatal, 'Argument following -r is not an integer.')
+    ELSE
+      CALL generateErrorMessage(err_code_default, err_fatal, 'Unknown argument. Invocation must be: ./prog -i input.in -r <n>')
+    END IF
+
+  END DO
+
+  !At least the input file must have been set
+  IF (TRIM(std_in_file) .EQ. "") &
+      CALL generateErrorMessage(err_code_default, err_fatal, 'Standard input &
+      file must be provided following -i command line argument.')
 
   !Get the input parameters first
   CALL ingestInput()
@@ -81,13 +102,47 @@ PROGRAM generateMesh
   out_extension = ADJUSTL(out_extension)
 
   !Ingest File
+  original_in_file = TRIM(in_file)
   SELECT CASE (in_extension)
   CASE ('.msh') !Gmesh 3.0
+
+    IF (uniform_refine .GT. 0) THEN
+      CALL get_environment_variable("THOR_LIBMESH_DIRECTORY", libmesh_dir)
+      WRITE(temp_string, *) "-r ", uniform_refine
+      command = TRIM(libmesh_dir) // "/meshtool-opt -i " // TRIM(in_file) &
+                // " -o internally_generated_gmesh_file.msh " // TRIM(temp_string)
+      in_file = "internally_generated_gmesh_file.msh"
+      CALL execute_command_line(TRIM(command), exitstat = stat)
+    END IF
+
     CALL ingestGmesh()
+
+    !Clean up the internally generated file if it exists
+    IF (uniform_refine .GT. 0) THEN
+      command = "rm internally_generated_gmesh_file.msh"
+      CALL execute_command_line(TRIM(command), exitstat = stat)
+    END IF
+
     execution_mode = 1
   CASE ('.e') !Exodus II
     !Call libtool & then call ingestGmesh on the new file
-    CALL generateErrorMessage(err_code_default, err_fatal, "Exodus II file support is not yet complete")
+    CALL get_environment_variable("THOR_LIBMESH_DIRECTORY", libmesh_dir)
+
+    temp_string = TRIM(libmesh_dir) // "/meshtool-opt -i " // TRIM(in_file) // " -o internally_generated_gmesh_file.msh"
+    IF (uniform_refine .GT. 0) THEN
+      WRITE(command, *) temp_string, " ", "-r ", uniform_refine
+    ELSE
+      command = TRIM(temp_string)
+    END IF
+    in_file = "internally_generated_gmesh_file.msh"
+    CALL execute_command_line(TRIM(command), exitstat = stat)
+
+    CALL ingestGmesh()
+
+    !Clean up the internally generated file
+    command = "rm internally_generated_gmesh_file.msh"
+    CALL execute_command_line(TRIM(command), exitstat = stat)
+
     execution_mode = 2
   CASE('.UNV','.unv')
     CALL ingestUNV()
