@@ -73,9 +73,9 @@ def csv_diff(file, gold_file, rel_tol = 1.0e-6, abs_tol = 1.0e-6):
 class thor_test:
 
     parameters = {'directory' : 'string', 'name' : 'string', 'input' : "string",\
-                  'gold_file_name' : "string", 'rel_tol' : "float", 'abs_tol' : "float"}
+                  'gold_file_name' : "string", 'rel_tol' : "float", 'abs_tol' : "float", 'nproc' : "int"}
     defaults = {'directory' : '__required__', 'name' : '__required__', 'input' : "__required__",\
-                'gold_file_name' : "__required__", 'rel_tol' : 1.0e-6, 'abs_tol' : 1.0e-6}
+                'gold_file_name' : "__required__", 'rel_tol' : 1.0e-6, 'abs_tol' : 1.0e-6, 'nproc' : 1}
 
     def __init__(self, input_parameters):
         self._params = {}
@@ -92,13 +92,23 @@ class thor_test:
                 else:
                     self._params[p] = convert_to_type(self.defaults[p], self.parameters[p])
 
+    """ Method for setting number of processors for this test
+    :returns: None
+    """
+    def set_nproc(self, nproc):
+        self._params['nproc'] = nproc
+
     """ Method for executing this THOR test
     :returns: csv diff results
     """
     def execute(self, exec_rel_path = ''):
         current_dir = os.getcwd()
         workdir = self._params['directory']
-        command = os.getcwd() + "/" + exec_rel_path + "thor-1.0.exe" + " " + self._params['input'] + " > dummy"
+        nproc = self._params['nproc']
+        if nproc == 1:
+            command = os.getcwd() + "/" + exec_rel_path + "thor-1.0.exe" + " " + self._params['input'] + " > dummy"
+        else:
+            command = "mpiexec -n " + str(nproc) + " " + os.getcwd() + "/" + exec_rel_path + "thor-1.0.exe" + " " + self._params['input'] + " > dummy"
         test_file = workdir + self._params['gold_file_name']
         gold_file = workdir + "gold/" + self._params['gold_file_name']
         l = len(os.getcwd() + "/" + exec_rel_path)

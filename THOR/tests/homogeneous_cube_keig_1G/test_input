@@ -3,6 +3,11 @@ start hom_cube_keig_sc
   gold_file_name = keig_sc.inp_out.csv
 end
 
+start hom_cube_keig_jfnk
+  input =  keig_jfnk.in
+  gold_file_name =  keig_jfnk.in_out.csv
+end
+
 start hom_cube_keig_lc
   input = keig_lc.inp
   gold_file_name = keig_lc.inp_out.csv

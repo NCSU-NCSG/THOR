@@ -83,7 +83,8 @@ CONTAINS
 
     ! Define temporary variables
 
-    INTEGER(kind=li) :: alloc_stat, q, oct, octt, octant, i, f, l, rcell,j,k,m,indx,nk,nf
+    INTEGER(kind=li) :: alloc_stat, q, oct, octant, i, f, l, rcell,&
+                        j, k, m, indx, nk, nf
     TYPE(vector) :: omega
 
     ! Define source along direction q
@@ -99,11 +100,11 @@ CONTAINS
 
     ! Define sc_flux parallel recieve buffer & reflected buffer
 
-    REAL(kind=d_t) :: sc_flux_buffer (num_moments_v,namom,num_cells)
+    REAL(kind=d_t) :: sc_flux_buffer(num_moments_v,namom,num_cells)
     REAL(kind=d_t) :: reflected_buffer(num_moments_f, rs, 8, nangle)
     CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
-    optimal_tasks = CEILING((nangle*8.0)/(num_p))
+    optimal_tasks = CEILING((nangle * 8.0) / (num_p))
     sc_flux_buffer =zero
     reflected_buffer= zero
     ! Allocate angular flux
@@ -114,13 +115,14 @@ CONTAINS
     IF(alloc_stat /= 0) CALL stop_thor(2_li)
 
     ! Begin parallel loop over quadrature octant
-
     DO parallel_i = 1, optimal_tasks
       k = parallel_map_l2g(parallel_i, rank+1)
       IF (k .EQ. 0) EXIT
-      oct = MOD(k,8)+1
-      q = CEILING(k/8.0)
-      octant= oct !ordering(oct)
+      oct = MOD(k, 8) + 1
+      q = CEILING(k / 8.0)
+      indx = indexOf(oct, octants_to_sweep)
+      IF (indx > 8_li .or. indx < 1) CALL stop_thor(-1_li, "Sweep order index out of bounds")
+      octant = ordering(ordered_octants_to_sweep(indx))
       IF(octant == 1)THEN
         omega%x1=quadrature(q)%mu%x1
         omega%x2=quadrature(q)%mu%x2
@@ -273,6 +275,10 @@ CONTAINS
         IF ( (omega .dot. outward_normal(k,f)) > 0.0_d_t )THEN
           ! store outflow on reflective faces
           reflected_buffer(:,i,octant,q) = an_flux%face_flux(:,f,k)
+
+          ! this is necessary to have immediate updates of potentially
+          ! relevant reflected fluxes
+          reflected_flux(:,i,octant,q) = an_flux%face_flux(:,f,k)
         END IF
       END DO
       ! update the faces that are assumed known for cycles
