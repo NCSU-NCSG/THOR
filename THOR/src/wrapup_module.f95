@@ -18,6 +18,9 @@ MODULE wrapup_module
   USE global_variables
   USE termination_module
   USE general_utility_module
+  USE SDD_global_variables
+
+  USE mpi
 
   IMPLICIT NONE
 
@@ -55,13 +58,16 @@ CONTAINS
     REAL(kind=d_t) :: delx, dely, delz, cartesian_vol
     TYPE(vector) :: v0, v1, v2, v3, point, barycentric
     INTEGER(kind=li) :: point_flux_location_element_indices(number_point_flux_locations)
+    REAL(kind=d_t) :: temp_recv
+    INTEGER(kind=li) :: mpi_err
+    REAL(kind=d_t),ALLOCATABLE :: gathered_flux(:,:), temp_gathered_flux(:,:)
 
     ! input file name for convenience
 
     CHARACTER(100) :: fname
 
     ! Print runtime
-    IF (rank .EQ. 0) THEN
+    IF (PBJrank .EQ. 0) THEN
       WRITE(unit_number,*)
       WRITE(unit_number,*) "--------------------------------------------------------"
       WRITE(unit_number,*) "   Execution Summary   "
@@ -73,11 +79,13 @@ CONTAINS
       END IF
       WRITE(unit_number,202) "Runtime (seconds):                                          ", finish-start
       IF (problem == 0 .OR. (problem == 1 .AND. eig_switch == 0 ) ) THEN
+        WRITE(unit_number,101) "Number of construction iterations:                          ", construction_inners_G
         WRITE(unit_number,101) "Number of outer iterations:                                 ", outer
         WRITE(unit_number,101) "Number of inner iterations:                                 ", tot_nInners
       ELSE
         WRITE(unit_number,101) "Number of newton iterations:                                ", nit
         IF (rd_method==1) THEN
+          WRITE(unit_number,101) "Number of construction iterations:                          ", construction_inners_G
           WRITE(unit_number,101) "Number of inner iterations:                                 ", tot_nInners
         END IF
         WRITE(unit_number,101)   "Total number of krylov iterations:                          ", tot_kit
@@ -86,6 +94,8 @@ CONTAINS
 
       IF(problem == 1)THEN
         WRITE(unit_number,102) "Final eigenvalue:                                          ", keff
+        !Save keff to global var
+        k_print=keff
       END IF
       IF(problem==0) THEN
         WRITE(unit_number,*) "Maximum scalar group flux error (outer iteration):         ", max_outer_error
@@ -99,22 +109,22 @@ CONTAINS
           WRITE(unit_number,103) eg,max_error(eg)
         END DO
       ELSE IF(problem==1 .AND. eig_switch == 0) THEN
-        WRITE(unit_number,*) "Eigenvalue error:                                           ", k_error
-        WRITE(unit_number,*) "Maximum fission source error:                               ", f_error
-        WRITE(unit_number,*) "Maximum scalar group flux error:                            ", max_outer_error
+        WRITE(unit_number,102) "Eigenvalue error:                                           ", k_error
+        WRITE(unit_number,102) "Maximum fission source error:                               ", f_error
+        WRITE(unit_number,102) "Maximum scalar group flux error:                            ", max_outer_error
       END IF
     END IF
 
     ! Formats
 
-101 FORMAT(1X,A60,I5)
+101 FORMAT(1X,A60,I0)
 102 FORMAT(A60,ES25.16)
 202 FORMAT(1X,A60,ES25.16)
 103 FORMAT(1X,I5,ES25.16)
 
     ! Open angular flux file and write volume and face flux in file
 
-    IF(vtk_flux_output /= 0 .AND. rank .EQ. 0)THEN
+    IF(vtk_flux_output /= 0 .AND. PBJrank .EQ. 0)THEN
       OPEN(unit=10,file=TRIM(vtk_flux_filename)//TRIM(suffix),status='unknown',action='write')
 
       WRITE(10,'(a26)') '# vtk DataFile Version 3.0'
@@ -161,14 +171,29 @@ CONTAINS
     END IF
 
     ! Open flux file and write volume and cell flux in file
-    IF (rank .EQ. 0) THEN
+    ALLOCATE(gathered_flux(tot_num_cells_G, egmax+1))
+    ALLOCATE(temp_gathered_flux(tot_num_cells_G, egmax+1))
+    gathered_flux=0.0d0
+    temp_gathered_flux=0.0d0
+    DO i = 1, num_cells
+      gathered_flux(SDD_cells_l2g_G(i), egmax + 1) = cells(i)%volume
+      DO eg = 1, egmax
+        gathered_flux(SDD_cells_l2g_G(i),eg) = flux(1,1,i,eg,niter)
+      END DO
+    END DO
+
+    CALL MPI_REDUCE(gathered_flux, temp_gathered_flux, tot_num_cells_G*(egmax+1), MPI_DOUBLE_PRECISION, &
+    &               MPI_SUM,0, MPI_COMM_WORLD, mpi_err)
+    gathered_flux=temp_gathered_flux
+
+    IF (PBJrank .EQ. 0) THEN
       OPEN(unit=20,file=TRIM(flux_filename)//TRIM(suffix),status='unknown',action='write')
 
       l=1
-      WRITE(20,*) num_cells
+      WRITE(20,*) tot_num_cells_G
       DO eg=1, egmax
-        DO i=1, num_cells
-          WRITE(20,*) cells(i)%volume,flux(1,1,i,eg,niter)
+        DO i=1, tot_num_cells_G
+          WRITE(20,*) gathered_flux(i,egmax+1),gathered_flux(i,eg)
         END DO
       END DO
 
@@ -179,46 +204,85 @@ CONTAINS
 
     ! Compute region averaged fluxes and reaction rates
 
-    IF (rank .EQ. 0) THEN
+    !Write header if in root
+    IF (PBJrank .EQ. 0) THEN
       WRITE(unit_number,*)
       WRITE(unit_number,*) "--------------------------------------------------------"
       WRITE(unit_number,*) "   Region averaged reaction rates  "
       WRITE(unit_number,*) "--------------------------------------------------------"
       WRITE(unit_number,*)
-      reg_volume=0.0_d_t
-      reac_rates=0.0_d_t
-      DO eg=1,egmax
-        DO i=1,num_cells
-          IF(eg.EQ.1) reg_volume(cells(i)%reg)=reg_volume(cells(i)%reg)+ cells(i)%volume
-          reac_rates(1,cells(i)%reg,eg)=reac_rates(1,cells(i)%reg,eg)  + cells(i)%volume * &
-                flux(1,1,i,eg,niter)
-          reac_rates(2,cells(i)%reg,eg)=reac_rates(2,cells(i)%reg,eg)  + cells(i)%volume * fiss(reg2mat(cells(i)%reg),eg)%xs * &
-                flux(1,1,i,eg,niter)
-          reac_rates(3,cells(i)%reg,eg)=reac_rates(3,cells(i)%reg,eg)  + cells(i)%volume *  &
-                (sigma_t(reg2mat(cells(i)%reg),eg)%xs - tsigs(reg2mat(cells(i)%reg),eg)%xs )         * &
-                flux(1,1,i,eg,niter)
-          reac_rates(4,cells(i)%reg,eg)=reac_rates(4,cells(i)%reg,eg)  + cells(i)%volume *  &
-                nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs                    * &
-                flux(1,1,i,eg,niter)
+    END IF
 
-        END DO
+    !Calculate net quantities locally as running summations
+    reg_volume=0.0_d_t
+    reac_rates=0.0_d_t
+    DO eg=1,egmax
+      DO i=1,num_cells
+        !Region volume
+        IF(eg.EQ.1) reg_volume(cells(i)%reg)=reg_volume(cells(i)%reg)+ cells(i)%volume
+        !Flux
+        reac_rates(1,cells(i)%reg,eg)=reac_rates(1,cells(i)%reg,eg)  + cells(i)%volume * &
+              flux(1,1,i,eg,niter)
+        !Fission
+        reac_rates(2,cells(i)%reg,eg)=reac_rates(2,cells(i)%reg,eg)  + cells(i)%volume * fiss(reg2mat(cells(i)%reg),eg)%xs * &
+              flux(1,1,i,eg,niter)
+        !Absorption
+        reac_rates(3,cells(i)%reg,eg)=reac_rates(3,cells(i)%reg,eg)  + cells(i)%volume *  &
+              (sigma_t(reg2mat(cells(i)%reg),eg)%xs - tsigs(reg2mat(cells(i)%reg),eg)%xs )         * &
+              flux(1,1,i,eg,niter)
+        !Fission source
+        reac_rates(4,cells(i)%reg,eg)=reac_rates(4,cells(i)%reg,eg)  + cells(i)%volume *  &
+              nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs                    * &
+              flux(1,1,i,eg,niter)
+
       END DO
-      DO eg=1,egmax
-        DO region=minreg,maxreg
-          reac_rates(1,region,egmax+1)=reac_rates(1,region,egmax+1)+reac_rates(1,region,eg)
-          reac_rates(2,region,egmax+1)=reac_rates(2,region,egmax+1)+reac_rates(2,region,eg)
-          reac_rates(3,region,egmax+1)=reac_rates(3,region,egmax+1)+reac_rates(3,region,eg)
-          reac_rates(4,region,egmax+1)=reac_rates(4,region,egmax+1)+reac_rates(4,region,eg)
-        END DO
+    END DO
+
+    !Use MPI to make reaction rates and region volumes global
+    DO eg=1,egmax
+      DO region=minreg,maxreg
+        !Region volume
+        IF (eg.EQ.1) THEN
+          CALL MPI_REDUCE(reg_volume(region), temp_recv, 1, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, mpi_err)
+          reg_volume(region)=temp_recv
+        END IF
+        !Flux
+        CALL MPI_REDUCE(reac_rates(1,region,eg), temp_recv, 1, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, mpi_err)
+        reac_rates(1,region,eg)=temp_recv
+        !Fission
+        CALL MPI_REDUCE(reac_rates(2,region,eg), temp_recv, 1, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, mpi_err)
+        reac_rates(2,region,eg)=temp_recv
+        !Absorption
+        CALL MPI_REDUCE(reac_rates(3,region,eg), temp_recv, 1, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, mpi_err)
+        reac_rates(3,region,eg)=temp_recv
+        !Fission Source
+        CALL MPI_REDUCE(reac_rates(4,region,eg), temp_recv, 1, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, mpi_err)
+        reac_rates(4,region,eg)=temp_recv
       END DO
-      DO eg=1,egmax+1
-        DO region=minreg,maxreg
-          reac_rates(1,region,eg)=reac_rates(1,region,eg)/reg_volume(region)
-          reac_rates(2,region,eg)=reac_rates(2,region,eg)/reg_volume(region)
-          reac_rates(3,region,eg)=reac_rates(3,region,eg)/reg_volume(region)
-          reac_rates(4,region,eg)=reac_rates(4,region,eg)/reg_volume(region)
-        END DO
+    END DO
+
+    !Region-wide totals
+    DO eg=1,egmax
+      DO region=minreg,maxreg
+        reac_rates(1,region,egmax+1)=reac_rates(1,region,egmax+1)+reac_rates(1,region,eg)
+        reac_rates(2,region,egmax+1)=reac_rates(2,region,egmax+1)+reac_rates(2,region,eg)
+        reac_rates(3,region,egmax+1)=reac_rates(3,region,egmax+1)+reac_rates(3,region,eg)
+        reac_rates(4,region,egmax+1)=reac_rates(4,region,egmax+1)+reac_rates(4,region,eg)
       END DO
+    END DO
+
+    !Normalize by volume with global quantities
+    DO eg=1,egmax+1
+      DO region=minreg,maxreg
+        reac_rates(1,region,eg)=reac_rates(1,region,eg)/reg_volume(region)
+        reac_rates(2,region,eg)=reac_rates(2,region,eg)/reg_volume(region)
+        reac_rates(3,region,eg)=reac_rates(3,region,eg)/reg_volume(region)
+        reac_rates(4,region,eg)=reac_rates(4,region,eg)/reg_volume(region)
+      END DO
+    END DO
+
+    !Write
+    IF (PBJrank.EQ.0) THEN
       DO region=minreg,maxreg
         WRITE(unit_number,501) '-- Region --',region,' Volume= ',reg_volume(region)
         WRITE(unit_number,*)
@@ -229,12 +293,13 @@ CONTAINS
         END DO
         WRITE(unit_number,504) 'Total   ',reac_rates(1,region,egmax+1),reac_rates(2,region,egmax+1),&
               reac_rates(3,region,egmax+1),reac_rates(4,region,egmax+1)
+        IF ((region-minreg+1).LE.3 .AND. (region-minreg+1).GE.1)reg_dbg_info(region-minreg+1)=reac_rates(1,region-minreg+1,egmax+1)
       END DO
     END IF
 
     ! if desired print cartesian flux map to file
 
-    IF (rank .EQ. 0 .AND. glob_do_cartesian_mesh .AND. is_final) THEN
+    IF (PBJrank .EQ. 0 .AND. glob_do_cartesian_mesh .AND. is_final) THEN
 
       ! compute reaction rates for each cartesian cell
       ! computes flux(1), total(2), absorption(3), total scattering (4),
@@ -333,7 +398,7 @@ CONTAINS
     END IF
 
     ! fluxes at point locations
-    IF (rank .EQ. 0 .AND. number_point_flux_locations .gt. 0 .AND. is_final) THEN
+    IF (PBJrank .EQ. 0 .AND. number_point_flux_locations .gt. 0 .AND. is_final) THEN
       point_flux_location_element_indices = 0_li
       ! find the right tets
       DO i = 1, num_cells
@@ -382,22 +447,25 @@ CONTAINS
 
     ! write a csv output file containing all region averaged
     ! TODO: make this more flexible, currently this is for testing only
-    CALL GET_COMMAND_ARGUMENT(1,fname)
-    OPEN(unit=20, file=TRIM(fname)//TRIM('_out.csv'), status='unknown', action='write')
-    WRITE(20, 502, ADVANCE = "NO") "Region,"
-    DO eg = 1, egmax - 1
-      WRITE(20, 505, ADVANCE = "NO") "flux g = ", eg, ","
-    END DO
-    WRITE(20, 506) "flux g = ", eg
+    ! TODO: make this an actual option from input and gate properly by procs
+    IF (.FALSE.) THEN
+        CALL GET_COMMAND_ARGUMENT(1,fname)
+        OPEN(unit=20, file=TRIM(fname)//TRIM('_out.csv'), status='unknown', action='write')
+        WRITE(20, 502, ADVANCE = "NO") "Region,"
+        DO eg = 1, egmax - 1
+          WRITE(20, 505, ADVANCE = "NO") "flux g = ", eg, ","
+        END DO
+        WRITE(20, 506) "flux g = ", eg
 
-    DO region=minreg,maxreg
-      WRITE(20, 509, ADVANCE = "NO") region, ","
-      DO eg= 1, egmax - 1
-        WRITE(20, 507, ADVANCE = "NO") reac_rates(1, region, eg), ","
-      END DO
-      WRITE(20, 508) reac_rates(1, region, egmax)
-    END DO
-    CLOSE(20)
+        DO region=minreg,maxreg
+          WRITE(20, 509, ADVANCE = "NO") region, ","
+          DO eg= 1, egmax - 1
+            WRITE(20, 507, ADVANCE = "NO") reac_rates(1, region, eg), ","
+          END DO
+          WRITE(20, 508) reac_rates(1, region, egmax)
+        END DO
+        CLOSE(20)
+    END IF
 
 499 FORMAT(1X,3I6,6ES18.8)
 501 FORMAT(1X,A,I4,A,ES14.6)

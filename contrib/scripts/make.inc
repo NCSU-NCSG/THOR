@@ -19,7 +19,7 @@ CFLAGS = -O3
 #  and handle these quantities appropriately. As a consequence, one
 #  should not compile LAPACK with flags such as -ffpe-trap=overflow.
 #
-FORTRAN = mpifort
+FORTRAN = mpif90 #fort
 OPTS    = -O2 -frecursive
 DRVOPTS = $(OPTS)
 NOOPT   = -O0 -frecursive

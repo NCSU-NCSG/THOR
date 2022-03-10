@@ -32,6 +32,10 @@ MODULE geometry_types
     INTEGER(kind=li) :: cell, face
   END TYPE list
 
+  TYPE, EXTENDS(list) :: SDD_list_entry
+    INTEGER(kind=li) :: proc
+  END TYPE SDD_list_entry
+
   TYPE linked_list
     INTEGER(kind=li) :: cell_id
     TYPE(linked_list), POINTER :: next

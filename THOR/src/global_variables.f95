@@ -20,7 +20,8 @@ MODULE global_variables
 
   INTEGER(kind=li) :: conv_flag
   INTEGER(kind=li) :: tot_nInners
-  REAL(kind=d_t)   :: k_error
+  INTEGER(kind=li) :: construction_inners_G
+  REAL(kind=d_t)   :: k_error, k_print
   REAL(kind=d_t)   :: f_error
   INTEGER(kind=li) :: namom
   INTEGER(kind=li) :: niter
@@ -33,7 +34,7 @@ MODULE global_variables
         egmax, num_mat, max_outer, max_inner, num_src_mat,&
         vtk_flux_output, finflow ,num_moments_v,num_moments_f,&
         vtk_mat_output,vtk_reg_output,execution,print_xs_flag,&
-        upscattering,vtk_src_output,multiplying,print_conv
+        upscattering,vtk_src_output,multiplying,print_conv, ITMM
 
   REAL(kind=d_t) :: inner_conv, outer_conv
 
@@ -82,9 +83,13 @@ MODULE global_variables
   TYPE(boundary_cell), DIMENSION(:)  , ALLOCATABLE :: rb_cells      !  reflective boundary faces
   TYPE(boundary_cell), DIMENSION(:)  , ALLOCATABLE :: vb_cells      !  vacuum boundary faces
   TYPE(boundary_cell), DIMENSION(:)  , ALLOCATABLE :: fb_cells      !  fixed inflow boundary faces
+  TYPE(boundary_cell), DIMENSION(:)  , ALLOCATABLE :: SDDb_cells    !  SDD boundary faces
   INTEGER(kind=li)   , DIMENSION(:)  , ALLOCATABLE :: refl_face_tpe !  supplementary array indicating  type of
   !  reflective bc
-  TYPE(list)         , DIMENSION(:,:), ALLOCATABLE :: adjacency_list
+
+  !Local processor adjacency list. All non-local data treated as BC.
+  !All numbering local.
+  TYPE(list), DIMENSION(:,:), ALLOCATABLE :: adjacency_list
 
   ! Quadrature
 
@@ -183,4 +188,41 @@ MODULE global_variables
   INTEGER, ALLOCATABLE:: parallel_map_l2g(:,:)
   INTEGER:: rank
   REAL*8:: parallel_timing(4,2)
+
+  !ITMM Matrices and associated	variables
+
+  !Matrices themselves
+  REAL(kind=d_t),ALLOCATABLE :: Jphi(:,:,:),Jpsi(:,:,:),Kphi(:,:,:),Kpsi(:,:),KpsiElements(:,:),KpsiElements_temp(:,:)
+  !indout indexes SD boundary outgoing angular fluxes
+  INTEGER(kind=li)::indout
+  !indin indexes SD boundary incoming angular fluxes
+  INTEGER(kind=li)::indin
+  !Total number of sides on the "SD" boundary
+  INTEGER(kind=li)::N_side_SDbound
+  !Matrix that stores the order of incoming and outgoing angular fluxes
+  INTEGER(kind=li),ALLOCATABLE :: ITMMKindex(:,:,:),KpsiIndexes(:,:),KpsiIndexes_temp(:,:)
+  INTEGER(kind=li) :: Kpsi_reallocate
+  !Nonzero elements in Kpsi
+  INTEGER(kind=li)::nonzero
+  !I-Jphi (which becomes factorization
+  REAL(kind=d_t),ALLOCATABLE :: IJ(:,:,:)
+  !Pivot vector for factorization
+  INTEGER(kind=li),ALLOCATABLE :: IPVT(:,:)
+  !temp storage for max iteration counts to save for after construction
+  INTEGER(kind=li):: max_inner_temp, max_outer_temp
+  !SD incoming/outgoing psi vectors
+  REAL(kind=d_t),ALLOCATABLE :: psiin(:,:),psiout(:,:)
+  !Number of neighboring processors
+  INTEGER(kind=li)::num_neigh
+  INTEGER :: PBJrank
+  !Global maximum error
+  REAL(kind=d_t)::max_error_g
+
+  !SDD Timers
+  REAL(kind=d_t) :: Construction_start_time, Construction_end_time, Factorization_end_time
+  REAL(kind=d_t) :: comm_instructions_start_time, comm_instructions_end_time
+  REAL(kind=d_t) :: total_solver_start_time, total_solver_end_time
+  REAL(kind=d_t) :: solver_inner_time = 0.0d0, solver_inner_start_time, solver_inner_end_time
+
+
 END MODULE global_variables

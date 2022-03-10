@@ -60,18 +60,18 @@ CONTAINS
     ! Define temporary variables
 
     INTEGER(kind=li)               :: alloc_stat, eg, egg, q, octant, i, l, &
-          order, n, m, ii, k, indx,face,f
+          order, n, m, ii, k, indx,face,f,j
     REAL(kind=d_t)                 :: t_error
     LOGICAL                        :: existence
 
     ! Define reflected flux
 
-    INTEGER(kind=li)                                 :: rs,rg
+    INTEGER(kind=li)                                 :: rs,rg,mpi_err
     REAL(kind=d_t),DIMENSION(:,:,:,:,:), ALLOCATABLE :: reflected_flux
 
     ! distributed source
 
-    REAL(kind=d_t) :: src(num_moments_v,namom,num_cells,egmax)
+    REAL(kind=d_t) :: src(num_moments_v,namom,num_cells,egmax),SDD_errors_send(2),SDD_errors_recv(2)
 
     ! Prepare array reflected_flux
     rs=MAX(1_li,rside_cells)
@@ -81,13 +81,13 @@ CONTAINS
       rg=1_li
     END IF
     ALLOCATE( reflected_flux(num_moments_f,rs,8,nangle,rg),stat=alloc_stat )
-    IF(alloc_stat /=0) CALL stop_thor(2_li)
+    IF(alloc_stat /=0 .AND. ITMM.NE.1 .AND. ITMM.NE.0) CALL stop_thor(2_li)
     reflected_flux=0.0_d_t
 
     !  Allocate group-dependent maximum spatial error array
 
     ALLOCATE(max_error(egmax),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0 .AND. ITMM.NE.1 .AND. ITMM.NE.0) CALL stop_thor(2_li)
 
     ! Open file to page out reflective BC if desired
 
@@ -107,11 +107,26 @@ CONTAINS
     END IF
 
     ! Keep track of iterations
-    IF (rank .EQ. 0) THEN
+    if (PBJrank .EQ. 0 .AND. ITMM .NE. 2 .AND. ITMM.NE.3) THEN
       WRITE(6,*) '========================================================'
       WRITE(6,*) '   Begin outer iterations.'
       WRITE(6,*) '========================================================'
     END IF
+
+    if (PBJrank .EQ. 0 .AND. ITMM .EQ. 2) THEN
+      WRITE(6,*) '========================================================'
+      WRITE(6,*) '   Begin ITMM Construction Phase via GFIC'
+      WRITE(6,*) '========================================================'
+    END IF
+
+    if (PBJrank .EQ. 0 .AND. ITMM .EQ. 3) THEN
+      WRITE(6,*) '========================================================'
+      WRITE(6,*) '   Begin IPBJ Communication Pre-Process'
+      WRITE(6,*) '========================================================'
+    END IF
+
+    IF ((ITMM.EQ.2).OR.(ITMM.EQ.3)) Construction_start_time = MPI_WTIME()
+
     ! Begin outer iteration
 
     DO outer=1, max_outer
@@ -119,18 +134,23 @@ CONTAINS
       ! Initialize the src with external source ...
 
       src = zero
-      DO eg=1,egmax
-        DO i=1,num_cells
-          ! imposed internal source contribution
-          DO l=1,num_moments_v
-            src(l,1,i,eg) = src_str(cells(i)%src,eg)*src_m(l,cells(i)%src,eg)
-          END DO
-        END DO
-      END DO
+      !If we are constructing ITMM, we leave the source as zero
+      IF (ITMM.NE.2 .AND. ITMM.NE.3) THEN
+      	DO eg=1,egmax
+        	DO i=1,num_cells
+              	! imposed internal source contribution
+              	DO l=1,num_moments_v
+                	src(l,1,i,eg) = src_str(cells(i)%src,eg)*src_m(l,cells(i)%src,eg)
+              	END DO
+        	END DO
+      	END DO
 
-      ! ... and upscattering
 
-      CALL compute_upscattering(flux, src)
+      	! ... and upscattering
+
+      	CALL compute_upscattering(flux, src)
+
+      END IF
 
       DO eg=1, egmax
 
@@ -149,7 +169,7 @@ CONTAINS
         END IF
 
         ! Call inner iteration
-
+        IF ((ITMM.EQ.0).OR.(ITMM.EQ.1)) solver_inner_start_time=MPI_WTIME()
         IF      (page_refl.EQ.0_li) THEN
           CALL inner_iteration(eg,flux(:,:,:,eg,niter),src(:,:,:,eg),LL,U,Lf,Uf,rs,reflected_flux(:,:,:,:,eg),.TRUE.)
         ELSE IF (page_refl.EQ.1_li) THEN
@@ -160,39 +180,49 @@ CONTAINS
           reflected_flux(:,:,:,:,1)=0.0_d_t
           CALL inner_iteration(eg,flux(:,:,:,eg,niter),src(:,:,:,eg),LL,U,Lf,Uf,rs,reflected_flux(:,:,:,:,1),.TRUE.)
         END IF
+        IF ((ITMM.EQ.0).OR.(ITMM.EQ.1)) THEN
+          solver_inner_end_time=MPI_WTIME()
+          solver_inner_time=solver_inner_time+solver_inner_end_time-solver_inner_start_time
+        END IF
 
         ! Compute downscattering from eg to egg
 
-        DO egg=eg+1, egmax
-          DO i=1, num_cells
-            DO l=0,scatt_ord
-              DO m=0,l
-                indx=1_li+m+(l+1_li)*l/2_li
-                DO k=1, num_moments_v
-                  src(k,indx,i,egg) = src(k,indx,i,egg)                                 +&
-                        scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs    *&
-                        dens_fact(cells(i)%reg)*flux(k,indx,i,eg,niter)
-                END DO
-              END DO
-            END DO
-            ! odd contributions
-            DO l=1,scatt_ord
-              DO m=1,l
-                indx=neven+m+(l-1_li)*l/2_li
-                DO k=1, num_moments_v
-                  src(k,indx,i,egg) = src(k,indx,i,egg)                                 +&
-                        scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs    *&
-                        dens_fact(cells(i)%reg)*flux(k,indx,i,eg,niter)
-                END DO
-              END DO
-            END DO
-          END DO
-        END DO
+		!Don't compute downscattering if we are constucting ITMM matrices
+		IF (ITMM.NE.2 .AND. ITMM.NE.3) THEN
+    	    DO egg=eg+1, egmax
+    	      DO i=1, num_cells
+    	        DO l=0,scatt_ord
+    	          DO m=0,l
+    	            indx=1_li+m+(l+1_li)*l/2_li
+    	            DO k=1, num_moments_v
+    	              src(k,indx,i,egg) = src(k,indx,i,egg)                                 +&
+    	                    scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs    *&
+    	                    dens_fact(cells(i)%reg)*flux(k,indx,i,eg,niter)
+    	            END DO
+    	          END DO
+    	        END DO
+    	        ! odd contributions
+    	        DO l=1,scatt_ord
+    	          DO m=1,l
+    	            indx=neven+m+(l-1_li)*l/2_li
+    	            DO k=1, num_moments_v
+    	              src(k,indx,i,egg) = src(k,indx,i,egg)                                 +&
+    	                    scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs    *&
+    	                    dens_fact(cells(i)%reg)*flux(k,indx,i,eg,niter)
+    	            END DO
+    	          END DO
+    	        END DO
+    	      END DO
+	        END DO
+        END IF
 
         ! Rewind unit=97 (finflow) if page_iflw == 1
 
         IF(page_iflw.EQ.1_li) REWIND(unit=97)
       END DO
+
+      !If this was ITMM construction, exit
+      IF ((ITMM.EQ.2).OR.(ITMM.EQ.3)) EXIT
 
       ! Compute error ...
 
@@ -225,14 +255,14 @@ CONTAINS
           END DO
         END DO
       END DO
-      IF (rank .EQ. 0) THEN
+      if (PBJrank .EQ. 0) THEN
         WRITE(6,*)   '---------------------------------------'
         WRITE(6,103) '---itn i-itn   max error   max error---'
         WRITE(6,102) outer,tot_nInners, max_outer_error, MAXVAL(max_error),' %% '
         WRITE(6,*)   '---------------------------------------'
         flush(6)
       END IF
-      IF(print_conv.EQ.1 .AND. rank .EQ. 0) THEN
+      IF(print_conv.EQ.1 .AND. PBJrank .EQ. 0) THEN
         WRITE(21,*)   '---------------------------------------'
         WRITE(21,103) '---itn i-itn   max error   max error---'
         WRITE(21,102) outer,tot_nInners, max_outer_error, MAXVAL(max_error),' %% '
@@ -243,6 +273,16 @@ CONTAINS
 102   FORMAT(1X,2I6,2ES12.4,A)
 
       ! Convergence check
+      SDD_errors_send(1)=MAXVAL(max_error)
+      SDD_errors_send(2)=max_outer_error
+      IF ((ITMM.NE.2).AND.(ITMM.NE.3)) THEN
+        comm_start_time=MPI_WTIME()
+        CALL MPI_ALLREDUCE(SDD_errors_send,SDD_errors_recv,2 ,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,mpi_err)
+        comm_time=comm_time+MPI_WTIME()-comm_start_time
+      END IF
+                        
+      max_error=SDD_errors_recv(1)
+      max_outer_error=SDD_errors_recv(2)
 
       IF(most_thermal==0) THEN ! no upscattering
         IF(MAXVAL(max_error)<inner_conv) THEN
@@ -262,17 +302,30 @@ CONTAINS
 
 10  CONTINUE
 
-    IF (rank .EQ. 0) THEN
+    if (PBJrank .EQ. 0 .AND. ITMM .NE. 2 .AND. ITMM.NE.3) THEN
       WRITE(6,*) '========================================================'
       WRITE(6,*) '   End outer iterations.'
       WRITE(6,*) '========================================================'
     END IF
+
+    if (PBJrank .EQ. 0 .AND. ITMM .EQ. 2) THEN
+      WRITE(6,*) '========================================================'
+      WRITE(6,*) '   End GFIC ITMM Pre-Process'
+      WRITE(6,*) '========================================================'
+    END IF
+
+    if (PBJrank .EQ. 0 .AND. ITMM .EQ. 3) THEN
+      WRITE(6,*) '========================================================'
+      WRITE(6,*) '   End IPBJ Communication Pre-Process'
+      WRITE(6,*) '========================================================'
+    END IF
+
     ! Close reflected flux file if page_ref .eq. 1
 
     IF(page_refl .EQ. 1_li) CLOSE(unit=98)
 
-
     IF( ALLOCATED(reflected_flux) ) DEALLOCATE(reflected_flux)
+
   END SUBROUTINE outer_iteration_ext
 
   !=============================================================================
@@ -302,7 +355,7 @@ CONTAINS
 
     INTEGER(kind=li)               :: alloc_stat, eg, egg, q, octant, i, l, &
           order, ii, n, m, indx, k
-    REAL(kind=d_t)                 :: fiss_den_old, fiss_den_new,       &
+    REAL(kind=d_t)                 :: fiss_den_old, fiss_den_new,SDD_fiss_den_new, &
           keff_error, keff_old, keff_new, fiss_error, fiss_dist_error(2),&
           flux_error,ts,te
     REAL(kind=d_t)                 :: t_error
@@ -356,10 +409,11 @@ CONTAINS
     INTEGER (kind=li) :: power_iter_count = 0_li, cheby_pi=5_li, cheby_pi_rem
     REAL(kind=d_t)    :: alpha = zero, beta = zero, gamma = zero
     REAL(kind=d_t)    :: chebychev_error = zero, entry_error = zero
-    REAL(kind=d_t)    :: entry_theta = zero, theor_err = zero
+    REAL(kind=d_t)    :: entry_theta = zero, theor_err = zero, SDD_errors_send(3)=0.0,SDD_errors_recv(3)=0.0
 
-    INTEGER:: temp_arg
+    INTEGER:: temp_arg, mpi_err
     CHARACTER:: temp_accel
+    LOGICAL :: intermediate_flux_print
 
     ! Prepare array reflected_flux
     rs=MAX(1_li,rside_cells)
@@ -369,14 +423,15 @@ CONTAINS
       rg=1_li
     END IF
     ALLOCATE( reflected_flux(num_moments_f,rs,8,nangle,rg),stat=alloc_stat )
-    IF(alloc_stat /=0) CALL stop_thor(2_li)
+    IF(alloc_stat /=0 .AND. ITMM.NE.1 .AND. ITMM.NE.0) CALL stop_thor(2_li)
     reflected_flux=0.0_d_t
 
     ! Initialize fiss_src
 
     fiss_den_old=0.0_d_t
     fiss_den_new=0.0_d_t
-    keff=0.0_d_t
+    SDD_fiss_den_new=0.0_d_t
+    keff=1.0_d_t
     keff_old=1.0_d_t
     keff_new=1.0_d_t
 
@@ -407,7 +462,7 @@ CONTAINS
     !  Allocate group-dependent maximum spatial error array
 
     ALLOCATE(max_error(egmax),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0 .AND. ITMM.NE.1 .AND. ITMM.NE.0) CALL stop_thor(2_li)
 
     ! Open file to page out reflective BC if desired
 
@@ -433,7 +488,7 @@ CONTAINS
       CALL inguess_eig(flux,keff,niter)
       keff_new=keff
       keff_old=keff
-      IF (rank .EQ. 0) THEN
+      if (PBJrank .EQ. 0) THEN
         WRITE(6,*)
       END IF
 
@@ -462,11 +517,25 @@ CONTAINS
       END DO
 
     END IF
-
+    !! ADD REMOVED - OCT 2019
+    !CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    !! ADD REMOVED - OCT 2019
     ! Keep track of iterations
-    IF (rank .EQ. 0) THEN
+    if (PBJrank .EQ. 0 .AND. ITMM .NE. 2 .AND. ITMM.NE.3) THEN
       WRITE(6,*) '========================================================'
       WRITE(6,*) '   Begin outer iterations.'
+      WRITE(6,*) '========================================================'
+    END IF
+
+    if (PBJrank .EQ. 0 .AND. ITMM .EQ. 2) THEN
+      WRITE(6,*) '========================================================'
+      WRITE(6,*) '   Begin ITMM Construction Phase via GFIC'
+      WRITE(6,*) '========================================================'
+    END IF
+
+    if (PBJrank .EQ. 0 .AND. ITMM .EQ. 3) THEN
+      WRITE(6,*) '========================================================'
+      WRITE(6,*) '   Begin IPBJ Communication Pre-Process'
       WRITE(6,*) '========================================================'
     END IF
 
@@ -476,9 +545,13 @@ CONTAINS
 
     ! Compute fission density
     fiss_den_new=zero
-    DO i=1, num_cells
-      fiss_den_new=fiss_den_new+cells(i)%volume*fiss_src(1,i,1)
-    END DO
+    IF ((ITMM.NE.1).AND.(ITMM.NE.0)) THEN
+      DO i=1, num_cells
+        fiss_den_new=fiss_den_new+cells(i)%volume*fiss_src(1,i,1)
+      END DO
+    ELSE
+      fiss_den_new=1.0d0
+    END IF
 
     !===========================================================================
     ! Begin outer iteration
@@ -535,6 +608,7 @@ CONTAINS
         !=======================================================================
         ! Call inner iteration
         !=======================================================================
+        IF ((ITMM.EQ.0).OR.(ITMM.EQ.1)) solver_inner_start_time=MPI_WTIME()
         IF      (page_refl.EQ.0_li) THEN
           CALL inner_iteration(eg,flux(:,:,:,eg,niter),src(:,:,:,eg),LL,U,Lf,Uf,rs,reflected_flux(:,:,:,:,eg),.TRUE.)
         ELSE IF  (page_refl.EQ.1_li) THEN
@@ -545,7 +619,12 @@ CONTAINS
           reflected_flux(:,:,:,:,1)=0.0_d_t
           CALL inner_iteration(eg,flux(:,:,:,eg,niter),src(:,:,:,eg),LL,U,Lf,Uf,rs,reflected_flux(:,:,:,:,1) ,.TRUE.)
         END IF
-
+        IF ((ITMM.EQ.0).OR.(ITMM.EQ.1)) THEN
+          solver_inner_end_time=MPI_WTIME()
+          solver_inner_time=solver_inner_time+solver_inner_end_time-solver_inner_start_time
+          
+        END IF
+        
         !=====================================================================
         ! Compute downscattering from eg to egg
         !=====================================================================
@@ -681,11 +760,22 @@ CONTAINS
       DO i=1, num_cells
         fiss_den_new=fiss_den_new+cells(i)%volume*fiss_src(1,i,2)
       END DO
+!write(*,*)'A', outer,pbjrank,fiss_den_new, keff_new
+      comm_start_time=MPI_WTIME()
+      CALL MPI_ALLREDUCE(fiss_den_new,SDD_fiss_den_new,1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,mpi_err)
+      comm_time=comm_time+MPI_WTIME()-comm_start_time
+!write(*,*)'B', outer,pbjrank,SDD_fiss_den_new, keff_new
+      fiss_den_new=SDD_fiss_den_new
 
       !========================================================================
       ! Compute new eigenvalue based on fission densities
       !========================================================================
       keff_new=keff_old*(fiss_den_new/fiss_den_old)
+      !write(*,*)pbjrank,keff_old,fiss_den_new,fiss_den_old
+      !call mpi_barrier(mpi_comm_world,mpi_err)
+      !stop
+!write(*,*)'C', outer,pbjrank, keff_new, keff_old, fiss_den_new, fiss_den_old
+!read(*,*)
 
       !========================================================================
       ! compute error in keff and copy new to old iterate
@@ -747,7 +837,7 @@ CONTAINS
       !========================================================================
       ! write information for outer iteration
       !========================================================================
-      IF (rank .EQ. 0) THEN
+      if (PBJrank .EQ. 0) THEN
         WRITE(6,*)   '---------------------------------------------------------------------------------------------------'
         WRITE(6,101) '---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap        time---'
         WRITE(6,102) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,te-ts,' %% '
@@ -776,19 +866,34 @@ CONTAINS
       !========================================================================
       ! call wrapup even/odd
       !========================================================================
-      IF (MOD(outer,2) .EQ. 0) THEN
-        suffix = "even"
-        OPEN(unit=49,file='intermediate_output_even.dat',status='unknown',action='write')
-      ELSE
-        suffix = "odd"
-        OPEN(unit=49,file='intermediate_output_odd.dat',status='unknown',action='write')
+      intermediate_flux_print=.FALSE.
+      IF (intermediate_flux_print.EQV..TRUE.) THEN
+          IF (MOD(outer,2) .EQ. 0) THEN
+            suffix = "even"
+            OPEN(unit=49,file='intermediate_output_even.dat',status='unknown',action='write')
+          ELSE
+            suffix = "odd"
+            OPEN(unit=49,file='intermediate_output_odd.dat',status='unknown',action='write')
+          END IF
+          CALL wrapup(flux = flux ,keff = keff_new, unit_number = 49, suffix = suffix, is_final = .FALSE.)
+          CLOSE(unit=49)
       END IF
-      CALL wrapup(flux = flux ,keff = keff_new, unit_number = 49, suffix = suffix, is_final = .FALSE.)
-      CLOSE(unit=49)
 
       !========================================================================
       ! check convergence and quit if criteria are satisfied
       !========================================================================
+
+      !All reduce to make errors global
+      SDD_errors_send(1)=fiss_error
+      SDD_errors_send(2)=flux_error
+      SDD_errors_send(3)=keff_error
+      comm_start_time=MPI_WTIME()
+      CALL MPI_ALLREDUCE(SDD_errors_send,SDD_errors_recv,3,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,mpi_err)
+      comm_time=comm_time+MPI_WTIME()-comm_start_time
+      fiss_error=SDD_errors_recv(1)
+      flux_error=SDD_errors_recv(2)
+      keff_error=SDD_errors_recv(3)
+
       IF(outer > 2 .AND. (fiss_error < outer_conv .OR. flux_error < outer_conv) .AND. &
             keff_error < k_conv) THEN
         conv_flag=1
@@ -831,9 +936,21 @@ CONTAINS
     max_outer_error = flux_error
     keff=keff_old
 
-    IF (rank .EQ. 0) THEN
+    if (PBJrank .EQ. 0 .AND. ITMM .NE. 2 .AND. ITMM.NE.3) THEN
       WRITE(6,*) '========================================================'
       WRITE(6,*) '   End outer iterations.'
+      WRITE(6,*) '========================================================'
+    END IF
+
+    if (PBJrank .EQ. 0 .AND. ITMM .EQ. 2) THEN
+      WRITE(6,*) '========================================================'
+      WRITE(6,*) '   End GFIC ITMM Pre-Process'
+      WRITE(6,*) '========================================================'
+    END IF
+
+    if (PBJrank .EQ. 0 .AND. ITMM .EQ. 3) THEN
+      WRITE(6,*) '========================================================'
+      WRITE(6,*) '   End IPBJ Communication Pre-Process'
       WRITE(6,*) '========================================================'
     END IF
 

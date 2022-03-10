@@ -137,7 +137,7 @@ CONTAINS
         !Split on ':' delimiter
         indx = INDEX(read_str,':')
         key_string  = read_str(1:indx-1)
-        data_string = ADJUSTL(read_str(indx+2:LNBLNK(read_str)))
+        !data_string = ADJUSTL(read_str(indx+2:LNBLNK(read_str)))
       END IF
 
       !///////////////////////////////////////////////////////////////////////////

@@ -212,6 +212,7 @@ CONTAINS
     ELSE
       WRITE(6,101) 'Most thermal group:              ',most_thermal
     END IF
+    WRITE(6,*)
     DO m=1,num_mat
       WRITE(6,102) 'Material ',m,' with ID ',xs_mat(m)%mat
       WRITE(6,103) 'Group','SigT','SigF','SigS','nu*SigF','chi'
@@ -224,9 +225,9 @@ CONTAINS
               sigs(g),fiss(xs_mat(m)%mat,g)%xs*nu(xs_mat(m)%mat,g)%xs,&
               chi(xs_mat(m)%mat,g)%xs
       END DO
-      WRITE(6,*) 'Scattering Matrix, from -> columns, to -> row'
+      WRITE(6,'(A)') '     Scattering Matrix, from -> columns, to -> row'
       DO order=1, xs_ord+1
-        WRITE(6,101) 'Scattering order: ',order
+        WRITE(6,101) '    Scattering order: ',order
         DO g=1,egmax
           WRITE(6,105) (sigma_scat(xs_mat(m)%mat,order,g,gp)%xs,gp=1,egmax)
         END DO
@@ -237,7 +238,7 @@ CONTAINS
 102 FORMAT(1X,A,I8,A,I8)
 103 FORMAT(1X,A9,5A15)
 104 FORMAT(1X,I9,5ES15.4)
-105 FORMAT(1X,12ES15.4)
+105 FORMAT(10X,12ES15.4)
   END SUBROUTINE print_xs
 
 END MODULE check_input

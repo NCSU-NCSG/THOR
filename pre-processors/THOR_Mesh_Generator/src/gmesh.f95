@@ -39,8 +39,9 @@ CONTAINS
     INTEGER :: hex_to_tet_split(4, 6)
     INTEGER :: quad_to_tri_split(3, 2)
     INTEGER :: prism_to_tet_split(4, 3)
-    INTEGER :: counter
-    INTEGER :: temp_block_id, temp_sideset_id
+    INTEGER :: counter, counterElem, counterBC
+    INTEGER :: num_msh_data
+    INTEGER :: temp_id
 
     ! when splitting hex we do not know if we get 5 or 6 tets
     ! hence we need to buffer tets first and then discard dummies because
@@ -48,6 +49,7 @@ CONTAINS
     INTEGER :: temporary_element_count
     INTEGER, ALLOCATABLE :: temporary_element_list(:,:)
     INTEGER, ALLOCATABLE :: temporary_block_id(:)
+    INTEGER, ALLOCATABLE :: msh_data_entries(:)
 
     !Open the gmesh file
     OPEN(UNIT = in_unit, FILE = TRIM(in_file), ACTION = 'READ', STATUS = 'OLD', IOSTAT = io_status)
@@ -105,7 +107,7 @@ CONTAINS
     temporary_element_count = 0
     bc_count = 0
     DO i = 1, total_instruction_count
-      READ(in_unit, *, IOSTAT=io_status) temp_int_1, temp_int_2
+      READ(in_unit, *, IOSTAT=io_status) temp_int_1, temp_int_2, num_msh_data
       IF (temp_int_2 .EQ. 4) THEN
         ! tetrahedron
         element_instruction_count = element_instruction_count + 1
@@ -133,6 +135,7 @@ CONTAINS
     END DO
     ALLOCATE(temporary_element_list(temporary_element_count, 4), temporary_block_id(temporary_element_count))
     ALLOCATE(bc_list(bc_count,3), side_set(bc_count))
+    ALLOCATE(msh_data_entries(num_msh_data))
     line = ""
 
     !Return to start of $Elements block
@@ -146,77 +149,69 @@ CONTAINS
     IF (io_status .NE. 0) &
           CALL generateErrorMessage(io_status, err_fatal, 'Issue parsing input file')
 
-    !Read in element block id and component nodes
-    counter = 1
-    DO i = 1, element_instruction_count
+    !Read in elements and BCs
+    counterElem = 1
+    counterBC = 1
+    DO i = 1, element_instruction_count+boundary_instruction_count
       READ(in_unit, '(A200)') line
-      READ(line, *, IOSTAT=io_status) temp_int_1, temp_int_2, temp_int_1, temp_block_id
+      READ(line, *, IOSTAT=io_status) temp_int_1, temp_int_2, temp_int_1, temp_id
 
+      !Make sure this is a valid element shape and the read was successful
       IF (io_status .NE. 0) &
             CALL generateErrorMessage(io_status, err_fatal, 'Issue reading $Elements block of input')
-      IF (temp_int_2 .EQ. 4) THEN
-        ! tetrahdron -> just save it
-        READ(line, *, IOSTAT=io_status) temp_int_1, temp_int_1, temp_int_1, temp_int_1, &
-                                        temp_int_1, temp_int_1, temporary_element_list(counter, :)
-        IF (io_status .NE. 0) &
-            CALL generateErrorMessage(io_status, err_fatal, 'Issue reading $Elements when processing tet info')
-        temporary_block_id(counter) = temp_block_id
-        counter = counter + 1
-      ELSE IF (temp_int_2 .EQ. 5) THEN
-        ! hexahedron splits into 6 tets
-        READ(line, *, IOSTAT=io_status) temp_int_1, temp_int_1, temp_int_1, temp_int_1, &
-                                        temp_int_1, temp_int_1, elem_read_buffer
-        IF (io_status .NE. 0) &
-            CALL generateErrorMessage(io_status, err_fatal, 'Issue reading $Elements when processing hex')
-        CALL splitHexIntoTet(elem_read_buffer, hex_to_tet_split)
-        DO j = 1, 6
-          temporary_element_list(counter, :) = hex_to_tet_split(:, j)
-          temporary_block_id(counter) = temp_block_id
-          counter = counter + 1
-        END DO
-      ELSE IF (temp_int_2 .EQ. 6) THEN
-        ! triangular prism splits into 3 tets
-        READ(line, *, IOSTAT=io_status) temp_int_1, temp_int_1, temp_int_1, temp_int_1, &
-                                        temp_int_1, temp_int_1, elem_read_buffer(1:6)
-        IF (io_status .NE. 0) &
-            CALL generateErrorMessage(io_status, err_fatal, 'Issue reading $Elements when processing prism')
-        CALL splitPrismToTet(elem_read_buffer(1:6), prism_to_tet_split)
-        DO j = 1, 3
-          temporary_element_list(counter, :) = prism_to_tet_split(:, j)
-          temporary_block_id(counter) = temp_block_id
-          counter = counter + 1
-        END DO
-      END IF
-    END DO
+      IF (temp_int_2 .NE. 2 .AND. temp_int_2 .NE. 3 .AND. temp_int_2 .NE. 4 .AND. temp_int_2 .NE. 5 .AND. temp_int_2 .NE. 6) &
+            CALL generateErrorMessage(err_code_default, err_fatal, 'Invalid Element Shape')
 
-    !Read in boundary condition side set id and component nodes
-    counter = 1
-    DO i = 1, boundary_instruction_count
-      READ(in_unit, '(A200)') line
-      READ(line, *, IOSTAT=io_status) temp_int_1, temp_int_2, temp_int_1, temp_sideset_id
-      IF (io_status .NE. 0) &
-            CALL generateErrorMessage(io_status, err_fatal, 'Issue reading $Elements block of input during BC ingestion')
-      IF (temp_int_2 .NE. 2 .AND. temp_int_2 .NE. 3) &
-            CALL generateErrorMessage(err_code_default, err_fatal, 'Invalid bc face shape (non-tri, non-quad)')
+      !For 2-D faces
       IF (temp_int_2 .EQ. 2) THEN
-        READ(line, *, IOSTAT=io_status) temp_int_1, temp_int_1, temp_int_1, temp_int_1, &
-                                        temp_int_1, temp_int_1, bc_list(counter,:)
+        READ(line, *, IOSTAT=io_status) temp_int_1, temp_int_1, temp_int_1, msh_data_entries, bc_list(counterBC,:)
         IF (io_status .NE. 0) &
             CALL generateErrorMessage(io_status, err_fatal, &
             'Issue reading $Elements block of input during BC ingestion processing triangle')
-        side_set(counter) = temp_sideset_id
-        counter = counter + 1
+        side_set(counterBC) = temp_id
+        counterBC = counterBC + 1
       ELSE IF (temp_int_2 .EQ. 3) THEN
-        READ(line, *, IOSTAT=io_status) temp_int_1, temp_int_1, temp_int_1, temp_int_1, &
-                                        temp_int_1, temp_int_1, boundary_read_buffer
+        READ(line, *, IOSTAT=io_status) temp_int_1, temp_int_1, temp_int_1, msh_data_entries, boundary_read_buffer
         IF (io_status .NE. 0) &
             CALL generateErrorMessage(io_status, err_fatal, &
             'Issue reading $Elements block of input during BC ingestion processing quadrilateral')
         CALL splitQuadIntoTri(boundary_read_buffer, quad_to_tri_split)
         DO j = 1, 2
-          bc_list(counter,:) = quad_to_tri_split(:, j)
-          side_set(counter) = temp_sideset_id
-          counter = counter + 1
+          bc_list(counterBC,:) = quad_to_tri_split(:, j)
+          side_set(counterBC) = temp_id
+          counterBC = counterBC + 1
+        END DO
+      END IF
+
+      !For volumetric elements
+      IF (temp_int_2 .EQ. 4) THEN
+        ! tetrahdron -> just save it
+        READ(line, *, IOSTAT=io_status) temp_int_1, temp_int_1, temp_int_1, msh_data_entries, temporary_element_list(counterElem, :)
+        IF (io_status .NE. 0) &
+            CALL generateErrorMessage(io_status, err_fatal, 'Issue reading $Elements when processing tet info')
+        temporary_block_id(counterElem) = temp_id
+        counterElem = counterElem + 1
+      ELSE IF (temp_int_2 .EQ. 5) THEN
+        ! hexahedron splits into 6 tets
+        READ(line, *, IOSTAT=io_status) temp_int_1, temp_int_1, temp_int_1, msh_data_entries, elem_read_buffer
+        IF (io_status .NE. 0) &
+            CALL generateErrorMessage(io_status, err_fatal, 'Issue reading $Elements when processing hex')
+        CALL splitHexIntoTet(elem_read_buffer, hex_to_tet_split)
+        DO j = 1, 6
+          temporary_element_list(counterElem, :) = hex_to_tet_split(:, j)
+          temporary_block_id(counterElem) = temp_id
+          counterElem = counterElem + 1
+        END DO
+      ELSE IF (temp_int_2 .EQ. 6) THEN
+        ! triangular prism splits into 3 tets
+        READ(line, *, IOSTAT=io_status) temp_int_1, temp_int_1, temp_int_1, msh_data_entries, elem_read_buffer(1:6)
+        IF (io_status .NE. 0) &
+            CALL generateErrorMessage(io_status, err_fatal, 'Issue reading $Elements when processing prism')
+        CALL splitPrismToTet(elem_read_buffer(1:6), prism_to_tet_split)
+        DO j = 1, 3
+          temporary_element_list(counterElem, :) = prism_to_tet_split(:, j)
+          temporary_block_id(counterElem) = temp_id
+          counterElem = counterElem + 1
         END DO
       END IF
     END DO

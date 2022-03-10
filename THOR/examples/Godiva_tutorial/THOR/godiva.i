@@ -7,7 +7,7 @@ Godiva 6 group example
     sweep = precomp
     page_refl = save
     kconv = 1E-8; innerconv = 1E-12 ; outerconv = 1E-7
-    maxinner = 4 ; maxouter = 5000
+    maxinner = 4000 ; maxouter = 5000
   end problem
 
   start inout

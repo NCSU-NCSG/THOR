@@ -40,10 +40,13 @@ CONTAINS
     ! Call solver to initiate problem execution
 
     CALL CPU_TIME(start)
+    total_solver_start_time=MPI_WTIME()
 
+    !Call solver
     CALL solver_ext(flux)
 
     CALL CPU_TIME(finish)
+    total_solver_end_time=MPI_WTIME()
 
   END SUBROUTINE execute_ext
 
@@ -66,10 +69,12 @@ CONTAINS
     ! Call solver to initiate problem execution
 
     CALL CPU_TIME(start)
+    total_solver_start_time=MPI_WTIME()
 
     CALL solver_eig(flux,keff)
 
     CALL CPU_TIME(finish)
+    total_solver_end_time=MPI_WTIME()
 
   END SUBROUTINE execute_eig
 

@@ -1,0 +1,24 @@
+
+ --------------------------------------------------------
+    Execution Summary   
+ --------------------------------------------------------
+ Warning! Execution finished without satisfying all stopping criteria. Warning!
+ Runtime (seconds):                                             0.0000000000000000E+00
+ Number of outer iterations:                                    13
+ Number of inner iterations:                                    68
+ Final eigenvalue:                                             6.7638506389337064E-02
+ Eigenvalue error:                                              0.0000000000000000     
+ Maximum fission source error:                                  0.0000000000000000     
+ Maximum scalar group flux error:                               0.0000000000000000     
+ A flux file was been succesfully written!
+
+ --------------------------------------------------------
+    Region averaged reaction rates  
+ --------------------------------------------------------
+
+ -- Region --   1 Volume=   6.148500E+00
+
+    Group          Flux       Fission    Absorption      Fiss Src
+        1  6.723709E-02  1.008556E-02 -3.361855E-02  1.008556E-02
+        2  6.824062E-02  6.824062E-03  1.023609E-01  6.824062E-03
+ Total     1.354777E-01  1.690963E-02  6.874239E-02  1.690963E-02

@@ -48,16 +48,14 @@ CONTAINS
     REAL(kind=d_t), DIMENSION(3,3) :: J, J_inv
     REAL(kind=d_t)                 :: det_J,tot_vol
     LOGICAL :: existence
-    INTEGER :: rank, num_p, mpi_err, localunit
-    CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
-    CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
+    INTEGER :: rank, num_p=1, mpi_err, localunit
+
 
     ! Read input
 
     CALL READ
 
     ! Assign local angles for parallel analysis
-
     CALL assign_work
 
     ! Allocate and initialize density factors and region volume
@@ -213,7 +211,7 @@ CONTAINS
       sweep_path=0_li
 
       ! pre-compute sweep
-      IF (rank .EQ. 0) THEN
+      IF (PBJrank .EQ. 0) THEN
         WRITE(6,*) "--------------------------------------------------------"
         WRITE(6,*) "   Precomputing sweep path   "
         WRITE(6,*) "--------------------------------------------------------"
@@ -222,7 +220,7 @@ CONTAINS
       CALL CPU_TIME(ts)
       CALL pre_sweep
       CALL CPU_TIME(te)
-      IF (rank .EQ. 0) THEN
+      IF (PBJrank .EQ. 0) THEN
         WRITE(6,101) '-- Finished precomputing sweep path. Time (sec.) ', te-ts
         WRITE(6,*)
       END IF
@@ -250,16 +248,18 @@ CONTAINS
     INTEGER(kind=li) :: i
 
     ! Write region information
-    IF (rank .EQ. 0) THEN
+    IF (PBJrank .EQ. 0) THEN
       WRITE(6,*)
       WRITE(6,*) "--------------------------------------------------------"
       WRITE(6,*) "   Region Information  "
       WRITE(6,*) "--------------------------------------------------------"
       WRITE(6,*)
       WRITE(6,*) "     Region ID","   Material ID","  Region Volume"," Density Factor"
+
       DO i = minreg,maxreg
         WRITE(6,104) i,reg2mat(i),reg_vol(i),dens_fact(i)
       END DO
+
     END IF
 
 104 FORMAT(1X,I14,I14,3ES15.4)
@@ -310,8 +310,13 @@ CONTAINS
     INTEGER(kind=li) :: parallel_i, k, oct, permutation(8), q
     INTEGER :: rank, num_p, mpi_err, localunit
 
-    CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
-    CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    !! ADD REMOVED - OCT 2019
+    !CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
+    !CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+
+    num_p = 1
+    rank = 0
+    !! ADD REMOVED - OCT 2019
 
     ! --- Set ordering
     !  -- x-dir
@@ -407,8 +412,13 @@ CONTAINS
     REAL(kind=d_t) :: te,ts
 
     INTEGER ::rank,mpi_err, localunit, num_p, optimal_tasks
-    CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
-    CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+
+    !! ADD REMOVED - OCT 2019
+    !CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
+    !CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    num_p = 1
+    rank = 0
+    !! ADD REMOVED - OCT 2019
 
     ! Begin parallel loop over quadrature octant
     optimal_tasks = CEILING((nangle*8.0)/(num_p))
@@ -468,7 +478,7 @@ CONTAINS
 
       CALL CPU_TIME(te)
       !FIX ME - Only prints angles belonging to root process
-      IF (rank .EQ. 0) THEN
+      IF (PBJrank .EQ. 0) THEN
         WRITE(6,101) ' - Computation of sweep path for octant: ',octant,' angle: ',q,' . Ex. Time(sec.): ',te-ts
       END IF
 
@@ -897,8 +907,13 @@ CONTAINS
 
     INTEGER:: i, p, k=0
     INTEGER ::rank,mpi_err, localunit, num_p, optimal_tasks
-    CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
-    CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+
+    !! ADD REMOVED - OCT 2019
+    !CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
+    !CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    num_p = 1
+    rank = 0
+    !! ADD REMOVED - OCT 2019
 
     optimal_tasks = CEILING((nangle*8.0)/(num_p))
 

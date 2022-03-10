@@ -19,6 +19,7 @@ MODULE read_module
   USE angle_types
   USE multindex_types
   USE global_variables
+  USE SDD_global_variables
 
   ! Use modules that pertain setting up problem
 
@@ -46,7 +47,10 @@ CONTAINS
 
     INTEGER(kind=li) :: alloc_stat
     INTEGER ::rank,mpi_err, localunit
-    CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    !! ADD REMOVED - OCT 2019
+    !CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    rank = 0
+    !! ADD REMOVED - OCT 2019
 
     ! Set the defaults
 
@@ -61,7 +65,7 @@ CONTAINS
     CALL check_standard_input
 
     ! Echo input
-    IF (rank.EQ.0) THEN
+    IF (PBJrank.EQ.0) THEN
       CALL echo_input
     END IF
 
@@ -70,7 +74,7 @@ CONTAINS
     CALL read_xs
 
     ! Print cross sections if desired
-    IF(rank .EQ. 0) THEN
+    IF(PBJrank .EQ. 0) THEN
       IF(print_xs_flag .EQ. 1 ) CALL print_xs
       IF(vtk_mat_output .EQ. 1) CALL plot_material
       IF(vtk_reg_output .EQ. 1) CALL plot_region
@@ -408,6 +412,7 @@ CONTAINS
     ipow         =0
     print_conv   =0
     dfact_opt    =0
+    ITMM         =3
 
     source_filename        = "file.src"
     finflow_filename       = "file.bc"
@@ -488,7 +493,7 @@ CONTAINS
 
     INTEGER :: i
 
-    IF (rank .EQ. 0) THEN
+    IF (PBJrank .EQ. 0) THEN
       WRITE(6,*)
       WRITE(6,*) "--------------------------------------------------------"
       WRITE(6,*) "   Input Summary  "
@@ -600,16 +605,20 @@ CONTAINS
 
     ! local variables
 
-    CHARACTER(100) :: buffer, fname
+    CHARACTER(100) :: buffer, fname,temp_str,temp_str2
     CHARACTER(100000) :: regmap
     LOGICAL :: done
-    INTEGER :: i, rank,mpi_err, localunit
+    INTEGER :: i, rank,mpi_err, localunit, ierr
+    INTEGER :: loc_minreg , loc_maxreg
     CALL GET_COMMAND_ARGUMENT(1,fname)
-    CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    !! ADD REMOVED - OCT 2019
+    !CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    rank = 0
+    !! ADD REMOVED - OCT 2019
     localunit = rank+100
 
     OPEN(unit = localunit, file = fname , status = 'old', action = 'read')
-    WRITE(*,*) "<><><><><><><><>", fname(LEN(TRIM(fname))-4: LEN(TRIM(fname)))
+    !WRITE(*,*) "<><><><><><><><>", fname(LEN(TRIM(fname))-4: LEN(TRIM(fname)))
 
     IF(fname(LEN(TRIM(fname))-4: LEN(TRIM(fname))) .EQ. ".yaml") THEN
       WRITE(*,*) "ADV READ"
@@ -630,6 +639,10 @@ CONTAINS
           CALL read_problem
         ELSE IF( INDEX( lowercase(buffer) ,'start') > 0 .AND. INDEX( lowercase(buffer) ,'inout')>0   ) THEN
           CALL read_inout
+          !Edit the mesh input filename to reflect the rank
+          WRITE(temp_str,'(I0)')num_proc
+          WRITE(temp_str2,'(I0)')PBJrank+1
+          mesh_filename=TRIM(mesh_filename)//'-'//TRIM(temp_str)//'/part_meshes/'//TRIM(mesh_root)//'.thrm.'//TRIM(temp_str2)
         ELSE IF( INDEX( lowercase(buffer) ,'start') > 0 .AND. INDEX( lowercase(buffer) ,'cross_sections')>0   ) THEN
           CALL read_cross_sections
         ELSE IF( INDEX( lowercase(buffer) ,'start') > 0 .AND. INDEX( lowercase(buffer) ,'quadrature')>0   ) THEN
@@ -650,6 +663,12 @@ CONTAINS
     ! Call read_mesh to read tetrahedral mesh file
 
     CALL read_tetmesh
+
+    !Get global minreg and maxreg
+    loc_minreg = minreg
+    loc_maxreg = maxreg
+    CALL MPI_ALLREDUCE(loc_minreg, minreg, 1, MPI_INTEGER, MPI_MIN, MPI_COMM_WORLD, ierr)
+    CALL MPI_ALLREDUCE(loc_maxreg, maxreg, 1, MPI_INTEGER, MPI_MAX, MPI_COMM_WORLD, ierr)
 
     ! Read reg2mat
     ALLOCATE(reg2mat(minreg:maxreg))
@@ -677,7 +696,10 @@ CONTAINS
     INTEGER :: l,lr
     INTEGER :: i, rank,mpi_err, localunit
     CALL GET_COMMAND_ARGUMENT(1,fname)
-    CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    !! ADD REMOVED - OCT 2019
+    !CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    rank = 0
+    !! ADD REMOVED - OCT 2019
     localunit = rank+100
 
     ! read input line by line
@@ -706,7 +728,10 @@ CONTAINS
     CHARACTER(100) :: words(100),wwords(2)
     INTEGER :: rank,mpi_err, localunit
     CALL GET_COMMAND_ARGUMENT(1,fname)
-    CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    !! ADD REMOVED - OCT 2019
+    !CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    rank = 0
+    !! ADD REMOVED - OCT 2019
     localunit = rank+100
 
     ! read loop over inout block
@@ -769,7 +794,10 @@ CONTAINS
     CHARACTER(1000) :: words(100), wwords(2), wwwords(100)
     INTEGER :: rank, mpi_err, localunit
     CALL GET_COMMAND_ARGUMENT(1,fname)
-    CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    !! ADD REMOVED - OCT 2019
+    !CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    rank = 0
+    !! ADD REMOVED - OCT 2019
     localunit = rank+100
 
     ! read loop over inout block
@@ -854,7 +882,10 @@ CONTAINS
     CHARACTER(100) :: words(100),wwords(2)
     INTEGER :: i, rank,mpi_err, localunit
     CALL GET_COMMAND_ARGUMENT(1,fname)
-    CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    !! ADD REMOVED - OCT 2019
+    !CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    rank = 0
+    !! ADD REMOVED - OCT 2019
     localunit = rank+100
 
     ! read loop over inout block
@@ -950,12 +981,15 @@ CONTAINS
   SUBROUTINE read_inout
 
     ! local variables
-    INTEGER :: nwords,ntmp,i,nwwords,ios
+    INTEGER :: nwords,ntmp,i,nwwords,ios,ierr
     CHARACTER(100) :: buffer, fname
-    CHARACTER(100) :: words(100),wwords(2)
+    CHARACTER(100) :: words(100),wwords(2),temp_str,temp_str2
     INTEGER :: rank,mpi_err, localunit
     CALL GET_COMMAND_ARGUMENT(1,fname)
-    CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    !! ADD REMOVED - OCT 2019
+    !CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    rank = 0
+    !! ADD REMOVED - OCT 2019
     localunit = rank+100
 
     ! read loop over inout block
@@ -974,6 +1008,9 @@ CONTAINS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'inflow_file'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'inflow_file' ) THEN
               finflow_filename=TRIM(wwords(2))
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'inflow_file'
+            ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'mesh_root' ) THEN
+              mesh_root=TRIM(wwords(2))
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'source_file'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'source_file' ) THEN
               source_filename=TRIM(wwords(2))
@@ -1057,7 +1094,10 @@ CONTAINS
     CHARACTER(100) :: words(100),wwords(2)
     INTEGER :: rank,mpi_err, localunit
     CALL GET_COMMAND_ARGUMENT(1,fname)
-    CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    !! ADD REMOVED - OCT 2019
+    !CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    rank = 0
+    !! ADD REMOVED - OCT 2019
     localunit = rank+100
 
     ! read loop over problem block
@@ -1319,6 +1359,18 @@ CONTAINS
                 WRITE(6,*) 'Execution will terminate.'
                 STOP
               END IF
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'ITMM'
+            ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'itmm' ) THEN
+              wwords(2)=TRIM(lowercase(wwords(2)))
+              IF      ( wwords(2) .EQ. 'no') THEN
+                ITMM=3
+              ELSE IF ( wwords(2) .EQ. 'yes') THEN
+                ITMM=2
+              ELSE
+                WRITE(6,*) 'Error. This is not a valid ITMM option (yes/no) -- ',wwords(2),' --'
+                WRITE(6,*) 'Execution will terminate.'
+                STOP
+              END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > default if keyword is unknown
             ELSE
               WRITE(6,*) 'Unknown keyword in problem specification -- ',TRIM(wwords(1)),' --'
@@ -1341,7 +1393,7 @@ CONTAINS
 
   REAL(kind=d_t) FUNCTION string_to_real(string, msg)
     CHARACTER(100), INTENT(in) :: string
-    CHARACTER(100), INTENT(in) :: msg
+    CHARACTER(*), INTENT(in) :: msg
 
     INTEGER(kind=li) :: ios
 
@@ -1354,14 +1406,19 @@ CONTAINS
 
   INTEGER(kind=li) FUNCTION string_to_int(string, msg, min_int)
     CHARACTER(100), INTENT(in) :: string
-    CHARACTER(100), INTENT(in) :: msg
-    INTEGER(kind=li), OPTIONAL, INTENT(inout) :: min_int
+    CHARACTER(*), INTENT(in) :: msg
+    INTEGER(kind=li), OPTIONAL, INTENT(in) :: min_int
 
-    INTEGER(kind=li) :: ios
+    INTEGER(kind=li) :: ios, loc_min_int
 
-    IF (.NOT. PRESENT(min_int)) min_int = -glob_max_int
+    IF (.NOT. PRESENT(min_int)) THEN
+        loc_min_int = -glob_max_int
+    ELSE
+        loc_min_int = min_int
+    END IF
+
     READ(string, '(i10)', iostat=ios) string_to_int
-    IF(ios .NE. 0 .OR. string_to_int < min_int) THEN
+    IF(ios .NE. 0 .OR. string_to_int < loc_min_int) THEN
       WRITE(6,*) TRIM(msg), TRIM(string)
       STOP
     END IF

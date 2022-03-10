@@ -99,7 +99,7 @@ CONTAINS
     SELECT CASE(scode)
 
     CASE(1_li)
-      IF (rank .EQ. 0) THEN
+      IF (PBJrank .EQ. 0) THEN
         WRITE(6,*)
         WRITE(6,*) "--------------------------------------------------------"
         WRITE(6,*) "   Execution of THOR completed successfully  "
@@ -208,6 +208,15 @@ CONTAINS
       WRITE(6,*) '>> Execution terminates unsuccessfully!'
     CASE(34_li)
       WRITE(6,*) 'Density factors were requested but referenced file was not found.'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(35_li)
+      WRITE(6,*) 'Boundary face parallel to discrete ordinate during ITMM construction.'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(36_li)
+      WRITE(6,*) 'ITMM matrix file not found.'
+      WRITE(6,*) '>> Execution terminates unsuccessfully!'
+    CASE(37_li)
+      WRITE(6,*) 'ITMM matrix file found, but of invalid data.'
       WRITE(6,*) '>> Execution terminates unsuccessfully!'
     CASE default
       IF (PRESENT(message)) THEN

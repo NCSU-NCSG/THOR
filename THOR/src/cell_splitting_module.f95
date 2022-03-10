@@ -172,27 +172,30 @@ CONTAINS
       WRITE(6,*) "Unacceptable case from cell splitting in cell", i
       CALL stop_thor(-1_li)
     END IF
+    
+    !Skip kernel calculation if this is IPBJ pre-process
+    IF (ITMM.NE.3) THEN
+        CALL upstream_mom(num_cells,adjacent_cells,num_moments_f,     &
+              adjacency_list,face_flux,octant,i,subcells,incoming_face,&
+              n0,n1,n2,n3,upstream_moments)
 
-    CALL upstream_mom(num_cells,adjacent_cells,num_moments_f,     &
-          adjacency_list,face_flux,octant,i,subcells,incoming_face,&
-          n0,n1,n2,n3,upstream_moments)
+        IF (space_ord == 0) THEN
+          CALL transport_kernel_SC(sigmat,qm_moments,vol_flux(:,i),                &
+                face_flux(:,:,i),LL,U,Lf,Uf,i,                  &
+                t,subcells,r0,r1,r2,r3,face_known,incoming_face,&
+                outgoing_face,J,J_inv,upstream_moments)
+        ELSE IF (space_ord == -1) THEN
+          CALL transport_kernel_LC(sigmat,qm_moments,vol_flux(:,i),                &
+                face_flux(:,:,i),LL,U,Lf,Uf,i,                  &
+                t,subcells,r0,r1,r2,r3,face_known,incoming_face,&
+                outgoing_face,J,J_inv,upstream_moments)
+        ELSE
+          CALL transport_kernel_CCE(sigmat,qm_moments,vol_flux(:,i),                &
+                face_flux(:,:,i),LL,U,Lf,Uf,i,                  &
+                t,subcells,r0,r1,r2,r3,face_known,incoming_face,&
+                outgoing_face,J,J_inv,upstream_moments)
 
-    IF (space_ord == 0) THEN
-      CALL transport_kernel_SC(sigmat,qm_moments,vol_flux(:,i),                &
-            face_flux(:,:,i),LL,U,Lf,Uf,i,                  &
-            t,subcells,r0,r1,r2,r3,face_known,incoming_face,&
-            outgoing_face,J,J_inv,upstream_moments)
-    ELSE IF (space_ord == -1) THEN
-      CALL transport_kernel_LC(sigmat,qm_moments,vol_flux(:,i),                &
-            face_flux(:,:,i),LL,U,Lf,Uf,i,                  &
-            t,subcells,r0,r1,r2,r3,face_known,incoming_face,&
-            outgoing_face,J,J_inv,upstream_moments)
-    ELSE
-      CALL transport_kernel_CCE(sigmat,qm_moments,vol_flux(:,i),                &
-            face_flux(:,:,i),LL,U,Lf,Uf,i,                  &
-            t,subcells,r0,r1,r2,r3,face_known,incoming_face,&
-            outgoing_face,J,J_inv,upstream_moments)
-
+        END IF
     END IF
 
     DEALLOCATE(r0,r1,r2,r3,upstream_moments)

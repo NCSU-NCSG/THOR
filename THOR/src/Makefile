@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------------
 #Compile Options
 #-----------------------------------------------------------------------------------
-FC := mpifort
+FC := mpif90 #mpifort
 EXE := thor-1.0
 EXT := .exe
 
@@ -10,7 +10,7 @@ debug:    TYPE := _Debug
 coverage: TYPE := _Coverage
 
 all:      OPT := -O3
-debug:    OPT := -O0 -g -fbacktrace -ffpe-trap=zero,overflow,underflow
+debug:    OPT := -O0 -g -fbacktrace -ffpe-trap=zero,overflow,underflow -fcheck=all
 coverage: OPT := -O0 -g --coverage
 
 #-----------------------------------------------------------------------------------
@@ -39,18 +39,20 @@ SRC :=  \
         global_variables.f95							\
         inner_iteration_module.f95				\
         input_check.f95										\
+        ITMM_module.f95										\
         jfnk_module.f95										\
         main.f95													\
         multindex_types.f95								\
         outer_iteration_module.f95				\
         parameter_types.f95								\
-        precision.f95												\
+        precision.f95											\
         quadrature_module.f95							\
         read_cross_section_module.f95			\
         read_inflow_module.f95						\
         read_module.f95										\
         read_source_module.f95						\
         readmesh_module.f95								\
+		SDD_global_variables.f95          \
         setup_module.f95									\
         solver_module.f95									\
         sph_harmonics_module.f95					\
@@ -230,12 +232,19 @@ inner_iteration_module.o inner_iteration_module.mod: \
   parameter_types.mod filename_types.mod vector_types.mod \
   cross_section_types.mod geometry_types.mod angle_types.mod \
   multindex_types.mod global_variables.mod sweep_module.mod \
-  termination_module.mod
+  termination_module.mod ITMM_module.mod
 
 input_check.o check_input.mod: input_check.f95 types.mod \
   parameter_types.mod filename_types.mod vector_types.mod \
   cross_section_types.mod geometry_types.mod angle_types.mod \
   multindex_types.mod global_variables.mod
+
+ITMM_module.o ITMM_module.mod: ITMM_module.f95 \
+  types.mod parameter_types.mod \
+  filename_types.mod vector_types.mod cross_section_types.mod \
+  geometry_types.mod angle_types.mod multindex_types.mod \
+  global_variables.mod wrapup_module.mod SDD_global_variables.mod \
+  termination_module.mod dump_inguess_module.mod 
 
 jfnk_module.o jfnk_module.mod: jfnk_module.f95 types.mod \
   parameter_types.mod filename_types.mod vector_types.mod \
@@ -292,7 +301,10 @@ read_source_module.o read_source_module.mod: read_source_module.f95 \
 readmesh_module.o readmesh_module.mod: readmesh_module.f95 \
   types.mod parameter_types.mod filename_types.mod \
   vector_types.mod geometry_types.mod global_variables.mod \
-  termination_module.mod
+  termination_module.mod SDD_global_variables.mod
+
+SDD_global_variables.o SDD_global_variables.mod: SDD_global_variables.f95 \
+	geometry_types.mod
 
 setup_module.o setup_module.mod: setup_module.f95  \
   types.mod parameter_types.mod filename_types.mod vector_types.mod \
@@ -305,7 +317,7 @@ solver_module.o solver_module.mod: solver_module.f95 types.mod \
   cross_section_types.mod geometry_types.mod angle_types.mod \
   multindex_types.mod global_variables.mod ahotc_matrix_module.mod \
   sph_harmonics_module.mod outer_iteration_module.mod jfnk_module.mod \
-  termination_module.mod
+  termination_module.mod ITMM_module.mod
 
 sph_harmonics_module.o sph_harmonics_module.mod: sph_harmonics_module.f95 \
   types.mod parameter_types.mod vector_types.mod angle_types.mod \
@@ -347,4 +359,4 @@ vector_types.o vector_types.mod: vector_types.f95 types.mod
 wrapup_module.o wrapup_module.mod: wrapup_module.f95 types.mod \
   parameter_types.mod filename_types.mod vector_types.mod \
   cross_section_types.mod geometry_types.mod angle_types.mod \
-  global_variables.mod termination_module.mod
+  global_variables.mod termination_module.mod SDD_global_variables.mod

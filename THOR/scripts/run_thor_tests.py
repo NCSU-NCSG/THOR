@@ -16,7 +16,7 @@ for j in range(len(argv)):
 counter = 0
 failures = 0
 successes = 0
-print ("-"*80)
+print "-"*80
 all_test_files = th.find_all_tests(os.getcwd() + "/..")
 for f in all_test_files:
     test_objects = th.parse_test_file(f)
@@ -27,11 +27,11 @@ for f in all_test_files:
         name, result = t.execute('../')
         if result == "success":
             successes += 1
-            print ("Test ", counter, name, "success")
+            print "Test ", counter, name, "success"
         else:
             failures += 1
-            print ("Test ", counter, name, "failure")
-            print (result)
+            print "Test ", counter, name, "failure"
+            print result
 
-print ("-"*80)
-print ('Successes: ', successes, '          ', 'Failures: ', failures)
+print "-"*80
+print 'Successes: ', successes, '          ', 'Failures: ', failures

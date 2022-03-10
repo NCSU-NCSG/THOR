@@ -1,0 +1,35 @@
+3CUBE THOR-MP TEST PROBLEM HOMOGENEOUS NO_UP 1 GROUP
+
+  start problem
+    execution = yes
+    ITMM = yes
+    lambda = 0
+    type=keig ; keigsolver = pi ; piacc=none
+    sweep=precomp
+    page_refl=save
+    innerconv=1E-7 ; outerconv=1E-6; kconv=1E-6
+    maxinner = 100 ; maxouter = 500
+  end problem
+
+  start inout
+    mesh_file     = ./meshes/ITMM3cube
+    mesh_root     = ITMM3cube
+    xs_file       = 3cube.xs
+    source_file   = 3cube.src
+    flux_file     = 3cube.flux
+    print_xs = yes
+  end inout
+
+  start cross_sections
+     ngroups=1 ; upscattering = no ;
+  end cross_sections
+
+  start quadrature
+    qdtype=levelsym ; qdorder = 4
+  end quadrature
+
+  start regionmap
+     1 1 1
+  end regionmap
+
+end file

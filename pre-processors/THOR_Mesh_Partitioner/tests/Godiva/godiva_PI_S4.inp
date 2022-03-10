@@ -1,0 +1,34 @@
+Godiva PI
+
+  start problem
+    execution = yes
+    ITMM = yes
+    lambda = 0
+    type=keig ; keigsolver = pi ; piacc=none
+    sweep=precomp
+    page_refl=save
+    kconv=1E-6; innerconv=1E-7 ; outerconv=1E-6
+    maxinner = 10000 ; maxouter = 1000
+  end problem
+
+  start inout
+    mesh_file     =  ./godiva
+    mesh_root     =  godiva
+    xs_file       =  godiva.xs
+    flux_file     =  godiva.flux
+    print_xs=yes
+  end inout
+
+  start cross_sections
+     ngroups=6 ; upscattering = no
+  end cross_sections
+
+  start quadrature
+    qdtype=levelsym ; qdorder = 4
+  end quadrature
+
+  start regionmap
+     1
+  end regionmap
+
+end file
