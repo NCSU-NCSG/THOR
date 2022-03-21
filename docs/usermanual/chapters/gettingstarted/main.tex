@@ -1,0 +1,314 @@
+\section{Accessing THOR on github}
+THOR is hosted at North Carolina State University's github repository. Open a browser and navigate to:
+\begin{verbatim}
+  github.ncsu.edu    
+\end{verbatim}
+Log in with your unity ID and password. For accessing THOR you have to be a member of the THOR project. Please contact the code owner~\href{mailto:yyazmy@ncsu.edu}{Yousry Azmy} to be added to the project's membership.
+Once you have obtained access to THOR, click on the THOR link on THOR's github page, then click fork, and then your username; below we refer to this username as 
+\verb"<git_usr>".
+This creates your own personal THOR repository that is separate from the main repository. You have write access to this repository, while you most likely do not have write access to the main repository.
+
+\section{Cloning THOR repository from github}
+This subsection describes how to clone, i.e. copy a fresh version, of THOR from the github repository to your local computer. The first step is to set up ssh keys. This can be accomplished by following the directions provided \href{https://help.github.com/en/enterprise/2.15/user/articles/adding-a-new-ssh-key-to-your-github-account}{here}. 
+
+Now, the process of cloning is described. First open a terminal window on your local computer where you wish to clone THOR.
+In the following description terminal commands are indicated by \verb">>"; by \verb"/home/<usr>" the home directory is indicated but it is understood that \verb"<usr>" must be replaced by the actual user name on the local computer; this tutorial also assumes that \verb"git" is installed on the local computer and is accessible to \verb"<usr>". In addition, we recognize that username on the local computer, \verb"<usr>", can be different from the same user's github username, \verb"<git_usr>", hence they are distinguished in the following instructions by different notation.
+It is a good idea to create a folder for all github projects, e.g. by
+\begin{verbatim}
+  >>  cd /home/<usr> ; mkdir projects
+\end{verbatim}
+Navigate to the \verb"projects" directory. 
+\begin{verbatim}
+  >>  cd projects
+\end{verbatim}
+Clone THOR by typing:
+\begin{verbatim} 
+  >> git clone git@github.ncsu.edu:NCSU-Rad-Transport/THOR.git
+\end{verbatim}
+Alternatively, a user who will not communicate frequently with THOR's github repository can avoid establishing ssh keys and clone THOR directly by issuing the following line-command on the local computer:
+\begin{verbatim} 
+git clone https://github.ncsu.edu/NCSU-Rad-Transport/THOR.git
+\end{verbatim}
+Now, navigate into the THOR directory and check if things are properly set up. 
+\begin{verbatim} 
+  >> cd THOR
+\end{verbatim}
+First check the current branch:
+\begin{verbatim} 
+  >> git branch
+\end{verbatim}
+It should return
+\begin{verbatim}
+  >>  * devel
+\end{verbatim}
+indicating that \verb"devel" is the current branch. The \verb"devel" branch (short for development) contains the most up to date version of THOR.
+The current branch can be changed by:
+\begin{verbatim}
+    >> git checkout <branch>
+\end{verbatim}
+where \verb"<branch>" is the branch name to switch to.
+Next, the remotes are set up. The remotes are addresses to remote repositories and serve as shorthand when information is pulled from or pushed to one of the remotes. The convention is to call the remote of the master repository \textit{upstream}, and to call the remote of the personal repository \textit{origin}. To check the remotes, type:
+\begin{verbatim}
+  >> git remote -v
+\end{verbatim}
+This should show the following:
+\begin{verbatim}
+  >> origin	git@github.ncsu.edu:NCSU-Rad-Transport/THOR.git (fetch) 
+  >> origin	git@github.ncsu.edu:NCSU-Rad-Transport/THOR.git (push)
+\end{verbatim}
+To set up the remote according to the THOR convention, type:
+\begin{verbatim}
+  >> git remote rm origin
+  >> git remote add upstream git@github.ncsu.edu:NCSU-Rad-Transport/THOR.git
+  >> git remote add origin 	git@github.ncsu.edu:<git_usr>/THOR.git
+\end{verbatim}
+Checking the remote again should show:
+\begin{verbatim}
+  >> upstream git@github.ncsu.edu:NCSU-Rad-Transport/THOR.git (fetch) 
+  >> upstream git@github.ncsu.edu:NCSU-Rad-Transport/THOR.git (push)
+  >> origin	git@github.ncsu.edu:<git_usr>/THOR.git (fetch) 
+  >> origin	git@github.ncsu.edu:<git_usr>/THOR.git (push)
+\end{verbatim}
+
+\section{Updating the devel branch}\label{sec:updating_branch}
+As THOR is developed, the local devel branch or any other user-created branches will become outdated. This section demonstrates how to obtain the most up-to-date version of THOR.
+It is a good idea to check the current status of the repository, by navigating to the THOR directory and typing:
+\begin{verbatim}
+    >> git status
+\end{verbatim}
+This command reveals if there are any modified or uncommitted files. Updating the current branch is prohibited if there are any modified files. Let us first assume that there is a modified file called \verb"/path/to/modified_file.txt". There are two options: 
+\begin{itemize}
+    \item You can stash the file by:
+    \begin{verbatim}
+        >> git stash
+    \end{verbatim}
+    This removes the modification and stores it in the stash. To un-stash the modifications, do:
+    \begin{verbatim}
+        >> git stash pop
+    \end{verbatim}
+    \item You can commit the file by:
+    \begin{verbatim}
+        >> git add /path/to/modified_file.txt
+        >> git commit -m "A message for this commit"
+    \end{verbatim}
+\end{itemize}
+After either committing or stashing, the branch can be updated by:
+\begin{verbatim}
+    >> git pull --rebase upstream devel
+\end{verbatim}
+Updating can lead to merge conflicts when local changes conflict with changes in the upstream version of the devel branch. Conflict resolution is beyond the scope of this primer. Please consult git literature or google for guides on conflict resolution.
+
+\section{Obtaining lapack dependencies}
+THOR depends on certain lapack routines. These are provided with THOR as a submodule. The lapack submodule can be initialized by:
+\begin{verbatim}
+    >> git submodule update --init
+\end{verbatim}
+The lapack submodule is not expected to change at all. However, if it does, the THOR repository keeps track of the associated version of the lapack repository, so after updating as described in Sect.~\ref{sec:updating_branch}, the user may run:
+\begin{verbatim}
+    >> git submodule update 
+\end{verbatim}
+to obtain the latest lapack submodule. If as expected lapack hasn't changed an empty line will be displayed.
+
+\section{Compiling THOR}
+This section describes how to compile THOR and its dependencies. If THOR is not set up from github, then this is your entry point for the \textit{Getting started} tutorial. Simply unzip the THOR directory where you want it to reside; this tutorial assumes that THOR is unzipped in the \verb"/home/<usr>/projects" directory.
+
+The first step is to compile the lapack dependency. To this end, navigate to:
+\begin{verbatim}
+    >> cd /home/<usr>/projects/THOR/contrib/scripts
+\end{verbatim}
+Edit the file \verb"make.inc" to specify the MPI Fortran compiler available on the local machine. Also, if necessary, enter command line that modify the environment to enable the compilation process to find the path to required executables; these typically have the form \verb">> load module pathname", where \verb"pathname" is a directory on the local computer where these necessary executables reside.
+Execute the \verb"build_lapack.sh" script by (first command may not be necessary, it only ensures that \verb"build_lapack.sh" is executable):
+\begin{verbatim}
+    >> chmod +x build_lapack.sh
+    >> ./build_lapack.sh <n>
+\end{verbatim}
+where \verb"<n>" is the number of processors. 
+%At this point it must be provided even if it is \verb"1".
+For example, on Idaho National Laboratory's Sawtooth HPCthe compiler is set in \verb"make.inc" via the statement \verb"FORTRAN = mpif90", and the environment is  modified with the command line
+\begin{verbatim}
+    >> module load mvapich2/2.3.3-gcc-8.4.0".
+\end{verbatim}
+A successful lapack build will conclude the scrolled output on the screen with a table of the form:
+\begin{verbatim}
+                        -->   LAPACK TESTING SUMMARY  <--
+                Processing LAPACK Testing output found in the TESTING directory
+SUMMARY                 nb test run     numerical error         other error
+================        ===========     =================       ================
+REAL                    1291905         0       (0.000%)        0       (0.000%)
+DOUBLE PRECISION        1292717         0       (0.000%)        0       (0.000%)
+COMPLEX                 749868          0       (0.000%)        0       (0.000%)
+COMPLEX16               749588          1       (0.000%)        1       (0.000%)
+
+--> ALL PRECISIONS      4084078         1       (0.000%)        1       (0.000%)
+\end{verbatim}
+Now, THOR can be compiled. Navigate to the THOR source folder:
+\begin{verbatim}
+    >> cd /home/<usr>/projects/THOR/THOR/src
+\end{verbatim}
+and, as before, edit the file \verb"Makefile" to utilize the available MPI Fortran compiler and if necessary modify the environment to enable \verb"make" to locate the compiler. Then type:
+\begin{verbatim}
+    >> make
+\end{verbatim}
+Successful compilation of THOR will conclude with the line:
+\begin{verbatim}
+    mv ./thor-1.0.exe ../
+\end{verbatim}
+The THOR executable (named in the above line) can be found here:
+\begin{verbatim}
+    >> ls /home/<usr>/projects/THOR/THOR/
+\end{verbatim}
+that should produce:
+\begin{verbatim}
+    doc  examples  hello_world  scripts  src  tests  thor-1.0.exe  unit
+\end{verbatim}
+
+\section{Running THOR for the first time}
+Navigate to the \verb"hello_thor" directory:
+\begin{verbatim}
+    >> cd /home/<usr>/projects/THOR/THOR/hello_world
+\end{verbatim}
+Check the content of this folder:
+\begin{verbatim}
+    >> ls
+\end{verbatim}
+It should show the following files:
+\begin{verbatim}
+    >> ls -l
+    total 696
+    -rwxrwxr-x 1 azmyyy azmyyy    603 Jun 26 19:56 hello_world.in
+    -rw-rw-r-- 1 azmyyy azmyyy  42700 Jun 26 19:56 hello_world.o
+    -rwxrwxr-x 1 azmyyy azmyyy 150040 Jun 26 19:56 hello_world.thrm
+    -rwxrwxr-x 1 azmyyy azmyyy     23 Jun 26 19:56 hello_world.xs
+\end{verbatim}
+These files have the following significance: 
+\begin{itemize}
+    \item \verb"hello_world.in" is a sample input file to THOR. This file is used to execute THOR.
+    \item \verb"hello_world.thrm" is the corresponding mesh file that is referenced within \verb"hello_world.in". At this point, it is only important that it is present and has the proper THOR mesh format. Creation of THOR mesh files is covered later in this manual.
+    \item \verb"hello_world.xs" is the corresponding cross section file, also referenced within \verb"hello_world.in", and again at this point, it is only important that it is present.
+    \item \verb"hello_world.o" is the corresponding output file created by redirecting THOR's standard output. This file can be used to compare THOR's printed output with what it should be upon correct termination of this run.
+\end{itemize}
+THOR is invoked at a minimum with the executable name and the standard input file that is specified after the \verb"-i" modifier.
+\begin{verbatim}
+    >> ../thor-1.0.exe -i hello_world.in
+\end{verbatim}
+For parallel execution type:
+\begin{verbatim}
+    >> mpiexec -n <n> ../thor-1.0.exe -i hello_world.in
+\end{verbatim}
+where \verb"<n>" is the number of processors.
+Several files should have been created: 
+\begin{itemize}
+    \item \verb"hello_world.flux"
+    \item \verb"hello_world.fluxeven"
+    \item \verb"hello_world.fluxodd"
+    \item \verb"hello_world.in_out.csv"
+    \item \verb"intermediate_output_even.dat" \item \verb"intermediate_output_odd.dat"
+\end{itemize}
+The significance of these files will be discussed later.
+THOR's standard output should start with a banner and conclude with:
+\begin{verbatim}
+ --------------------------------------------------------
+    Region averaged reaction rates  
+ --------------------------------------------------------
+
+ -- Region --   0 Volume=   1.500000E+01
+
+    Group          Flux       Fission    Absorption      Fiss Src
+        1  9.515584E-01  1.284604E+00  8.564026E-01  1.284604E+00
+ Total     9.515584E-01  1.284604E+00  8.564026E-01  1.284604E+00
+
+ --------------------------------------------------------
+    Execution of THOR completed successfully  
+ --------------------------------------------------------
+\end{verbatim}
+
+\section{Pre/post Processors}
+
+\subsection{Setting up THOR\_MESH\_Generator}
+THOR mesh generator converts \textit{exodus} and \textit{gmsh} 
+mesh formats to THOR's native mesh format. It also permits
+uniform refinement of meshes provided in exodus files. Conversion from \textit{exodus} format and uniform refinement uses the 
+\textit{libmesh}~\cite{libMeshPaper} \textit{meshtool}. Therefore, 
+\textit{libmesh} has to be set up first. To this end, navigate to the \verb"scripts" directory:
+\begin{verbatim}
+    >> cd /home/<usr>/projects/THOR/contrib/scripts
+\end{verbatim}
+and execute \verb"build_libmesh.sh":
+\begin{verbatim}
+    >> chmod +x build_libmesh.sh
+    >> ./build_libmesh.sh <n>
+\end{verbatim}
+where the first command makes \verb"build_libmesh.sh" executable (if it is not already) and \verb"<n>" is the number of processors. It must be provided even if it is simply 1. Executing this script may take a long time to complete installing \textit{libmesh}, however, it will show progress on the screen. If the git-clone command in the \verb"build_libmesh.sh" script does not work, replace it with the command:
+\begin{verbatim}
+git clone https://github.com/libMesh/libmesh.git
+\end{verbatim}
+Finally, the \verb"THOR_LIBMESH_DIRECTORY" environment variable has to be set. This environment variable must point to the directory that the \verb"meshtool-opt" executable is located. For the standard installation, one should execute:
+\begin{verbatim}
+    >> export THOR_LIBMESH_DIRECTORY=/home/<usr>/projects/THOR/contrib/libmesh/build
+\end{verbatim}
+
+The next step is to make the THOR\_MESH\_GENERATOR application. Navigate to its source folder:
+\begin{verbatim}
+    >> cd /home/<usr>/projects/THOR/pre-processors/THOR_Mesh_Generator/src
+\end{verbatim}
+and type:
+\begin{verbatim}
+    >> make
+\end{verbatim}
+The exectutable
+\begin{verbatim}
+    /home/<usr>/projects/THOR/pre-processors/THOR_Mesh_Generator/Thor_Mesh_Generator.exe
+\end{verbatim}
+should have been created.
+
+\begin{verbatim}
+***************************************************************
+The tests as described below did not execute as described.
+Instead, I did the following and still execution of the tests
+did not work properly:
+
+1. In ~/PROJECTS/THOR/pre-processors/THOR_Mesh_Generator:
+ln -s Thor_Mesh_Generator\_MP.exe Thor_Mesh_Generator.exe
+
+2. In ~/PROJECTS/THOR/pre-processors/THOR\_Mesh_Generator/scripts:
+chmode u+x test\_all.sh
+
+3. ./test\_all.sh
+This ran but did not give the output below and reported execution
+errors. It is not clear if these reported errors are part of the
+testing since some of the cases are labeled Bad, or the error
+indicates erroneous installation of libmesh.
+***************************************************************
+\end{verbatim}
+
+
+To ensure that the THOR\_MESH\_GENERATOR application compiled correctly, execute the regression tests. Change directory to:
+\begin{verbatim}
+    >> cd /home/<usr>/projects/THOR/pre-processors/THOR_Mesh_Generator/scripts
+\end{verbatim}
+and execute:
+\begin{verbatim}
+    >> python run_thor_tests.py 
+\end{verbatim}
+You should see screen output similar to this:
+\begin{verbatim}
+--------------------------------------------------------------------------------
+Test  1 tests/bad_gmesh_non_tet_element:bad_gmesh_non_tet_element success
+Test  2 tests/bad_gmesh_no_elements_block:bad_gmesh_no_elements_block success
+Test  3 tests/homogeneous_domain:homogeneous success
+Test  4 tests/homogeneous_domain:homogeneous_from_exodus success
+Test  5 tests/homogeneous_domain:homogeneous_r1 success
+Test  6 tests/homogeneous_domain:homogeneous_from_exodus_r1 success
+Test  7 tests/bad_gmesh_no_nodes_block:bad_gmesh_no_nodes_block success
+Test  8 tests/bad_gmesh_no_format_block:bad_gmesh_no_format_block success
+Test  9 tests/bad_gmesh_non_tri_face:bad_gmesh_non_tri_face success
+Test  10 tests/convert_old_to_new_THOR:convert_old_to_new_THOR success
+Test  11 tests/unv_sphere_in_shell_in_box:unv_sphere_in_shell_in_box success
+Test  12 tests/Basic_Cube_Mesh_test:basic_cube_mesh success
+Test  13 tests/split_hex_and_prism:split_hex success
+Test  14 tests/split_hex_and_prism:split_prism success
+Test  15 tests/bad_unv_sphere_in_shell_in_box_no_2411:bad_unv_sphere_in_shell_in_box_no_2411 success
+--------------------------------------------------------------------------------
+Successes:  15            Failures:  0
+\end{verbatim}
+All or at least the vast majority of tests should pass, so \verb"Failures" should be close to zero.

@@ -1,0 +1,194 @@
+\documentclass[twoside]{report}
+
+% Use so that < and > get formatted correctly when printed in text
+%\usepackage[T1]{fontenc}
+\usepackage{acronym}
+\usepackage{amsmath}
+\usepackage{amssymb}
+%\usepackage{array}
+\usepackage[blocks]{authblk}
+%\usepackage{booktabs}
+%\usepackage[toc]{appendix}
+%\usepackage{breqn}
+\usepackage[justification=justified,singlelinecheck=off,bf]{caption}
+\usepackage{chngcntr}
+\usepackage{changepage}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{enumerate}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+%\usepackage[Glenn]{fncychap}
+\usepackage{fancybox}
+\usepackage{fancyvrb}
+\usepackage{float}
+%\usepackage{framed}
+%\usepackage{fullpage}
+%\usepackage{gensymb}
+\usepackage[top=1.0in,bottom=1.0in,inner=1.0in,outer=1.0in]{geometry}
+\usepackage{graphicx}
+\usepackage{lastpage}
+%\usepackage{listing}
+%\usepackage{lscape}
+%\usepackage{makecell}
+\usepackage{multirow}
+%\usepackage{pdflscape}
+\usepackage{units}
+\usepackage{newfloat}
+\usepackage{wrapfig}
+%\usepackage{nicefrac}
+%\usepackage{multicol}
+%\usepackage{xr-hyper}
+\usepackage{hyperref}
+\usepackage{tabularx}
+\usepackage{siunitx}
+\usepackage{textcomp}
+\usepackage[pages=some]{background}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{titlesec}
+
+\title{THOR Theory Manual}
+\newcommand{\subtitle}{}
+\newcommand{\shortTitle}{THOR Theory Manual}
+\author[1]{Nicholas Herring}
+\author[1]{Yousry Azmy}
+\author[2]{Sebastian Schunert}
+\author[3]{Raffi Yessayan}
+\author[4]{Rodolfo Ferrer}
+
+\affil[1]{North Carolina State University}
+\affil[2]{Idaho National Laboratory}
+\affil[3]{Los Alamos National Laboratory}
+\affil[4]{Studsvik Scandpower}
+
+\newcommand{\publicationDate}{03/16/2022}
+
+
+%customize hyperref
+%uncomment to underline the hyperlinks in the document
+\hypersetup{
+        colorlinks,
+%	colorlinks=false,
+%	pdfborderstyle={/S/U/W 1},
+%	pdfborder=0 0 1,
+	linkcolor=black,
+	citecolor=black,
+	}
+
+
+% Make custom blue to match word blue
+\definecolor{DocNameRed}{RGB}{206,32,41}
+% CASL blue
+\definecolor{NCSURed}{RGB}{206,32,41}
+\definecolor{TitleRed}{RGB}{204,0,2}
+
+
+% All the other pages style
+\renewcommand{\headrulewidth}{0pt}
+\fancyhead{}
+\fancyfoot{}
+\fancyhead[LO,RE]{\includegraphics[width=1.15in]{template/NCSU_logo.png}}
+\fancyhead[RO,LE]{\color{white}\shortTitle}
+\fancyfoot[LE,RO]{\textcolor{NCSURed}{NCSU} Radiation Transport Group}
+\fancyfoot[CO,CE]{\thepage}
+
+\fancypagestyle{plain}
+{
+\fancyhead[LO,RE]{\includegraphics[width=1.15in]{template/NCSU_logo.png}}
+\fancyhead[RO,LE]{\color{NCSURed}\shortTitle}
+\fancyfoot[LE,RO]{\textcolor{NCSURed}{NCSU} Radiation Transport Group}
+\fancyfoot[CO,CE]{\thepage}
+}
+
+% The title page style
+\fancypagestyle{firststyle}
+{
+   \fancyhead[L]{}
+   \fancyfoot[]{}
+}
+
+
+\backgroundsetup{
+scale=1,
+color=black,
+opacity=1.0,
+angle=0,
+contents={%
+  \includegraphics[width=\paperwidth,height=\paperheight]{template/NCSU_background.pdf}
+  }%
+}
+
+% Define command to surround text in angle brackets
+\newcommand{\brackets}[1]{\textlangle{}#1\textrangle{}}
+
+% For formatting code
+\newcommand{\codeblock}[1]{\texttt{#1}}
+
+%increase space after captions
+\setlength{\belowcaptionskip}{2pt}
+
+% No indenting at start of paragraph
+\setlength{\parindent}{0pt}
+
+%increase space between paragraphs
+\parskip 1em
+
+\titleformat{\chapter}{\Huge\bfseries}{\thechapter. }{0pt}{\Huge\bfseries}
+
+% set the section numbering depth and TOC depth
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+% Use continuous counting scheme for floats
+\counterwithout{table}{chapter}
+
+\let\DeclareUSUnit\DeclareSIUnit
+\let\US\SI
+\DeclareUSUnit\F{F}
+\DeclareUSUnit\ft{ft}
+
+% Set list spacing to zero
+%\setitemize{itemsep=0em}
+
+\begin{document}
+
+%clear the header/footer until TOC
+\pagenumbering{roman}
+
+\input{title}
+
+% no abstract in users' manual
+%\input{abstract}
+
+\chapter*{Acronyms}
+\input{acronym}
+
+% table of contents
+\tableofcontents
+
+% list of figures
+% \listoffigures
+
+% list of tables
+% \listoftables
+\clearpage
+\pagenumbering{arabic}
+\pagestyle{fancy}
+
+\chapter{Introduction}
+
+\input{chapters/introduction/main.tex}
+
+\chapter{Theory}
+
+\input{chapters/theory/main.tex}
+
+
+\bibliographystyle{plain}
+\bibliography{biblio}
+\addcontentsline{toc}{chapter}{References}
+
+%\appendix
+
+
+\end{document}
