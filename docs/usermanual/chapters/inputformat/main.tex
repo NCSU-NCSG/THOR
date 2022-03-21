@@ -1,0 +1,333 @@
+\subsection{THOR Transport Solver}\label{sec:THOR_format}
+add a description of input format for
+\begin{itemize}
+    \item standard input
+    \item XS
+    \item mesh
+    \item source
+\end{itemize}
+
+This section describes the input format of the THOR transport solver. 
+
+\subsection{Compilation and Invocation}
+Navigate to:
+\begin{verbatim}
+    >> cd /home/<usr>/projects/THOR/THOR/src
+\end{verbatim}
+and make the application:
+\begin{verbatim}
+    >> make
+\end{verbatim}
+The executable \verb"THOR_TRANSPORT_SOLVER.exe" should have been created here:
+\begin{verbatim}
+    >> /home/<usr>/projects/THOR/THOR/THOR_TRANSPORT_SOLVER.exe
+\end{verbatim}
+
+The THOR transport solver is invoked by 
+
+\begin{verbatim}
+    >> mpiexec -n <n> THOR_TRANSPORT_SOLVER.exe -i standard_input -t
+\end{verbatim}
+where \verb"-i" precedes the name of the standard input file \verb"standard_input" and \verb"-t" is an optional parameter
+for additional timing. 
+\noindent\textbf{Remark:} \verb"-i standard_input" must currently follow the executable name \verb"THOR_TRANSPORT_SOLVER.exe". This will be fixed in future versions.
+
+\subsection{Standard Input}
+THOR input is organized in blocks. The blocks are 
+\begin{itemize}
+    \item The first line must contain a user selected name for the problem.
+    \item \verb"problem": general parameters to define the problem to be solved
+    \item \verb"inout": Names of inputs and outputs files and toggles for specific output.
+    \item \verb"cross_sections": parameters pertaining to the cross section data.
+    \item \verb"quadrature": parameters pertaining to the angular quadrature.
+    \item \verb"postprocess": parameters pertaining to postprocessing outputs. \verb"cartesian_map" sets up an overlayed Cartesian mesh that fluxes and reactions rates are averaged over. The Cartesian mesh is defined by the minimum and maximum coordinates for each direction (x, y, z) and number of subdivisions between. \verb"point_value_locations" allows extraction of flux values at user provided points.
+    \item \verb"regionmap": mapping from region id to cross section id. Region ids are an integer assigned to to each tetrahedral element that are used to group elements into regions or blocks (see Sect.~\ref{sec:mesh_format}). Cross section ids are indices that identify sets of cross sections provided in the cross section input file (see Sect.~\ref{sec:cross_section_format}).
+\end{itemize}
+
+Blocks are delineated with \verb"start" and \verb"end" keywords like this:
+\begin{verbatim}
+    start <block_name>
+       key1 = value1 ; key2 = value2
+       key3 = value3
+    end <block_name>
+\end{verbatim}
+Each blocks contains several keyword-value pairs. Multiply assignments can be placed on the same
+line if they are separated by \verb";".
+The keyword-value pairs can be provided in an arbitrary order.
+All keywords are listed in Table~\ref{tab:thor_solver_parameters}.
+
+\begin{table}[p]
+    \centering
+    \caption{Keywords of THOR Transport Solver Application\label{tab:thor_solver_parameters_1}}
+    \begin{tabular}{l l l l}
+        \toprule
+        Keyword & Type & Options & Explanation\\
+        \midrule
+        \multicolumn{4}{l}{\textbf{Block}: problem}\\
+            type    &  string  &  keig/fsrc & Problem type. Either eigenvalue (keig) or fixed source (fsrc) \\
+            keigsolver & string & pi/jfnk  & Solve type for keig. Either power iteration (pi) or Jacobian-Free Newton-Krylov (jfmk) \\
+            lambda & integer & - & Expansion order, negative number indicates reduced set \\
+            inflow & string  & yes/no & If fixed inflow boundary conditions are provided for fsrc problems\\
+            piacc & string & errmode/none & Type of power iteration acceleration: none or error mode extrapolation \\
+            sweep & string & precomp & Must be set to precomp at this point. (Redundant keyword)\\
+            page\_sweep & string & yes/no & If the sweep path is saved or is paged to scratch file when not needed\\
+            page\_refl & string & page/save/inner & If significant angular fluxes are paged to/from scratch file (page), stored (save), or discarded after completing inner iterations for a given group\\
+            page\_iflw & string  & bygroup/all & If inflow information is loaded to memory completely (all) or for each group when required (bygroup)\\
+            kconv & Real & - & Stopping criterion for eigenvalue\\
+            innerconv & Real & - & Stopping criterion for group flux during inner iteration \\
+            outerconv & Real & - & Stopping criterion for group flux during outer/power iteration \\
+            maxinner & integer & - & Maximum number of inner iterations \\
+            maxouter & integer & - & Maximum number of outer/power iterations \\
+            jfnk\_krsze & integer & - & Maximum size of Krylov subspace during jfnk \\
+            jfnk\_maxkr &integer & - & Maximum number of Krylov iterations\\
+            jfnk\_method & string & outer/flat/flat\_wds & Type of jfnk formulation, see~\cite{}\\
+            initial\_guess & string & yes/no & If an initial guess file should be read\\
+            save\_restart & string & yes/no & If a restart file should be written \\
+            ipiter & integer & - & Number of initial power iterations for jfnk\\
+            print\_conv & string & yes/no & If convergence monitor is written to file \verb"thor.convergence"\\
+            density\_factor & string & no/byvolume/fromfile  & Density factor options: use no density factors (no), use density factors and density factor file provides region volumes (byvolume), use density factors and density factor file provides density factors (fromfile). \\
+            execution & string & yes/no & If yes problem is executed, if no then input is only read and checked.\\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[p]
+    \centering
+    \caption{Keywords of THOR Transport Solver Application\label{tab:thor_solver_parameters_2}}
+    \begin{tabular}{l l l l}
+        \toprule
+        Keyword & Type & Options & Explanation\\
+        \midrule
+        \multicolumn{4}{l}{\textbf{Block}: inout}\\
+        \verb"mesh_file"&string& -& Name of the mesh file\\
+        \verb"inflow_file"&string& -& Name of the boundary inflow information file\\
+        \verb"source_file"&string& -& Name of the volumetric source file\\
+        \verb"flux_file"&string& -& Name of the THOR formatted output flux file\\
+        \verb"xs_file"&string& -& Name of the cross section file\\
+        \verb"density_factor_file"&string& -& Name of the density factor file\\
+        \verb"quad_file"&string& -& Name of the angular quadrature file\\
+        \verb"vtk"&string (multiple)&flux/mat/reg/src& Which information is written to vtk formatted outputs. You can select more than one (e.g. vtk = mat reg src)\\
+        \verb"vtk_flux_file"&string& -& Name of the vtk flux file\\
+        \verb"vtk_mat_file"&string& -& Name of the vtk material file\\
+        \verb"vtk_reg_file"&string& -& Name of the vtk region file\\
+        \verb"vtk_src_file"&string& -& Name of the vtk volumetric source file\\
+        \verb"restart_file"&string& -& Name of the restart file written when save\_restart = yes\\
+        \verb"inguess_file"&string& -& Name of the initial guess file if initial\_guess = yes\\
+        \verb"cartesian_map_file"&&&Name of the file that the cartesian map output is written to\\
+        \verb"print_xs"&string& yes/no& If cross sections are echoed to standard output.\\
+        \midrule
+        \multicolumn{4}{l}{\textbf{Block}: cross\_sections}\\
+        \verb"ngroups"&integer& -& Number of energy groups\\
+        \verb"pnorder"&integer& -& Spherical harmonics order used for scattering in code\\
+         \verb"pnread"&integer& -& Spherical harmonics expansion provided in cross section file\\
+         \verb"upscattering" & string & yes/no & Read upscattering data from cross section file or ignore it \\
+         \verb"multiplying" & string & yes/no & If the cross section file contains fission information \\
+         \verb"scatt_mult_included" & string & yes/no & If the scattering data includes the $2 l + 1$ multiplier or not \\
+        \midrule
+        \multicolumn{4}{l}{\textbf{Block}: quadrature}\\
+        \verb"qdtype" & string & levelsym/legcheb/fromfile & Quadrature type: level-symmetric, Legendre-Chebyshev, read from file \\
+        \verb"qdorder" & integer & - & Order of the angular quadrature \\
+        \midrule
+        \multicolumn{4}{l}{\textbf{Block}: postprocess}\\
+        \verb"cartesian_map" & Real/integer (9 entries) & - & xmin, xmax, nx, ymin, ymax, ny, zmin, zmax, nz \\
+        \verb"point_value_locations" & Real (3 N) & - & N is the number of points, (x,y,z) coordinates of N points, x1 y1 z1 x2 y2 ...  \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The \verb"regionmap" block does not contain keyword-value pairs. Instead, it maps region ids to cross section ids. We denote by 
+\verb"min_reg" and \verb"max_reg" the smallest and largest region ids in the mesh file. The number of entries in the \verb"regionmap"
+field must then be \verb"num_entries" = \verb"max_reg" - \verb"min_reg" + 1. The assignment is best illustrated for an example. 
+Let us assume that \verb"min_reg" = -1 and \verb"max_reg" = 2 and we want to assign 
+\begin{verbatim}
+    -1 -> 12
+     0 -> 1
+     1 -> 1
+     2 -> 3
+\end{verbatim}
+Then the \verb"regionmap" block is given by:
+\begin{verbatim}
+start regionmap
+ 12 1 1 3
+end regionmap
+\end{verbatim}
+Unused region ids can be accommodated by padding the entries in the regionmap field. 
+
+\subsection{THOR Mesh Format}\label{sec:mesh_format}
+Line 1: number of vertices
+\vspace{2mm}
+
+\noindent Line 2: number of elements
+\vspace{2mm}
+
+\noindent Line 3: unused enter 1
+\vspace{2mm}
+
+\noindent Line 4: unused enter 1
+\vspace{2mm}
+
+\noindent Block 1: vertex coordinates, number of lines = number of vertices; each line is as follows: vertex\_id (integer) x-coordinate (Real) y-coordinate (Real) z-coordinate (Real)
+\vspace{2mm}
+
+\noindent Block 2: region and source id assignments, number of lines = number of elements; each line is as follows: element\_id region\_id source\_id (all integers). For setting up Monte Carlo on the tet mesh, this block can be ignored.
+\vspace{2mm}
+
+\noindent Block 3: element descriptions, the vertex\_ids that form each element. Number of lines = number of elements; each line is as follows: element\_id vertex\_id1 vertex\_id2 vertex\_id3 vertex\_id4 (all integers). 
+\vspace{2mm}
+
+\noindent Next line: number of boundary face edits
+\vspace{2mm}
+
+\noindent Block 4: boundary face descriptions. All exterior faces associated with their boundary condition id, number if lines = number of boundary face edits; each line is as follows: element\_id local\_tetrahedron\_face\_id boundary\_condition\_id.
+\vspace{2mm}
+
+\noindent \textbf{Explanation}: 
+local\_tetrahedron\_face\_id: natural local id of tetrahedron’s face which is the id of the vertex opposite to this face. Note: indexed 0-3. 
+boundary\_condition\_id:
+value = 0: vacuum BC
+value = 1: reflective BC
+value = 2: fixed inflow
+\vspace{2mm}
+
+\noindent Next line: number of adjacency list entries
+\vspace{2mm}
+
+\noindent Block 5: adjacency list, number of lines = number of adjacency list entries; each line is as follows: element\_id face\_id neighbor\_id neighbor\_face\_id.
+Explanation: The element\_id is the current element. The neighbor across the face indexed by face\_id has the element id neighbor\_id and the its own local index for the said common face is neighbor\_face\_id.
+
+\subsection{THOR Cross Section Format}\label{sec:cross_section_format}
+\begin{verbatim}
+Line 1: number of materials
+
+Block 1: each entry in this block contains cross sections for a single material. Each entry contains  L *G+ 6 lines. 
+
+Entry line 1: material_id
+Entry line 2: fission_spectrum_1 fission_spectrum_2 … fission_spectrum_G
+Entry line 3: energy_group_boundary_1 energy_group_boundary_3 … energy_group_boundary_G
+Entry line 4: fission_xs_1 fission_xs_2 fission_xs_3 … fission_xs_G
+Entry line 5: nu_bar_1 nu_bar_2 … nu_bar_G
+Entry line 6: total_xs_1 total_xs_2 … total_xs_G
+Entry line 7: sig_scat_{0, 1->1} sig_scat_{0, 2->1} … sig_scat_{0, G->1}
+Entry line 8: sig_scat_{0, 1->2} sig_scat_{0, 2->2} … sig_scat_{0, G->2}
+
+        :
+Entry line G + 6: sig_scat_{0, 1->G} sig_scat_{0, 2->G} … sig_scat_{0, G->G}
+Entry line G + 7: sig_scat_{1, 1->1} sig_scat_{1, 2->1} … sig_scat_{1, G->1}
+Entry line G + 8: sig_scat_{1, 1->2} sig_scat_{1, 2->2} … sig_scat_{1, G->2}
+
+        :
+Entry line 2 * G + 6: sig_scat_{1, 1->G} sig_scat_{1, 2->G} … sig_scat_{1, G->G}
+        :
+
+\end{verbatim}
+
+\begin{itemize}
+\item G = total number of groups.
+\item L = scattering expansion.
+\item fission\_spectrum\_g: fraction of neutrons born in fission that appear in energy group g.
+\item energy\_group\_boundary\_g: currently unused, can be filled with 0s. Upper bound of energy group g.
+\item fission\_xs\_g: fission cross section (NOTE: not nu\_bar * fission\_xs) in group g.
+\item nu\_bar\_g: average number of neutrons released by fission caused by a neutron in energy group g.
+\item total\_xs\_g: total cross section in energy group g.
+\item sig\_scat\_{l, g’->g}: l-th Legendre polynomial moment of the scattering cross section from group g’ to g. The (2 * l + 1) factor may be included in the value of the cross section or not, THOR can handle both cases. It needs to be specified separately every time.
+\end{itemize}
+
+
+
+\subsection{List of all Inputs and Outputs of THOR transport solver}
+
+\subsection{THOR Mesh Generator}
+This section discusses the input of THOR's mesh generator tool. The mesh generator tool provides the following capabilties:
+\begin{itemize}
+    \item Convert exodus~\cite{exodus_format} formatted meshes to THOR format.
+    \item Convert gmsh~\cite{gmsh_ref} formatted meshes to THOR format.
+    \item Convert universal file format meshes to THOR format.
+    \item Split the elements of hexahedra and wedge (triangular prisms) meshes into tetrahedra before comverting to THOR mesh format.
+    \item Conversion of legacy THOR mesh format to new format. 
+\end{itemize}
+
+\subsubsection{Compilation and Invocation}
+Navigate to:
+\begin{verbatim}
+    >> cd /home/<usr>/projects/THOR/pre-processors/THOR_Mesh_Generator/src
+\end{verbatim}
+and make the application:
+\begin{verbatim}
+    >> make
+\end{verbatim}
+The executable \verb"Thor_Mesh_Generator.exe" should have been created here:
+\begin{verbatim}
+    >> /home/<usr>/projects/THOR/pre-processors/THOR_Mesh_Generator/Thor_Mesh_Generator.exe
+\end{verbatim}
+The application is invoked with:
+\begin{verbatim}
+    >> /path/to/Thor_Mesh_Generator.exe -i standard_input
+\end{verbatim}
+where \verb"standard_input" is the standard input file.
+
+\noindent\textbf{Remark:} Conversion of exodus files to gmsh files relies on using libMesh's \verb"mesh-tool"~\cite{libMeshPaper}. You must compile libMesh and set the environment variable \verb"THOR_LIBMESH_DIRECTORY".
+
+\subsubsection{Format of the THOR's mesh generator standard input}
+The standard input file of the THOR mesh generator contains the following lines:
+\begin{verbatim}
+input_mesh_file
+output_mesh_file
+region_id_file
+source_id_file
+boundary_id_file
+\end{verbatim}
+where \verb"input_mesh_file" and \verb"output_mesh_file" are required parameters, while the remaining parameters are optional.
+If a parameter is omitted, the line should just be left blank (that means that e.g. \verb"source_id_file" will always be provided
+on line 4 regardless of whether \verb"region_id_file" was provided).
+
+The purpose of these files is as follows:
+\begin{itemize}
+    \item \verb"input_mesh_file": name of the input mesh file. Note that the file ending matters: exodus is \verb".e" and gmsh is \verb".msh", because the mesh format is inferred from it.
+    \item \verb"output_mesh_file": name of the THOR mesh format files. Use file ending \verb".thrm".
+    \item  \verb"region_id_file": name of file that contains instructions to reassign region (sometimes called block) ids. Formatting instructions for this file is provided in Sect.~\ref{sec:reassign_file_format}.
+    \item  \verb"source_id_file": name of file that contains instructions to reassign source ids. Formatting instructions for this file is provided in Sect.~\ref{sec:reassign_file_format}.
+    \item  \verb"boundary_id_file": name of file that contains instructions to reassign boundary ids. Formatting instructions for this file is provided in Sect.~\ref{sec:reassign_file_format}.
+\end{itemize}
+
+\subsubsection{Formatting instructions for regions, source, and boundary id reassignment files}\label{sec:reassign_file_format}
+IDs are integers that are assigned to each tetrahedral element to group it into a region, a source region or assigned to boundary
+faces to group it into a set of faces for boundary assignment.
+The file format for id reassignment files is:
+\begin{verbatim}
+n
+old_id_<1> new_id_<1>
+  :
+  :
+old_id_<n> new_id_<n>
+\end{verbatim}
+The meaning is as follows:
+\begin{itemize}
+    \item \verb"n": the number of instructions in the file (i.e. the number of lines following this line).
+    \item \verb"old_id_<j>": the j-th old id that will be replaced by \verb"new_id_<j>".
+    \item \verb"new_id_<j>": the j-th new id that will replace \verb"old_id_<j>"
+\end{itemize}
+\textbf{Remarks:}
+\begin{itemize}
+    \item Note, each instruction needs to be on a different line.
+    \item The boundary id characterizes the boundary condition. It must be 0, 1, or 2, where 0 is a vacuum, 1 is a reflective, and 2 is a fixed inflow boundary.
+\end{itemize}
+
+\subsection{Testing}
+THOR provides a convenient test harness that can be executed by the user by navigating to the \verb"scripts" directory that exists as subdirectory for all applications; for example, for the THOR transport solver the test file is located in:
+\begin{verbatim}
+    >> /home/<usr>/projects/THOR/THOR/scripts
+\end{verbatim}
+The tests are executed via the \verb"run_thor_tests.py" python script. The execution of the python script requires \textit{python3}. Tests are executed by:
+\begin{verbatim}
+    >> cd /home/<usr>/projects/THOR/THOR/scripts
+    >> python run_thor_tests.py 
+\end{verbatim}
+The output of the test script should look like this:
+\begin{verbatim}
+-------------------------------------
+Test  1 name success
+  :
+Test  N name success
+-------------------------------------
+Successes:  N            Failures:  0
+\end{verbatim}
