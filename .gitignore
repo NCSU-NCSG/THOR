@@ -20,6 +20,7 @@ pre-processors/THOR_Mesh_Generator/src/Thor_Mesh_Generator
 #user manual outputs
 docs/usermanual/output/*
 docs/theorymanual/output/*
+docs/developermanual/output/*
 
 #manual outputs if someone just makes with latexmk
 .vscode
