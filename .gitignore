@@ -43,3 +43,25 @@ main.synctex.gz
 main.toc
 *.bbl
 *.blg
+
+#files created in tutorials/generating libraries
+THOR/examples/Godiva_tutorial/THOR/godiva.i_out.csv
+THOR/examples/Godiva_tutorial/THOR/intermediate_output_even.dat
+THOR/examples/Godiva_tutorial/THOR/intermediate_output_odd.dat
+THOR/examples/Godiva_tutorial/THOR/pi_hard_eig_1grp.fluxeven
+THOR/examples/Godiva_tutorial/THOR/pi_hard_eig_1grp.fluxodd
+THOR/hello_world/hello_world.fluxeven
+THOR/hello_world/hello_world.fluxodd
+THOR/hello_world/hello_world.in_out.csv
+THOR/hello_world/intermediate_output_even.dat
+THOR/hello_world/intermediate_output_odd.dat
+THOR/src/liblapack.a
+THOR/src/librefblas.a
+THOR/src/libskit.a
+THOR/src/libtmglib.a
+contrib/SPARSKIT2/libskit.a
+contrib/libmesh/
+contrib/libs/
+pre-processors/THOR_Mesh_Generator/test/convert_old_to_new_THOR/takeda.thrm
+pre-processors/THOR_Mesh_Generator/test/homogeneous_domain/homogeneous.thrm
+pre-processors/THOR_Mesh_Generator/test/homogeneous_domain/homogeneous_from_exodus.thrm
