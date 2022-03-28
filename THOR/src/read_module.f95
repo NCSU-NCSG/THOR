@@ -29,7 +29,7 @@ MODULE read_module
   USE quadrature_module
   USE check_input
   USE termination_module
-  USE adv_read_module
+  USE yaml_read_module
 
   IMPLICIT NONE
 
@@ -600,10 +600,10 @@ CONTAINS
 
     ! local variables
 
-    CHARACTER(100) :: buffer, fname
+    CHARACTER(100) :: buffer, fname, tchar
     CHARACTER(100000) :: regmap
     LOGICAL :: done
-    INTEGER :: i, rank,mpi_err, localunit
+    INTEGER :: i, rank,mpi_err, localunit,ios,legacyv
     CALL GET_COMMAND_ARGUMENT(1,fname)
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
     localunit = rank+100
@@ -611,13 +611,36 @@ CONTAINS
     OPEN(unit = localunit, file = fname , status = 'old', action = 'read')
     WRITE(*,*) "<><><><><><><><>", fname(LEN(TRIM(fname))-4: LEN(TRIM(fname)))
 
+    legacyv=0
+    !determine if the input is yaml
+    IF(fname(LEN(TRIM(fname))-4: LEN(TRIM(fname))) .EQ. ".yaml")THEN
+      legacyv=-1
+    ELSE
+      !determine if the input is legacy
+      DO
+        READ(localunit,101,IOSTAT=ios) tchar
+        !legacy version 2
+        IF(trim(adjustl(tchar)) .EQ. "start problem")legacyv=1
+        IF(ios .NE. 0)EXIT
+      ENDDO
+      REWIND(localunit)
+    ENDIF
+
+    !SELECTCASE(legacyv)
+    !  CASE(-1)
+    !  CASE(1)
+    !    CALL legacyv1_read(localunit)
+    !  CASE DEFAULT
+    !    CALL inputfile_read()
+    !ENDSELECT
+
     IF(fname(LEN(TRIM(fname))-4: LEN(TRIM(fname))) .EQ. ".yaml") THEN
       WRITE(*,*) "ADV READ"
-      CALL adv_read(localunit)
+      CALL yaml_read(localunit)
     ELSE
+
+
       ! read title
-
-
       READ(localunit,*) jobname
 
       ! main read loop
