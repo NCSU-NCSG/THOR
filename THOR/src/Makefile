@@ -25,7 +25,7 @@ LIB     := ../../lib
 #rule declaration. Add these items to FILTER
 #-----------------------------------------------------------------------------------
 SRC :=  \
-        adv_read_module.f95								\
+        yaml_read_module.f95								\
         ahotc_matrix_module.f95						\
         angle_types.f95										\
         cell_splitting_module.f95					\
@@ -181,7 +181,7 @@ libtmglib.a:
 #Dependency List
 #Use [gfortran -M -cpp *.f95] repeatedly until clean compile to update rules below
 #-----------------------------------------------------------------------------------
-adv_read_module.o adv_read_module.mod: adv_read_module.f95 \
+yaml_read_module.o yaml_read_module.mod: yaml_read_module.f95 \
   error_generator.mod global_variables.mod parameter_types.mod
 
 ahotc_matrix_module.o ahotc_matrix_module.mod: ahotc_matrix_module.f95 \
@@ -283,7 +283,7 @@ read_module.o read_module.mod: read_module.f95  \
   angle_types.mod multindex_types.mod global_variables.mod \
   read_cross_section_module.mod readmesh_module.mod read_source_module.mod \
   read_inflow_module.mod quadrature_module.mod check_input.mod \
-  termination_module.mod adv_read_module.mod
+  termination_module.mod yaml_read_module.mod
 
 read_source_module.o read_source_module.mod: read_source_module.f95 \
   types.mod parameter_types.mod filename_types.mod multindex_types.mod \

@@ -18,14 +18,14 @@
 !===============================================================================
 !===============================================================================
 !===============================================================================
-MODULE adv_read_module
+MODULE yaml_read_module
   USE error_generator
   USE global_variables
   USE parameter_types
   IMPLICIT NONE
 
 CONTAINS
-  SUBROUTINE adv_read(local_unit)
+  SUBROUTINE yaml_read(local_unit)
 
     !Command Line Arg Parsing
     INTEGER, INTENT(IN) :: local_unit
@@ -294,7 +294,7 @@ CONTAINS
       sanity_check = .FALSE.
     END DO
 
-  END SUBROUTINE adv_read
+  END SUBROUTINE yaml_read
 
   !===============================================================================
   ! [Execute] flag !==============================================================
@@ -2074,4 +2074,4 @@ CONTAINS
     END IF
   END SUBROUTINE input_flag_generic
 
-END MODULE adv_read_module
+END MODULE yaml_read_module

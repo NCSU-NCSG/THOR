@@ -11,7 +11,7 @@ Godiva 6 group example
   end problem
 
   start inout
-    mesh_file     =  ../create_mesh/from_CUBIT/godiva_1_c.thrm
+    mesh_file     =  ../create_mesh/from_CUBIT/godiva_1_o.thrm
     xs_file       =  ../cross_sections/godiva.xs
     flux_file     =  pi_hard_eig_1grp.flux
     print_xs = yes

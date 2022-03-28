@@ -8,10 +8,11 @@ if [ -d "../libmesh" ]; then
 fi
 
 cd ../
-git clone git@github.com:libMesh/libmesh.git
+git clone https://github.com/libMesh/libmesh.git
 cd libmesh
 mkdir build
 cd build
+git submodule update --init --recursive
 ../configure --with-methods="opt dbg devel"
 make -j $1
 
