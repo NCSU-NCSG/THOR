@@ -1,0 +1,2 @@
+should make sure all output/optional input should have a "yes" option that defaults to the name of the input file *.out/*.flux/*.dens etc.
+no/none will default to nothing
