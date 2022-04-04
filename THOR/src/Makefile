@@ -25,7 +25,6 @@ LIB     := ../../lib
 #rule declaration. Add these items to FILTER
 #-----------------------------------------------------------------------------------
 SRC :=  \
-        yaml_read_module.f95								\
         ahotc_matrix_module.f95						\
         angle_types.f95										\
         cell_splitting_module.f95					\
@@ -44,10 +43,12 @@ SRC :=  \
         multindex_types.f95								\
         outer_iteration_module.f95				\
         parameter_types.f95								\
-        precision.f95												\
+        precision.f95											\
         quadrature_module.f95							\
         read_cross_section_module.f95			\
         read_inflow_module.f95						\
+        read_module_legacy.f95						\
+        read_module_current.f95						\
         read_module.f95										\
         read_source_module.f95						\
         readmesh_module.f95								\
@@ -181,9 +182,6 @@ libtmglib.a:
 #Dependency List
 #Use [gfortran -M -cpp *.f95] repeatedly until clean compile to update rules below
 #-----------------------------------------------------------------------------------
-yaml_read_module.o yaml_read_module.mod: yaml_read_module.f95 \
-  error_generator.mod global_variables.mod parameter_types.mod
-
 ahotc_matrix_module.o ahotc_matrix_module.mod: ahotc_matrix_module.f95 \
   types.mod parameter_types.mod multindex_types.mod general_utility_module.mod
 
@@ -277,13 +275,18 @@ read_inflow_module.o read_inflow_module.mod: read_inflow_module.f95 \
   types.mod parameter_types.mod filename_types.mod multindex_types.mod \
   global_variables.mod termination_module.mod
 
+read_module_legacy.o read_module_legacy.mod: read_module_legacy.f95 \
+  stringmod.mod error_generator.mod global_variables.mod parameter_types.mod
+
+read_module_current.o read_module_current.mod: read_module_current.f95
+
 read_module.o read_module.mod: read_module.f95  \
   stringmod.mod types.mod parameter_types.mod filename_types.mod \
   vector_types.mod cross_section_types.mod geometry_types.mod \
   angle_types.mod multindex_types.mod global_variables.mod \
   read_cross_section_module.mod readmesh_module.mod read_source_module.mod \
   read_inflow_module.mod quadrature_module.mod check_input.mod \
-  termination_module.mod yaml_read_module.mod
+  termination_module.mod read_module_legacy.mod read_module_current.mod
 
 read_source_module.o read_source_module.mod: read_source_module.f95 \
   types.mod parameter_types.mod filename_types.mod multindex_types.mod \
