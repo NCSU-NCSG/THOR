@@ -278,7 +278,8 @@ read_inflow_module.o read_inflow_module.mod: read_inflow_module.f95 \
 read_module_legacy.o read_module_legacy.mod: read_module_legacy.f95 \
   stringmod.mod error_generator.mod global_variables.mod parameter_types.mod
 
-read_module_current.o read_module_current.mod: read_module_current.f95
+read_module_current.o read_module_current.mod: read_module_current.f95  \
+  stringmod.mod global_variables.mod
 
 read_module.o read_module.mod: read_module.f95  \
   stringmod.mod types.mod parameter_types.mod filename_types.mod \

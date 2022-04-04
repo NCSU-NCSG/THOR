@@ -1,6 +1,7 @@
 !THOR input format version 1.0.
 !Lines starting with an exclamation point, !, and blank lines will be ignored.
 !Whitespace is necessary between parameters and param values but is otherwise ignored.
+!Do not put more than 200 characters into any single line, otherwise they will be ignored.
 !Parameters are separated either with new lines (make sure your line endings for your file are UNIX
 !   line endings! NOT Windows or Mac) or separated with semicolons, ;.
 !When a parameter is specified it is assumed that the next set of values will be for that parameter,

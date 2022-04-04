@@ -609,7 +609,9 @@ CONTAINS
     localunit = rank+100
 
     OPEN(unit = localunit, file = fname , status = 'old', action = 'read')
-    WRITE(*,*) "<><><><><><><><>", fname(LEN(TRIM(fname))-4: LEN(TRIM(fname)))
+    IF(rank .EQ. 0)THEN
+      WRITE(*,*) "<><><><><><><><>", fname
+    ENDIF
 
     legacyv=0
     !determine if the input is yaml
