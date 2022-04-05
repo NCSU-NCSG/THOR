@@ -44,7 +44,7 @@ ABSTRACT INTERFACE
   SUBROUTINE prototype_wordarg(thisCard,twords)
     IMPORT :: cardType
     CLASS(cardType),INTENT(INOUT) :: thisCard
-    CHARACTER(200),INTENT(IN) :: twords(100)
+    CHARACTER(200),INTENT(INOUT) :: twords(100)
   ENDSUBROUTINE prototype_wordarg
 ENDINTERFACE
 
@@ -193,12 +193,11 @@ CONTAINS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_type(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    CHARACTER(ll_max) :: tchar1
-    tchar1=TRIM(lowercase(wwords(2)))
-    IF(tchar1 .EQ. 'keig') THEN
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    IF(wwords(2) .EQ. 'keig') THEN
       problem=1
-    ELSEIF(tchar1 .EQ. 'fsrc') THEN
+    ELSEIF(wwords(2) .EQ. 'fsrc') THEN
       problem=0
     ELSE
       WRITE(6,*) 'Error. This is not a valid problem type -- ',wwords(2),' --'
@@ -210,12 +209,11 @@ CONTAINS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_keigsolver(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    CHARACTER(ll_max) :: tchar1
-    tchar1=TRIM(lowercase(wwords(2)))
-    IF(tchar1 .EQ. 'pi') THEN
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    IF(wwords(2) .EQ. 'pi') THEN
       eig_switch=0
-    ELSEIF(tchar1 .EQ. 'jfnk') THEN
+    ELSEIF(wwords(2) .EQ. 'jfnk') THEN
       eig_switch=1
     ELSE
       WRITE(6,*) 'Error. This is not a valid eigenvalue solver -- ',wwords(2),' --'
@@ -227,11 +225,10 @@ CONTAINS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_lambda(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     INTEGER :: ios
-    CHARACTER(ll_max) :: tchar1
-    tchar1=TRIM(lowercase(wwords(2)))
-    READ(tchar1,'(i10)',iostat=ios) space_ord
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    READ(wwords(2),'(i10)',iostat=ios) space_ord
     IF(ios.NE.0) THEN
       WRITE(6,*) 'Invalid spatial order in problem specification -- ',TRIM(wwords(2)),' --'
       STOP
@@ -241,12 +238,11 @@ CONTAINS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_inflow(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    CHARACTER(ll_max) :: tchar1
-    tchar1=TRIM(lowercase(wwords(2)))
-    IF(tchar1.EQ. 'yes') THEN
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    IF(wwords(2).EQ. 'yes') THEN
       finflow=1
-    ELSEIF(tchar1 .EQ. 'no') THEN
+    ELSEIF(wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
       finflow=0
     ELSE
       WRITE(6,*) 'Error. This is not a valid inflow flag -- ',wwords(2),' --'
@@ -258,12 +254,11 @@ CONTAINS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_piacc(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    CHARACTER(ll_max) :: tchar1
-    tchar1=TRIM(lowercase(wwords(2)))
-    IF(tchar1 .EQ. 'errmode') THEN
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    IF(wwords(2) .EQ. 'errmode') THEN
       outer_acc=2
-    ELSEIF(tchar1 .EQ. 'none') THEN
+    ELSEIF(wwords(2) .EQ. 'none') THEN
       outer_acc=1
     ELSE
       WRITE(6,*) 'Error. This is not a valid acceleration option for PI -- ',wwords(2),' --'
@@ -275,12 +270,11 @@ CONTAINS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_page_sweep(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    CHARACTER(ll_max) :: tchar1
-    tchar1=TRIM(lowercase(wwords(2)))
-    IF(tchar1 .EQ. 'yes') THEN
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    IF(wwords(2) .EQ. 'yes') THEN
       page_sweep=1
-    ELSEIF(tchar1 .EQ. 'no') THEN
+    ELSEIF(wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
       page_sweep=0
     ELSE
       WRITE(6,*) 'Error. This is not a valid sweep page option -- ',wwords(2),' --'
@@ -292,295 +286,501 @@ CONTAINS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_page_refl(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    IF(wwords(2) .EQ. 'page') THEN
+      page_refl=1
+    ELSEIF(wwords(2) .EQ. 'save') THEN
+      page_refl=0
+    ELSEIF(wwords(2) .EQ. 'inner') THEN
+      page_refl=2
+    ELSE
+      WRITE(6,*) 'Error. This is not a valid page reflective BC option -- ',wwords(2),' --'
+      WRITE(6,*) 'Execution will terminate.'
+      STOP
+    ENDIF
   END SUBROUTINE get_page_refl
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_page_iflw(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    IF(wwords(2) .EQ. 'bygroup') THEN
+      page_iflw=1
+    ELSEIF(wwords(2) .EQ. 'all') THEN
+      page_iflw=0
+    ELSE
+      WRITE(6,*) 'Error. This is not a valid page inflow option -- ',wwords(2),' --'
+      WRITE(6,*) 'Execution will terminate.'
+      STOP
+    END IF
   END SUBROUTINE get_page_iflw
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_kconv(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    INTEGER :: ios
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    READ(wwords(2),*,iostat=ios) k_conv
+    IF(ios.NE.0) THEN
+      WRITE(6,*) 'Invalid stopping criterion for keff in problem specification -- ',TRIM(wwords(2)),' --'
+      STOP
+    END IF
   END SUBROUTINE get_kconv
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_innerconv(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    INTEGER :: ios
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    READ(wwords(2),*,iostat=ios) inner_conv
+    IF(ios.NE.0) THEN
+      WRITE(6,*) 'Invalid stopping criterion for inner iterations in problem specification -- ',TRIM(wwords(2)),' --'
+      STOP
+    END IF
   END SUBROUTINE get_innerconv
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_outerconv(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    INTEGER :: ios
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    READ(wwords(2),*,iostat=ios) outer_conv
+    IF(ios.NE.0) THEN
+      WRITE(6,*) 'Invalid stopping criterion for outer iterations in problem specification -- ',TRIM(wwords(2)),' --'
+      STOP
+    END IF
   END SUBROUTINE get_outerconv
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_maxinner(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    INTEGER :: ios
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    READ(wwords(2),'(i10)',iostat=ios) max_inner
+    IF(ios.NE.0 .OR. max_inner<1 ) THEN
+      WRITE(6,*) 'Invalid maximum number of inner iteration in problem specification -- ',TRIM(wwords(2)),' --'
+      STOP
+    END IF
   END SUBROUTINE get_maxinner
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_maxouter(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    INTEGER :: ios
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    READ(wwords(2),'(i10)',iostat=ios) max_outer
+    IF(ios.NE.0 .OR. max_outer<1 ) THEN
+      WRITE(6,*) 'Invalid maximum number of outer iteration in problem specification -- ',TRIM(wwords(2)),' --'
+      STOP
+    END IF
   END SUBROUTINE get_maxouter
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_jfnk_krsze(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    INTEGER :: ios
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    READ(wwords(2),'(i10)',iostat=ios) rd_restart
+    IF(ios.NE.0 .OR. rd_restart<1 ) THEN
+      WRITE(6,*) 'Invalid Krylov subspace size for JFNK in problem specification -- ',TRIM(wwords(2)),' --'
+      STOP
+    END IF
   END SUBROUTINE get_jfnk_krsze
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_jfnk_maxkr(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    INTEGER :: ios
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    READ(wwords(2),'(i10)',iostat=ios) rd_max_kit
+    IF(ios.NE.0 .OR. rd_max_kit < 1 ) THEN
+      WRITE(6,*) 'Invalid maximum number of Krylov iterations for JFNK in problem specification -- '&
+            ,TRIM(wwords(2)),' --'
+      STOP
+    ENDIF
   END SUBROUTINE get_jfnk_maxkr
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_jfnk_method(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    IF(wwords(2) .EQ. 'outer') THEN
+      rd_method=1
+    ELSEIF(wwords(2) .EQ. 'flat') THEN
+      rd_method=2
+    ELSEIF(wwords(2) .EQ. 'flat_wds') THEN
+      rd_method=3
+    ELSE
+      WRITE(6,*) 'Error. This is not a valid jfnk solution method -- ',wwords(2),' --'
+      WRITE(6,*) 'Execution will terminate.'
+      STOP
+    END IF
   END SUBROUTINE get_jfnk_method
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_initial_guess(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    IF      ( wwords(2) .EQ. 'yes') THEN
+      inguess_flag=1
+    ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+      inguess_flag=0
+    ELSE
+      WRITE(6,*) 'Error. This is not a valid initial guess option (yes/no) -- ',wwords(2),' --'
+      WRITE(6,*) 'Execution will terminate.'
+      STOP
+    END IF
   END SUBROUTINE get_initial_guess
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_save_restart(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    IF      ( wwords(2) .EQ. 'yes') THEN
+      dump_flag=1
+    ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+      dump_flag=0
+    ELSE
+      WRITE(6,*) 'Error. This is not a valid restart file option (yes/no) -- ',wwords(2),' --'
+      WRITE(6,*) 'Execution will terminate.'
+      STOP
+    END IF
   END SUBROUTINE get_save_restart
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_ipiter(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    INTEGER :: ios
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    READ(wwords(2),'(i10)',iostat=ios) ipow
+    IF(ios.NE.0 ) THEN
+      WRITE(6,*) 'Invalid number of initial power iterations -- '&
+            ,TRIM(wwords(2)),' --'
+      STOP
+    END IF
   END SUBROUTINE get_ipiter
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_print_conv(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    IF      ( wwords(2) .EQ. 'yes') THEN
+      print_conv=1
+    ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+      print_conv=0
+    ELSE
+      WRITE(6,*) 'Error. This is not a valid execution option (yes/no) -- ',wwords(2),' --'
+      WRITE(6,*) 'Execution will terminate.'
+      STOP
+    END IF
   END SUBROUTINE get_print_conv
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_density_factor(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    IF      ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+      dfact_opt = 0
+    ELSE
+      IF      ( wwords(2) .EQ. 'byvolume') THEN
+        dfact_opt = 1
+      ELSE IF ( wwords(2) .EQ. 'fromfile') THEN
+        dfact_opt = 2
+      ELSE
+        WRITE(6,*) 'Error. This is not a valid density factor option &
+              (no/byvolume/fromfile) -- ',wwords(2),' --'
+        WRITE(6,*) 'Execution will terminate.'
+        STOP
+      END IF
+    END IF
   END SUBROUTINE get_density_factor
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_execution(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    IF      ( wwords(2) .EQ. 'yes') THEN
+      execution=1
+    ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+      execution=0
+    ELSE
+      WRITE(6,*) 'Error. This is not a valid execution option (yes/no) -- ',wwords(2),' --'
+      WRITE(6,*) 'Execution will terminate.'
+      STOP
+    END IF
   END SUBROUTINE get_execution
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_mesh_file(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    mesh_filename=TRIM(wwords(2))
   END SUBROUTINE get_mesh_file
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_inflow_file(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    finflow_filename=TRIM(wwords(2))
   END SUBROUTINE get_inflow_file
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_source_file(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    source_filename=TRIM(wwords(2))
   END SUBROUTINE get_source_file
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_flux_file(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    flux_filename=TRIM(wwords(2))
   END SUBROUTINE get_flux_file
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_xs_file(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    cross_section_filename=TRIM(wwords(2))
   END SUBROUTINE get_xs_file
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_density_factor_file(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    dens_fact_filename=TRIM(wwords(2))
   END SUBROUTINE get_density_factor_file
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_quad_file(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    quad_file=TRIM(wwords(2))
   END SUBROUTINE get_quad_file
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_vtk(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    IF( INDEX(wwords(2),'flux') > 0 ) vtk_flux_output=1
+    IF( INDEX(wwords(2),'mat'  ) > 0 ) vtk_mat_output=1
+    IF( INDEX(wwords(2),'reg') > 0 ) vtk_reg_output=1
+    IF( INDEX(wwords(2),'src') > 0 ) vtk_src_output=1
   END SUBROUTINE get_vtk
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_vtk_flux_file(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    vtk_flux_filename=TRIM(wwords(2))
   END SUBROUTINE get_vtk_flux_file
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_vtk_mat_file(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    vtk_mat_filename=TRIM(wwords(2))
   END SUBROUTINE get_vtk_mat_file
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_vtk_reg_file(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    vtk_reg_filename=TRIM(wwords(2))
   END SUBROUTINE get_vtk_reg_file
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_vtk_src_file(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    vtk_src_filename=TRIM(wwords(2))
   END SUBROUTINE get_vtk_src_file
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_restart_file(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    dump_file=TRIM(wwords(2))
   END SUBROUTINE get_restart_file
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_inguess_file(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    inguess_file=TRIM(wwords(2))
   END SUBROUTINE get_inguess_file
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_cartesian_map_file(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    cartesian_map_filename = TRIM(wwords(2))
   END SUBROUTINE get_cartesian_map_file
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_print_xs(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    IF      ( wwords(2) .EQ. 'yes') THEN
+      print_xs_flag=1
+    ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+      print_xs_flag=0
+    ELSE
+      WRITE(6,*) 'Error. This is not a valid cross section print option (yes/no) -- ',wwords(2),' --'
+      WRITE(6,*) 'Execution will terminate.'
+      STOP
+    END IF
   END SUBROUTINE get_print_xs
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_ngroups(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    INTEGER :: ios
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    READ(wwords(2),'(i10)',iostat=ios) egmax
+    IF(ios.NE.0 .OR. egmax<1) THEN
+      WRITE(6,*) 'Invalid number of energy groups in cross section specification -- ',TRIM(wwords(2)),' --'
+      STOP
+    END IF
   END SUBROUTINE get_ngroups
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_pnorder(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    INTEGER :: ios
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    READ(wwords(2),'(i10)',iostat=ios) scatt_ord
+    IF(ios.NE.0 .OR. scatt_ord < 0) THEN
+      WRITE(6,*) 'Invalid scattering expansion in cross section specification -- ',TRIM(wwords(2)),' --'
+      STOP
+    END IF
   END SUBROUTINE get_pnorder
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_pnread(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    INTEGER :: ios
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    READ(wwords(2),'(i10)',iostat=ios) xs_ord
+    IF(ios.NE.0 .OR. xs_ord < 0) THEN
+      WRITE(6,*) 'Invalid cross section expansion in cross section specification -- ',TRIM(wwords(2)),' --'
+      STOP
+    END IF
   END SUBROUTINE get_pnread
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_upscattering(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    IF      ( wwords(2) .EQ. 'yes') THEN
+      upscattering=1
+    ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+      upscattering=0
+    ELSE
+      WRITE(6,*) 'Error. This is not a valid upscattering flag -- ',wwords(2),' --'
+      WRITE(6,*) 'Execution will terminate.'
+      STOP
+    END IF
   END SUBROUTINE get_upscattering
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_multiplying(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    IF      ( wwords(2) .EQ. 'yes') THEN
+      multiplying=1
+    ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+      multiplying=0
+    ELSE
+      WRITE(6,*) 'Error. This is not a valid multiplying flag -- ',wwords(2),' --'
+      WRITE(6,*) 'Execution will terminate.'
+      STOP
+    END IF
   END SUBROUTINE get_multiplying
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_scatt_mult_included(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    IF      ( wwords(2) .EQ. 'yes') THEN
+      scat_mult_flag=1
+    ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+      scat_mult_flag=0
+    ELSE
+      WRITE(6,*) 'Error. This is not a valid scattering multiplier flag -- ',wwords(2),' --'
+      WRITE(6,*) 'Execution will terminate.'
+      STOP
+    END IF
   END SUBROUTINE get_scatt_mult_included
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_qdtype(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    IF      ( wwords(2) .EQ. 'levelsym') THEN
+      quad_tpe=1
+    ELSE IF ( wwords(2) .EQ. 'legcheb') THEN
+      quad_tpe=2
+    ELSE IF ( wwords(2) .EQ. 'fromfile') THEN
+      quad_tpe=3
+    ELSE
+      WRITE(6,*) 'Error. This is not a valid quadrature type -- ',wwords(2),' --'
+      WRITE(6,*) 'Execution will terminate.'
+      STOP
+    END IF
   END SUBROUTINE get_qdtype
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_qdorder(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    INTEGER :: ios
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    READ(wwords(2),'(i10)',iostat=ios) quad_ord
+    IF(ios.NE.0 ) THEN
+      WRITE(6,*) 'Invalid quadrature order -- ',TRIM(wwords(2)),' --'
+      STOP
+    END IF
   END SUBROUTINE get_qdorder
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_cartesian_map(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    STOP 'get_cartesian_map not yet complete'
   END SUBROUTINE get_cartesian_map
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_point_value_locations(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(IN) :: wwords(lp_max)
-    STOP 'thisget not yet complete'
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    STOP 'get_point_value_locations not yet complete'
   END SUBROUTINE get_point_value_locations
 
 END MODULE read_module_current
