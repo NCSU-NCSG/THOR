@@ -47,8 +47,8 @@ SRC :=  \
         quadrature_module.f95							\
         read_cross_section_module.f95			\
         read_inflow_module.f95						\
-        read_module_legacy.f95						\
-        read_module_current.f95						\
+        read_inp_module_legacy.f95				\
+        read_inp_module_current.f95 			\
         read_module.f95										\
         read_source_module.f95						\
         readmesh_module.f95								\
@@ -127,7 +127,7 @@ clean:
 
 #Intended to reset directory to fresh state with no exe or artifacts
 reset: clean
-	rm -f *.gcno *.gcda
+	rm -f *.gcno *.gcda *.o *.mod
 	rm -f -r $(EXE)*.dSYM
 	rm -f ../$(EXE)*
 
@@ -275,10 +275,10 @@ read_inflow_module.o read_inflow_module.mod: read_inflow_module.f95 \
   types.mod parameter_types.mod filename_types.mod multindex_types.mod \
   global_variables.mod termination_module.mod
 
-read_module_legacy.o read_module_legacy.mod: read_module_legacy.f95 \
+read_inp_module_legacy.o read_inp_module_legacy.mod: read_inp_module_legacy.f95 \
   stringmod.mod error_generator.mod global_variables.mod parameter_types.mod
 
-read_module_current.o read_module_current.mod: read_module_current.f95  \
+read_inp_module_current.o read_inp_module_current.mod: read_inp_module_current.f95  \
   stringmod.mod global_variables.mod
 
 read_module.o read_module.mod: read_module.f95  \
@@ -287,7 +287,7 @@ read_module.o read_module.mod: read_module.f95  \
   angle_types.mod multindex_types.mod global_variables.mod \
   read_cross_section_module.mod readmesh_module.mod read_source_module.mod \
   read_inflow_module.mod quadrature_module.mod check_input.mod \
-  termination_module.mod read_module_legacy.mod read_module_current.mod
+  termination_module.mod read_inp_module_legacy.mod read_inp_module_current.mod
 
 read_source_module.o read_source_module.mod: read_source_module.f95 \
   types.mod parameter_types.mod filename_types.mod multindex_types.mod \

@@ -29,8 +29,8 @@ MODULE read_module
   USE quadrature_module
   USE check_input
   USE termination_module
-  USE read_module_legacy
-  USE read_module_current
+  USE read_inp_module_legacy
+  USE read_inp_module_current
 
   IMPLICIT NONE
 

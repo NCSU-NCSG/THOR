@@ -5,7 +5,7 @@
 ! compatibility.
 !
 !***********************************************************************
-MODULE read_module_legacy
+MODULE read_inp_module_legacy
   USE mpi
   USE stringmod
   USE error_generator
@@ -2816,4 +2816,4 @@ CONTAINS
     END IF
   END FUNCTION string_to_int
 
-END MODULE read_module_legacy
+END MODULE read_inp_module_legacy
