@@ -30,7 +30,7 @@ MODULE read_module
   USE check_input
   USE termination_module
   USE read_inp_module_legacy
-  USE read_inp_module_current
+  USE read_inp_module
 
   IMPLICIT NONE
 

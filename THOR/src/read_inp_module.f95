@@ -5,7 +5,7 @@
 ! compatibility.
 !
 !***********************************************************************
-MODULE read_inp_module_current
+MODULE read_inp_module
 
   USE mpi
   USE stringmod
@@ -783,4 +783,4 @@ CONTAINS
     STOP 'get_point_value_locations not yet complete'
   END SUBROUTINE get_point_value_locations
 
-END MODULE read_inp_module_current
+END MODULE read_inp_module
