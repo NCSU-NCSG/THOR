@@ -27,7 +27,7 @@
   page_refl           save
 
 !geometry specifications
-  mesh_file           cube_level1.mesh
+  mesh           cube_level1.mesh
   density_factor      none
 
 !angular quadrature specifications
@@ -35,7 +35,7 @@
   qdorder             12
 
 !cross section specifications
-  xs_file             cube_eigenvalue_1g.xs
+  xs                  cube_eigenvalue_1g.xs
   pnorder             0
   upscattering        yes
   multiplying         yes
@@ -45,13 +45,13 @@
 !output specifications
   restart_out         none
   print_conv          yes
-  flux_output         pi_hard_eig_1grp.flux
+  flux_out            pi_hard_eig_1grp.flux
   vtk_flux_out        none
   vtk_mat_out         none
   vtk_reg_out         yes
   vtk_src_out         none
   cartesian_map_out   none
-  xs_out              none
+  print_xs            no
 
 !misc specifications
   execution           yes

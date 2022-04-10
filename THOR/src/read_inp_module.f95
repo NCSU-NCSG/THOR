@@ -20,7 +20,7 @@ MODULE read_inp_module
 !> The maximum length of a cardname
 INTEGER,PARAMETER :: MAX_CARDNAME_LEN=32
 !> The number of cards we have
-INTEGER,PARAMETER :: num_cards=48
+INTEGER,PARAMETER :: num_cards=42
 !> The maximum length of a line in the input file
 INTEGER,PARAMETER :: ll_max=200
 !(also need to change in interface if changed)
@@ -59,8 +59,8 @@ CONTAINS
     IF(local_unit .NE. 100+rank)STOP 'rank mismatch in input file reading'
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    !setup the card objects, add one to here if you need a new one, make sure to change the number
-    !of cards param as well
+    !setup the card objects, add one to here if you need a new one, make sure to change the total
+    !number of cards param as well
     cards(1)%cname='type'
     cards(1)%getcard => get_type
     cards(2)%cname='keigsolver'
@@ -95,8 +95,8 @@ CONTAINS
     cards(16)%getcard => get_jfnk_method
     cards(17)%cname='initial_guess'
     cards(17)%getcard => get_initial_guess
-    cards(18)%cname='save_restart'
-    cards(18)%getcard => get_save_restart
+    cards(18)%cname='restart_out'
+    cards(18)%getcard => get_restart_out
     cards(19)%cname='ipiter'
     cards(19)%getcard => get_ipiter
     cards(20)%cname='print_conv'
@@ -105,62 +105,51 @@ CONTAINS
     cards(21)%getcard => get_density_factor
     cards(22)%cname='execution'
     cards(22)%getcard => get_execution
-    cards(23)%cname='mesh_file'
-    cards(23)%getcard => get_mesh_file
-    cards(24)%cname='inflow_file'
-    cards(24)%getcard => get_inflow_file
-    cards(25)%cname='source_file'
-    cards(25)%getcard => get_source_file
-    cards(26)%cname='flux_file'
-    cards(26)%getcard => get_flux_file
-    cards(27)%cname='xs_file'
-    cards(27)%getcard => get_xs_file
-    cards(28)%cname='density_factor_file'
-    cards(28)%getcard => get_density_factor_file
-    cards(29)%cname='quad_file'
-    cards(29)%getcard => get_quad_file
-    cards(30)%cname='vtk'
-    cards(30)%getcard => get_vtk
-    cards(31)%cname='vtk_flux_file'
-    cards(31)%getcard => get_vtk_flux_file
-    cards(32)%cname='vtk_mat_file'
-    cards(32)%getcard => get_vtk_mat_file
-    cards(33)%cname='vtk_reg_file'
-    cards(33)%getcard => get_vtk_reg_file
-    cards(34)%cname='vtk_src_file'
-    cards(34)%getcard => get_vtk_src_file
-    cards(35)%cname='restart_file'
-    cards(35)%getcard => get_restart_file
-    cards(36)%cname='inguess_file'
-    cards(36)%getcard => get_inguess_file
-    cards(37)%cname='cartesian_map_file'
-    cards(37)%getcard => get_cartesian_map_file
-    cards(38)%cname='print_xs'
-    cards(38)%getcard => get_print_xs
-    cards(39)%cname='ngroups'
-    cards(39)%getcard => get_ngroups
-    cards(40)%cname='pnorder'
-    cards(40)%getcard => get_pnorder
-    cards(41)%cname='pnread'
-    cards(41)%getcard => get_pnread
-    cards(42)%cname='upscattering'
-    cards(42)%getcard => get_upscattering
-    cards(43)%cname='multiplying'
-    cards(43)%getcard => get_multiplying
-    cards(44)%cname='scatt_mult_included'
-    cards(44)%getcard => get_scatt_mult_included
-    cards(45)%cname='qdtype'
-    cards(45)%getcard => get_qdtype
-    cards(46)%cname='qdorder'
-    cards(46)%getcard => get_qdorder
-    cards(47)%cname='cartesian_map'
-    cards(47)%getcard => get_cartesian_map
-    cards(48)%cname='point_value_locations'
-    cards(48)%getcard => get_point_value_locations
+    cards(23)%cname='mesh'
+    cards(23)%getcard => get_mesh
+    cards(24)%cname='source'
+    cards(24)%getcard => get_source
+    cards(25)%cname='flux_out'
+    cards(25)%getcard => get_flux_out
+    cards(26)%cname='xs'
+    cards(26)%getcard => get_xs
+    cards(27)%cname='vtk_flux_out'
+    cards(27)%getcard => get_vtk_flux_out
+    cards(28)%cname='vtk_mat_out'
+    cards(28)%getcard => get_vtk_mat_out
+    cards(29)%cname='vtk_reg_out'
+    cards(29)%getcard => get_vtk_reg_out
+    cards(30)%cname='vtk_src_out'
+    cards(30)%getcard => get_vtk_src_out
+    cards(31)%cname='cartesian_map_out'
+    cards(31)%getcard => get_cartesian_map_out
+    cards(32)%cname='print_xs'
+    cards(32)%getcard => get_print_xs
+    cards(33)%cname='ngroups'
+    cards(33)%getcard => get_ngroups
+    cards(34)%cname='pnorder'
+    cards(34)%getcard => get_pnorder
+    cards(35)%cname='pnread'
+    cards(35)%getcard => get_pnread
+    cards(36)%cname='upscattering'
+    cards(36)%getcard => get_upscattering
+    cards(37)%cname='multiplying'
+    cards(37)%getcard => get_multiplying
+    cards(38)%cname='scatt_mult_included'
+    cards(38)%getcard => get_scatt_mult_included
+    cards(39)%cname='qdtype'
+    cards(39)%getcard => get_qdtype
+    cards(40)%cname='qdorder'
+    cards(40)%getcard => get_qdorder
+    cards(41)%cname='cartesian_map'
+    cards(41)%getcard => get_cartesian_map
+    cards(42)%cname='point_value_locations'
+    cards(42)%getcard => get_point_value_locations
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     DO
       READ(local_unit,'(A200)',IOSTAT=ios) tchar
+      IF(ios .NE. 0)EXIT
       tchar=TRIM(ADJUSTL(tchar))
       !ignore blank and commented lines
       IF(tchar .NE. '' .AND. tchar(1:1) .NE. '!')THEN
@@ -173,7 +162,10 @@ CONTAINS
           !find the card it belongs to
           DO ic=1,num_cards
             IF(wwords(1) .EQ. cards(ic)%cname)THEN
-              IF(cards(ic)%used)STOP 'duplicate params'
+              IF(cards(ic)%used)THEN
+                WRITE(*,*) 'duplicate params: ',cards(ic)%cname
+                STOP
+              ENDIF
               CALL cards(ic)%getcard(wwords)
               cards(ic)%used=.TRUE.
               EXIT
@@ -185,7 +177,6 @@ CONTAINS
           ENDIF
         ENDDO
       ENDIF
-      IF(ios .NE. 0)EXIT
     ENDDO
     STOP 'inputfile_read not yet complete'
   END SUBROUTINE inputfile_read
@@ -239,15 +230,14 @@ CONTAINS
   SUBROUTINE get_inflow(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    IF(wwords(2).EQ. 'yes') THEN
-      finflow=1
-    ELSEIF(wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+    wwords(2)=TRIM(wwords(2))
+    finflow=1
+    IF(lowercase(wwords(2)) .EQ. 'yes') THEN
+      finflow_filename='finflow.txt'
+    ELSEIF(lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none') THEN
       finflow=0
     ELSE
-      WRITE(6,*) 'Error. This is not a valid inflow flag -- ',wwords(2),' --'
-      WRITE(6,*) 'Execution will terminate.'
-      STOP
+      finflow_filename=wwords(2)
     ENDIF
   END SUBROUTINE get_inflow
 
@@ -431,33 +421,31 @@ CONTAINS
   SUBROUTINE get_initial_guess(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    IF      ( wwords(2) .EQ. 'yes') THEN
-      inguess_flag=1
-    ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+    wwords(2)=TRIM(wwords(2))
+    inguess_flag=1
+    IF      ( lowercase(wwords(2)) .EQ. 'yes') THEN
+      inguess_file='initial_guess.txt'
+    ELSE IF ( lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none') THEN
       inguess_flag=0
     ELSE
-      WRITE(6,*) 'Error. This is not a valid initial guess option (yes/no) -- ',wwords(2),' --'
-      WRITE(6,*) 'Execution will terminate.'
-      STOP
+      inguess_file=wwords(2)
     END IF
   END SUBROUTINE get_initial_guess
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_save_restart(this_card,wwords)
+  SUBROUTINE get_restart_out(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    IF      ( wwords(2) .EQ. 'yes') THEN
-      dump_flag=1
-    ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+    wwords(2)=TRIM(wwords(2))
+    dump_flag=1
+    IF      ( lowercase(wwords(2)) .EQ. 'yes') THEN
+      dump_file='restart.out'
+    ELSE IF ( lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none') THEN
       dump_flag=0
     ELSE
-      WRITE(6,*) 'Error. This is not a valid restart file option (yes/no) -- ',wwords(2),' --'
-      WRITE(6,*) 'Execution will terminate.'
-      STOP
+      dump_file=wwords(2)
     END IF
-  END SUBROUTINE get_save_restart
+  END SUBROUTINE get_restart_out
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_ipiter(this_card,wwords)
@@ -508,6 +496,14 @@ CONTAINS
         STOP
       END IF
     END IF
+    wwords(3)=TRIM(wwords(3))
+    IF(dfact_opt .NE. 0)THEN
+      IF(lowercase(wwords(3)) .NE. '')THEN
+        dens_fact_filename=wwords(3)
+      ELSE
+        dens_fact_filename='density_factor.txt'
+      ENDIF
+    ENDIF
   END SUBROUTINE get_density_factor
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -527,113 +523,117 @@ CONTAINS
   END SUBROUTINE get_execution
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_mesh_file(this_card,wwords)
+  SUBROUTINE get_mesh(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     mesh_filename=TRIM(wwords(2))
-  END SUBROUTINE get_mesh_file
+  END SUBROUTINE get_mesh
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_inflow_file(this_card,wwords)
+  SUBROUTINE get_source(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    finflow_filename=TRIM(wwords(2))
-  END SUBROUTINE get_inflow_file
+    wwords(2)=TRIM(wwords(2))
+    IF      ( lowercase(wwords(2)) .EQ. 'yes') THEN
+      source_filename='source.txt'
+    ELSE IF ( lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none') THEN
+    ELSE
+      source_filename=wwords(2)
+    ENDIF
+  END SUBROUTINE get_source
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_source_file(this_card,wwords)
+  SUBROUTINE get_flux_out(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    source_filename=TRIM(wwords(2))
-  END SUBROUTINE get_source_file
+    wwords(2)=TRIM(wwords(2))
+    IF      ( lowercase(wwords(2)) .EQ. 'yes') THEN
+      flux_filename='flux.out'
+    ELSE IF ( lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none') THEN
+    ELSE
+      flux_filename=wwords(2)
+    ENDIF
+  END SUBROUTINE get_flux_out
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_flux_file(this_card,wwords)
-    CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    flux_filename=TRIM(wwords(2))
-  END SUBROUTINE get_flux_file
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_xs_file(this_card,wwords)
+  SUBROUTINE get_xs(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     cross_section_filename=TRIM(wwords(2))
-  END SUBROUTINE get_xs_file
+  END SUBROUTINE get_xs
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_density_factor_file(this_card,wwords)
+  SUBROUTINE get_vtk_flux_out(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    dens_fact_filename=TRIM(wwords(2))
-  END SUBROUTINE get_density_factor_file
+    vtk_flux_output=1
+    wwords(2)=TRIM(wwords(2))
+    IF(lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none')THEN
+      vtk_flux_output=0
+    ELSEIF(lowercase(wwords(2)) .EQ. 'yes')THEN
+      vtk_flux_filename='vtk_flux.out'
+    ELSE
+      vtk_flux_filename=wwords(2)
+    ENDIF
+  END SUBROUTINE get_vtk_flux_out
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_quad_file(this_card,wwords)
+  SUBROUTINE get_vtk_mat_out(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    quad_file=TRIM(wwords(2))
-  END SUBROUTINE get_quad_file
+    vtk_mat_output=1
+    wwords(2)=TRIM(wwords(2))
+    IF(lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none')THEN
+      vtk_mat_output=0
+    ELSEIF(lowercase(wwords(2)) .EQ. 'yes')THEN
+      vtk_mat_filename='vtk_mat.out'
+    ELSE
+      vtk_mat_filename=wwords(2)
+    ENDIF
+  END SUBROUTINE get_vtk_mat_out
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_vtk(this_card,wwords)
+  SUBROUTINE get_vtk_reg_out(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    IF( INDEX(wwords(2),'flux') > 0 ) vtk_flux_output=1
-    IF( INDEX(wwords(2),'mat'  ) > 0 ) vtk_mat_output=1
-    IF( INDEX(wwords(2),'reg') > 0 ) vtk_reg_output=1
-    IF( INDEX(wwords(2),'src') > 0 ) vtk_src_output=1
-  END SUBROUTINE get_vtk
+    vtk_reg_output=1
+    wwords(2)=TRIM(wwords(2))
+    IF(lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none')THEN
+      vtk_reg_output=0
+    ELSEIF(lowercase(wwords(2)) .EQ. 'yes')THEN
+      vtk_reg_filename='vtk_reg.out'
+    ELSE
+      vtk_reg_filename=wwords(2)
+    ENDIF
+  END SUBROUTINE get_vtk_reg_out
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_vtk_flux_file(this_card,wwords)
+  SUBROUTINE get_vtk_src_out(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    vtk_flux_filename=TRIM(wwords(2))
-  END SUBROUTINE get_vtk_flux_file
+    vtk_src_output=1
+    wwords(2)=TRIM(wwords(2))
+    IF(lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none')THEN
+      vtk_src_output=0
+    ELSEIF(lowercase(wwords(2)) .EQ. 'yes')THEN
+      vtk_src_filename='vtk_src.out'
+    ELSE
+      vtk_src_filename=wwords(2)
+    ENDIF
+  END SUBROUTINE get_vtk_src_out
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_vtk_mat_file(this_card,wwords)
+  SUBROUTINE get_cartesian_map_out(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    vtk_mat_filename=TRIM(wwords(2))
-  END SUBROUTINE get_vtk_mat_file
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_vtk_reg_file(this_card,wwords)
-    CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    vtk_reg_filename=TRIM(wwords(2))
-  END SUBROUTINE get_vtk_reg_file
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_vtk_src_file(this_card,wwords)
-    CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    vtk_src_filename=TRIM(wwords(2))
-  END SUBROUTINE get_vtk_src_file
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_restart_file(this_card,wwords)
-    CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    dump_file=TRIM(wwords(2))
-  END SUBROUTINE get_restart_file
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_inguess_file(this_card,wwords)
-    CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    inguess_file=TRIM(wwords(2))
-  END SUBROUTINE get_inguess_file
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_cartesian_map_file(this_card,wwords)
-    CLASS(cardType),INTENT(INOUT) :: this_card
-    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    cartesian_map_filename = TRIM(wwords(2))
-  END SUBROUTINE get_cartesian_map_file
+    wwords(2)=TRIM(wwords(2))
+    IF      ( lowercase(wwords(2)) .EQ. 'yes') THEN
+      cartesian_map_filename='cartesian_map.out'
+    ELSE IF ( lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none') THEN
+    ELSE
+      cartesian_map_filename=wwords(2)
+    ENDIF
+  END SUBROUTINE get_cartesian_map_out
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_print_xs(this_card,wwords)
@@ -742,17 +742,14 @@ CONTAINS
   SUBROUTINE get_qdtype(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    IF      ( wwords(2) .EQ. 'levelsym') THEN
+    wwords(2)=TRIM(wwords(2))
+    IF      ( lowercase(wwords(2)) .EQ. 'levelsym') THEN
       quad_tpe=1
-    ELSE IF ( wwords(2) .EQ. 'legcheb') THEN
+    ELSE IF ( lowercase(wwords(2)) .EQ. 'legcheb') THEN
       quad_tpe=2
-    ELSE IF ( wwords(2) .EQ. 'fromfile') THEN
-      quad_tpe=3
     ELSE
-      WRITE(6,*) 'Error. This is not a valid quadrature type -- ',wwords(2),' --'
-      WRITE(6,*) 'Execution will terminate.'
-      STOP
+      quad_tpe=3
+      quad_file=wwords(2)
     END IF
   END SUBROUTINE get_qdtype
 
