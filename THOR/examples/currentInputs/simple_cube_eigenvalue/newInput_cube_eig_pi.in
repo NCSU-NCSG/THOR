@@ -53,7 +53,9 @@
   cartesian_map_out   none
   print_xs            no
 
-!reion map specification
+!reion map specification. This can be multiple lines if desired. order is index of region,
+!followed by index of material (based on cross section index). Regions must index from 1 up
+!order doesn't matter
   region_map          1 0
 
 !misc specifications
