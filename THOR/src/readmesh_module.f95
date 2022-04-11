@@ -21,7 +21,7 @@ CONTAINS
   SUBROUTINE read_tetmesh
     !*********************************************************************
     !
-    ! Subroutine reads tetrahedral mesh from CUBIT Exodus II file
+    ! Subroutine reads tetrahedral mesh from THOR mesh file
     !
     !*********************************************************************
 
@@ -32,14 +32,14 @@ CONTAINS
     INTEGER(kind=li), DIMENSION(:), ALLOCATABLE:: cell_temp, face, &
           side_cells_tmp
     REAL(kind=d_t) :: rdummy
-    INTEGER ::rank,mpi_err, localunit
+    INTEGER ::rank,mpi_err, localunit,temp_minreg,temp_maxreg
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
     localunit = rank+100
 
-    ! Set minreg,maxreg
+    ! Set temp_minreg,temp_maxreg
 
-    minreg= 100000_li
-    maxreg=-1_li
+    temp_minreg= 100000_li
+    temp_maxreg=-1_li
 
     ! Open and read mesh file
 
@@ -69,12 +69,28 @@ CONTAINS
     IF(alloc_stat /= 0) CALL stop_thor(2_li)
 
     ! Read cell block property list (region and source composition)
-
     DO i=1, num_cells
       READ(localunit,*) dummy, cells(i)%reg, cells(i)%src
-      IF(cells(i)%reg>maxreg) maxreg=cells(i)%reg
-      IF(cells(i)%reg<minreg) minreg=cells(i)%reg
+      IF(cells(i)%reg>temp_maxreg) temp_maxreg=cells(i)%reg
+      IF(cells(i)%reg<temp_minreg) temp_minreg=cells(i)%reg
     END DO
+
+    IF(minreg .EQ. 100000_li .AND. maxreg .EQ. -1_li)THEN
+      !region map was not found in input file, so assign here
+      maxreg=temp_maxreg
+      minreg=temp_minreg
+      ALLOCATE(reg2mat(minreg:maxreg))
+      DO i=minreg,maxreg
+        reg2mat(i)=i
+      ENDDO
+    ELSE
+      !region map was found in input file, so check that they match
+      IF(temp_maxreg .NE. maxreg .OR. temp_minreg .NE. minreg)THEN
+        WRITE(*,*)'Error: Min index in input file',minreg,'min index in mesh',temp_minreg
+        WRITE(*,*)'Error: Max index in input file',maxreg,'max index in mesh',temp_maxreg
+        STOP 'Region map in input file and regions in mesh file do not match! Be sure to index from 1'
+      ENDIF
+    ENDIF
 
     ! Read vertices to cell mapping
 

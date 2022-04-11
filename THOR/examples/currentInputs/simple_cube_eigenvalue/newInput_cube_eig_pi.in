@@ -1,0 +1,62 @@
+!THOR input format version 1.0.
+!Lines starting with an exclamation point, !, and blank lines will be ignored.
+!Whitespace is necessary between parameters and param values but is otherwise ignored.
+!Do not put more than 200 characters into any single line, otherwise they will be ignored.
+!Parameters are separated either with new lines (make sure your line endings for your file are UNIX
+!   line endings! NOT Windows or Mac) or separated with semicolons, ;.
+!When a parameter is specified it is assumed that the next set of values will be for that parameter,
+!   including values on the next line, until all needed values are read.
+!So do NOT specify a parameter name without immediately giving it a value.
+!Other than that, parameter order does not matter
+!Almost all parameters have a default that can be found in the User Manual.
+
+!solver specifications
+  type                keig
+  keigsolver          pi
+  lambda              0
+  piacc               none
+  kconv               1E-8
+  innerconv           1E-12
+  outerconv           1E-7
+  maxinner            2
+  maxouter            5000
+  initial_guess       no
+
+!sweeper specifications
+  page_sweep          no
+  page_refl           save
+
+!geometry specifications
+  mesh                cube_level1.mesh
+  density_factor      none
+
+!angular quadrature specifications
+  qdtype              levelsym
+  qdorder             12
+
+!cross section specifications
+  xs                  newInput_cube_eigenvalue_1g.xs
+  pnorder             0
+  upscattering        yes
+  multiplying         yes
+  scatt_mult_included no
+  !TODO figure out if I need ngroups, pnread, scatt_mult_included, or if I can just compute it from the file
+
+!output specifications
+  restart_out         none
+  print_conv          yes
+  flux_out            pi_hard_eig_1grp.flux
+  vtk_flux_out        none
+  vtk_mat_out         none
+  vtk_reg_out         none
+  vtk_src_out         none
+  cartesian_map_out   none
+  print_xs            no
+
+!reion map specification. This can be multiple lines if desired. order is index of region,
+!followed by index of material (based on cross section index). Regions must index from 1 up
+!order doesn't matter
+  region_map          1 0
+
+!misc specifications
+  execution           yes
