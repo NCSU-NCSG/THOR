@@ -283,6 +283,9 @@ CONTAINS
       sanity_check = .FALSE.
     END DO
 
+    minreg= 100000_li
+    maxreg=-1_li
+
   END SUBROUTINE yaml_read
 
   !===============================================================================
@@ -2063,9 +2066,8 @@ CONTAINS
     END IF
   END SUBROUTINE yaml_input_flag_generic
 
-  SUBROUTINE legacyv1_read(localunit,regmap)
+  SUBROUTINE legacyv1_read(localunit)
     INTEGER,INTENT(IN) :: localunit
-    CHARACTER(100000),INTENT(OUT) :: regmap
     !***********************************************************************
     !
     ! This subroutine reads the standard input file
@@ -2076,15 +2078,20 @@ CONTAINS
 
     CHARACTER(100) :: buffer, fname, tchar
     LOGICAL :: done
-    INTEGER :: i, rank,mpi_err,ios,legacyv
+    INTEGER :: i, rank,mpi_err,ios,legacyv,nwords
+    CHARACTER(100000) :: regmap
+    CHARACTER(10) :: words(25000)
+    !get rank
     CALL GET_COMMAND_ARGUMENT(1,fname)
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    IF(localunit .NE. 100+rank)STOP 'rank mismatch in input file reading'
     ! read title
     READ(localunit,*) jobname
 
     ! main read loop
 
     done = .FALSE.
+    regmap=""
     DO WHILE(done .EQV. .FALSE.)
 
       READ(localunit,101,END=999) buffer
@@ -2109,6 +2116,17 @@ CONTAINS
 999 CONTINUE
 
 101 FORMAT(A100)
+
+    ! Read reg2mat
+    minreg= 100000_li
+    maxreg=-1_li
+    IF(regmap .NE. "")THEN
+      CALL parse(regmap," ",words,nwords)
+      minreg=1
+      maxreg=nwords
+      ALLOCATE(reg2mat(minreg:maxreg))
+      READ(regmap,*) (reg2mat(i),i=minreg,maxreg)
+    ENDIF
 
   END SUBROUTINE legacyv1_read
 
@@ -2139,7 +2157,7 @@ CONTAINS
       ELSE
         l      = LEN(TRIM(regmap))
         lr     = LEN(TRIM(line))
-        regmap(l+1:l+1+lr) = TRIM(line)
+        regmap(l+2:l+2+lr) = TRIM(line)
       END IF
     END DO
 

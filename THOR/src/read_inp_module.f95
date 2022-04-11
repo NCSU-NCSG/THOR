@@ -1,8 +1,6 @@
 !***********************************************************************
 !
-! The module contains all legacy subroutines for old yaml_input versions. These
-! subroutines should generally not be changed to garauntee backwards
-! compatibility.
+! The module contains all current subroutines for input file reading
 !
 !***********************************************************************
 MODULE read_inp_module
@@ -20,7 +18,7 @@ MODULE read_inp_module
 !> The maximum length of a cardname
 INTEGER,PARAMETER :: MAX_CARDNAME_LEN=32
 !> The number of cards we have
-INTEGER,PARAMETER :: num_cards=42
+INTEGER,PARAMETER :: num_cards=43
 !> The maximum length of a line in the input file
 INTEGER,PARAMETER :: ll_max=200
 !(also need to change in interface if changed)
@@ -145,7 +143,12 @@ CONTAINS
     cards(41)%getcard => get_cartesian_map
     cards(42)%cname='point_value_locations'
     cards(42)%getcard => get_point_value_locations
+    cards(42)%cname='region_map'
+    cards(42)%getcard => get_region_map
+    !end of input cards
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    minreg= 100000_li
+    maxreg=-1_li
 
     DO
       READ(local_unit,'(A200)',IOSTAT=ios) tchar
@@ -178,7 +181,6 @@ CONTAINS
         ENDDO
       ENDIF
     ENDDO
-    STOP 'inputfile_read not yet complete'
   END SUBROUTINE inputfile_read
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -248,7 +250,7 @@ CONTAINS
     wwords(2)=TRIM(lowercase(wwords(2)))
     IF(wwords(2) .EQ. 'errmode') THEN
       outer_acc=2
-    ELSEIF(wwords(2) .EQ. 'none') THEN
+    ELSEIF(wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
       outer_acc=1
     ELSE
       WRITE(6,*) 'Error. This is not a valid acceleration option for PI -- ',wwords(2),' --'
@@ -628,6 +630,7 @@ CONTAINS
     IF      ( lowercase(wwords(2)) .EQ. 'yes') THEN
       !do nothing, default
     ELSE IF ( lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none') THEN
+      glob_do_cartesian_mesh = .FALSE.
     ELSE
       cartesian_map_filename=wwords(2)
     ENDIF
@@ -821,6 +824,69 @@ CONTAINS
       END DO
     END IF
   END SUBROUTINE get_point_value_locations
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  SUBROUTINE get_region_map(this_card,wwords)
+    CLASS(cardType),INTENT(INOUT) :: this_card
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+    CHARACTER(100000) :: regmap
+    CHARACTER(200) :: line
+    CHARACTER(MAX_CARDNAME_LEN) :: words(200)
+    INTEGER :: rank,mpi_err,local_unit,i,l,lr,nwords,ios
+    INTEGER,ALLOCATABLE :: tempintarray(:)
+    CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+    local_unit=rank+100
+
+    regmap=""
+    !get any region map info on the same line
+    DO i=2,lp_max
+      wwords(i)=ADJUSTL(TRIM(wwords(i)))
+      IF(wwords(i) .EQ. "")EXIT
+      l      = LEN(TRIM(regmap))
+      lr     = LEN(TRIM(wwords(i)))
+      regmap(l+2:l+2+lr) = TRIM(wwords(i))
+    ENDDO
+    !get any region map info on subsequent lines
+    D1: DO
+      READ(local_unit,'(A200)',IOSTAT=ios)line
+      IF(ios .NE. 0)EXIT
+      line=TRIM(ADJUSTL(line))
+      IF(line .NE. '' .AND. line(1:1) .NE. '!')THEN
+        CALL parse(line," ",words,nwords)
+        words(1)=TRIM(ADJUSTL(words(1)))
+        !make sure we're not onto the next param
+        DO i=1,num_cards
+          IF(words(1).EQ. cards(i)%cname)THEN
+            BACKSPACE(local_unit)
+            EXIT D1
+          ENDIF
+        ENDDO
+        !if it didn't exit, then it's legit input
+        DO i=1,nwords
+          words(i)=TRIM(ADJUSTL(words(i)))
+          l      = LEN(TRIM(regmap))
+          lr     = LEN(TRIM(words(i)))
+          regmap(l+2:l+2+lr) = TRIM(words(i))
+        ENDDO
+      ENDIF
+    ENDDO D1
+    regmap=TRIM(ADJUSTL(regmap))
+    CALL parse(regmap," ",words,nwords)
+    ALLOCATE(tempintarray(nwords))
+    READ(regmap,*)(tempintarray(i),i=1,nwords)
+    !odd indexed are the actual region indeces
+    DO i=1,nwords,2
+      IF(tempintarray(i) .GE. maxreg)maxreg=tempintarray(i)
+      IF(tempintarray(i) .LE. minreg)minreg=tempintarray(i)
+    ENDDO
+    IF(ABS(nwords-2*(maxreg-minreg+1)) .GT. 0) &
+      STOP "region map bounds and number of entries don't match"
+    ALLOCATE(reg2mat(minreg:maxreg))
+    !assign region mapping
+    DO i=1,nwords,2
+      reg2mat(tempintarray(i))=tempintarray(i+1)
+    ENDDO
+  END SUBROUTINE get_region_map
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   INTEGER(kind=li) FUNCTION string_to_int(string, msg, min_int)

@@ -386,63 +386,59 @@ CONTAINS
 
     ! Set the input default
 
-    execution               = 1
-    problem                 = 1
-    space_ord               = 0
-    finflow                 = 0
-    outer_acc               = 1
-    sweep_tpe               = 1
-    page_sweep              = 0
-    page_refl               = 0
-    page_iflw               = 0
-    max_outer               = 5
-    max_inner               = 10
-    inner_conv              = 1.0E-4_d_t
-    outer_conv              = 1.0E-3_d_t
-    k_conv                  = 1.0E-4_d_t
-    eig_switch              = 0
-    rd_restart              = 25
-    rd_max_kit              = 250
-    rd_method               = 2
-    inguess_flag            = 0
-    dump_flag               = 0
-    ipow                    = 0
-    print_conv              = 0
-    dfact_opt               = 0
-
-    source_filename         = "source.dat"
-    finflow_filename        = "finflow.dat"
-    cross_section_filename  = "xs.dat"
-    mesh_filename           = "mesh.thrm"
-    flux_filename           = "flux.out"
-    vtk_flux_filename       = "flux.vtk"
-    quad_file               = "quad.dat"
-    dump_file               = "restart.out"
-    inguess_file            = "initial_guess.dat"
-    vtk_mat_filename        = "mat.vtk"
-    vtk_reg_filename        = "reg.vtk"
-    vtk_src_filename        = "src.vtk"
-    dens_fact_filename      = "density_factor.dat"
-    print_xs_flag           = 0
-    vtk_flux_output         = 0
-    vtk_reg_output          = 0
-    vtk_mat_output          = 0
-    vtk_src_output          = 0
-
-    quad_ord                = 4
-    quad_tpe                = 1
-
-    egmax                   = 1
-    scatt_ord               = 0
-    xs_ord                  = 0
-    upscattering            = 1
-    multiplying             = 1
-    scat_mult_flag          = 0
-
-    glob_do_cartesian_mesh = .FALSE.
-    cartesian_map_filename = "cartesian_map.out"
-
+    problem                     = 1
+    eig_switch                  = 0
+    space_ord                   = 0
+    finflow                     = 0
+    finflow_filename            = "finflow.dat"
+    outer_acc                   = 1
+    page_sweep                  = 0
+    page_refl                   = 0
+    page_iflw                   = 0
+    k_conv                      = 1.0E-4_d_t
+    inner_conv                  = 1.0E-4_d_t
+    outer_conv                  = 1.0E-3_d_t
+    max_inner                   = 10
+    max_outer                   = 100
+    rd_restart                  = 25
+    rd_max_kit                  = 250
+    rd_method                   = 2
+    inguess_flag                = 0
+    inguess_file                = "initial_guess.dat"
+    dump_flag                   = 0
+    dump_file                   = "restart.out"
+    ipow                        = 0
+    print_conv                  = 0
+    dfact_opt                   = 0
+    dens_fact_filename          = "density_factor.dat"
+    execution                   = 1
+    mesh_filename               = "mesh.thrm"
+    source_filename             = "source.dat"
+    flux_filename               = "flux.out"
+    cross_section_filename      = "xs.dat"
+    vtk_flux_output             = 0
+    vtk_flux_filename           = "flux.vtk"
+    vtk_mat_output              = 0
+    vtk_mat_filename            = "mat.vtk"
+    vtk_reg_output              = 0
+    vtk_reg_filename            = "reg.vtk"
+    vtk_src_output              = 0
+    vtk_src_filename            = "src.vtk"
+    glob_do_cartesian_mesh      = .FALSE.
+    cartesian_map_filename      = "cartesian_map.out"
+    print_xs_flag               = 0
+    egmax                       = 1
+    scatt_ord                   = 0
+    xs_ord                      = 0
+    upscattering                = 1
+    multiplying                 = 1
+    scat_mult_flag              = 0
+    quad_tpe                    = 1
+    quad_file                   = "quad.dat"
+    quad_ord                    = 4
     number_point_flux_locations = 0_li
+    !only 1 sweep type right now and so not an input
+    sweep_tpe                   = 1
 
   END SUBROUTINE set_default
 
@@ -602,7 +598,6 @@ CONTAINS
     ! local variables
 
     CHARACTER(100) :: fname, tchar
-    CHARACTER(100000) :: regmap
     INTEGER :: i,rank,mpi_err,localunit,ios,legacyv
     CALL GET_COMMAND_ARGUMENT(1,fname)
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
@@ -634,7 +629,7 @@ CONTAINS
         CALL yaml_read(localunit)
       CASE(1)
         !original THOR input version, for backwards compatibility
-        CALL legacyv1_read(localunit,regmap)
+        CALL legacyv1_read(localunit)
       CASE(0)
         !current THOR input format
         CALL inputfile_read(localunit)
@@ -646,14 +641,6 @@ CONTAINS
 
     ! Call read_mesh to read tetrahedral mesh file
     CALL read_tetmesh
-
-    ! Read reg2mat
-    ALLOCATE(reg2mat(minreg:maxreg))
-    IF(fname(LEN(TRIM(fname))-4: LEN(TRIM(fname))) .EQ. ".yaml") THEN
-      reg2mat(0)=1
-    ELSE
-      READ(regmap,*) (reg2mat(i),i=minreg,maxreg)
-    END IF
 
   END SUBROUTINE read_input
 
