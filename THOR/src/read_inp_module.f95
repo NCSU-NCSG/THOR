@@ -233,7 +233,7 @@ CONTAINS
     wwords(2)=TRIM(wwords(2))
     finflow=1
     IF(lowercase(wwords(2)) .EQ. 'yes') THEN
-      finflow_filename='finflow.txt'
+      !do nothing, default filename
     ELSEIF(lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none') THEN
       finflow=0
     ELSE
@@ -424,7 +424,7 @@ CONTAINS
     wwords(2)=TRIM(wwords(2))
     inguess_flag=1
     IF      ( lowercase(wwords(2)) .EQ. 'yes') THEN
-      inguess_file='initial_guess.txt'
+      !do nothing, default
     ELSE IF ( lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none') THEN
       inguess_flag=0
     ELSE
@@ -439,7 +439,7 @@ CONTAINS
     wwords(2)=TRIM(wwords(2))
     dump_flag=1
     IF      ( lowercase(wwords(2)) .EQ. 'yes') THEN
-      dump_file='restart.out'
+      !do nothing, default
     ELSE IF ( lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none') THEN
       dump_flag=0
     ELSE
@@ -500,8 +500,6 @@ CONTAINS
     IF(dfact_opt .NE. 0)THEN
       IF(lowercase(wwords(3)) .NE. '')THEN
         dens_fact_filename=wwords(3)
-      ELSE
-        dens_fact_filename='density_factor.txt'
       ENDIF
     ENDIF
   END SUBROUTINE get_density_factor
@@ -535,7 +533,7 @@ CONTAINS
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     wwords(2)=TRIM(wwords(2))
     IF      ( lowercase(wwords(2)) .EQ. 'yes') THEN
-      source_filename='source.txt'
+      !do nothing, default
     ELSE IF ( lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none') THEN
     ELSE
       source_filename=wwords(2)
@@ -548,7 +546,7 @@ CONTAINS
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     wwords(2)=TRIM(wwords(2))
     IF      ( lowercase(wwords(2)) .EQ. 'yes') THEN
-      flux_filename='flux.out'
+      !do nothing, default
     ELSE IF ( lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none') THEN
     ELSE
       flux_filename=wwords(2)
@@ -571,7 +569,7 @@ CONTAINS
     IF(lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none')THEN
       vtk_flux_output=0
     ELSEIF(lowercase(wwords(2)) .EQ. 'yes')THEN
-      vtk_flux_filename='vtk_flux.out'
+      !do nothing, default
     ELSE
       vtk_flux_filename=wwords(2)
     ENDIF
@@ -586,7 +584,7 @@ CONTAINS
     IF(lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none')THEN
       vtk_mat_output=0
     ELSEIF(lowercase(wwords(2)) .EQ. 'yes')THEN
-      vtk_mat_filename='vtk_mat.out'
+      !do nothing, default
     ELSE
       vtk_mat_filename=wwords(2)
     ENDIF
@@ -601,7 +599,7 @@ CONTAINS
     IF(lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none')THEN
       vtk_reg_output=0
     ELSEIF(lowercase(wwords(2)) .EQ. 'yes')THEN
-      vtk_reg_filename='vtk_reg.out'
+      !do nothing, default
     ELSE
       vtk_reg_filename=wwords(2)
     ENDIF
@@ -616,7 +614,7 @@ CONTAINS
     IF(lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none')THEN
       vtk_src_output=0
     ELSEIF(lowercase(wwords(2)) .EQ. 'yes')THEN
-      vtk_src_filename='vtk_src.out'
+      !do nothing, default
     ELSE
       vtk_src_filename=wwords(2)
     ENDIF
@@ -628,7 +626,7 @@ CONTAINS
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     wwords(2)=TRIM(wwords(2))
     IF      ( lowercase(wwords(2)) .EQ. 'yes') THEN
-      cartesian_map_filename='cartesian_map.out'
+      !do nothing, default
     ELSE IF ( lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none') THEN
     ELSE
       cartesian_map_filename=wwords(2)
@@ -770,14 +768,88 @@ CONTAINS
   SUBROUTINE get_cartesian_map(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    STOP 'get_cartesian_map not yet complete'
+    INTEGER :: nwwwords
+    CHARACTER(ll_max) :: wwwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    glob_do_cartesian_mesh = .TRUE.
+    ! wwords must be an array with of length 9
+    CALL parse(wwords(2), " ", wwwords, nwwwords)
+    IF (nwwwords .NE. 9) THEN
+      WRITE(6,*) 'Following cartesian map nine entries are required; Found: ',&
+            TRIM(wwords(2)),' has ', nwwwords, ' entries.'
+    END IF
+    glob_cmap_min_x = string_to_real(wwwords(1), 'Conversion to cartesian map xmin failed')
+    glob_cmap_max_x = string_to_real(wwwords(2), 'Conversion to cartesian map xmax failed')
+    IF (ABS(glob_cmap_max_x - glob_cmap_min_x) < small_real) THEN
+      WRITE(6, *) "cartesian_map xmin and xmax are too close to each other"
+    END IF
+    glob_cmap_nx = string_to_int(wwwords(3), 'Conversion to cartesian map nx failed', 1)
+    glob_cmap_min_y = string_to_real(wwwords(4), 'Conversion to cartesian map ymin failed')
+    glob_cmap_max_y = string_to_real(wwwords(5), 'Conversion to cartesian map ymax failed')
+    IF (ABS(glob_cmap_max_y - glob_cmap_min_y) < small_real) THEN
+      WRITE(6, *) "cartesian_map xmin and xmax are too close to each other"
+    END IF
+    glob_cmap_ny = string_to_int(wwwords(6), 'Conversion to cartesian map ny failed', 1)
+    glob_cmap_min_z = string_to_real(wwwords(7), 'Conversion to cartesian map zmin failed')
+    glob_cmap_max_z = string_to_real(wwwords(8), 'Conversion to cartesian map zmax failed')
+    IF (ABS(glob_cmap_max_z - glob_cmap_min_z) < small_real) THEN
+      WRITE(6, *) "cartesian_map zmin and zmax are too close to each other"
+    END IF
+    glob_cmap_nz = string_to_int(wwwords(9), 'Conversion to cartesian map nz failed', 1)
   END SUBROUTINE get_cartesian_map
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_point_value_locations(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    STOP 'get_point_value_locations not yet complete'
+    INTEGER :: nwwwords,j,l
+    CHARACTER(ll_max) :: wwwords(lp_max)
+    wwords(2)=TRIM(lowercase(wwords(2)))
+    CALL parse(wwords(2), " ", wwwords, nwwwords)
+    ! must be divisible by 3
+    IF (modulo(nwwwords, 3) .ne. 0) THEN
+      WRITE(6,*) 'point_value_locations number of entries must be divisible by 3; Found: ',&
+            TRIM(wwords(2)),' has ', nwwwords, ' entries.'
+    ELSE
+      number_point_flux_locations = nwwwords / 3
+      ALLOCATE(point_flux_locations(number_point_flux_locations, 3))
+      DO l = 1, number_point_flux_locations
+        DO j = 1, 3
+          point_flux_locations(l, j) = string_to_real(wwwords((l - 1) * 3 + j),&
+            'Conversion to point flux location failed')
+        END DO
+      END DO
+    END IF
   END SUBROUTINE get_point_value_locations
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  INTEGER(kind=li) FUNCTION string_to_int(string, msg, min_int)
+    CHARACTER(lp_max), INTENT(in) :: string
+    CHARACTER(100), INTENT(in) :: msg
+    INTEGER(kind=li), OPTIONAL, INTENT(inout) :: min_int
+
+    INTEGER(kind=li) :: ios
+
+    IF (.NOT. PRESENT(min_int)) min_int = -glob_max_int
+    READ(string, '(i10)', iostat=ios) string_to_int
+    IF(ios .NE. 0 .OR. string_to_int < min_int) THEN
+      WRITE(6,*) TRIM(msg), TRIM(string)
+      STOP
+    END IF
+  END FUNCTION string_to_int
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  REAL(kind=d_t) FUNCTION string_to_real(string, msg)
+    CHARACTER(lp_max), INTENT(in) :: string
+    CHARACTER(lp_max), INTENT(in) :: msg
+
+    INTEGER(kind=li) :: ios
+
+    READ(string, *, iostat=ios) string_to_real
+    IF(ios .NE. 0) THEN
+      WRITE(6,*) TRIM(msg), TRIM(string)
+      STOP
+    END IF
+  END FUNCTION string_to_real
 
 END MODULE read_inp_module

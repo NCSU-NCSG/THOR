@@ -2231,7 +2231,7 @@ CONTAINS
         DO i=1,nwords
           CALL parse(words(i),"=",wwords,nwwords)
           IF(nwwords .EQ. 2) THEN
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'qdtype'
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'cartesian_map'
             IF( TRIM(lowercase(wwords(1))) .EQ. 'cartesian_map' ) THEN
               wwords(2)=TRIM(lowercase(wwords(2)))
               glob_do_cartesian_mesh = .TRUE.
@@ -2259,6 +2259,7 @@ CONTAINS
                 WRITE(6, *) "cartesian_map zmin and zmax are too close to each other"
               END IF
               glob_cmap_nz = string_to_int(wwwords(9), 'Conversion to cartesian map nz failed', 1)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'point_value_locations'
             ELSE IF ( TRIM(lowercase(wwords(1))) .EQ. 'point_value_locations' ) THEN
               wwords(2)=TRIM(lowercase(wwords(2)))
               CALL parse(wwords(2), " ", wwwords, nwwwords)
@@ -2788,19 +2789,6 @@ CONTAINS
 101 FORMAT(A100)
   END SUBROUTINE legacyv1_read_problem
 
-  REAL(kind=d_t) FUNCTION string_to_real(string, msg)
-    CHARACTER(100), INTENT(in) :: string
-    CHARACTER(100), INTENT(in) :: msg
-
-    INTEGER(kind=li) :: ios
-
-    READ(string, *, iostat=ios) string_to_real
-    IF(ios .NE. 0) THEN
-      WRITE(6,*) TRIM(msg), TRIM(string)
-      STOP
-    END IF
-  END FUNCTION string_to_real
-
   INTEGER(kind=li) FUNCTION string_to_int(string, msg, min_int)
     CHARACTER(100), INTENT(in) :: string
     CHARACTER(100), INTENT(in) :: msg
@@ -2815,5 +2803,18 @@ CONTAINS
       STOP
     END IF
   END FUNCTION string_to_int
+
+  REAL(kind=d_t) FUNCTION string_to_real(string, msg)
+    CHARACTER(100), INTENT(in) :: string
+    CHARACTER(100), INTENT(in) :: msg
+
+    INTEGER(kind=li) :: ios
+
+    READ(string, *, iostat=ios) string_to_real
+    IF(ios .NE. 0) THEN
+      WRITE(6,*) TRIM(msg), TRIM(string)
+      STOP
+    END IF
+  END FUNCTION string_to_real
 
 END MODULE read_inp_module_legacy

@@ -27,7 +27,7 @@
   page_refl           save
 
 !geometry specifications
-  mesh           cube_level1.mesh
+  mesh                cube_level1.mesh
   density_factor      none
 
 !angular quadrature specifications

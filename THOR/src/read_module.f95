@@ -386,61 +386,61 @@ CONTAINS
 
     ! Set the input default
 
-    execution = 1
-    problem   = 1
-    space_ord = 0
-    finflow   = 0
-    outer_acc = 1
-    sweep_tpe = 1
-    page_sweep= 0
-    page_refl = 0
-    page_iflw = 0
-    max_outer = 5
-    max_inner = 10
-    inner_conv= 1.0E-4_d_t
-    outer_conv= 1.0E-3_d_t
-    k_conv    = 1.0E-4_d_t
-    eig_switch= 0
-    rd_restart= 25
-    rd_max_kit= 250
-    rd_method = 2
-    inguess_flag =0
-    dump_flag    =0
-    ipow         =0
-    print_conv   =0
-    dfact_opt    =0
+    execution               = 1
+    problem                 = 1
+    space_ord               = 0
+    finflow                 = 0
+    outer_acc               = 1
+    sweep_tpe               = 1
+    page_sweep              = 0
+    page_refl               = 0
+    page_iflw               = 0
+    max_outer               = 5
+    max_inner               = 10
+    inner_conv              = 1.0E-4_d_t
+    outer_conv              = 1.0E-3_d_t
+    k_conv                  = 1.0E-4_d_t
+    eig_switch              = 0
+    rd_restart              = 25
+    rd_max_kit              = 250
+    rd_method               = 2
+    inguess_flag            = 0
+    dump_flag               = 0
+    ipow                    = 0
+    print_conv              = 0
+    dfact_opt               = 0
 
-    source_filename        = "file.src"
-    finflow_filename       = "file.bc"
-    cross_section_filename = "file.xs"
-    mesh_filename          = "file.mesh"
-    flux_filename          = "file.flux"
-    vtk_flux_filename      = "flux.vtk"
-    quad_file              = "file.quad"
-    dump_file              = "restart"
-    inguess_file           = "inguess"
-    vtk_mat_filename       = "mat.vtk"
-    vtk_reg_filename       = "reg.vtk"
-    vtk_src_filename       = "src.vtk"
-    dens_fact_filename     = "density_factors.dat"
-    print_xs_flag          = 1
-    vtk_flux_output        = 0
-    vtk_reg_output         = 0
-    vtk_mat_output         = 0
-    vtk_src_output         = 0
+    source_filename         = "source.dat"
+    finflow_filename        = "finflow.dat"
+    cross_section_filename  = "xs.dat"
+    mesh_filename           = "mesh.thrm"
+    flux_filename           = "flux.out"
+    vtk_flux_filename       = "flux.vtk"
+    quad_file               = "quad.dat"
+    dump_file               = "restart.out"
+    inguess_file            = "initial_guess.dat"
+    vtk_mat_filename        = "mat.vtk"
+    vtk_reg_filename        = "reg.vtk"
+    vtk_src_filename        = "src.vtk"
+    dens_fact_filename      = "density_factor.dat"
+    print_xs_flag           = 0
+    vtk_flux_output         = 0
+    vtk_reg_output          = 0
+    vtk_mat_output          = 0
+    vtk_src_output          = 0
 
-    quad_ord = 4
-    quad_tpe = 1
+    quad_ord                = 4
+    quad_tpe                = 1
 
-    egmax = 1
-    scatt_ord = 0
-    xs_ord    = 0
-    upscattering = 1
-    multiplying  = 1
-    scat_mult_flag=0
+    egmax                   = 1
+    scatt_ord               = 0
+    xs_ord                  = 0
+    upscattering            = 1
+    multiplying             = 1
+    scat_mult_flag          = 0
 
     glob_do_cartesian_mesh = .FALSE.
-    cartesian_map_filename = "cartesian_map_output.dat"
+    cartesian_map_filename = "cartesian_map.out"
 
     number_point_flux_locations = 0_li
 
@@ -645,7 +645,6 @@ CONTAINS
     CLOSE(localunit)
 
     ! Call read_mesh to read tetrahedral mesh file
-
     CALL read_tetmesh
 
     ! Read reg2mat
