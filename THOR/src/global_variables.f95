@@ -65,10 +65,11 @@ MODULE global_variables
   ! Cross Sections
 
   TYPE(cross_section_mat), DIMENSION(:)      , ALLOCATABLE :: xs_mat
-  TYPE(cross_section)    , DIMENSION(:,:)    , ALLOCATABLE :: chi,eg_bounds, fiss, nu, sigma_t
+  TYPE(cross_section)    , DIMENSION(:,:)    , ALLOCATABLE :: chi, fiss, nu, sigma_t
   TYPE(cross_section)    , DIMENSION(:,:)    , ALLOCATABLE :: tsigs
   TYPE(cross_section)    , DIMENSION(:,:,:,:), ALLOCATABLE :: sigma_scat
   CHARACTER(64)          , DIMENSION(:)      , ALLOCATABLE :: mat_name
+  REAL(kind=d_t),ALLOCATABLE :: eg_bounds(:)
 
   ! Geometry types
 
