@@ -25,6 +25,8 @@ INTEGER,PARAMETER :: ll_max=200
 !> The maximum number of params on a given line or inputs for a param
 INTEGER,PARAMETER :: lp_max=100
 !(also need to change in interface if changed)
+!> The local unit for the input file
+INTEGER :: local_unit
 
 TYPE :: cardType
   !character name of the card
@@ -48,13 +50,14 @@ ENDINTERFACE
 
 CONTAINS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE inputfile_read(local_unit)
-    INTEGER, INTENT(IN) :: local_unit
+  SUBROUTINE inputfile_read(localunit)
+    INTEGER, INTENT(IN) :: localunit
     CHARACTER(ll_max) :: tchar
     CHARACTER(ll_max) :: words(lp_max),wwords(lp_max)
     INTEGER :: ios,rank,mpi_err,nwords,nwwords,iw,iww,ic
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
-    IF(local_unit .NE. 100+rank)STOP 'rank mismatch in input file reading'
+    IF(localunit .NE. 100+rank)STOP 'rank mismatch in input file reading'
+    local_unit=localunit
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !setup the card objects, add one to here if you need a new one, make sure to change the total
@@ -151,35 +154,31 @@ CONTAINS
     maxreg=-1_li
 
     DO
-      READ(local_unit,'(A200)',IOSTAT=ios) tchar
+      CALL get_next_line(tchar,ios)
       IF(ios .NE. 0)EXIT
-      tchar=TRIM(ADJUSTL(tchar))
-      !ignore blank and commented lines
-      IF(tchar .NE. '' .AND. tchar(1:1) .NE. '!')THEN
-        CALL parse(tchar,";",words,nwords)
-        !loop over inputs on a line
-        DO iw=1,nwords
-          words(iw)=TRIM(ADJUSTL(words(iw)))
-          CALL parse(words(iw)," ",wwords,nwwords)
-          wwords(1)=TRIM(ADJUSTL(lowercase(wwords(1))))
-          !find the card it belongs to
-          DO ic=1,num_cards
-            IF(wwords(1) .EQ. cards(ic)%cname)THEN
-              IF(cards(ic)%used)THEN
-                WRITE(*,*) 'duplicate params: ',cards(ic)%cname
-                STOP
-              ENDIF
-              CALL cards(ic)%getcard(wwords)
-              cards(ic)%used=.TRUE.
-              EXIT
+      CALL parse(tchar,";",words,nwords)
+      !loop over inputs on a line
+      DO iw=1,nwords
+        words(iw)=TRIM(ADJUSTL(words(iw)))
+        CALL parse(words(iw)," ",wwords,nwwords)
+        wwords(1)=TRIM(ADJUSTL(lowercase(wwords(1))))
+        !find the card it belongs to
+        DO ic=1,num_cards
+          IF(wwords(1) .EQ. cards(ic)%cname)THEN
+            IF(cards(ic)%used)THEN
+              WRITE(*,*) 'duplicate params: ',cards(ic)%cname
+              STOP
             ENDIF
-          ENDDO
-          IF(ic .GE. num_cards+1)THEN
-            IF(rank .EQ. 0)WRITE(*,'(2A)')'STOPPING: bad input, unrecognized card: ',wwords(1)
-            STOP
+            CALL cards(ic)%getcard(wwords)
+            cards(ic)%used=.TRUE.
+            EXIT
           ENDIF
         ENDDO
-      ENDIF
+        IF(ic .GE. num_cards+1)THEN
+          IF(rank .EQ. 0)WRITE(*,'(2A)')'STOPPING: bad input, unrecognized card: ',wwords(1)
+          STOP
+        ENDIF
+      ENDDO
     ENDDO
   END SUBROUTINE inputfile_read
 
@@ -917,5 +916,25 @@ CONTAINS
       STOP
     END IF
   END FUNCTION string_to_real
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  SUBROUTINE get_next_line(line,ios)
+    CHARACTER(200),INTENT(OUT) :: line
+    INTEGER,INTENT(OUT) :: ios
+    CHARACTER(200) :: words(100)
+    INTEGER :: nwords
+    DO
+      READ(local_unit,'(A10000)',IOSTAT=ios)line
+      IF(ios .NE. 0)EXIT
+      line=TRIM(ADJUSTL(line))
+      !finding uncommented line that isn't empty
+      IF(line(1:1) .NE. '!' .AND. line .NE. '')THEN
+        !ignore commented portions of line
+        CALL parse(line,'!',words,nwords)
+        line=TRIM(ADJUSTL(words(1)))
+        EXIT
+      ENDIF
+    ENDDO
+  ENDSUBROUTINE
 
 END MODULE read_inp_module

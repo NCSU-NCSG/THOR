@@ -193,7 +193,6 @@ CONTAINS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !currently supports max of 1000 groups
   SUBROUTINE xs_read_current()
-    CHARACTER(10000) :: line
     CHARACTER(10000) :: words(1000)
     INTEGER :: nwords,ios,mat_num,i,g,alloc_stat,gp,j
 
@@ -202,9 +201,7 @@ CONTAINS
     xs_ord=0
     !get the specification data
     DO
-      READ(local_unit,'(A10000)')line
-      line=TRIM(ADJUSTL(line))
-      CALL parse(line,' ',words,nwords)
+      CALL get_next_line(words,nwords)
       words(1)=TRIM(ADJUSTL(words(1)))
       IF(words(1) .EQ. 'THOR_XS_V1')THEN
         !get the material, group, and order amount
@@ -215,7 +212,6 @@ CONTAINS
         READ(words(3),*)egmax
         READ(words(4),*)xs_ord
         REWIND(local_unit)
-        CALL SLEEP(5)
         EXIT
       ENDIF
     ENDDO
@@ -241,148 +237,62 @@ CONTAINS
 
     DO i=1,num_mat
       DO
-        READ(local_unit,'(A10000)',IOSTAT=ios)line
-        IF(ios .NE. 0)STOP 'end of xs file was reached before all materials were found'
-        line=TRIM(ADJUSTL(line))
-        !uncommented line
-        IF(line(1:1) .NE. '!' .AND. line .NE. '')THEN
-          !ignore commented portions of line
-          CALL parse(line,'!',words,nwords)
-          line=TRIM(ADJUSTL(words(1)))
-          !separate into data
-          CALL parse(line,' ',words,nwords)
-          words(1)=TRIM(ADJUSTL(words(1)))
-          IF(words(1) .EQ. 'id')THEN
-            READ(words(2),*)mat_num
-            xs_mat(mat_num)%mat=mat_num
-            words(4)=TRIM(ADJUSTL(words(4)))
-            !get or assign mat name
-            IF(words(4) .NE. '')THEN
-              mat_name(mat_num)=words(4)
-            ELSE
-              WRITE(mat_name(mat_num),'(A,I0)')'mat_',mat_num
-            ENDIF
-            !read in the fission spectrum
-            DO
-              READ(local_unit,'(A10000)',IOSTAT=ios)line
-              IF(ios .NE. 0)STOP 'end of xs file was reached before all data was found'
-              line=TRIM(ADJUSTL(line))
-              !uncommented line
-              IF(line(1:1) .NE. '!' .AND. line .NE. '')THEN
-                !ignore commented portions of line
-                CALL parse(line,'!',words,nwords)
-                line=TRIM(ADJUSTL(words(1)))
-                !separate into data
-                CALL parse(line,' ',words,nwords)
-                IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
-                DO g=1,egmax
-                  READ(words(g),*)chi(mat_num,g)%xs
-                ENDDO
-                EXIT
-              ENDIF
-            ENDDO
-            !read in the energy bounds
-            DO
-              READ(local_unit,'(A10000)',IOSTAT=ios)line
-              IF(ios .NE. 0)STOP 'end of xs file was reached before all data was found'
-              line=TRIM(ADJUSTL(line))
-              !uncommented line
-              IF(line(1:1) .NE. '!' .AND. line .NE. '')THEN
-                !ignore commented portions of line
-                CALL parse(line,'!',words,nwords)
-                line=TRIM(ADJUSTL(words(1)))
-                !separate into data
-                CALL parse(line,' ',words,nwords)
-                IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
-                DO g=1,egmax
-                  READ(words(g),*)eg_bounds(mat_num,g)%xs
-                ENDDO
-                eg_bounds(mat_num,egmax+1)%xs=0.0
-                EXIT
-              ENDIF
-            ENDDO
-            !read in SigmaF
-            DO
-              READ(local_unit,'(A10000)',IOSTAT=ios)line
-              IF(ios .NE. 0)STOP 'end of xs file was reached before all data was found'
-              line=TRIM(ADJUSTL(line))
-              !uncommented line
-              IF(line(1:1) .NE. '!' .AND. line .NE. '')THEN
-                !ignore commented portions of line
-                CALL parse(line,'!',words,nwords)
-                line=TRIM(ADJUSTL(words(1)))
-                !separate into data
-                CALL parse(line,' ',words,nwords)
-                IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
-                DO g=1,egmax
-                  READ(words(g),*)fiss(mat_num,g)%xs
-                ENDDO
-                EXIT
-              ENDIF
-            ENDDO
-            !read in nu
-            DO
-              READ(local_unit,'(A10000)',IOSTAT=ios)line
-              IF(ios .NE. 0)STOP 'end of xs file was reached before all data was found'
-              line=TRIM(ADJUSTL(line))
-              !uncommented line
-              IF(line(1:1) .NE. '!' .AND. line .NE. '')THEN
-                !ignore commented portions of line
-                CALL parse(line,'!',words,nwords)
-                line=TRIM(ADJUSTL(words(1)))
-                !separate into data
-                CALL parse(line,' ',words,nwords)
-                IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
-                DO g=1,egmax
-                  READ(words(g),*)nu(mat_num,g)%xs
-                ENDDO
-                EXIT
-              ENDIF
-            ENDDO
-            !read in total/transport xs
-            DO
-              READ(local_unit,'(A10000)',IOSTAT=ios)line
-              IF(ios .NE. 0)STOP 'end of xs file was reached before all data was found'
-              line=TRIM(ADJUSTL(line))
-              !uncommented line
-              IF(line(1:1) .NE. '!' .AND. line .NE. '')THEN
-                !ignore commented portions of line
-                CALL parse(line,'!',words,nwords)
-                line=TRIM(ADJUSTL(words(1)))
-                !separate into data
-                CALL parse(line,' ',words,nwords)
-                IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
-                DO g=1,egmax
-                  READ(words(g),*)sigma_t(mat_num,g)%xs
-                ENDDO
-                EXIT
-              ENDIF
-            ENDDO
-            !read in scattering xs format gp->g
-            DO j=1,xs_ord+1
-              DO g=1,egmax
-                DO
-                  READ(local_unit,'(A10000)',IOSTAT=ios)line
-                  IF(ios .NE. 0)STOP 'end of xs file was reached before all data was found'
-                  line=TRIM(ADJUSTL(line))
-                  !uncommented line
-                  IF(line(1:1) .NE. '!' .AND. line .NE. '')THEN
-                    !ignore commented portions of line
-                    CALL parse(line,'!',words,nwords)
-                    line=TRIM(ADJUSTL(words(1)))
-                    !separate into data
-                    CALL parse(line,' ',words,nwords)
-                    IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
-                    DO gp=1,egmax
-                      READ(words(gp),*)sigma_scat(mat_num,j,g,gp)%xs
-                    ENDDO
-                    EXIT
-                  ENDIF
-                ENDDO
+        !get next line
+        CALL get_next_line(words,nwords)
+        IF(nwords .LT. 2)STOP 'no id number'
+        words(1)=TRIM(ADJUSTL(words(1)))
+        IF(words(1) .EQ. 'id')THEN
+          READ(words(2),*)mat_num
+          xs_mat(mat_num)%mat=mat_num
+          words(4)=TRIM(ADJUSTL(words(4)))
+          !get or assign mat name
+          IF(words(4) .NE. '')THEN
+            mat_name(mat_num)=words(4)
+          ELSE
+            WRITE(mat_name(mat_num),'(A,I0)')'mat_',mat_num
+          ENDIF
+          !read in the fission spectrum
+          CALL get_next_line(words,nwords)
+          IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
+          DO g=1,egmax
+            READ(words(g),*)chi(mat_num,g)%xs
+          ENDDO
+          !read in the energy bounds
+          CALL get_next_line(words,nwords)
+          IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
+          DO g=1,egmax
+            READ(words(g),*)eg_bounds(mat_num,g)%xs
+          ENDDO
+          eg_bounds(mat_num,egmax+1)%xs=0.0
+          !read in SigmaF
+          CALL get_next_line(words,nwords)
+          IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
+          DO g=1,egmax
+            READ(words(g),*)fiss(mat_num,g)%xs
+          ENDDO
+          !read in nu
+          CALL get_next_line(words,nwords)
+          IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
+          DO g=1,egmax
+            READ(words(g),*)nu(mat_num,g)%xs
+          ENDDO
+          !read in total/transport xs
+          CALL get_next_line(words,nwords)
+          IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
+          DO g=1,egmax
+            READ(words(g),*)sigma_t(mat_num,g)%xs
+          ENDDO
+          !read in scattering xs format gp->g
+          DO j=1,xs_ord+1
+            DO g=1,egmax
+              CALL get_next_line(words,nwords)
+              IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
+              DO gp=1,egmax
+                READ(words(gp),*)sigma_scat(mat_num,j,g,gp)%xs
               ENDDO
             ENDDO
-            EXIT
-          ENDIF
+          ENDDO
+          EXIT
         ENDIF
       ENDDO
     ENDDO
@@ -440,8 +350,26 @@ CONTAINS
 
   END SUBROUTINE xs_read_current
 
-  ! SUBROUTINE get_next_line()
-  ! ENDSUBROUTINE
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  SUBROUTINE get_next_line(words,nwords)
+    INTEGER,INTENT(OUT) :: nwords
+    CHARACTER(10000),INTENT(OUT) :: words(1000)
+    CHARACTER(10000) :: line
+    INTEGER :: ios
+    DO
+      READ(local_unit,'(A10000)',IOSTAT=ios)line
+      IF(ios .NE. 0)STOP 'end of xs file was reached before all data/materials were found'
+      line=TRIM(ADJUSTL(line))
+      !finding uncommented line that isn't empty
+      IF(line(1:1) .NE. '!' .AND. line .NE. '')THEN
+        !ignore commented portions of line
+        CALL parse(line,'!',words,nwords)
+        line=TRIM(ADJUSTL(words(1)))
+        CALL parse(line,' ',words,nwords)
+        EXIT
+      ENDIF
+    ENDDO
+  ENDSUBROUTINE
 
 
 END MODULE read_cross_section_module
