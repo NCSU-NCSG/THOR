@@ -35,7 +35,7 @@
   qdorder             12
 
 !cross section specifications
-  xs                  newInput_cube_eigenvalue_1g.xs
+  xs                  cube_eigenvalue_1g.xs
   pnorder             0
   upscattering        yes
   multiplying         yes
