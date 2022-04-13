@@ -31,14 +31,8 @@ CONTAINS
     ! cross section types
 
     IF( ALLOCATED(xs_mat) )     DEALLOCATE(xs_mat)
-    IF( ALLOCATED(chi) )        DEALLOCATE(chi)
     IF( ALLOCATED(eg_bounds) )  DEALLOCATE(eg_bounds)
-    IF( ALLOCATED(fiss) )       DEALLOCATE(fiss)
-    IF( ALLOCATED(nu) )         DEALLOCATE(nu)
-    IF( ALLOCATED(sigma_t) )    DEALLOCATE(sigma_t)
-    IF( ALLOCATED(sigma_scat) ) DEALLOCATE(sigma_scat)
     IF( ALLOCATED(scat_mult)  ) DEALLOCATE(scat_mult)
-    IF( ALLOCATED(tsigs) )      DEALLOCATE(tsigs)
 
     ! fixed inflow flux
 

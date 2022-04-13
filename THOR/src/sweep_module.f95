@@ -346,7 +346,7 @@ CONTAINS
     REAL(kind=d_t) :: sigmat
     LOGICAL :: all_incoming_known
     TYPE(vector) :: n0, n1, n2, n3
-    INTEGER(kind=li) :: soct,sq
+    INTEGER(kind=li) :: soct,sq,mat_indx
 
     INTEGER ::rank,mpi_err, num_p
     CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
@@ -366,7 +366,8 @@ CONTAINS
 
       i=sweep_path(j,soct,sq)
 
-      sigmat=dens_fact(cells(i)%reg)*sigma_t(reg2mat(cells(i)%reg),eg)%xs
+      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      sigmat=dens_fact(cells(i)%reg)*xs_mat(mat_indx)%sigma_t(eg)
 
       n0=outward_normal(i,0)
       n1=outward_normal(i,1)

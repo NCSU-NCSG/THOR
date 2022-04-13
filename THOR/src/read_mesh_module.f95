@@ -1,4 +1,4 @@
-MODULE readmesh_module
+MODULE read_mesh_module
   !***********************************************************************
   !
   ! Read mesh module contains all subroutines needed for reading
@@ -234,4 +234,4 @@ CONTAINS
 
   END SUBROUTINE read_tetmesh
 
-END MODULE readmesh_module
+END MODULE read_mesh_module

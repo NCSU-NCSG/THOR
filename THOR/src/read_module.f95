@@ -23,7 +23,7 @@ MODULE read_module
   ! Use modules that pertain setting up problem
 
   USE read_cross_section_module
-  USE readmesh_module
+  USE read_mesh_module
   USE read_source_module
   USE read_inflow_module
   USE quadrature_module
@@ -56,6 +56,10 @@ CONTAINS
     ! Call read_input to read input file
 
     CALL read_input
+
+    ! Call read_mesh to read tetrahedral mesh file
+
+    CALL read_tetmesh
 
     ! Check the input
 
@@ -603,7 +607,11 @@ CONTAINS
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
     localunit = rank+100
 
-    OPEN(unit = localunit, file = fname , status = 'old', action = 'read')
+    OPEN(unit = localunit, file = fname , status = 'old', action = 'read',IOSTAT=ios)
+    IF(ios .NE. 0)THEN
+      WRITE(*,*)'error opening ',TRIM(fname)
+      STOP 'fatal error'
+    ENDIF
     IF(rank .EQ. 0)THEN
       WRITE(*,*) "<><><><><><><><>", fname
     ENDIF
@@ -638,9 +646,6 @@ CONTAINS
     ENDSELECT
 
     CLOSE(localunit)
-
-    ! Call read_mesh to read tetrahedral mesh file
-    CALL read_tetmesh
 
   END SUBROUTINE read_input
 

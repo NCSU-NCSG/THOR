@@ -46,7 +46,7 @@ CONTAINS
 
     ! Declare temporary variables
 
-    INTEGER(kind=li) :: i, j, eg, l, region, ix, iy, iz
+    INTEGER(kind=li) :: i, j, eg, l, region, ix, iy, iz,mat_indx
     REAL(kind=d_t) :: reac_rates(4,minreg:maxreg,egmax+1)
     REAL(kind=d_t) :: reg_volume(minreg:maxreg)
     REAL(kind=d_t), ALLOCATABLE :: cartesian_map(:,:,:,:)
@@ -187,18 +187,21 @@ CONTAINS
       WRITE(unit_number,*)
       reg_volume=0.0_d_t
       reac_rates=0.0_d_t
-      DO eg=1,egmax
-        DO i=1,num_cells
+      DO i=1,num_cells
+        mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+        DO eg=1,egmax
           IF(eg.EQ.1) reg_volume(cells(i)%reg)=reg_volume(cells(i)%reg)+ cells(i)%volume
           reac_rates(1,cells(i)%reg,eg)=reac_rates(1,cells(i)%reg,eg)  + cells(i)%volume * &
                 flux(1,1,i,eg,niter)
-          reac_rates(2,cells(i)%reg,eg)=reac_rates(2,cells(i)%reg,eg)  + cells(i)%volume * fiss(reg2mat(cells(i)%reg),eg)%xs * &
+          reac_rates(2,cells(i)%reg,eg)=reac_rates(2,cells(i)%reg,eg)  + cells(i)%volume  &
+            * xs_mat(mat_indx)%sigma_f(eg)* &
                 flux(1,1,i,eg,niter)
           reac_rates(3,cells(i)%reg,eg)=reac_rates(3,cells(i)%reg,eg)  + cells(i)%volume *  &
-                (sigma_t(reg2mat(cells(i)%reg),eg)%xs - tsigs(reg2mat(cells(i)%reg),eg)%xs )         * &
+                (xs_mat(mat_indx)%sigma_t(eg) &
+                - xs_mat(mat_indx)%tsigs(eg) )         * &
                 flux(1,1,i,eg,niter)
           reac_rates(4,cells(i)%reg,eg)=reac_rates(4,cells(i)%reg,eg)  + cells(i)%volume *  &
-                nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs                    * &
+                xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg)* &
                 flux(1,1,i,eg,niter)
 
         END DO
@@ -256,6 +259,7 @@ CONTAINS
       ! TODO: might want to consider a flag for providing group fluxes/reac_rates?
       DO eg = 1, egmax
         DO i = 1, num_cells
+          mat_indx=mat_pointer(reg2mat(cells(i)%reg))
 
           ! this is the current cell with index i, first we need to find out
           ! which x/y/z cartesian this cell belongs to
@@ -287,24 +291,25 @@ CONTAINS
             ! 2. total interaction rate
             cartesian_map(2, ix, iy, iz) = cartesian_map(2, ix, iy, iz) + &
                   cells(i)%volume * flux(1, 1, i, eg, niter) * &
-                  sigma_t(reg2mat(cells(i)%reg), eg)%xs / cartesian_vol
+                  xs_mat(mat_indx)%sigma_t(eg) / cartesian_vol
             ! 3. absorption rate
             cartesian_map(3, ix, iy, iz) = cartesian_map(3, ix, iy, iz) + &
                   cells(i)%volume * flux(1, 1, i, eg, niter) * &
-                  (sigma_t(reg2mat(cells(i)%reg), eg)%xs - tsigs(reg2mat(cells(i)%reg), eg)%xs) / &
+                  (xs_mat(mat_indx)%sigma_t(eg) &
+                  - xs_mat(mat_indx)%tsigs(eg)) / &
                   cartesian_vol
             ! 4. total scattering rate
             cartesian_map(4, ix, iy, iz) = cartesian_map(4, ix, iy, iz) + &
                   cells(i)%volume * flux(1, 1, i, eg, niter) * &
-                  tsigs(reg2mat(cells(i)%reg), eg)%xs / cartesian_vol
+                  xs_mat(mat_indx)%tsigs(eg) / cartesian_vol
             ! 5. fission rate
             cartesian_map(5, ix, iy, iz) = cartesian_map(5, ix, iy, iz) + &
                   cells(i)%volume * flux(1, 1, i, eg, niter) * &
-                  fiss(reg2mat(cells(i)%reg), eg)%xs / cartesian_vol
+                  xs_mat(mat_indx)%sigma_f(eg) / cartesian_vol
             ! 6. fission source rate
             cartesian_map(6, ix, iy, iz) = cartesian_map(6, ix, iy, iz) + &
                   cells(i)%volume * flux(1, 1, i, eg, niter) * &
-                  nu(reg2mat(cells(i)%reg), eg)%xs * fiss(reg2mat(cells(i)%reg), eg)%xs / &
+                  xs_mat(mat_indx)%nu(eg) * xs_mat(mat_indx)%sigma_f(eg) / &
                   cartesian_vol
           END IF
         END DO

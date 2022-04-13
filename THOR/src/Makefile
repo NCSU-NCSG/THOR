@@ -51,7 +51,7 @@ SRC :=  \
         read_inp_module.f95 	        		\
         read_module.f95										\
         read_source_module.f95						\
-        readmesh_module.f95								\
+        read_mesh_module.f95								\
         setup_module.f95									\
         solver_module.f95									\
         sph_harmonics_module.f95					\
@@ -285,7 +285,7 @@ read_module.o read_module.mod: read_module.f95  \
   stringmod.mod types.mod parameter_types.mod filename_types.mod \
   vector_types.mod cross_section_types.mod geometry_types.mod \
   angle_types.mod multindex_types.mod global_variables.mod \
-  read_cross_section_module.mod readmesh_module.mod read_source_module.mod \
+  read_cross_section_module.mod read_mesh_module.mod read_source_module.mod \
   read_inflow_module.mod quadrature_module.mod check_input.mod \
   termination_module.mod read_inp_module_legacy.mod read_inp_module.mod
 
@@ -293,7 +293,7 @@ read_source_module.o read_source_module.mod: read_source_module.f95 \
   types.mod parameter_types.mod filename_types.mod multindex_types.mod \
   global_variables.mod termination_module.mod
 
-readmesh_module.o readmesh_module.mod: readmesh_module.f95 \
+read_mesh_module.o read_mesh_module.mod: read_mesh_module.f95 \
   types.mod parameter_types.mod filename_types.mod \
   vector_types.mod geometry_types.mod global_variables.mod \
   termination_module.mod
