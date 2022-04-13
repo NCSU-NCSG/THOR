@@ -71,20 +71,19 @@ CONTAINS
     most_thermal=egmax+1
     ! Determine most_thermal
     DO i=1,num_mat
-      write(*,*)i,xs_mat(i)%mat
       IF(upscattering .NE. 0) THEN
         DO g=1,egmax
           DO gp=g+1,egmax
-            IF( ABS(sigma_scat(xs_mat(i)%mat,1,g,gp)%xs) > 2.24E-16_d_t .AND. most_thermal>g ) &
+            IF( ABS(xs_mat(i)%sigma_scat(1,g,gp)) > 2.24E-16_d_t .AND. most_thermal>g ) &
               most_thermal=g
           END DO
         END DO
       END IF
       ! Compute tsigs
       DO gp=1,egmax
-        tsigs(xs_mat(i)%mat,gp)%xs=0.0_d_t
+        xs_mat(i)%tsigs(gp)=0.0_d_t
         DO g=1,egmax
-          tsigs(xs_mat(i)%mat,gp)%xs=tsigs(xs_mat(i)%mat,gp)%xs+sigma_scat(xs_mat(i)%mat,1,g,gp)%xs
+          xs_mat(i)%tsigs(gp)=xs_mat(i)%tsigs(gp)+xs_mat(i)%sigma_scat(1,g,gp)
         END DO
       END DO
     ENDDO
@@ -114,6 +113,21 @@ CONTAINS
         END DO
       END DO
     END IF
+
+    mat_id_min=9999999
+    mat_id_max=-9999999
+    !find max and min id values
+    DO i=1,num_mat
+      IF(xs_mat(i)%mat_id .GE. mat_id_max)mat_id_max=xs_mat(i)%mat_id
+      IF(xs_mat(i)%mat_id .LE. mat_id_min)mat_id_min=xs_mat(i)%mat_id
+    ENDDO
+    !allocate and assign pointer values
+    !everywhere else will be
+    ALLOCATE(mat_pointer(mat_id_min:mat_id_max))
+    mat_pointer=0
+    DO i=1,num_mat
+      mat_pointer(xs_mat(i)%mat_id)=i
+    ENDDO
   END SUBROUTINE read_xs
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -124,37 +138,52 @@ CONTAINS
     READ(local_unit,*) num_mat
 
     ! Allocate cross-section arrays and check if enough memory is available
-    ALLOCATE(xs_mat(0:num_mat),chi(0:num_mat,egmax),&
-          eg_bounds(egmax+1),fiss(0:num_mat,egmax),&
-          nu(0:num_mat,egmax),sigma_t(0:num_mat,egmax),tsigs(0:num_mat,egmax),&
-          sigma_scat(0:num_mat,xs_ord+1,egmax,egmax),&
+    ALLOCATE(xs_mat(num_mat),&
+          eg_bounds(egmax+1),&
           stat=alloc_stat)
     IF(alloc_stat /= 0) CALL stop_thor(2_li)
 
+    DO m=1,num_mat
+      ALLOCATE(xs_mat(m)%chi(egmax),xs_mat(m)%sigma_f(egmax),xs_mat(m)%nu(egmax), &
+        xs_mat(m)%sigma_t(egmax),xs_mat(m)%tsigs(egmax), &
+        xs_mat(m)%sigma_scat(xs_ord+1,egmax,egmax),stat=alloc_stat)
+      IF(alloc_stat /= 0) CALL stop_thor(2_li)
+      !set everything to 0
+      xs_mat(m)%chi(:)=0
+      xs_mat(m)%sigma_f(:)=0
+      xs_mat(m)%nu(:)=0
+      xs_mat(m)%sigma_t(:)=0
+      xs_mat(m)%tsigs(:)=0
+      xs_mat(m)%sigma_scat(:,:,:)=0
+    ENDDO
+    xs_mat(:)%mat_id=0
+    eg_bounds(:)=0
+
     ! Read material total & scattering cross-section
     DO m=1, num_mat
-      READ(local_unit,*) xs_mat(m)%mat
+      READ(local_unit,*) xs_mat(m)%mat_id
+      WRITE(xs_mat(m)%mat_name,'(A,I0)')'mat_',xs_mat(m)%mat_id
       IF(multiplying .NE. 0)THEN
-        READ(local_unit,*) (chi(xs_mat(m)%mat,e1)%xs,e1=1,egmax)
+        READ(local_unit,*) (xs_mat(m)%chi(e1),e1=1,egmax)
         READ(local_unit,*) (eg_bounds(e1),e1=1,egmax)
         eg_bounds(egmax+1)=0.0_d_t
-        READ(local_unit,*) (fiss(xs_mat(m)%mat,e1)%xs,e1=1,egmax)
-        READ(local_unit,*) (nu(xs_mat(m)%mat,e1)%xs,e1=1,egmax)
+        READ(local_unit,*) (xs_mat(m)%sigma_f(e1),e1=1,egmax)
+        READ(local_unit,*) (xs_mat(m)%nu(e1),e1=1,egmax)
       ELSE
         DO e1 = 1, egmax
-          chi(xs_mat(m)%mat,e1)%xs = zero
+          xs_mat(m)%chi(e1) = zero
           eg_bounds(e1) = zero
-          fiss(xs_mat(m)%mat,e1)%xs = zero
-          nu(xs_mat(m)%mat,e1)%xs = zero
+          xs_mat(m)%sigma_f(e1) = zero
+          xs_mat(m)%nu(e1) = zero
         END DO
         eg_bounds(egmax+1) = zero
       END IF
-      READ(local_unit,*) (sigma_t(xs_mat(m)%mat,e1)%xs,e1=1,egmax)
+      READ(local_unit,*) (xs_mat(m)%sigma_t(e1),e1=1,egmax)
       ! Initialize scattering matrix
       DO order=1, xs_ord+1
         DO eg_to=1,egmax
           DO eg_from=1,egmax
-            sigma_scat(xs_mat(m)%mat,order,eg_to,eg_from)%xs=zero
+            xs_mat(m)%sigma_scat(order,eg_to,eg_from)=zero
           END DO
         END DO
       END DO
@@ -163,15 +192,13 @@ CONTAINS
       IF(upscattering.EQ.0) THEN
         DO order=1, xs_ord+1
           DO eg_to=1,egmax
-            READ(local_unit,*) (sigma_scat(xs_mat(m)%mat,order,&
-                  eg_to,eg_from)%xs,eg_from=1,eg_to)
+            READ(local_unit,*) (xs_mat(m)%sigma_scat(order,eg_to,eg_from),eg_from=1,eg_to)
           END DO
         END DO
       ELSE
         DO order=1, xs_ord+1
           DO eg_to=1,egmax
-            READ(local_unit,*) (sigma_scat(xs_mat(m)%mat,order,&
-                  eg_to,eg_from)%xs,eg_from=1,egmax)
+            READ(local_unit,*) (xs_mat(m)%sigma_scat(order,eg_to,eg_from),eg_from=1,egmax)
           END DO
         END DO
       END IF
@@ -182,7 +209,7 @@ CONTAINS
 !currently supports max of 1000 groups
   SUBROUTINE xs_read_current()
     CHARACTER(10000) :: words(1000)
-    INTEGER :: nwords,ios,mat_num,i,g,alloc_stat,gp,j
+    INTEGER :: nwords,ios,i,g,alloc_stat,gp,j
 
     num_mat=0
     egmax=0
@@ -204,22 +231,29 @@ CONTAINS
     READ(words(3),*)egmax
     READ(words(4),*)xs_ord
     ! Allocate cross-section arrays and check if enough memory is available
-    ALLOCATE(xs_mat(0:num_mat),chi(0:num_mat,egmax),&
-          eg_bounds(egmax+1),fiss(0:num_mat,egmax),&
-          nu(0:num_mat,egmax),sigma_t(0:num_mat,egmax),tsigs(0:num_mat,egmax),&
-          sigma_scat(0:num_mat,xs_ord+1,egmax,egmax),mat_name(0:num_mat),&
-          stat=alloc_stat)
+    ALLOCATE(xs_mat(num_mat),eg_bounds(egmax+1),stat=alloc_stat)
     IF(alloc_stat /= 0) CALL stop_thor(2_li)
-    !set everything to 0
-    xs_mat(:)%mat=0
-    chi(:,:)%xs=0
+
+    DO i=1,num_mat
+      ALLOCATE(xs_mat(i)%chi(egmax),xs_mat(i)%sigma_f(egmax),xs_mat(i)%nu(egmax), &
+        xs_mat(i)%sigma_t(egmax),xs_mat(i)%tsigs(egmax), &
+        xs_mat(i)%sigma_scat(xs_ord+1,egmax,egmax),stat=alloc_stat)
+      IF(alloc_stat /= 0) CALL stop_thor(2_li)
+      !set everything to 0
+      xs_mat(i)%chi(:)=0
+      xs_mat(i)%sigma_f(:)=0
+      xs_mat(i)%nu(:)=0
+      xs_mat(i)%sigma_t(:)=0
+      xs_mat(i)%tsigs(:)=0
+      xs_mat(i)%sigma_scat(:,:,:)=0
+    ENDDO
+    xs_mat(:)%mat_id=0
+    xs_mat(:)%mat_name=''
     eg_bounds(:)=0
-    fiss(:,:)%xs=0
-    nu(:,:)%xs=0
-    sigma_t(:,:)%xs=0
-    tsigs(:,:)%xs=0
-    sigma_scat(:,:,:,:)%xs=0
-    mat_name(:)=''
+    !set everything to 0
+    xs_mat(:)%mat_id=0
+    eg_bounds(:)=0
+
     !read in energy bounds if present
     CALL get_next_line(words,nwords)
     words(1)=TRIM(ADJUSTL(words(1)))
@@ -240,38 +274,37 @@ CONTAINS
         words(1)=TRIM(ADJUSTL(words(1)))
         IF(words(1) .EQ. 'id')THEN
           IF(nwords .LT. 2)STOP 'no id number'
-          READ(words(2),*)mat_num
-          xs_mat(mat_num)%mat=mat_num
+          READ(words(2),*)xs_mat(i)%mat_id
           words(4)=TRIM(ADJUSTL(words(4)))
           !get or assign mat name
           IF(words(4) .NE. '')THEN
-            mat_name(mat_num)=words(4)
+            xs_mat(i)%mat_name=words(4)
           ELSE
-            WRITE(mat_name(mat_num),'(A,I0)')'mat_',mat_num
+            WRITE(xs_mat(i)%mat_name,'(A,I0)')'mat_',xs_mat(i)%mat_id
           ENDIF
           !read in the fission spectrum
           CALL get_next_line(words,nwords)
           IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
           DO g=1,egmax
-            READ(words(g),*)chi(mat_num,g)%xs
+            READ(words(g),*)xs_mat(i)%chi(g)
           ENDDO
           !read in SigmaF
           CALL get_next_line(words,nwords)
           IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
           DO g=1,egmax
-            READ(words(g),*)fiss(mat_num,g)%xs
+            READ(words(g),*)xs_mat(i)%sigma_f(g)
           ENDDO
           !read in nu
           CALL get_next_line(words,nwords)
           IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
           DO g=1,egmax
-            READ(words(g),*)nu(mat_num,g)%xs
+            READ(words(g),*)xs_mat(i)%nu(g)
           ENDDO
           !read in total/transport xs
           CALL get_next_line(words,nwords)
           IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
           DO g=1,egmax
-            READ(words(g),*)sigma_t(mat_num,g)%xs
+            READ(words(g),*)xs_mat(i)%sigma_t(g)
           ENDDO
           !read in scattering xs format gp->g
           DO j=1,xs_ord+1
@@ -279,7 +312,7 @@ CONTAINS
               CALL get_next_line(words,nwords)
               IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
               DO gp=1,egmax
-                READ(words(gp),*)sigma_scat(mat_num,j,g,gp)%xs
+                READ(words(gp),*)xs_mat(i)%sigma_scat(j,g,gp)
               ENDDO
             ENDDO
           ENDDO

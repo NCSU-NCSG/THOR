@@ -66,7 +66,7 @@ CONTAINS
     ! Define temporary variables
 
     INTEGER(kind=li) :: l, i, q, octant, order, alloc_stat,&
-          n,m, k, indx
+          n,m, k, indx, mat_indx
     REAL(kind=d_t) :: error,te,ts
 
     ! Define self-scatter source
@@ -103,14 +103,14 @@ CONTAINS
       ! Recompute self-scattering source and add external source
 
       DO i=1,num_cells
+        mat_indx=mat_pointer(reg2mat(cells(i)%reg))
         ! even contribution
         DO l=0,scatt_ord
           DO m=0,l
             indx=1_li+m+(l+1_li)*l/2_li
             DO k=1, num_moments_v
               self_scatter(k,indx,i) = scat_mult(l,m)                             *&
-                    sigma_scat(reg2mat(cells(i)%reg),l+1,eg,eg)%xs     *&
-                    dens_fact(cells(i)%reg)                            *&
+                    xs_mat(mat_indx)%sigma_scat(l+1,eg,eg)*dens_fact(cells(i)%reg)*&
                     sc_flux(k,indx,i) + q_external(k,indx,i)
             END DO
           END DO
@@ -121,8 +121,7 @@ CONTAINS
             indx=neven+m+(l-1_li)*l/2_li
             DO k=1, num_moments_v
               self_scatter(k,indx,i) = scat_mult(l,m) *&
-                    sigma_scat(reg2mat(cells(i)%reg),l+1,eg,eg)%xs     *&
-                    dens_fact(cells(i)%reg)                            *&
+                    xs_mat(mat_indx)%sigma_scat(l+1,eg,eg)*dens_fact(cells(i)%reg)*&
                     sc_flux(k,indx,i) + q_external(k,indx,i)
             END DO
           END DO

@@ -60,7 +60,7 @@ CONTAINS
     ! Define temporary variables
 
     INTEGER(kind=li)               :: alloc_stat, eg, egg, q, octant, i, l, &
-          order, n, m, ii, k, indx,face,f
+          order, n, m, ii, k, indx,face,f,mat_indx
     REAL(kind=d_t)                 :: t_error
     LOGICAL                        :: existence
 
@@ -163,14 +163,15 @@ CONTAINS
 
         ! Compute downscattering from eg to egg
 
-        DO egg=eg+1, egmax
-          DO i=1, num_cells
+        DO i=1, num_cells
+          mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+          DO egg=eg+1, egmax
             DO l=0,scatt_ord
               DO m=0,l
                 indx=1_li+m+(l+1_li)*l/2_li
                 DO k=1, num_moments_v
                   src(k,indx,i,egg) = src(k,indx,i,egg)                                 +&
-                        scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs    *&
+                        scat_mult(l,m)*xs_mat(mat_indx)%sigma_scat(l+1,egg,eg)*&
                         dens_fact(cells(i)%reg)*flux(k,indx,i,eg,niter)
                 END DO
               END DO
@@ -181,7 +182,7 @@ CONTAINS
                 indx=neven+m+(l-1_li)*l/2_li
                 DO k=1, num_moments_v
                   src(k,indx,i,egg) = src(k,indx,i,egg)                                 +&
-                        scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs    *&
+                        scat_mult(l,m)*xs_mat(mat_indx)%sigma_scat(l+1,egg,eg)*&
                         dens_fact(cells(i)%reg)*flux(k,indx,i,eg,niter)
                 END DO
               END DO
@@ -353,7 +354,7 @@ CONTAINS
     !
     !---------------------------------------------------------------------------
     INTEGER (kind=li) :: p = 0_li
-    INTEGER (kind=li) :: power_iter_count = 0_li, cheby_pi=5_li, cheby_pi_rem
+    INTEGER (kind=li) :: power_iter_count = 0_li, cheby_pi=5_li, cheby_pi_rem,mat_indx
     REAL(kind=d_t)    :: alpha = zero, beta = zero, gamma = zero
     REAL(kind=d_t)    :: chebychev_error = zero, entry_error = zero
     REAL(kind=d_t)    :: entry_theta = zero, theor_err = zero
@@ -394,11 +395,12 @@ CONTAINS
 
     fiss_src = zero
 
-    DO eg=1, egmax
-      DO i=1, num_cells
+    DO i=1, num_cells
+      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      DO eg=1, egmax
         DO l=1, num_moments_v
           fiss_src(l,i,1)=fiss_src(l,i,1)                                         +&
-                nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs  *&
+                xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg)* &
                 dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
         END DO
       END DO
@@ -451,11 +453,12 @@ CONTAINS
 
       fiss_src = zero
 
-      DO eg=1, egmax
-        DO i=1, num_cells
+      DO i=1, num_cells
+        mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+        DO eg=1, egmax
           DO l=1, num_moments_v
             fiss_src(l,i,1)=fiss_src(l,i,1)                                       +&
-                  nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs *&
+                  xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg) *&
                   dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
           END DO
         END DO
@@ -513,11 +516,12 @@ CONTAINS
       ! Compute fission and set all angular moments >0 to zero...
       !=========================================================================
       src = zero
-      DO eg=1,egmax
-        DO i=1,num_cells
+      DO i=1,num_cells
+        mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+        DO eg=1,egmax
           DO l=1,num_moments_v
             src(l,1,i,eg)  =one/keff_new     *&
-                  chi(reg2mat(cells(i)%reg),eg)%xs*fiss_src(l,i,1)
+                  xs_mat(mat_indx)%chi(eg)*fiss_src(l,i,1)
           END DO
         END DO
       END DO
@@ -663,11 +667,12 @@ CONTAINS
           fiss_src(l,i,2)=zero
         END DO
       END DO
-      DO eg=1, egmax
-        DO i=1, num_cells
+      DO i=1, num_cells
+        mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+        DO eg=1, egmax
           DO l=1, num_moments_v
             fiss_src(l,i,2)=fiss_src(l,i,2)                                        +&
-                  nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs *&
+                  xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg) *&
                   dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
           END DO
         END DO
@@ -854,12 +859,13 @@ CONTAINS
   !> This subroutine is for both the eigenvalue and fixed source solvers
   SUBROUTINE compute_upscattering(flux, src)
 
-    INTEGER:: eg, egg, i, l, m, k, indx
+    INTEGER:: eg, egg, i, l, m, k, indx,mat_indx
     REAL(kind=d_t) :: flux(num_moments_v,namom,num_cells,egmax,niter)
     REAL(kind=d_t) :: src(num_moments_v,namom,num_cells,egmax)
 
-    DO eg=most_thermal,egmax     ! eg is the group that it is scattered to
-      DO i=1,num_cells
+    DO i=1,num_cells
+      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      DO eg=most_thermal,egmax     ! eg is the group that it is scattered to
         ! even contributions
         DO l=0,scatt_ord
           DO m=0,l
@@ -867,7 +873,7 @@ CONTAINS
             DO egg=eg+1,egmax  ! egg is the group that is scattered from
               DO k=1, num_moments_v
                 src(k,indx,i,eg) =  src(k,indx,i,eg) +&
-                      scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,eg,egg)%xs  *  &
+                      scat_mult(l,m)*xs_mat(mat_indx)%sigma_scat(l+1,eg,egg)*  &
                       dens_fact(cells(i)%reg)*flux(k,indx,i,egg,niter)
               END DO
             END DO
@@ -880,7 +886,7 @@ CONTAINS
             DO egg=eg+1,egmax  ! egg is the group that is scattered from
               DO k=1, num_moments_v
                 src(k,indx,i,eg) = src(k,indx,i,eg)                                   +&
-                      scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,eg,egg)%xs    *&
+                      scat_mult(l,m)*xs_mat(mat_indx)%sigma_scat(l+1,eg,egg)*&
                       dens_fact(cells(i)%reg)*flux(k,indx,i,egg,niter)
               END DO
             END DO
@@ -898,19 +904,20 @@ CONTAINS
   !> This subroutine is for both the eigenvalue and fixed source solvers
   SUBROUTINE update_downscattering(eg, flux, src)
 
-    INTEGER:: eg, eg_from, i, l, m, k, index
+    INTEGER:: eg, eg_from, i, l, m, k, index,mat_indx
     REAL(kind=d_t) :: flux(num_moments_v,namom,num_cells,egmax,niter)
     REAL(kind=d_t) :: src(num_moments_v,namom,num_cells,egmax)
 
-    DO eg_from = eg + 1, egmax
-      DO i = 1, num_cells
+    DO i = 1, num_cells
+      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      DO eg_from = eg + 1, egmax
         ! Even contributions
         DO l = 0, scatt_ord
           DO m = 0, l
             index = 1_li + m + (l + 1_li) * l / 2_li
             DO k = 1, num_moments_v
               src(k,index,i,eg_from) = src(k,index,i,eg_from)                        +&
-                scat_mult(l,m) * sigma_scat(reg2mat(cells(i)%reg),l+1,eg_from,eg)%xs *&
+                scat_mult(l,m) *xs_mat(mat_indx)%sigma_scat(l+1,eg_from,eg)*&
                 dens_fact(cells(i)%reg) * flux(k,index,i,eg,niter)
             END DO
           END DO
@@ -921,7 +928,7 @@ CONTAINS
             index = neven + m + (l - 1_li) * l / 2_li
             DO k = 1, num_moments_v
               src(k,index,i,eg_from) = src(k,index,i,eg_from)                      +&
-                scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,eg_from,eg)%xs *&
+                scat_mult(l,m)*xs_mat(mat_indx)%sigma_scat(l+1,eg_from,eg)*&
                 dens_fact(cells(i)%reg)*flux(k,index,i,eg,niter)
             END DO
           END DO

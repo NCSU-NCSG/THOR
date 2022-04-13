@@ -8,28 +8,28 @@ MODULE cross_section_types
   IMPLICIT NONE
   PRIVATE
 
-  PUBLIC :: cross_section_mat
-  PUBLIC :: cross_section
   PUBLIC :: xs_material_type
 
   INTEGER,PARAMETER :: name_size=64
-
-  ! Define total and scattering cross-section
-
-  TYPE cross_section_mat
-    INTEGER(kind=li) :: mat
-  END TYPE cross_section_mat
-
-  TYPE cross_section
-    REAL(kind=d_t) :: xs
-  END TYPE cross_section
 
   !cross section material type
   TYPE :: xs_material_type
     !material name
     CHARACTER(name_size) :: mat_name
+    !material ID
+    INTEGER(kind=li) :: mat_id
     !fission spectrum
-    CHARACTER(name_size), DIMENSION(:), ALLOCATABLE :: chi
+    REAL(kind=d_t), DIMENSION(:), ALLOCATABLE :: chi
+    !fission cross section SigmaF
+    REAL(kind=d_t), DIMENSION(:), ALLOCATABLE :: sigma_f
+    !fission production nu
+    REAL(kind=d_t), DIMENSION(:), ALLOCATABLE :: nu
+    !total or transport cross section sigma_t
+    REAL(kind=d_t), DIMENSION(:), ALLOCATABLE :: sigma_t
+    !total scattering cross section for reaction rates
+    REAL(kind=d_t), DIMENSION(:), ALLOCATABLE :: tsigs
+    !scattering matrix
+    REAL(kind=d_t), DIMENSION(:,:,:), ALLOCATABLE :: sigma_scat
   ENDTYPE xs_material_type
 
 END MODULE cross_section_types

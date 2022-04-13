@@ -644,7 +644,7 @@ CONTAINS
 
     ! Local variables
 
-    INTEGER(kind=li) :: alloc_stat,eg,m,n,i,l,egg,k,indx
+    INTEGER(kind=li) :: alloc_stat,eg,m,n,i,l,egg,k,indx,mat_indx
 
     ! Initialize tfsrc
 
@@ -652,10 +652,12 @@ CONTAINS
 
     ! Compute total fission source
 
-    DO eg = 1, egmax
-      DO i = 1, num_cells
+    DO i = 1, num_cells
+      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      DO eg = 1, egmax
         DO l = 1, num_moments_v
-          tfsrc(l,i) = tfsrc(l,i) + nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs * &
+          tfsrc(l,i) = tfsrc(l,i) + xs_mat(mat_indx)%nu(eg) &
+            *xs_mat(mat_indx)%sigma_f(eg)* &
                 dens_fact(cells(i)%reg)*flx(l,1,i,eg,flag)
         END DO
       END DO
@@ -663,18 +665,20 @@ CONTAINS
 
     ! Add to src
 
-    DO eg = 1, egmax
-      DO i = 1, num_cells
+    DO i = 1, num_cells
+      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      DO eg = 1, egmax
         DO l = 1, num_moments_v
-          src(l,1,i,eg) = src(l,1,i,eg) + chi(reg2mat(cells(i)%reg),eg)%xs*tfsrc(l,i)/keff
+          src(l,1,i,eg) = src(l,1,i,eg) + xs_mat(mat_indx)%chi(eg)*tfsrc(l,i)/keff
         END DO
       END DO
     END DO
 
     ! Add upscattering
 
-    DO eg=most_thermal,egmax    ! eg is the group that it is scattered to
-      DO i=1,num_cells
+    DO i=1,num_cells
+      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      DO eg=most_thermal,egmax    ! eg is the group that it is scattered to
         ! even contribution
         DO l=0,scatt_ord
           DO m=0,l
@@ -682,7 +686,7 @@ CONTAINS
             DO egg=eg+1,egmax  ! egg is the group that is scattered from
               DO k=1, num_moments_v
                 src(k,indx,i,eg) = src(k,indx,i,eg)                                  +&
-                      scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,eg,egg)%xs   *&
+                      scat_mult(l,m)*xs_mat(mat_indx)%sigma_scat(l+1,eg,egg)   *&
                       dens_fact(cells(i)%reg)*flx(k,indx,i,egg,flag)
               END DO
             END DO
@@ -695,7 +699,7 @@ CONTAINS
             DO egg=eg+1,egmax  ! egg is the group that is scattered from
               DO k=1, num_moments_v
                 src(k,indx,i,eg)=src(k,indx,i,eg)                                    +&
-                      scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,eg,egg)%xs   *&
+                      scat_mult(l,m)*xs_mat(mat_indx)%sigma_scat(l+1,eg,egg)*&
                       dens_fact(cells(i)%reg)*flx(k,indx,i,egg,flag)
               END DO
             END DO
@@ -740,19 +744,20 @@ CONTAINS
 
     ! Local variables
 
-    INTEGER(kind=li) :: eg,i,l,m,n,k,indx
+    INTEGER(kind=li) :: eg,i,l,m,n,k,indx,mat_indx
 
     ! Start adding downscattering source
 
-    DO eg = 1, egg-1
-      DO i = 1, num_cells
+    DO i = 1, num_cells
+      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      DO eg = 1, egg-1
         ! even contribution
         DO l=0, scatt_ord
           DO m = 0,l
             indx=1_li+m+(l+1_li)*l/2_li
             DO k = 1, num_moments_v
               src(k,indx,i,egg)=src(k,indx,i,egg)                               +&
-                    scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs  *&
+                    scat_mult(l,m)*xs_mat(mat_indx)%sigma_scat(l+1,egg,eg)*&
                     dens_fact(cells(i)%reg)*flx(k,indx,i,eg,flag1)
             END DO
           END DO
@@ -763,7 +768,7 @@ CONTAINS
             indx=neven+m+(l-1_li)*l/2_li
             DO k = 1, num_moments_v
               src(k,indx,i,egg)=src(k,indx,i,egg)                               +&
-                    scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,eg)%xs  *&
+                    scat_mult(l,m)*xs_mat(mat_indx)%sigma_scat(l+1,egg,eg)*&
                     dens_fact(cells(i)%reg)*flx(k,indx,i,eg,flag1)
             END DO
           END DO
@@ -774,13 +779,14 @@ CONTAINS
     ! Add selfscattering source
 
     DO i = 1, num_cells
+      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
       ! Even contributions
       DO l = 0, scatt_ord
         DO m = 0,l
           indx=1_li+m+(l+1_li)*l/2_li
           DO k = 1, num_moments_v
             src(k,indx,i,egg)=src(k,indx,i,egg)                                +&
-                  scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,egg)%xs  *&
+                  scat_mult(l,m)*xs_mat(mat_indx)%sigma_scat(l+1,egg,egg)*&
                   dens_fact(cells(i)%reg)*flx(k,indx,i,eg,flag2)
           END DO
         END DO
@@ -791,7 +797,7 @@ CONTAINS
           indx=neven+m+(l-1_li)*l/2_li
           DO k = 1, num_moments_v
             src(k,indx,i,egg)=src(k,indx,i,egg)                                +&
-                  scat_mult(l,m)*sigma_scat(reg2mat(cells(i)%reg),l+1,egg,egg)%xs  *&
+                  scat_mult(l,m)*xs_mat(mat_indx)%sigma_scat(l+1,egg,egg)*&
                   dens_fact(cells(i)%reg)*flx(k,indx,i,eg,flag2)
           END DO
         END DO
@@ -826,7 +832,7 @@ CONTAINS
 
     ! local variables
 
-    INTEGER(kind=li) :: eg,i,indx
+    INTEGER(kind=li) :: eg,i,indx,mat_indx
 
     ! initialize tfissions
 
@@ -834,10 +840,11 @@ CONTAINS
 
     ! compute tfission
 
-    DO eg = 1, egmax
-      DO i = 1, num_cells
+    DO i = 1, num_cells
+      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      DO eg = 1, egmax
         tfissions = tfissions+ &
-              nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs* &
+              xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg)* &
               cells(i)%volume*dens_fact(cells(i)%reg)*flux(1,1,i,eg,flag)
       END DO
     END DO
@@ -1314,7 +1321,7 @@ CONTAINS
 
     INTEGER(kind=li) :: eg,eeg,i,j,l,m,n,alloc_stat,indx,k
     INTEGER(kind=li) :: zero,one,two,three
-    INTEGER(kind=li) :: q,octant,egg
+    INTEGER(kind=li) :: q,octant,egg,mat_indx
 
     ! dummy for max_errors
 
@@ -1342,20 +1349,21 @@ CONTAINS
 
     ! build fission source and initialize src with chi*fiss_src
 
-    DO eg = 1, egmax
-      DO i = 1, num_cells
+    DO i = 1, num_cells
+      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      DO eg = 1, egmax
         DO l = 1, num_moments_v
-          fiss_src(l,i) =fiss_src(l,i)                                          +&
-                nu(reg2mat(cells(i)%reg),eg)%xs*fiss(reg2mat(cells(i)%reg),eg)%xs *&
+          fiss_src(l,i) =fiss_src(l,i)+xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg) *&
                 dens_fact(cells(i)%reg)*flx(l,1,i,eg,1)
         END DO
       END DO
     END DO
     !
-    DO eg = 1, egmax
-      DO i = 1, num_cells
+    DO i = 1, num_cells
+      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      DO eg = 1, egmax
         DO l = 1, num_moments_v
-          src(l,1,i,eg)=chi(reg2mat(cells(i)%reg),eg)%xs*fiss_src(l,i)/keff
+          src(l,1,i,eg)=xs_mat(mat_indx)%chi(eg)*fiss_src(l,i)/keff
         END DO
       END DO
     END DO

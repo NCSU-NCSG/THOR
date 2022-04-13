@@ -21,7 +21,7 @@ INTEGER,PARAMETER :: MAX_CARDNAME_LEN=32
 INTEGER,PARAMETER :: num_cards=43
 !> The maximum length of a line in the input file
 INTEGER,PARAMETER :: ll_max=200
-!(also need to change in interface if changed)
+!(need to change in interface if changed)
 !> The maximum number of params on a given line or inputs for a param
 INTEGER,PARAMETER :: lp_max=100
 !(also need to change in interface if changed)

@@ -213,22 +213,22 @@ CONTAINS
       WRITE(6,101) 'Most thermal group:              ',most_thermal
     END IF
     DO m=1,num_mat
-      WRITE(6,102) 'Material ',m,' with ID ',xs_mat(m)%mat
+      WRITE(6,102) 'Material ',xs_mat(m)%mat_name,' with ID ',xs_mat(m)%mat_id
       WRITE(6,103) 'Group','SigT','SigF','SigS','nu*SigF','chi'
       DO g=1,egmax
         sigs=0.0_d_t
         DO gp=1,egmax
-          sigs(g)=sigs(g)+sigma_scat(xs_mat(m)%mat,1,gp,g)%xs
+          sigs(g)=sigs(g)+xs_mat(m)%sigma_scat(1,gp,g)
         END DO
-        WRITE(6,104) g,sigma_t(xs_mat(m)%mat,g)%xs,fiss(xs_mat(m)%mat,g)%xs, &
-              sigs(g),fiss(xs_mat(m)%mat,g)%xs*nu(xs_mat(m)%mat,g)%xs,&
-              chi(xs_mat(m)%mat,g)%xs
+        WRITE(6,104) g,xs_mat(m)%sigma_t(g),xs_mat(m)%sigma_f(g), &
+              sigs(g),xs_mat(m)%sigma_f(g)*xs_mat(m)%nu(g),&
+              xs_mat(m)%chi(g)
       END DO
       WRITE(6,*) 'Scattering Matrix, from -> columns, to -> row'
       DO order=1, xs_ord+1
-        WRITE(6,101) 'Scattering order: ',order
+        WRITE(6,101) 'Scattering order: ',order-1
         DO g=1,egmax
-          WRITE(6,105) (sigma_scat(xs_mat(m)%mat,order,g,gp)%xs,gp=1,egmax)
+          WRITE(6,105) (xs_mat(m)%sigma_scat(order,gp,g),gp=1,egmax)
         END DO
       END DO
     END DO
