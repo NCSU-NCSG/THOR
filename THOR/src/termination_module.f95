@@ -23,10 +23,7 @@ CONTAINS
     INTEGER(kind=li) :: m,eg,q,octant,f
 
     ! src types
-
-    IF ( ALLOCATED( src_m   ) ) DEALLOCATE( src_m)
-    IF ( ALLOCATED( src_mat ) ) DEALLOCATE( src_mat )
-    IF ( ALLOCATED( src_str ) ) DEALLOCATE( src_str )
+    IF ( ALLOCATED( ext_src   ) ) DEALLOCATE( ext_src)
 
     ! cross section types
 

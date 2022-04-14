@@ -85,8 +85,10 @@ CONTAINS
 
     IF(execution .EQ. 0) CALL stop_thor(1_li)
 
-    ! Call generate_num_moments and generate_multi_index to create indices
+    !set the namom here so we know for the source file
+    namom=(scatt_ord+1)**2
 
+    ! Call generate_num_moments and generate_multi_index to create indices
     CALL generate_num_moments(space_ord,num_moments_v,num_moments_f)
 
     ALLOCATE(index_v(num_moments_v),index_f(num_moments_f),&

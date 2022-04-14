@@ -14,6 +14,7 @@ MODULE global_variables
   USE angle_types
   USE multindex_types
   USE integer_array_tools
+  USE source_types
   IMPLICIT NONE
 
   ! from parameters
@@ -47,11 +48,10 @@ MODULE global_variables
   INTEGER(kind=li) :: number_point_flux_locations
   REAL(kind=d_t), ALLOCATABLE :: point_flux_locations(:,:)
 
-  ! Source types
-
-  INTEGER, DIMENSION(:), ALLOCATABLE :: src_mat
-  REAL(kind=d_t),ALLOCATABLE :: src_m(:,:,:)
-  REAL(kind=d_t),ALLOCATABLE :: src_str(:,:)
+  !Sources
+  TYPE(source_type), ALLOCATABLE :: ext_src(:)
+  INTEGER(kind=li)      , DIMENSION(:)      , ALLOCATABLE :: src_pointer
+  INTEGER(kind=li) :: src_id_min,src_id_max
 
   ! Inflow flux derived type
 
@@ -65,8 +65,8 @@ MODULE global_variables
   ! Cross Sections
   TYPE(xs_material_type) , DIMENSION(:)      , ALLOCATABLE :: xs_mat
   REAL(kind=d_t)         , DIMENSION(:)      , ALLOCATABLE :: eg_bounds
-  INTEGER(kind=d_t)      , DIMENSION(:)      , ALLOCATABLE :: mat_pointer
-  INTEGER(kind=d_t) :: mat_id_min,mat_id_max
+  INTEGER(kind=li)      , DIMENSION(:)      , ALLOCATABLE :: mat_pointer
+  INTEGER(kind=li) :: mat_id_min,mat_id_max
 
   ! Geometry types
 

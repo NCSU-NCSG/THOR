@@ -60,7 +60,7 @@ CONTAINS
     ! Define temporary variables
 
     INTEGER(kind=li)               :: alloc_stat, eg, egg, q, octant, i, l, &
-          order, n, m, ii, k, indx,face,f,mat_indx
+          order, n, m, ii, k, indx,face,f,mat_indx,src_indx
     REAL(kind=d_t)                 :: t_error
     LOGICAL                        :: existence
 
@@ -119,11 +119,14 @@ CONTAINS
       ! Initialize the src with external source ...
 
       src = zero
-      DO eg=1,egmax
-        DO i=1,num_cells
+      DO i=1,num_cells
+        src_indx=src_pointer(cells(i)%src)
+        DO eg=1,egmax
           ! imposed internal source contribution
           DO l=1,num_moments_v
-            src(l,1,i,eg) = src_str(cells(i)%src,eg)*src_m(l,cells(i)%src,eg)
+            DO k=1,namom
+              src(l,k,i,eg) = ext_src(src_indx)%mom(l,k,eg)
+            ENDDO
           END DO
         END DO
       END DO

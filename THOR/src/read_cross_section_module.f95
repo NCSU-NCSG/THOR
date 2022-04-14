@@ -122,7 +122,7 @@ CONTAINS
       IF(xs_mat(i)%mat_id .LE. mat_id_min)mat_id_min=xs_mat(i)%mat_id
     ENDDO
     !allocate and assign pointer values
-    !everywhere else will be
+    !everywhere else will be 0
     ALLOCATE(mat_pointer(mat_id_min:mat_id_max))
     mat_pointer=0
     DO i=1,num_mat

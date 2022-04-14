@@ -29,6 +29,7 @@ SRC :=  \
         angle_types.f95										\
         cell_splitting_module.f95					\
         cross_section_types.f95						\
+        source_types.f95						\
         dump_inguess_module.f95						\
         error_generator.f95								\
         execution_module.f95							\
@@ -198,6 +199,9 @@ cell_splitting_module.o cell_splitting_module.mod: \
 cross_section_types.o cross_section_types.mod: cross_section_types.f95 \
   types.mod
 
+source_types.o source_types.mod: source_types.f95 \
+  types.mod
+
 dump_inguess_module.o dump_inguess_module.mod: dump_inguess_module.f95 \
   types.mod parameter_types.mod filename_types.mod vector_types.mod \
   cross_section_types.mod geometry_types.mod angle_types.mod \
@@ -220,7 +224,7 @@ geometry_types.o geometry_types.mod: geometry_types.f95 types.mod \
 
 global_variables.o global_variables.mod: global_variables.f95 types.mod \
   parameter_types.mod filename_types.mod vector_types.mod \
-  cross_section_types.mod geometry_types.mod angle_types.mod \
+  cross_section_types.mod source_types.mod geometry_types.mod angle_types.mod \
   multindex_types.mod integer_array_tools.mod
 
 inner_iteration_module.o inner_iteration_module.mod: \
