@@ -11,6 +11,7 @@ MODULE read_source_module
   USE multindex_types
   USE global_variables
   USE termination_module
+  USE stringmod
 
   IMPLICIT NONE
   PRIVATE
@@ -127,9 +128,64 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE src_read_current
+    INTEGER :: nwords,given_ang,given_space,alloc_stat,m,i,j,g
+    CHARACTER(10000) :: words(1000)
 
-  STOP 'src_read_current not finished'
+    CALL get_next_line(words,nwords)
+
+    given_ang=1
+    given_space=1
+    READ(words(2),*)num_src_mat
+    IF(nwords .GE. 3)READ(words(3),*)given_ang
+    IF(nwords .GE. 4)READ(words(4),*)given_space
+
+    !allocate the external source
+    ALLOCATE(ext_src(num_src_mat),stat=alloc_stat)
+    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    ext_src(:)%src_id=0.0
+    DO m=1,num_src_mat
+      ALLOCATE(ext_src(m)%mom(num_moments_v,namom,egmax),stat=alloc_stat)
+      IF(alloc_stat /= 0) CALL stop_thor(2_li)
+      ext_src(m)%mom(:,:,:)=0.0
+    ENDDO
+
+    DO m=1,num_src_mat
+      CALL get_next_line(words,nwords)
+      READ(words(1),*)ext_src(m)%src_id
+      !loop over source data for the given amount
+      DO i=1,given_ang
+        DO j=1,given_space
+          CALL get_next_line(words,nwords)
+          IF(i .LE. namom .AND. j .LE. num_moments_v)THEN
+            DO g=1,egmax
+              READ(words(g),*)ext_src(m)%mom(j,i,g)
+            ENDDO
+          ENDIF
+        ENDDO
+      ENDDO
+    ENDDO
 
   END SUBROUTINE src_read_current
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  SUBROUTINE get_next_line(words,nwords)
+    INTEGER,INTENT(OUT) :: nwords
+    CHARACTER(10000),INTENT(OUT) :: words(1000)
+    CHARACTER(10000) :: line
+    INTEGER :: ios
+    DO
+      READ(local_unit,'(A10000)',IOSTAT=ios)line
+      IF(ios .NE. 0)STOP 'end of xs file was reached before all data/materials were found'
+      line=TRIM(ADJUSTL(line))
+      !finding uncommented line that isn't empty
+      IF(line(1:1) .NE. '!' .AND. line .NE. '')THEN
+        !ignore commented portions of line
+        CALL parse(line,'!',words,nwords)
+        line=TRIM(ADJUSTL(words(1)))
+        CALL parse(line,' ',words,nwords)
+        EXIT
+      ENDIF
+    ENDDO
+  ENDSUBROUTINE
 
 END MODULE read_source_module

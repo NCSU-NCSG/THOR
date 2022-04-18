@@ -48,7 +48,7 @@ MODULE global_variables
   INTEGER(kind=li) :: number_point_flux_locations
   REAL(kind=d_t), ALLOCATABLE :: point_flux_locations(:,:)
 
-  !Sources
+  !External Sources
   TYPE(source_type), ALLOCATABLE :: ext_src(:)
   INTEGER(kind=li)      , DIMENSION(:)      , ALLOCATABLE :: src_pointer
   INTEGER(kind=li) :: src_id_min,src_id_max
