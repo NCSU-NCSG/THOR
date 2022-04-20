@@ -1,0 +1,26 @@
+  execution yes
+  lambda -1
+  type fsrc;
+  sweep precomp
+  page_refl save
+  innerconv 1E-7 ; outerconv 1E-6
+  maxinner 100; maxouter 2
+
+  mesh_file kobayashi-3-0.thrm
+  xs_file kobayashi.xs
+  source_file kobayashi-LC.src
+  flux_file kobayashi-LC.flux
+  print_xs yes
+
+  ngroups 1
+  upscattering no
+  multiplying no
+
+  qdtype levelsym
+  qdorder 8
+
+  point_value_locations 5 55 5 15 55 5 25 55 5 35 55 5 45 55 5 55 55 5;
+
+  regionmap 1 1
+  2 2
+  3 1

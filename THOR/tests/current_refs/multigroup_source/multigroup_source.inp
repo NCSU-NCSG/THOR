@@ -1,0 +1,21 @@
+  execution yes
+  lambda 0
+  type fsrc ;
+  sweep precomp
+  page_refl save
+  innerconv 1E-12 ; outerconv 1E-5
+  maxinner 2 ; maxouter 500
+
+  mesh_file two_region_cube.thrm
+  xs_file two_group_upscattering.xs
+  source_file two_region_cube.src
+  flux_file multigroup_two_region_cube.flux
+  print_xs yes
+
+  ngroups 2 ; upscattering yes ;
+  multiplying no
+
+  qdtype levelsym ; qdorder 2
+
+  regionmap 1 1
+  2 1

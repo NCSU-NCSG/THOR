@@ -199,9 +199,6 @@ cell_splitting_module.o cell_splitting_module.mod: \
 cross_section_types.o cross_section_types.mod: cross_section_types.f95 \
   types.mod
 
-source_types.o source_types.mod: source_types.f95 \
-  types.mod
-
 dump_inguess_module.o dump_inguess_module.mod: dump_inguess_module.f95 \
   types.mod parameter_types.mod filename_types.mod vector_types.mod \
   cross_section_types.mod geometry_types.mod angle_types.mod \
@@ -243,7 +240,7 @@ jfnk_module.o jfnk_module.mod: jfnk_module.f95 types.mod \
   parameter_types.mod filename_types.mod vector_types.mod \
   cross_section_types.mod geometry_types.mod angle_types.mod \
   multindex_types.mod global_variables.mod inner_iteration_module.mod \
-  dump_inguess_module.mod
+  dump_inguess_module.mod outer_iteration_module.mod
 
 main.o: main.f95  types.mod parameter_types.mod \
   filename_types.mod vector_types.mod cross_section_types.mod \
@@ -273,17 +270,22 @@ quadrature_module.o quadrature_module.mod: quadrature_module.f95 \
 read_cross_section_module.o read_cross_section_module.mod: \
   read_cross_section_module.f95 types.mod parameter_types.mod \
   filename_types.mod cross_section_types.mod global_variables.mod \
-  termination_module.mod
+  termination_module.mod stringmod.mod
 
 read_inflow_module.o read_inflow_module.mod: read_inflow_module.f95 \
   types.mod parameter_types.mod filename_types.mod multindex_types.mod \
   global_variables.mod termination_module.mod
 
+read_inp_module.o read_inp_module.mod: read_inp_module.f95  \
+  stringmod.mod global_variables.mod
+
 read_inp_module_legacy.o read_inp_module_legacy.mod: read_inp_module_legacy.f95 \
   stringmod.mod error_generator.mod global_variables.mod parameter_types.mod
 
-read_inp_module.o read_inp_module.mod: read_inp_module.f95  \
-  stringmod.mod global_variables.mod
+read_mesh_module.o read_mesh_module.mod: read_mesh_module.f95 \
+  types.mod parameter_types.mod filename_types.mod \
+  vector_types.mod geometry_types.mod global_variables.mod \
+  termination_module.mod
 
 read_module.o read_module.mod: read_module.f95  \
   stringmod.mod types.mod parameter_types.mod filename_types.mod \
@@ -295,18 +297,16 @@ read_module.o read_module.mod: read_module.f95  \
 
 read_source_module.o read_source_module.mod: read_source_module.f95 \
   types.mod parameter_types.mod filename_types.mod multindex_types.mod \
-  global_variables.mod termination_module.mod
-
-read_mesh_module.o read_mesh_module.mod: read_mesh_module.f95 \
-  types.mod parameter_types.mod filename_types.mod \
-  vector_types.mod geometry_types.mod global_variables.mod \
-  termination_module.mod
+  global_variables.mod termination_module.mod stringmod.mod
 
 setup_module.o setup_module.mod: setup_module.f95  \
   types.mod parameter_types.mod filename_types.mod vector_types.mod \
   cross_section_types.mod geometry_types.mod angle_types.mod \
   multindex_types.mod global_variables.mod read_module.mod \
   quadrature_module.mod sweep_module.mod termination_module.mod
+
+source_types.o source_types.mod: source_types.f95 \
+  types.mod
 
 solver_module.o solver_module.mod: solver_module.f95 types.mod \
   parameter_types.mod filename_types.mod vector_types.mod \
@@ -355,4 +355,4 @@ vector_types.o vector_types.mod: vector_types.f95 types.mod
 wrapup_module.o wrapup_module.mod: wrapup_module.f95 types.mod \
   parameter_types.mod filename_types.mod vector_types.mod \
   cross_section_types.mod geometry_types.mod angle_types.mod \
-  global_variables.mod termination_module.mod
+  global_variables.mod termination_module.mod general_utility_module.mod

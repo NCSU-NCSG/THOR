@@ -1,0 +1,27 @@
+  execution yes
+  lambda 0
+  type fsrc ;
+  sweep precomp
+  page_refl save
+  innerconv 1E-12 ; outerconv 1E-8
+  maxinner 4000 ; maxouter 5000
+
+  mesh_file ./noshield.thrm
+  xs_file ./noshield_32group.xs
+  source_file ./noshield_32group.src
+  flux_file noshieldout.flux
+  print_xs no
+
+  ngroups 32 ; upscattering yes ;
+  multiplying yes
+
+  qdtype levelsym ; qdorder 2
+
+  regionmap
+  1 1
+  2 2
+  3 3
+  4 4
+  5 5
+  6 6
+  7 7

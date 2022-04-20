@@ -228,7 +228,7 @@ CONTAINS
       DO order=1, xs_ord+1
         WRITE(6,101) 'Scattering order: ',order-1
         DO g=1,egmax
-          WRITE(6,105) (xs_mat(m)%sigma_scat(order,gp,g),gp=1,egmax)
+          WRITE(6,105) (xs_mat(m)%sigma_scat(order,g,gp),gp=1,egmax)
         END DO
       END DO
     END DO

@@ -1,0 +1,34 @@
+  execution yes
+  lambda 0
+  type keig ; keigsolver jfnk
+  jfnk_method outer ; ipiter 0
+  sweep precomp
+  page_refl save
+  kconv 1E-4; innerconv 1E-12 ; outerconv 1E-7
+  maxinner 2 ; maxouter 500
+
+  mesh_file ./takeda.thrm
+  xs_file ./takeda.xs
+  flux_file takeda-IV-ari.flux
+  print_xs yes
+
+  ngroups 4 ; upscattering no
+
+  qdtype levelsym ; qdorder 4
+
+  start regionmap
+  1 1
+  2 2
+  3 3
+  4 4
+  5 5
+  6 6
+  7 7
+  8 8
+  9 9
+  10 10
+  11 11
+  12 12
+  13 13
+  14 14
+  15 15
