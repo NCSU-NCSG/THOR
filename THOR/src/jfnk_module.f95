@@ -381,8 +381,8 @@ CONTAINS
         WRITE(6,103) 'with final residual ',nres
         WRITE(6,*)   '---------------------------------------------------------------------------'
         conv_flag=1
-        go to 10
       END IF
+      IF(nres<nit_conv)EXIT
 103   FORMAT (1X,A,ES12.4)
 104   FORMAT (1X,A44,I4,A)
 
@@ -395,8 +395,6 @@ CONTAINS
     END DO
 
     nit=nit-1
-
-10  CONTINUE
 
     ! normalize eigenmode
 
