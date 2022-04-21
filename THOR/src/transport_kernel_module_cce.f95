@@ -1063,11 +1063,11 @@ CONTAINS
       rerror=ABS(new_term/face_moment1)
       IF(rerror > eps)THEN
       ELSE
-        go to 10
+        EXIT
       END IF
     END DO
 
-10 END FUNCTION face_moment1
+  END FUNCTION face_moment1
 
   FUNCTION face_moment2(gam1,gam2,gam3,t,e)
     !*********************************************************************
@@ -1119,22 +1119,20 @@ CONTAINS
         END IF
         IF(rerror1 > eps)THEN
         ELSE
-          go to 10
+          EXIT
         END IF
       END DO
-
-10    CONTINUE
 
       face_moment2=face_moment2+new_term2
       rerror2=ABS(new_term2/face_moment2)
       IF(rerror2 > eps)THEN
         new_term2=0.0_d_t
       ELSE
-        go to 11
+        EXIT
       END IF
     END DO
 
-11 END FUNCTION face_moment2
+  END FUNCTION face_moment2
 
   FUNCTION volume_moment1(gam1,gam2,gam3,e)
     !*********************************************************************
@@ -1172,11 +1170,11 @@ CONTAINS
       rerror=ABS(new_term/volume_moment1)
       IF(rerror > eps)THEN
       ELSE
-        go to 10
+        EXIT
       END IF
     END DO
 
-10 END FUNCTION volume_moment1
+  END FUNCTION volume_moment1
 
   FUNCTION volume_moment2(gam1,gam2,gam3,gam3p,t,e)
     !*********************************************************************
@@ -1228,21 +1226,19 @@ CONTAINS
         END IF
         IF(rerror1 > eps)THEN
         ELSE
-          go to 10
+          EXIT
         END IF
       END DO
-
-10    CONTINUE
 
       volume_moment2=volume_moment2+new_term2
       rerror2=ABS(new_term2/volume_moment2)
       IF(rerror2 > eps)THEN
         new_term2=0.0_d_t
       ELSE
-        go to 11
+        EXIT
       END IF
     END DO
 
-11 END FUNCTION volume_moment2
+  END FUNCTION volume_moment2
 
 END MODULE transport_kernel_module_CCE

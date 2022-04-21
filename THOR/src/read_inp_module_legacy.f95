@@ -2113,8 +2113,6 @@ CONTAINS
 
     END DO
 
-999 CONTINUE
-
 101 FORMAT(A100)
 
     ! Read reg2mat

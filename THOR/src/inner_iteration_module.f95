@@ -152,7 +152,7 @@ CONTAINS
       ! Test convergence of current-group scalar flux
 
       IF(inner > 1 .AND. max_error(eg) < inner_conv)THEN
-        go to 10
+        EXIT
       END IF
 
       IF(inner < max_inner)THEN
@@ -185,8 +185,6 @@ CONTAINS
     END DO
 
     inner=inner-1_li
-
-10  CONTINUE
 
     tot_nInners=tot_nInners+inner
 

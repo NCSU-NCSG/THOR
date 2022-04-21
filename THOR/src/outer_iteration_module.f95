@@ -251,20 +251,18 @@ CONTAINS
       IF(most_thermal==0) THEN ! no upscattering
         IF(MAXVAL(max_error)<inner_conv) THEN
           conv_flag=1
-          go to 10
+          EXIT
         END IF
       ELSE
         IF(MAXVAL(max_error)<inner_conv .AND. max_outer_error<outer_conv) THEN
           conv_flag=1
-          go to 10
+          EXIT
         END IF
       END IF
 
     END DO
 
     outer=outer-one
-
-10  CONTINUE
 
     IF (rank .EQ. 0) THEN
       WRITE(6,*) '========================================================'
@@ -800,7 +798,7 @@ CONTAINS
       IF(outer > 2 .AND. (fiss_error < outer_conv .OR. flux_error < outer_conv) .AND. &
             keff_error < k_conv) THEN
         conv_flag=1
-        go to 10
+        EXIT
       END IF
 
       !========================================================================
@@ -831,8 +829,6 @@ CONTAINS
     END DO
 
     outer=outer-1
-
-10  CONTINUE
 
     k_error=keff_error
     f_error=fiss_error
