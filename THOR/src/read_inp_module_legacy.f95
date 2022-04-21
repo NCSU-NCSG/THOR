@@ -2094,7 +2094,8 @@ CONTAINS
     regmap=""
     DO WHILE(done .EQV. .FALSE.)
 
-      READ(localunit,101,END=999) buffer
+      READ(localunit,101,IOSTAT=ios) buffer
+      IF(ios .NE. 0)EXIT
       IF     ( INDEX( lowercase(buffer) ,'start') > 0 .AND. INDEX( lowercase(buffer) ,'problem')>0 ) THEN
         CALL legacyv1_read_problem
       ELSE IF( INDEX( lowercase(buffer) ,'start') > 0 .AND. INDEX( lowercase(buffer) ,'inout')>0   ) THEN
