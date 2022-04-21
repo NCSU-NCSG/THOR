@@ -178,6 +178,7 @@ CONTAINS
     ! Error out if we have reflecting BCs, JFNK, and nproc > 1
     IF (eig_switch .EQ. one .and. SUM(reflective) .NE. zero .and. num_p > one) THEN
       CALL stop_thor(-1_li, "Parallel execution of JFNK with reflecting BC is currently not supported in THOR.")
+      !TODO: This should be analyzed and figured out if we can do something different, or if we can just set it to 1 thread
     END IF
 
 101 FORMAT(1X,A,ES12.4)
