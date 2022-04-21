@@ -1,14 +1,13 @@
   execution yes
   lambda -1
   type keig ;
-  sweep precomp
   page_refl save
   innerconv 1E-12 ; outerconv 1E-7
   maxinner 4 ; maxouter 500
 
-  mesh_file keig_homogeneous.thrm
-  xs_file keig_homogeneous.xs
-  flux_file keig_homogeneous.flux
+  mesh keig_homogeneous.thrm
+  xs keig_homogeneous.xs
+  flux_out keig_homogeneous.flux
   print_xs yes
 
   ngroups 1 ; upscattering no
@@ -16,4 +15,4 @@
 
   qdtype levelsym ; qdorder 2
 
-  regionmap 1 1
+  region_map 0 1

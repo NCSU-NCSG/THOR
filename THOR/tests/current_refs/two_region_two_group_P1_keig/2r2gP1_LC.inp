@@ -1,14 +1,13 @@
   execution yes
   lambda -1
   type keig ; keigsolver pi ; piacc none
-  sweep precomp
   page_refl save
   kconv 1E-4; innerconv 1E-12 ; outerconv 1E-7
   maxinner 4 ; maxouter 500
 
-  mesh_file base.thrm
-  xs_file 2r2gP1.xs
-  flux_file 2r2gP1_LC.flux
+  mesh base.thrm
+  xs 2r2gP1.xs
+  flux_out 2r2gP1_LC.flux
   print_xs yes
 
   ngroups 2
@@ -19,6 +18,6 @@
   qdtype levelsym
   qdorder 2
 
-  regionmap
+  region_map
   1 1
   2 2

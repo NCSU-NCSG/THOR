@@ -1,21 +1,20 @@
   execution yes
   lambda 0
-  type keig ; keigsolver pi ; piacc=none
-  sweep precomp
+  type keig ; keigsolver pi ; piacc none
   page_refl save
   kconv 1E-8; innerconv 1E-12 ; outerconv 1E-4
   maxinner 2 ; maxouter 5000
 
-  mesh_file cube_level1.mesh
-  xs_file cube_eigenvalue_1g.xs
-  flux_file pi_hard_eig_1grp.flux
-  cartesian_map_file cube_cartesian_map.dat
+  mesh cube_level1.mesh
+  xs cube_eigenvalue_1g.xs
+  flux_out pi_hard_eig_1grp.flux
+  cartesian_map_out cube_cartesian_map.dat
   print_xs yes
 
-  ngroups=1 ; upscattering yes
+  ngroups 1 ; upscattering yes
 
   cartesian_map -50.0 50.0 4 -50.0 50.0 4  -50.0 50.0 2  ;
 
   qdtype levelsym ; qdorder 4
 
-  regionmap 1 0
+  region_map 1 0

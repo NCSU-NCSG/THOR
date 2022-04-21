@@ -1,4 +1,4 @@
-THOR_XS_V1 1 0
+THOR_XS_V1 1 1 0
 id 0
 1.0
 0.39

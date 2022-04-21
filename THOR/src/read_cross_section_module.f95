@@ -284,25 +284,37 @@ CONTAINS
           ENDIF
           !read in the fission spectrum
           CALL get_next_line(words,nwords)
-          IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
+          IF(nwords .NE. egmax)THEN
+            WRITE(*,*)'bad amount of xs data on line for chi',nwords,TRIM(words(1))
+            STOP 'fatal error'
+          ENDIF
           DO g=1,egmax
             READ(words(g),*)xs_mat(i)%chi(g)
           ENDDO
           !read in SigmaF
           CALL get_next_line(words,nwords)
-          IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
+          IF(nwords .NE. egmax)THEN
+            WRITE(*,*)'bad amount of xs data on line for SigmaF',nwords,TRIM(words(1))
+            STOP 'fatal error'
+          ENDIF
           DO g=1,egmax
             READ(words(g),*)xs_mat(i)%sigma_f(g)
           ENDDO
           !read in nu
           CALL get_next_line(words,nwords)
-          IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
+          IF(nwords .NE. egmax)THEN
+            WRITE(*,*)'bad amount of xs data on line for nu',nwords,TRIM(words(1))
+            STOP 'fatal error'
+          ENDIF
           DO g=1,egmax
             READ(words(g),*)xs_mat(i)%nu(g)
           ENDDO
           !read in total/transport xs
           CALL get_next_line(words,nwords)
-          IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
+          IF(nwords .NE. egmax)THEN
+            WRITE(*,*)'bad amount of xs data on line for total xs',nwords,TRIM(words(1))
+            STOP 'fatal error'
+          ENDIF
           DO g=1,egmax
             READ(words(g),*)xs_mat(i)%sigma_t(g)
           ENDDO
@@ -310,7 +322,10 @@ CONTAINS
           DO j=1,xs_ord+1
             DO g=1,egmax
               CALL get_next_line(words,nwords)
-              IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
+              IF(nwords .NE. egmax)THEN
+                WRITE(*,*)'bad amount of xs data on line for sigmas',g,nwords,TRIM(words(1))
+                STOP 'fatal error'
+              ENDIF
               DO gp=1,egmax
                 READ(words(gp),*)xs_mat(i)%sigma_scat(j,g,gp)
               ENDDO

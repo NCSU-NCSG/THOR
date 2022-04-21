@@ -610,6 +610,7 @@ CONTAINS
     localunit = rank+100
 
     OPEN(unit = localunit, file = fname , status = 'old', action = 'read',IOSTAT=ios)
+    jobname=TRIM(ADJUSTL(fname))
     IF(ios .NE. 0)THEN
       WRITE(*,*)'error opening ',TRIM(fname)
       STOP 'fatal error'

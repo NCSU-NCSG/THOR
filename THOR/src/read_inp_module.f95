@@ -146,8 +146,8 @@ CONTAINS
     cards(41)%getcard => get_cartesian_map
     cards(42)%cname='point_value_locations'
     cards(42)%getcard => get_point_value_locations
-    cards(42)%cname='region_map'
-    cards(42)%getcard => get_region_map
+    cards(43)%cname='region_map'
+    cards(43)%getcard => get_region_map
     !end of input cards
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     minreg= 100000_li
@@ -770,12 +770,16 @@ CONTAINS
   SUBROUTINE get_cartesian_map(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    INTEGER :: nwwwords
+    INTEGER :: nwwwords,i
     CHARACTER(ll_max) :: wwwords(lp_max)
-    wwords(2)=TRIM(lowercase(wwords(2)))
+    !get the cartesian map array
+    DO i=2,lp_max
+      wwwords(i-1)=TRIM(ADJUSTL(lowercase(wwords(i))))
+      IF(TRIM(ADJUSTL(wwords(i))) .EQ. '')EXIT
+      nwwwords=i-1
+    ENDDO
     glob_do_cartesian_mesh = .TRUE.
     ! wwords must be an array with of length 9
-    CALL parse(wwords(2), " ", wwwords, nwwwords)
     IF (nwwwords .NE. 9) THEN
       WRITE(6,*) 'Following cartesian map nine entries are required; Found: ',&
             TRIM(wwords(2)),' has ', nwwwords, ' entries.'
@@ -806,8 +810,12 @@ CONTAINS
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     INTEGER :: nwwwords,j,l
     CHARACTER(ll_max) :: wwwords(lp_max)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    CALL parse(wwords(2), " ", wwwords, nwwwords)
+    !get the point value locations array
+    DO j=2,lp_max
+      wwwords(j-1)=TRIM(ADJUSTL(lowercase(wwords(j))))
+      IF(TRIM(ADJUSTL(wwords(j))) .EQ. '')EXIT
+      nwwwords=j-1
+    ENDDO
     ! must be divisible by 3
     IF (modulo(nwwwords, 3) .ne. 0) THEN
       WRITE(6,*) 'point_value_locations number of entries must be divisible by 3; Found: ',&

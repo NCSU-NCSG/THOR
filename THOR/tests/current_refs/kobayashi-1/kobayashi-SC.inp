@@ -1,15 +1,14 @@
   execution yes
   lambda 0
   type fsrc;
-  sweep precomp
   page_refl save
   innerconv 1E-7 ; outerconv 1E-6
   maxinner 2; maxouter 5000
 
-  mesh_file kobayashi-1-0.thrm
-  xs_file kobayashi.xs
-  source_file kobayashi-SC.src
-  flux_file kobayashi-SC.flux
+  mesh kobayashi-1-0.thrm
+  xs kobayashi.xs
+  source kobayashi-SC.src
+  flux_out kobayashi-SC.flux
   print_xs yes
 
   ngroups 1
@@ -21,6 +20,6 @@
 
   point_value_locations 5 5 5 15 15 15 25 25 25 35 35 35 45 45 45 55 55 55 65 65 65 75 75 75 85 85 85 95 95 95;
 
-  regionmap 1 1
+  region_map 1 1
   2 2
   3 1

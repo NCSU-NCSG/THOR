@@ -2,21 +2,20 @@
   lambda 0
   type keig ; keigsolver jfnk
   jfnk_method outer ; ipiter 0
-  sweep precomp
   page_refl save
   kconv 1E-4; innerconv 1E-12 ; outerconv 1E-7
   maxinner 2 ; maxouter 500
 
-  mesh_file ./takeda.thrm
-  xs_file ./takeda.xs
-  flux_file takeda-IV-ari.flux
+  mesh ./takeda.thrm
+  xs ./takeda.xs
+  flux_out takeda-IV-ari.flux
   print_xs yes
 
   ngroups 4 ; upscattering no
 
   qdtype levelsym ; qdorder 4
 
-  start regionmap
+  region_map
   1 1
   2 2
   3 3

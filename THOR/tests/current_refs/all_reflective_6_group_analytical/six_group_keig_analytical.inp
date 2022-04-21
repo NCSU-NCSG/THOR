@@ -1,15 +1,14 @@
   execution yes
   lambda 0
   type keig
-  sweep precomp
   page_refl save
   innerconv 1E-12 ; outerconv 1E-7
   maxinner  4 ; maxouter 500
 
 
-  mesh_file brick_tet_mesh.thrm
-  xs_file   six_group.xs
-  flux_file six_group_keig_analytical.flux
+  mesh brick_tet_mesh.thrm
+  xs   six_group.xs
+  flux_out six_group_keig_analytical.flux
   print_xs yes
 
   ngroups 6
@@ -19,4 +18,4 @@
   qdtype levelsym
   qdorder 2
 
-  regionmap 1 1
+  region_map 1 1
