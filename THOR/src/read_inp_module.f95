@@ -770,8 +770,9 @@ CONTAINS
   SUBROUTINE get_cartesian_map(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    INTEGER :: nwwwords,i
-    CHARACTER(ll_max) :: wwwords(lp_max)
+    INTEGER :: nwwwords,i,minint
+    CHARACTER(ll_max) :: wwwords(lp_max),msg
+    minint=1
     !get the cartesian map array
     DO i=2,lp_max
       wwwords(i-1)=TRIM(ADJUSTL(lowercase(wwords(i))))
@@ -784,24 +785,33 @@ CONTAINS
       WRITE(6,*) 'Following cartesian map nine entries are required; Found: ',&
             TRIM(wwords(2)),' has ', nwwwords, ' entries.'
     END IF
-    glob_cmap_min_x = string_to_real(wwwords(1), 'Conversion to cartesian map xmin failed')
-    glob_cmap_max_x = string_to_real(wwwords(2), 'Conversion to cartesian map xmax failed')
+    msg='Conversion to cartesian map xmin failed'
+    glob_cmap_min_x = string_to_real(wwwords(1), msg)
+    msg='Conversion to cartesian map xmax failed'
+    glob_cmap_max_x = string_to_real(wwwords(2), msg)
     IF (ABS(glob_cmap_max_x - glob_cmap_min_x) < small_real) THEN
       WRITE(6, *) "cartesian_map xmin and xmax are too close to each other"
     END IF
-    glob_cmap_nx = string_to_int(wwwords(3), 'Conversion to cartesian map nx failed', 1)
-    glob_cmap_min_y = string_to_real(wwwords(4), 'Conversion to cartesian map ymin failed')
-    glob_cmap_max_y = string_to_real(wwwords(5), 'Conversion to cartesian map ymax failed')
+    msg='Conversion to cartesian map nx failed'
+    glob_cmap_nx = string_to_int(wwwords(3), msg, minint)
+    msg='Conversion to cartesian map ymin failed'
+    glob_cmap_min_y = string_to_real(wwwords(4), msg)
+    msg='Conversion to cartesian map ymax failed'
+    glob_cmap_max_y = string_to_real(wwwords(5), msg)
     IF (ABS(glob_cmap_max_y - glob_cmap_min_y) < small_real) THEN
       WRITE(6, *) "cartesian_map xmin and xmax are too close to each other"
     END IF
-    glob_cmap_ny = string_to_int(wwwords(6), 'Conversion to cartesian map ny failed', 1)
-    glob_cmap_min_z = string_to_real(wwwords(7), 'Conversion to cartesian map zmin failed')
-    glob_cmap_max_z = string_to_real(wwwords(8), 'Conversion to cartesian map zmax failed')
+    msg='Conversion to cartesian map ny failed'
+    glob_cmap_ny = string_to_int(wwwords(6), msg, minint)
+    msg='Conversion to cartesian map zmin failed'
+    glob_cmap_min_z = string_to_real(wwwords(7), msg)
+    msg='Conversion to cartesian map zmax failed'
+    glob_cmap_max_z = string_to_real(wwwords(8), msg)
     IF (ABS(glob_cmap_max_z - glob_cmap_min_z) < small_real) THEN
       WRITE(6, *) "cartesian_map zmin and zmax are too close to each other"
     END IF
-    glob_cmap_nz = string_to_int(wwwords(9), 'Conversion to cartesian map nz failed', 1)
+    msg='Conversion to cartesian map nz failed'
+    glob_cmap_nz = string_to_int(wwwords(9), msg, minint)
   END SUBROUTINE get_cartesian_map
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -809,7 +819,8 @@ CONTAINS
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     INTEGER :: nwwwords,j,l
-    CHARACTER(ll_max) :: wwwords(lp_max)
+    CHARACTER(ll_max) :: wwwords(lp_max),msg
+    msg='Conversion to point flux location failed'
     !get the point value locations array
     DO j=2,lp_max
       wwwords(j-1)=TRIM(ADJUSTL(lowercase(wwords(j))))
@@ -825,8 +836,7 @@ CONTAINS
       ALLOCATE(point_flux_locations(number_point_flux_locations, 3))
       DO l = 1, number_point_flux_locations
         DO j = 1, 3
-          point_flux_locations(l, j) = string_to_real(wwwords((l - 1) * 3 + j),&
-            'Conversion to point flux location failed')
+          point_flux_locations(l, j) = string_to_real(wwwords((l - 1) * 3 + j),msg)
         END DO
       END DO
     END IF
@@ -913,8 +923,8 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   REAL(kind=d_t) FUNCTION string_to_real(string, msg)
-    CHARACTER(lp_max), INTENT(in) :: string
-    CHARACTER(lp_max), INTENT(in) :: msg
+    CHARACTER(ll_max), INTENT(in) :: string
+    CHARACTER(ll_max), INTENT(in) :: msg
 
     INTEGER(kind=li) :: ios
 
@@ -927,9 +937,9 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_next_line(line,ios)
-    CHARACTER(200),INTENT(OUT) :: line
+    CHARACTER(ll_max),INTENT(OUT) :: line
     INTEGER,INTENT(OUT) :: ios
-    CHARACTER(200) :: words(100)
+    CHARACTER(ll_max) :: words(100)
     INTEGER :: nwords
     DO
       READ(local_unit,'(A10000)',IOSTAT=ios)line
