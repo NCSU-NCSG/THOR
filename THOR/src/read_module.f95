@@ -604,7 +604,7 @@ CONTAINS
     ! local variables
 
     CHARACTER(100) :: fname, tchar
-    INTEGER :: i,rank,mpi_err,localunit,ios,legacyv
+    INTEGER :: i,rank,mpi_err,localunit,ios,legacy_v
     CALL GET_COMMAND_ARGUMENT(1,fname)
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
     localunit = rank+100
@@ -619,29 +619,29 @@ CONTAINS
       WRITE(*,*) "<><><><><><><><>", fname
     ENDIF
 
-    legacyv=0
+    legacy_v=-9999
     !determine if the input is yaml
     IF(fname(LEN(TRIM(fname))-4: LEN(TRIM(fname))) .EQ. ".yaml")THEN
-      legacyv=-1
+      legacy_v=-1
     ELSE
       !determine if the input is legacy
       DO
         READ(localunit,'(A100)',IOSTAT=ios) tchar
         !legacy version 2
-        IF(trim(adjustl(tchar)) .EQ. "start problem")legacyv=1
+        IF(trim(adjustl(tchar)) .EQ. "start problem")legacy_v=0
         IF(ios .NE. 0)EXIT
       ENDDO
       REWIND(localunit)
     ENDIF
 
-    SELECTCASE(legacyv)
+    SELECTCASE(legacy_v)
       CASE(-1)
         !yaml read case
         CALL yaml_read(localunit)
-      CASE(1)
-        !original THOR input version, for backwards compatibility
-        CALL legacyv1_read(localunit)
       CASE(0)
+        !original THOR input version, for backwards compatibility
+        CALL legacy_v0_read(localunit)
+      CASE(-9999)
         !current THOR input format
         CALL inputfile_read(localunit)
       CASE DEFAULT

@@ -52,7 +52,7 @@ CONTAINS
       IF(ios .NE. 0)THEN
         !legacy original THOR xs format with no format indicater
         REWIND(local_unit)
-        CALL xs_read_legacyv0()
+        CALL xs_read_legacy_v0()
         EXIT
       ENDIF
       xs_format=TRIM(ADJUSTL(xs_format))
@@ -131,7 +131,7 @@ CONTAINS
   END SUBROUTINE read_xs
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE xs_read_legacyv0()
+  SUBROUTINE xs_read_legacy_v0()
 
     INTEGER(kind=li) :: alloc_stat, e1, order, eg_to, eg_from,l,m
 
@@ -203,7 +203,7 @@ CONTAINS
         END DO
       END IF
     END DO
-  END SUBROUTINE xs_read_legacyv0
+  END SUBROUTINE xs_read_legacy_v0
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !currently supports max of 1000 groups

@@ -2066,7 +2066,7 @@ CONTAINS
     END IF
   END SUBROUTINE yaml_input_flag_generic
 
-  SUBROUTINE legacyv1_read(localunit)
+  SUBROUTINE legacy_v0_read(localunit)
     INTEGER,INTENT(IN) :: localunit
     !***********************************************************************
     !
@@ -2078,7 +2078,7 @@ CONTAINS
 
     CHARACTER(100) :: buffer, fname, tchar
     LOGICAL :: done
-    INTEGER :: i, rank,mpi_err,ios,legacyv,nwords
+    INTEGER :: i, rank,mpi_err,ios,legacy_v,nwords
     CHARACTER(100000) :: regmap
     CHARACTER(10) :: words(25000)
     !get rank
@@ -2097,17 +2097,17 @@ CONTAINS
       READ(localunit,101,IOSTAT=ios) buffer
       IF(ios .NE. 0)EXIT
       IF     ( INDEX( lowercase(buffer) ,'start') > 0 .AND. INDEX( lowercase(buffer) ,'problem')>0 ) THEN
-        CALL legacyv1_read_problem
+        CALL legacy_v0_read_problem
       ELSE IF( INDEX( lowercase(buffer) ,'start') > 0 .AND. INDEX( lowercase(buffer) ,'inout')>0   ) THEN
-        CALL legacyv1_read_inout
+        CALL legacy_v0_read_inout
       ELSE IF( INDEX( lowercase(buffer) ,'start') > 0 .AND. INDEX( lowercase(buffer) ,'cross_sections')>0   ) THEN
-        CALL legacyv1_read_cross_sections
+        CALL legacy_v0_read_cross_sections
       ELSE IF( INDEX( lowercase(buffer) ,'start') > 0 .AND. INDEX( lowercase(buffer) ,'quadrature')>0   ) THEN
-        CALL legacyv1_read_quadrature_field
+        CALL legacy_v0_read_quadrature_field
       ELSE IF( INDEX( lowercase(buffer) ,'start') > 0 .AND. INDEX( lowercase(buffer) ,'postprocess')>0   ) THEN
-        CALL legacyv1_read_postprocess_field
+        CALL legacy_v0_read_postprocess_field
       ELSE IF( INDEX( lowercase(buffer) ,'start') > 0 .AND. INDEX( lowercase(buffer) ,'regionmap')>0   ) THEN
-        CALL legacyv1_read_regionmap_field(regmap)
+        CALL legacy_v0_read_regionmap_field(regmap)
       ELSE IF( INDEX( lowercase(buffer) ,'end') > 0   .AND. INDEX( lowercase(buffer) ,'file')   >0 ) THEN
         done=.TRUE.
       END IF
@@ -2127,9 +2127,9 @@ CONTAINS
       READ(regmap,*) (reg2mat(i),i=minreg,maxreg)
     ENDIF
 
-  END SUBROUTINE legacyv1_read
+  END SUBROUTINE legacy_v0_read
 
-  SUBROUTINE legacyv1_read_regionmap_field(regmap)
+  SUBROUTINE legacy_v0_read_regionmap_field(regmap)
 
     ! reads the regionmap into array regmap
 
@@ -2162,9 +2162,9 @@ CONTAINS
 
 101 FORMAT(A100)
 
-  END SUBROUTINE legacyv1_read_regionmap_field
+  END SUBROUTINE legacy_v0_read_regionmap_field
 
-  SUBROUTINE legacyv1_read_quadrature_field
+  SUBROUTINE legacy_v0_read_quadrature_field
 
     ! local variables
     INTEGER :: nwords,ntmp,i,nwwords,ios
@@ -2225,9 +2225,9 @@ CONTAINS
 
 101 FORMAT(A100)
 
-  END SUBROUTINE legacyv1_read_quadrature_field
+  END SUBROUTINE legacy_v0_read_quadrature_field
 
-  SUBROUTINE legacyv1_read_postprocess_field
+  SUBROUTINE legacy_v0_read_postprocess_field
 
     ! local variables
     INTEGER :: nwords, ntmp, i, l, j, nwwords, ios, nwwwords
@@ -2311,9 +2311,9 @@ CONTAINS
 
 101 FORMAT(A1000)
 
-  END SUBROUTINE legacyv1_read_postprocess_field
+  END SUBROUTINE legacy_v0_read_postprocess_field
 
-  SUBROUTINE legacyv1_read_cross_sections
+  SUBROUTINE legacy_v0_read_cross_sections
 
     ! local variables
     INTEGER :: nwords,ntmp,nwwords,ios
@@ -2412,9 +2412,9 @@ CONTAINS
 
 101 FORMAT(A100)
 
-  END SUBROUTINE legacyv1_read_cross_sections
+  END SUBROUTINE legacy_v0_read_cross_sections
 
-  SUBROUTINE legacyv1_read_inout
+  SUBROUTINE legacy_v0_read_inout
 
     ! local variables
     INTEGER :: nwords,ntmp,i,nwwords,ios
@@ -2514,9 +2514,9 @@ CONTAINS
 
 101 FORMAT(A100)
 
-  END SUBROUTINE legacyv1_read_inout
+  END SUBROUTINE legacy_v0_read_inout
 
-  SUBROUTINE legacyv1_read_problem
+  SUBROUTINE legacy_v0_read_problem
 
     ! local variables
     INTEGER :: nwords,ntmp,i,nwwords,ios
@@ -2804,7 +2804,7 @@ CONTAINS
     END DO
 
 101 FORMAT(A100)
-  END SUBROUTINE legacyv1_read_problem
+  END SUBROUTINE legacy_v0_read_problem
 
   INTEGER(kind=li) FUNCTION string_to_int(string, msg, min_int)
     CHARACTER(100), INTENT(in) :: string

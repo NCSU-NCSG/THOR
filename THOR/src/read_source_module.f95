@@ -49,7 +49,7 @@ CONTAINS
       IF(ios .NE. 0)THEN
         !legacy original THOR source format with no format indicater
         REWIND(local_unit)
-        CALL src_read_legacyv0()
+        CALL src_read_legacy_v0()
         EXIT
       ENDIF
       src_format=TRIM(ADJUSTL(src_format))
@@ -82,7 +82,7 @@ CONTAINS
   END SUBROUTINE read_src
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE src_read_legacyv0
+  SUBROUTINE src_read_legacy_v0
     !*********************************************************************
     !
     ! Subroutine reads source in 'unique' ahot format
@@ -124,7 +124,7 @@ CONTAINS
       END DO
     END DO
 
-  END SUBROUTINE src_read_legacyv0
+  END SUBROUTINE src_read_legacy_v0
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE src_read_current
