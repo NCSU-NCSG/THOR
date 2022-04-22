@@ -26,7 +26,7 @@ CONTAINS
 
     ! Declare temporary variables
 
-    INTEGER(kind=li) :: alloc_stat, eg, q, octant, m, i, cell, f, face
+    INTEGER(kind=li) :: alloc_stat, eg, q, octant, m, cell, f, face
     REAL(kind=d_t)   :: dmy
 
     ! Depending on page_iflw set eg_iflw

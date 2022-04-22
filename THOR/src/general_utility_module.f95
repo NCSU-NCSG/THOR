@@ -132,7 +132,7 @@ CONTAINS
 
     ! Define temporary variables
 
-    INTEGER(kind=li) :: i, j
+    INTEGER(kind=li) :: j
     REAL(kind=d_t), INTENT(out) :: det_Js
     !  real(kind=d_t), dimension(3,3) :: Identity
     TYPE(vector), DIMENSION(0:3), INTENT(in) :: v

@@ -30,7 +30,7 @@ MODULE transport_kernel_module_LC
 CONTAINS
 
   SUBROUTINE transport_kernel_LC(sigmat,q_moments,vol_moment,face_moment, &
-        LL,U,Lf,Uf,i,t,subcells,r0,r1,r2,r3,     &
+        i,t,subcells,r0,r1,r2,r3,     &
         face_known,incoming_face,outgoing_face,J,&
         J_inv,upstream_moments)
     !*********************************************************************
@@ -47,8 +47,6 @@ CONTAINS
     REAL(kind=d_t), DIMENSION(num_moments_v), INTENT(in) :: q_moments
     REAL(kind=d_t), DIMENSION(num_moments_v), INTENT(inout) :: vol_moment
     REAL(kind=d_t), DIMENSION(num_moments_f,0:3), INTENT(inout) :: face_moment
-    REAL(kind=d_t), DIMENSION(num_moments_v,num_moments_v) :: LL, U
-    REAL(kind=d_t), DIMENSION(num_moments_f,num_moments_f) :: Lf, Uf
     INTEGER(kind=li), INTENT(in) :: i, subcells
     TYPE(vector), DIMENSION(subcells), INTENT(in) :: r0, r1, r2, r3
     INTEGER(kind=1), DIMENSION(0:3,num_cells), INTENT(inout) :: face_known
@@ -59,7 +57,7 @@ CONTAINS
 
     ! Define local variables
 
-    INTEGER(kind=li) :: alloc_stat, ii, l, f, adjcnt_cell
+    INTEGER(kind=li) :: ii, l, f, adjcnt_cell
     REAL(kind=d_t) :: det_Jup, det_Js, e
     REAL(kind=d_t), DIMENSION(2) :: af
     REAL(kind=d_t), DIMENSION(3) :: a_temp, a
@@ -220,14 +218,14 @@ CONTAINS
           subcell_upstream_moments(l)=upstream_moments(l,ii)
         END DO
 
-        CALL transform_incoming_moments(Lf,Uf,af,bf,subcell_upstream_moments,&
+        CALL transform_incoming_moments(af,bf,subcell_upstream_moments,&
               transformed_moments,transformed_flux )
 
       ELSE
         DO l=1, num_moments_f
           transformed_moments(l)=upstream_moments(l,ii)
         END DO
-        CALL transform_boundary_moments(Lf,Uf,transformed_moments,transformed_flux)
+        CALL transform_boundary_moments(transformed_moments,transformed_flux)
       END IF
 
       DO l=1, num_moments_f
@@ -299,11 +297,11 @@ CONTAINS
       af=MATMUL(JF_inv,a_temp)
       bf=MATMUL(JF_inv,Jsf)
 
-      CALL incoming_cell_subcell_project(Lf,Uf,af,bf,transformed_flux,incoming_flux)
+      CALL incoming_cell_subcell_project(af,bf,transformed_flux,incoming_flux)
 
       ! Compute cell source expansion coefficients based on source moments
 
-      CALL cell_source_expansion(q_moments,LL,U,q_expansion)
+      CALL cell_source_expansion(q_moments,q_expansion)
 
       ! Project cell source moment into subcell moments in subcell system
 
@@ -317,7 +315,7 @@ CONTAINS
         cell_source(l)=q_expansion(l)
       END DO
 
-      CALL source_projection(LL,U,a,b,cell_source,subcell_source)
+      CALL source_projection(a,b,cell_source,subcell_source)
 
       ! Compute outgoing face moments in subcell with characteristic relation
 
@@ -380,7 +378,7 @@ CONTAINS
       a=MATMUL(J_inv,a_temp)
       b=MATMUL(J_inv,Js)
 
-      CALL characteristic_solver(i,t,e,a,b,af,bf,incoming_flux,&
+      CALL characteristic_solver(t,e,a,b,af,bf,incoming_flux,&
             subcell_source,outgoing_moments,subcell_flux)
 
       DO l=1, num_moments_f
@@ -419,7 +417,7 @@ CONTAINS
         face_angular_mom(l)=face_moment(l,f)
       END DO
 
-      CALL face_moment_transformation(Lf,Uf,f,face_angular_mom,face_cell_temp)
+      CALL face_moment_transformation(f,face_angular_mom,face_cell_temp)
 
       DO l=1, num_moments_v
         face_angular(f,l)=face_cell_temp(l)
@@ -440,7 +438,7 @@ CONTAINS
 
   END SUBROUTINE transport_kernel_LC
 
-  SUBROUTINE transform_incoming_moments(Lf,Uf,af,bf,upstream_moments,transformed_moments,&
+  SUBROUTINE transform_incoming_moments(af,bf,upstream_moments,transformed_moments,&
         transformed_flux)
     !*********************************************************************
     !
@@ -451,8 +449,6 @@ CONTAINS
 
     ! Define variables
 
-    INTEGER(kind=li) :: alloc_stat, l, q, i1, i2, iup1, iup2, m11, &
-          m12, m21, m22
     REAL(kind=d_t), DIMENSION(num_moments_f), INTENT(in) :: &
           upstream_moments
     REAL(kind=d_t), DIMENSION(num_moments_f), INTENT(out) :: &
@@ -460,8 +456,6 @@ CONTAINS
     REAL(kind=d_t), DIMENSION(2), INTENT(in) :: af
     REAL(kind=d_t), DIMENSION(2,2), INTENT(in) :: bf
     REAL(kind=d_t), DIMENSION(num_moments_f) :: upstream_flux
-    REAL(kind=d_t), DIMENSION(num_moments_f,num_moments_f), &
-          INTENT(in) :: Lf, Uf
     REAL(kind=d_t), DIMENSION(3,3) :: T
 
     ! Create transformation matrix
@@ -478,7 +472,7 @@ CONTAINS
 
   END SUBROUTINE transform_incoming_moments
 
-  SUBROUTINE transform_boundary_moments(Lf,Uf,transformed_moments,transformed_flux)
+  SUBROUTINE transform_boundary_moments(transformed_moments,transformed_flux)
     !*********************************************************************
     !
     ! Subroutine transform incoming moments transforms the upstream cell
@@ -492,14 +486,12 @@ CONTAINS
           transformed_moments
     REAL(kind=d_t), DIMENSION(num_moments_f), INTENT(out) :: &
           transformed_flux
-    REAL(kind=d_t), DIMENSION(num_moments_f,num_moments_f), &
-          INTENT(in) :: Lf, Uf
 
     CALL back_substitution_lc(num_moments_f,transformed_moments,transformed_flux)
 
   END SUBROUTINE transform_boundary_moments
 
-  SUBROUTINE incoming_cell_subcell_project(Lf,Uf,af,bf,transformed_flux,incoming_flux)
+  SUBROUTINE incoming_cell_subcell_project(af,bf,transformed_flux,incoming_flux)
     !*********************************************************************
     !
     ! Subroutine incoming cell to subcell moments projects the incoming
@@ -509,7 +501,6 @@ CONTAINS
 
     ! Define variables
 
-    INTEGER(kind=li) :: alloc_stat, l, q, i1, i2, m11, m12, m21, m22
     REAL(kind=d_t), DIMENSION(num_moments_f), INTENT(in) :: &
           transformed_flux
     REAL(kind=d_t), DIMENSION(num_moments_f), INTENT(out) :: &
@@ -517,7 +508,6 @@ CONTAINS
     REAL(kind=d_t), DIMENSION(2), INTENT(in) :: af
     REAL(kind=d_t), DIMENSION(2,2), INTENT(in) :: bf
     REAL(kind=d_t), DIMENSION(num_moments_f) :: incoming_moments
-    REAL(kind=d_t), DIMENSION(num_moments_f,num_moments_f) :: Lf, Uf
     REAL(kind=d_t), DIMENSION(3,3)  :: p
 
     ! Create projection matrix
@@ -530,7 +520,7 @@ CONTAINS
 
   END SUBROUTINE incoming_cell_subcell_project
 
-  SUBROUTINE cell_source_expansion(q_moments,LL,U,q_expansion)
+  SUBROUTINE cell_source_expansion(q_moments,q_expansion)
     !*********************************************************************
     !
     ! Subroutine cell source expansion solves for the source expansion
@@ -548,8 +538,6 @@ CONTAINS
     REAL(kind=d_t), DIMENSION(num_moments_v) :: y, x
     REAL(kind=d_t), DIMENSION(num_moments_v), INTENT(inout) :: &
           q_expansion
-    REAL(kind=d_t), DIMENSION(num_moments_v,num_moments_v),&
-          INTENT(in) :: LL, U
 
     DO l=1, num_moments_v
       y(l)=q_moments(l)
@@ -563,7 +551,7 @@ CONTAINS
 
   END SUBROUTINE cell_source_expansion
 
-  SUBROUTINE source_projection(LL,U,a,b,cell_source,subcell_source)
+  SUBROUTINE source_projection(a,b,cell_source,subcell_source)
     !*********************************************************************
     !
     ! Subroutine source projection projects cell source moments into
@@ -573,9 +561,6 @@ CONTAINS
 
     ! Define variables
 
-    INTEGER(kind=li) ::  alloc_stat, l, q, i1, i2, i3, m11, m12, m13, &
-          m21, m22, m23, m31, m32, m33
-    REAL(kind=d_t) :: fact, a1temp, a2temp, a3temp
     REAL(kind=d_t), DIMENSION(3), INTENT(in) :: a
     REAL(kind=d_t), DIMENSION(3,3), INTENT(in) :: b
     REAL(kind=d_t), DIMENSION(num_moments_v) :: subcell_moments
@@ -583,8 +568,6 @@ CONTAINS
           cell_source
     REAL(kind=d_t), DIMENSION(num_moments_v), INTENT(out) :: &
           subcell_source
-    REAL(kind=d_t), DIMENSION(num_moments_v,num_moments_v),&
-          INTENT(in) :: LL, U
     REAL(kind=d_t), DIMENSION(4,4) :: P
 
     ! Create projection matrix
@@ -597,7 +580,7 @@ CONTAINS
 
   END SUBROUTINE source_projection
 
-  SUBROUTINE characteristic_solver(i,t,e,a,b,af,bf,incoming_flux,subcell_source,&
+  SUBROUTINE characteristic_solver(t,e,a,b,af,bf,incoming_flux,subcell_source,&
         outgoing_moments,subcell_flux)
     !*********************************************************************
     !
@@ -608,11 +591,6 @@ CONTAINS
 
     ! Define variables
 
-    INTEGER(kind=li), INTENT(in) :: i
-    INTEGER(kind=li) ::  alloc_stat, l, q, i1, i2, i3, m11, m12, m13, &
-          m21, m22, m23, m31, m32, m33, g1, g2, g3, g3p
-    REAL(kind=d_t) :: fact, af1temp, af2temp, &
-          a1temp, a2temp, a3temp
     REAL(kind=d_t), INTENT(in) :: t, e
     REAL(kind=d_t), DIMENSION(2), INTENT(in) :: af
     REAL(kind=d_t), DIMENSION(2,2), INTENT(in) :: bf
@@ -852,7 +830,7 @@ CONTAINS
 
   END SUBROUTINE characteristic_solver
 
-  SUBROUTINE face_moment_transformation(Lf,Uf,f,face_angular_mom,face_cell_temp)
+  SUBROUTINE face_moment_transformation(f,face_angular_mom,face_cell_temp)
     !*********************************************************************
     !
     ! Subroutine face moment transformation transforms the face angular
@@ -864,13 +842,12 @@ CONTAINS
     ! Define variables
 
     INTEGER(kind=li) :: f
-    INTEGER(kind=li) :: alloc_stat, l, q, i1F, i2F
+    INTEGER(kind=li) :: l, q, i1F, i2F
     REAL(kind=d_t), DIMENSION(num_moments_f), INTENT(in) :: &
           face_angular_mom
     REAL(kind=d_t), DIMENSION(num_moments_v), INTENT(out) :: &
           face_cell_temp
     REAL(kind=d_t), DIMENSION(num_moments_f) :: x
-    REAL(kind=d_t), DIMENSION(num_moments_f,num_moments_f) :: Lf, Uf
     REAL(kind=d_t), DIMENSION(4,3) :: TF
 
     ! Create projection matrix

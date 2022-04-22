@@ -18,10 +18,6 @@ CONTAINS
     !
     !**********************************************************************
 
-    ! local variables
-
-    INTEGER(kind=li) :: m,eg,q,octant,f
-
     ! src types
     IF ( ALLOCATED( ext_src   ) ) DEALLOCATE( ext_src)
 

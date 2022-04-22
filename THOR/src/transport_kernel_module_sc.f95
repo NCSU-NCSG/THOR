@@ -25,9 +25,9 @@ MODULE transport_kernel_module_SC
 CONTAINS
 
   SUBROUTINE transport_kernel_SC(sigmat,q_moments,vol_moment,face_moment, &
-        LL,U,Lf,Uf,i,t,subcells,r0,r1,r2,r3,     &
-        face_known,incoming_face,outgoing_face,J,&
-        J_inv,upstream_moments)
+        i,t,subcells,r0,r1,r2,r3,     &
+        face_known,incoming_face,outgoing_face,&
+        upstream_moments)
     !*********************************************************************
     !
     ! Subroutine transport cell computes outgoing angular face and
@@ -45,60 +45,27 @@ CONTAINS
     REAL(kind=d_t), INTENT(inout)    :: vol_moment(num_moments_v)
     REAL(kind=d_t), INTENT(inout)    :: face_moment(num_moments_v,0:3)
 
-    ! Declare the matrices LL,U,Lf,Uf
-
-    REAL(kind=d_t), DIMENSION(num_moments_v,num_moments_v) :: LL, U
-    REAL(kind=d_t), DIMENSION(num_moments_f,num_moments_f) :: Lf, Uf
-
     ! Define temporary variables
 
     INTEGER(kind=li)                 :: ii
-    INTEGER(kind=li)                 :: l
     INTEGER(kind=li)                 :: f
     INTEGER(kind=li),  INTENT(in)    :: i
     INTEGER(kind=li),  INTENT(in)    :: subcells
     INTEGER(kind=li),  INTENT(in)    :: incoming_face(subcells)
     INTEGER(kind=li),  INTENT(in)    :: outgoing_face(subcells)
-    REAL(kind=d_t)                   :: det_Jup
     REAL(kind=d_t)                   :: det_Js
     REAL(kind=d_t)                   :: e
-    REAL(kind=d_t)                   :: af(2)
-    REAL(kind=d_t)                   :: a_temp(3)
-    REAL(kind=d_t)                   :: a(3)
-    REAL(kind=d_t)                   :: bf(2,2)
-    REAL(kind=d_t)                   :: JFup(3,2)
-    REAL(kind=d_t)                   :: JFdown(3,2)
-    REAL(kind=d_t)                   :: JF(3,2)
-    REAL(kind=d_t)                   :: Jsf(3,2)
-    REAL(kind=d_t)                   :: JFup_inv(2,3)
-    REAL(kind=d_t)                   :: JF_inv(2,3)
-    REAL(kind=d_t)                   :: Jup(3,3)
-    REAL(kind=d_t)                   :: Jup_inv(3,3)
     REAL(kind=d_t)                   :: Js(3,3)
     REAL(kind=d_t)                   :: Js_inv(3,3)
-    REAL(kind=d_t)                   :: b(3,3)
-    REAL(kind=d_t),    INTENT(in)    :: J(3,3)
-    REAL(kind=d_t),    INTENT(in)    :: J_inv(3,3)
     REAL(kind=d_t)                   :: q_expansion
     REAL(kind=d_t)                   :: area(subcells)
     REAL(kind=d_t)                   :: volume(subcells)
     REAL(kind=d_t)                   :: cell_source
     REAL(kind=d_t)                   :: subcell_source
     REAL(kind=d_t)                   :: subcell_flux
-    REAL(kind=d_t)                   :: proj_flux_moments
-    REAL(kind=d_t)                   :: face_cell_mom
-    REAL(kind=d_t)                   :: face_cell_temp
-    REAL(kind=d_t)                   :: y
-    REAL(kind=d_t)                   :: subcell_upstream_moments
     REAL(kind=d_t)                   :: incoming_flux
-    REAL(kind=d_t)                   :: outgoing_flux
-    REAL(kind=d_t)                   :: transformed_moments
     REAL(kind=d_t)                   :: transformed_flux
     REAL(kind=d_t)                   :: outgoing_moments
-    REAL(kind=d_t)                   :: projected_temp
-    REAL(kind=d_t)                   :: proj_moments
-    REAL(kind=d_t)                   :: face_angular_mom
-    REAL(kind=d_t)                   :: subcell_source_moments(subcells)
     REAL(kind=d_t)                   :: projected_moments(subcells)
     REAL(kind=d_t)                   :: face_angular(0:3)
     REAL(kind=d_t)                   :: projected_flux(subcells)
@@ -106,13 +73,6 @@ CONTAINS
     REAL(kind=d_t),    INTENT(in)    :: sigmat
     REAL(kind=d_t),    INTENT(in)    :: t
     INTEGER(kind=1),   INTENT(inout) :: face_known(0:3,num_cells)
-    TYPE(vector)                     :: R0down
-    TYPE(vector)                     :: R0up
-    TYPE(vector)                     :: R0F
-    TYPE(vector)                     :: v0
-    TYPE(vector)                     :: v1
-    TYPE(vector)                     :: v2
-    TYPE(vector)                     :: v3
     TYPE(vector)                     :: v(0:3)
     TYPE(vector),      INTENT(in)    :: r0(subcells)
     TYPE(vector),      INTENT(in)    :: r1(subcells)

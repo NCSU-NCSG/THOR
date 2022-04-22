@@ -374,7 +374,7 @@ CONTAINS
       a=MATMUL(J_inv,a_temp)
       b=MATMUL(J_inv,Js)
 
-      CALL characteristic_solver(i,t,e,a,b,af,bf,incoming_flux,&
+      CALL characteristic_solver(t,e,a,b,af,bf,incoming_flux,&
             subcell_source,outgoing_moments,subcell_flux)
 
       DO l=1, num_moments_f
@@ -735,7 +735,7 @@ CONTAINS
 
   END SUBROUTINE source_projection
 
-  SUBROUTINE characteristic_solver(i,t,e,a,b,af,bf,incoming_flux,subcell_source,&
+  SUBROUTINE characteristic_solver(t,e,a,b,af,bf,incoming_flux,subcell_source,&
         outgoing_moments,subcell_flux)
     !*********************************************************************
     !
@@ -746,7 +746,6 @@ CONTAINS
 
     ! Define variables
 
-    INTEGER(kind=li), INTENT(in) :: i
     INTEGER(kind=li) ::  alloc_stat, l, q, i1, i2, i3, m11, m12, m13, &
           m21, m22, m23, m31, m32, m33, g1, g2, g3, g3p
     REAL(kind=d_t) :: e1, e2, e3, e4, e5, e6, fact, af1temp, af2temp, &
@@ -1114,7 +1113,7 @@ CONTAINS
         new_term1=r1*r2/((ggam3+n+m+3_li)*(ggam2+n+m+2_li)*&
               (ggam1+n+1_li))
         new_term2=new_term2+new_term1
-        IF(new_term2 /= 0)THEN
+        IF(ABS(new_term2) .GT. 0)THEN
           rerror1=ABS(new_term1/new_term2)
         END IF
         IF(rerror1 > eps)THEN
@@ -1221,7 +1220,7 @@ CONTAINS
         new_term1=r1*r2/((ggam3+n+m+4_li)*(ggam2+n+m+3_li)*&
               (ggam1+n+m+2_li)*(gam3p+n+1_li))
         new_term2=new_term2+new_term1
-        IF(new_term2 /= 0)THEN
+        IF(ABS(new_term2) .GT. 0)THEN
           rerror1=ABS(new_term1/new_term2)
         END IF
         IF(rerror1 > eps)THEN

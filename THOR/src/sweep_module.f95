@@ -83,8 +83,8 @@ CONTAINS
 
     ! Define temporary variables
 
-    INTEGER(kind=li) :: alloc_stat, q, oct, octant, i, f, l, rcell,&
-                        j, k, m, indx, nk, nf
+    INTEGER(kind=li) :: alloc_stat, q, oct, octant, i, f, l,&
+                        k, m, indx, nk, nf
     TYPE(vector) :: omega
 
     ! Define source along direction q
@@ -95,7 +95,7 @@ CONTAINS
 
     INTEGER(kind=li) :: tpe, mate,giflx, parallel_i
 
-    INTEGER ::rank,mpi_err, localunit, num_p, optimal_tasks
+    INTEGER ::rank,mpi_err, num_p, optimal_tasks
 
 
     ! Define sc_flux parallel recieve buffer & reflected buffer
@@ -342,9 +342,8 @@ CONTAINS
 
     ! Local variables
 
-    INTEGER(kind=li) :: alloc_stat, i,j, oct, f, l, CASE
+    INTEGER(kind=li) :: i,j, CASE
     REAL(kind=d_t) :: sigmat
-    LOGICAL :: all_incoming_known
     TYPE(vector) :: n0, n1, n2, n3
     INTEGER(kind=li) :: soct,sq,mat_indx
 
@@ -377,7 +376,7 @@ CONTAINS
       CALL cell_orientation(omega,n0,n1,n2,n3,CASE)
 
       CALL cell_splitting(sigmat,qm(:,i),an_flux%vol_flux,an_flux%face_flux,   &
-            octant,LL,U,Lf,Uf,omega,i,face_known,CASE,n0,n1,n2,n3)
+            LL,U,Lf,Uf,omega,i,face_known,CASE,n0,n1,n2,n3)
 
     END DO
 
@@ -413,28 +412,28 @@ CONTAINS
 
     IF((omega .dot. n0) < 0.0)THEN
       incoming=incoming+1
-    ELSEIF((omega .dot. n0) == 0.0)THEN
+    ELSEIF(ABS(omega .dot. n0) .LE. 1.0D-16)THEN
     ELSE
       outgoing=outgoing+1
     END IF
 
     IF((omega .dot. n1) < 0.0)THEN
       incoming=incoming+1
-    ELSEIF((omega .dot. n1) == 0.0)THEN
+    ELSEIF(ABS(omega .dot. n1) .LE. 1.0D-16)THEN
     ELSE
       outgoing=outgoing+1
     END IF
 
     IF((omega .dot. n2) < 0.0)THEN
       incoming=incoming+1
-    ELSEIF((omega .dot. n2) == 0.0)THEN
+    ELSEIF(ABS(omega .dot. n2) .LE. 1.0D-16)THEN
     ELSE
       outgoing=outgoing+1
     END IF
 
     IF((omega .dot. n3) < 0.0)THEN
       incoming=incoming+1
-    ELSEIF((omega .dot. n3) == 0.0)THEN
+    ELSEIF(ABS(omega .dot. n3) .LE. 1.0D-16)THEN
     ELSE
       outgoing=outgoing+1
     END IF
@@ -608,7 +607,7 @@ CONTAINS
 
     ! Define temporary variables
 
-    INTEGER(kind=li) :: i, l, order, k, indx, m
+    INTEGER(kind=li) :: i, l, k, indx, m
 
     ! Compute scalar flux angular moments, right now only isotropic
     ! flux is accumulated

@@ -46,7 +46,7 @@ CONTAINS
     ! Declare temporary variable
 
     INTEGER(kind=li) :: alloc_stat
-    INTEGER ::rank,mpi_err, localunit
+    INTEGER ::rank,mpi_err
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
 
     ! Set the defaults
@@ -489,8 +489,6 @@ CONTAINS
 
     ! Echo out problem specifications
 
-    INTEGER :: i
-
     IF (rank .EQ. 0) THEN
       WRITE(6,*)
       WRITE(6,*) "--------------------------------------------------------"
@@ -588,9 +586,6 @@ CONTAINS
 
 101 FORMAT(1X,A60,I5)
 102 FORMAT(A60,ES12.4)
-202 FORMAT(1X,A60,ES12.4)
-103 FORMAT(1X,I5,ES12.4)
-104 FORMAT(1X,I14,A,I14)
 
   END SUBROUTINE echo_input
 
@@ -604,7 +599,7 @@ CONTAINS
     ! local variables
 
     CHARACTER(100) :: fname, tchar
-    INTEGER :: i,rank,mpi_err,localunit,ios,legacy_v
+    INTEGER :: rank,mpi_err,localunit,ios,legacy_v
     CALL GET_COMMAND_ARGUMENT(1,fname)
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
     localunit = rank+100

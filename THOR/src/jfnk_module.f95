@@ -177,7 +177,7 @@ CONTAINS
     ! Local variables
 
     REAL(kind=d_t) :: kerr,tol,tfiss1,tfiss2
-    INTEGER(kind=li) :: i,j,l,indx,eg,alloc_stat,m,n,k
+    INTEGER(kind=li) :: i,l,eg,m,n
     INTEGER(kind=li) :: one,two,three
     REAL(kind=d_t) :: tot_vol
     REAL(kind=d_t) :: ts,te,keff_error,max_outer_error,tmp
@@ -313,7 +313,7 @@ CONTAINS
 
     ! compute forcing factor
 
-    tol = forcing_factor(nres,nit)
+    tol = forcing_factor()
 
     ! increment newton iteration counter
 
@@ -351,7 +351,7 @@ CONTAINS
 
       ! compute forcing factor
 
-      tol = forcing_factor(nres,nit)
+      tol = forcing_factor()
 
       ! stop timer
 
@@ -459,8 +459,7 @@ CONTAINS
 
     ! Local variables
 
-    INTEGER(kind=li) :: eg,i,j,l,alloc_stat,m,n,indx,zero,one,two,three,&
-          q,octant
+    INTEGER(kind=li) :: eg,i,l,alloc_stat,n,indx,zero,one,two,three
     REAL(kind=d_t)   :: f1,f2
 
     ! Source: src is a general source used for all methods
@@ -642,7 +641,7 @@ CONTAINS
 
     ! Local variables
 
-    INTEGER(kind=li) :: alloc_stat,eg,m,n,i,l,egg,k,indx,mat_indx
+    INTEGER(kind=li) :: eg,m,i,l,egg,k,indx,mat_indx
 
     ! Initialize tfsrc
 
@@ -742,7 +741,7 @@ CONTAINS
 
     ! Local variables
 
-    INTEGER(kind=li) :: eg,i,l,m,n,k,indx,mat_indx
+    INTEGER(kind=li) :: eg,i,l,m,k,indx,mat_indx
 
     ! Start adding downscattering source
 
@@ -830,7 +829,7 @@ CONTAINS
 
     ! local variables
 
-    INTEGER(kind=li) :: eg,i,indx,mat_indx
+    INTEGER(kind=li) :: eg,i,mat_indx
 
     ! initialize tfissions
 
@@ -1032,7 +1031,7 @@ CONTAINS
 
     REAL(kind=d_t)   :: dflux(num_moments_v,namom,num_cells,egmax,niter)
     REAL(kind=d_t)   :: dkeff
-    INTEGER(kind=li) :: eg,i,l,j,one,indx,ii,n,m
+    INTEGER(kind=li) :: eg,i,l,one,indx,n
 
     ! allocate dflx and initialize
 
@@ -1104,7 +1103,7 @@ CONTAINS
 
     ! local variables
 
-    INTEGER(kind=li) :: eg,i,l,one,indx,n,m
+    INTEGER(kind=li) :: eg,i,l,one,indx,n
 
     ! standard update
 
@@ -1132,7 +1131,7 @@ CONTAINS
   !-----------------------------------------------------------------------------------------
   !-----------------------------------------------------------------------------------------
 
-  FUNCTION forcing_factor(cnres,cnit)
+  FUNCTION forcing_factor()
     !**********************************************************************
     !
     ! Function forcing_factor computes the forcing factor
@@ -1144,10 +1143,7 @@ CONTAINS
 
     ! pass input arguments
 
-    REAL(kind=d_t)   :: cnres
-    INTEGER(kind=li) ::cnit
     REAL(kind=d_t) :: forcing_factor
-    REAL(kind=d_t) :: dummy
 
     ! easiest implementation
 
@@ -1221,7 +1217,7 @@ CONTAINS
     ! Local variable
 
     REAL(kind=d_t) :: s,value
-    INTEGER(kind=li) :: i,eg,l,n,m
+    INTEGER(kind=li) :: i,eg,l,n
 
     value = REAL(egmax,d_t) * tot_vol
 
@@ -1317,9 +1313,9 @@ CONTAINS
 
     ! local variabels
 
-    INTEGER(kind=li) :: eg,eeg,i,j,l,m,n,alloc_stat,indx,k
+    INTEGER(kind=li) :: eg,i,l
     INTEGER(kind=li) :: zero,one,two,three
-    INTEGER(kind=li) :: q,octant,egg,mat_indx
+    INTEGER(kind=li) :: mat_indx
 
     ! dummy for max_errors
 

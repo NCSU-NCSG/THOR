@@ -36,7 +36,7 @@ CONTAINS
   !> THOR is based in the AHOT-C methods. The AHOT-C method splits tetrahedra
   !> into characteristic tetrahedra and solves the characteristic equations
   !> on each of these. This is the entry point for the single mesh-cell solver.
-  SUBROUTINE cell_splitting(sigmat,qm_moments,vol_flux,face_flux,octant,  &
+  SUBROUTINE cell_splitting(sigmat,qm_moments,vol_flux,face_flux,  &
         LL,U,Lf,Uf,omega,i,face_known,CASE,n0,n1,n2,n3)
     !*********************************************************************
     !
@@ -51,7 +51,7 @@ CONTAINS
     REAL(kind=d_t), DIMENSION(num_moments_v), INTENT(in)   :: qm_moments
     REAL(kind=d_t), DIMENSION(num_moments_v,num_cells)     :: vol_flux
     REAL(kind=d_t), DIMENSION(num_moments_f,0:3,num_cells) :: face_flux
-    INTEGER(kind=li), INTENT(in)                           :: octant, i, CASE
+    INTEGER(kind=li), INTENT(in)                           :: i, CASE
     REAL(kind=d_t), DIMENSION(num_moments_v,num_moments_v) :: LL,U
     REAL(kind=d_t), DIMENSION(num_moments_f,num_moments_f) :: Lf,Uf
     TYPE(vector), INTENT(in)                               :: omega, n0, n1, n2,n3
@@ -173,18 +173,18 @@ CONTAINS
       CALL stop_thor(-1_li)
     END IF
 
-    CALL upstream_mom(num_cells,adjacent_cells,num_moments_f,     &
-          adjacency_list,face_flux,octant,i,subcells,incoming_face,&
-          n0,n1,n2,n3,upstream_moments)
+    CALL upstream_mom(adjacent_cells,num_moments_f,     &
+          adjacency_list,face_flux,i,subcells,incoming_face,&
+          upstream_moments)
 
     IF (space_ord == 0) THEN
       CALL transport_kernel_SC(sigmat,qm_moments,vol_flux(:,i),                &
-            face_flux(:,:,i),LL,U,Lf,Uf,i,                  &
+            face_flux(:,:,i),i,                  &
             t,subcells,r0,r1,r2,r3,face_known,incoming_face,&
-            outgoing_face,J,J_inv,upstream_moments)
+            outgoing_face,upstream_moments)
     ELSE IF (space_ord == -1) THEN
       CALL transport_kernel_LC(sigmat,qm_moments,vol_flux(:,i),                &
-            face_flux(:,:,i),LL,U,Lf,Uf,i,                  &
+            face_flux(:,:,i),i,                  &
             t,subcells,r0,r1,r2,r3,face_known,incoming_face,&
             outgoing_face,J,J_inv,upstream_moments)
     ELSE
@@ -199,8 +199,8 @@ CONTAINS
 
   END SUBROUTINE cell_splitting
 
-  SUBROUTINE upstream_mom(nc,nadj,numf,adj_list,face_flux,octant,i,&
-        subcells,incoming_face,n0,n1,n2,n3,upstream_moments)
+  SUBROUTINE upstream_mom(nadj,numf,adj_list,face_flux,i,&
+        subcells,incoming_face,upstream_moments)
     !*********************************************************************
     !
     ! Subroutine upstream_mom determines upstream moments
@@ -208,7 +208,7 @@ CONTAINS
     !*********************************************************************
     ! Pass geometry parameters
 
-    INTEGER(kind=li), INTENT(in) :: nc, nadj
+    INTEGER(kind=li), INTENT(in) :: nadj
 
     ! Declare index size
 
@@ -224,11 +224,10 @@ CONTAINS
 
     ! Define temporary variables
 
-    INTEGER(kind=li)                                        :: ii, up_cell, up_face, l, qoct
-    INTEGER(kind=li), INTENT(in)                            :: octant, i, subcells
+    INTEGER(kind=li)                                        :: ii, up_cell, up_face, l
+    INTEGER(kind=li), INTENT(in)                            :: i, subcells
     INTEGER(kind=li), DIMENSION(subcells), INTENT(in)       :: incoming_face
     REAL(kind=d_t), DIMENSION(numf,subcells), INTENT(inout) :: upstream_moments
-    TYPE(vector), INTENT(in)                                :: n0, n1, n2, n3
 
     ! Assign upstream values and boundary conditions
 
@@ -779,7 +778,7 @@ CONTAINS
 
     ! Split cell and define subcell vertices r0, r1, r2, & r3
 
-    IF((face0 .EQ. 0) .AND. (omega .dot. n0) /= 0.0)THEN
+    IF((face0 .EQ. 0) .AND. ABS(omega .dot. n0) .GT. 0.0)THEN
       t=1.0_d_t/(omega_local%x1)
       Rin=v0
       Rout=Rin+t*omega
@@ -829,7 +828,7 @@ CONTAINS
         r2(2)=Rin
         r3(2)=Rout
       ENDIF
-    ELSEIF((face1 .EQ. 0) .AND. (omega .dot. n1) /= zero)THEN
+    ELSEIF((face1 .EQ. 0) .AND. ABS(omega .dot. n1) .GT. zero)THEN
       t=1.0_d_t/(omega_local%x2-omega_local%x1)
       Rin=v1
       Rout=Rin+t*omega
@@ -879,7 +878,7 @@ CONTAINS
         r2(2)=Rin
         r3(2)=Rout
       ENDIF
-    ELSEIF((face2 .EQ. 0) .AND. (omega .dot. n2) /= 0.0)THEN
+    ELSEIF((face2 .EQ. 0) .AND. ABS(omega .dot. n2) .GT. 0.0)THEN
       t=1.0_d_t/(omega_local%x3-omega_local%x2)
       Rin=v2
       Rout=Rin+t*omega
@@ -929,7 +928,7 @@ CONTAINS
         r2(2)=Rin
         r3(2)=Rout
       ENDIF
-    ELSEIF((face3 .EQ. 0) .AND. (omega .dot. n3) /= 0.0)THEN
+    ELSEIF((face3 .EQ. 0) .AND. ABS(omega .dot. n3) .GT. 0.0)THEN
       t=1.0_d_t/(-1.0_d_t*omega_local%x3)
       Rin=v3
       Rout=Rin+t*omega
@@ -1008,7 +1007,7 @@ CONTAINS
       t=1.0_d_t/(-1.0_d_t*omega_local%x1)
       Rout=v0
       Rin=Rout-t*omega
-      IF((omega .dot. n1) == 0.0)THEN
+      IF(ABS(omega .dot. n1) .LE. 1.0D-16)THEN
         ! Subcell 1
         incoming_face(1)=0
         outgoing_face(1)=3
@@ -1023,7 +1022,7 @@ CONTAINS
         r1(2)=v3
         r2(2)=Rin
         r3(2)=Rout
-      ELSEIF((omega .dot. n2) == 0.0)THEN
+      ELSEIF(ABS(omega .dot. n2) .LE. 1.0D-16)THEN
         ! Subcell 1
         incoming_face(1)=0
         outgoing_face(1)=1
@@ -1038,7 +1037,7 @@ CONTAINS
         r1(2)=v1
         r2(2)=Rin
         r3(2)=Rout
-      ELSEIF((omega .dot. n3) == 0.0)THEN
+      ELSEIF(ABS(omega .dot. n3) .LE. 1.0D-16)THEN
         ! Subcell 1
         incoming_face(1)=0
         outgoing_face(1)=2
@@ -1058,7 +1057,7 @@ CONTAINS
       t=1.0_d_t/(omega_local%x1-omega_local%x2)
       Rout=v1
       Rin=Rout-t*omega
-      IF((omega .dot. n0) == 0.0)THEN
+      IF(ABS(omega .dot. n0) .LE. 1.0D-16)THEN
         ! Subcell 1
         incoming_face(1)=1
         outgoing_face(1)=2
@@ -1073,7 +1072,7 @@ CONTAINS
         r1(2)=v2
         r2(2)=Rin
         r3(2)=Rout
-      ELSEIF((omega .dot. n2) == 0.0)THEN
+      ELSEIF(ABS(omega .dot. n2) .LE. 1.0D-16)THEN
         ! Subcell 1
         incoming_face(1)=1
         outgoing_face(1)=3
@@ -1088,7 +1087,7 @@ CONTAINS
         r1(2)=v3
         r2(2)=Rin
         r3(2)=Rout
-      ELSEIF((omega .dot. n3) == 0.0)THEN
+      ELSEIF(ABS(omega .dot. n3) .LE. 1.0D-16)THEN
         ! Subcell 1
         incoming_face(1)=1
         outgoing_face(1)=0
@@ -1108,7 +1107,7 @@ CONTAINS
       t=1.0_d_t/(omega_local%x2-omega_local%x3)
       Rout=v2
       Rin=Rout-t*omega
-      IF((omega .dot. n0) == 0.0)THEN
+      IF(ABS(omega .dot. n0) .LE. 1.0D-16)THEN
         ! Subcell 1
         incoming_face(1)=2
         outgoing_face(1)=3
@@ -1123,7 +1122,7 @@ CONTAINS
         r1(2)=v3
         r2(2)=Rin
         r3(2)=Rout
-      ELSEIF((omega .dot. n1) == 0.0)THEN
+      ELSEIF(ABS(omega .dot. n1) .LE. 1.0D-16)THEN
         ! Subcell 1
         incoming_face(1)=2
         outgoing_face(1)=0
@@ -1138,7 +1137,7 @@ CONTAINS
         r1(2)=v0
         r2(2)=Rin
         r3(2)=Rout
-      ELSEIF((omega .dot. n3) == 0.0)THEN
+      ELSEIF(ABS(omega .dot. n3) .LE. 1.0D-16)THEN
         ! Subcell 1
         incoming_face(1)=2
         outgoing_face(1)=1
@@ -1158,7 +1157,7 @@ CONTAINS
       t=1.0_d_t/(omega_local%x3)
       Rout=v3
       Rin=Rout-t*omega
-      IF((omega .dot. n0) == 0.0)THEN
+      IF(ABS(omega .dot. n0) .LE. 1.0D-16)THEN
         ! Subcell 1
         incoming_face(1)=3
         outgoing_face(1)=1
@@ -1173,7 +1172,7 @@ CONTAINS
         r1(2)=v1
         r2(2)=Rin
         r3(2)=Rout
-      ELSEIF((omega .dot. n1) == 0.0)THEN
+      ELSEIF(ABS(omega .dot. n1) .LE. 1.0D-16)THEN
         ! Subcell 1
         incoming_face(1)=3
         outgoing_face(1)=2
@@ -1188,7 +1187,7 @@ CONTAINS
         r1(2)=v2
         r2(2)=Rin
         r3(2)=Rout
-      ELSEIF((omega .dot. n2) == 0.0)THEN
+      ELSEIF(ABS(omega .dot. n2) .LE. 1.0D-16)THEN
         ! Subcell 1
         incoming_face(1)=3
         outgoing_face(1)=0
@@ -1230,7 +1229,7 @@ CONTAINS
 
     ! Split cell and define subcell vertices r0, r1, r2, & r3
 
-    IF((face0 .EQ. 0) .AND. (omega .dot. n0) /= 0.0)THEN
+    IF((face0 .EQ. 0) .AND. ABS(omega .dot. n0) .GT. 0.0)THEN
       t=1.0_d_t/(omega_local%x1)
       Rin=v0
       Rout=Rin+t*omega
@@ -1259,7 +1258,7 @@ CONTAINS
         r2(1)=Rin
         r3(1)=Rout
       ENDIF
-    ELSEIF((face1 .EQ. 0) .AND. (omega .dot. n1) /= 0.0)THEN
+    ELSEIF((face1 .EQ. 0) .AND. ABS(omega .dot. n1) .GT. 0.0)THEN
       t=1.0_d_t/(omega_local%x2-omega_local%x1)
       Rin=v1
       Rout=Rin+t*omega
@@ -1288,7 +1287,7 @@ CONTAINS
         r2(1)=Rin
         r3(1)=Rout
       ENDIF
-    ELSEIF((face2 .EQ. 0) .AND. (omega .dot. n2) /= 0.0)THEN
+    ELSEIF((face2 .EQ. 0) .AND. ABS(omega .dot. n2) .GT. 0.0)THEN
       t=1.0_d_t/(omega_local%x3-omega_local%x2)
       Rin=v2
       Rout=Rin+t*omega
@@ -1317,7 +1316,7 @@ CONTAINS
         r2(1)=Rin
         r3(1)=Rout
       ENDIF
-    ELSEIF((face3 .EQ. 0) .AND. (omega .dot. n3) /= 0.0)THEN
+    ELSEIF((face3 .EQ. 0) .AND. ABS(omega .dot. n3) .GT. 0.0)THEN
       t=1.0_d_t/(-1.0_d_t*omega_local%x3)
       Rin=v3
       Rout=Rin+t*omega

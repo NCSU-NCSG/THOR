@@ -60,7 +60,7 @@ CONTAINS
     ! Define temporary variables
 
     INTEGER(kind=li)               :: alloc_stat, eg, egg, q, octant, i, l, &
-          order, n, m, ii, k, indx,face,f,mat_indx,src_indx
+          n, m, ii, k, indx,face,f,mat_indx,src_indx
     REAL(kind=d_t)                 :: t_error
     LOGICAL                        :: existence
 
@@ -262,7 +262,7 @@ CONTAINS
 
     END DO
 
-    outer=outer-one
+    outer=outer-1
 
     IF (rank .EQ. 0) THEN
       WRITE(6,*) '========================================================'
@@ -302,8 +302,8 @@ CONTAINS
 
     ! Define temporary variables
 
-    INTEGER(kind=li)               :: alloc_stat, eg, egg, q, octant, i, l, &
-          order, ii, n, m, indx, k
+    INTEGER(kind=li)               :: alloc_stat, eg, i, l, &
+          ii, n
     REAL(kind=d_t)                 :: fiss_den_old, fiss_den_new,       &
           keff_error, keff_old, keff_new, fiss_error, fiss_dist_error(2),&
           flux_error,ts,te
@@ -323,7 +323,7 @@ CONTAINS
 
     REAL(kind=d_t)   :: theta(3),thet
     INTEGER(kind=li) :: extra_flag
-    REAL(kind=d_t)   :: a,b,c
+    REAL(kind=d_t)   :: a,b
 
     ! Define source that is passed into inner iteration
 
@@ -769,8 +769,6 @@ CONTAINS
       END IF
 101   FORMAT(1X,A)
 102   FORMAT(1X,2I6,5ES12.4,I12,ES12.4,A)
-103   FORMAT(1X,A,ES12.4)
-104   FORMAT(1X,A,I5,3ES12.4)
 
       !========================================================================
       ! write iteration results to file if desired

@@ -48,10 +48,10 @@ PROGRAM ahot_c_ug
 
   ! Declare temporary variables
 
-  INTEGER(kind=li) :: alloc_stat, eg, i, ii, l, it, n, m
+  INTEGER(kind=li) :: alloc_stat
 
   !######### MPI variables
-  INTEGER :: mpi_err , mpi_sig_size(MPI_STATUS_SIZE), num_p
+  INTEGER :: mpi_err, num_p
   !#########
 
   ! timing variables
@@ -176,7 +176,7 @@ SUBROUTINE write_timing
 
   INTEGER :: i, num_p, mpi_err, err_size(MPI_STATUS_SIZE), do_timing=0
   REAL*8:: print_timing(4,2)
-	CHARACTER(100):: temp
+  CHARACTER(100) :: temp
   CALL GET_COMMAND_ARGUMENT(2,temp)
   IF (TRIM(temp) .EQ. '-t') do_timing = 1
   flush(6)

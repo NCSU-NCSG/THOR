@@ -7,10 +7,12 @@ EXT := .exe
 
 all:      TYPE :=
 debug:    TYPE := _Debug
+catch:    TYPE := _Catch
 coverage: TYPE := _Coverage
 
 all:      OPT := -O3
 debug:    OPT := -O0 -g -fbacktrace -ffpe-trap=zero,overflow,underflow
+catch:    OPT := -O0 -g -Wall -W -Wsurprising -Werror
 coverage: OPT := -O0 -g --coverage
 
 #-----------------------------------------------------------------------------------
@@ -110,13 +112,15 @@ COMP_DEP := \
 #-----------------------------------------------------------------------------------
 #Phony targets for cleaning and building
 #-----------------------------------------------------------------------------------
-.PHONY: all debug coverage clean reset
+.PHONY: all debug catch coverage clean reset
 
 print-%  : ; @echo $* = $($*)
 
 all: $(EXE)
 
 debug: $(EXE)
+
+catch: $(EXE)
 
 coverage: $(EXE)
 

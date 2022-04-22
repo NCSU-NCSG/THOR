@@ -194,7 +194,7 @@ CONTAINS
 
     ! Local variables
 
-    INTEGER :: g,gp,m,l,order
+    INTEGER :: g,gp,m,order
     REAL(kind=d_t) :: sigs(egmax)
 
     ! Print cross sections

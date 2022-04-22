@@ -26,7 +26,6 @@ CONTAINS
     !INTEGER :: i = 1
     INTEGER :: verbose=0
     INTEGER :: ioerr=0
-    CHARACTER(50) :: in_file = ""
     !CHARACTER(50) :: out_file = ""
 
     !Input File Parsing
@@ -2076,9 +2075,9 @@ CONTAINS
 
     ! local variables
 
-    CHARACTER(100) :: buffer, fname, tchar
+    CHARACTER(100) :: buffer, fname
     LOGICAL :: done
-    INTEGER :: i, rank,mpi_err,ios,legacy_v,nwords
+    INTEGER :: i, rank,mpi_err,ios,nwords
     CHARACTER(100000) :: regmap
     CHARACTER(10) :: words(25000)
     !get rank
@@ -2141,7 +2140,7 @@ CONTAINS
 
     CHARACTER(100) :: line, fname
     INTEGER :: l,lr
-    INTEGER :: i, rank,mpi_err, localunit
+    INTEGER :: rank,mpi_err, localunit
     CALL GET_COMMAND_ARGUMENT(1,fname)
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
     localunit = rank+100
@@ -2167,7 +2166,7 @@ CONTAINS
   SUBROUTINE legacy_v0_read_quadrature_field
 
     ! local variables
-    INTEGER :: nwords,ntmp,i,nwwords,ios
+    INTEGER :: nwords,i,nwwords,ios
     CHARACTER(100) :: buffer, fname
     CHARACTER(100) :: words(100),wwords(2)
     INTEGER :: rank,mpi_err, localunit
@@ -2230,7 +2229,7 @@ CONTAINS
   SUBROUTINE legacy_v0_read_postprocess_field
 
     ! local variables
-    INTEGER :: nwords, ntmp, i, l, j, nwwords, ios, nwwwords
+    INTEGER :: nwords, i, l, j, nwwords, nwwwords
     CHARACTER(1000) :: buffer, fname, msg
     CHARACTER(1000) :: words(100), wwords(2), wwwords(100)
     INTEGER :: rank, mpi_err, localunit, minint
@@ -2326,7 +2325,7 @@ CONTAINS
   SUBROUTINE legacy_v0_read_cross_sections
 
     ! local variables
-    INTEGER :: nwords,ntmp,nwwords,ios
+    INTEGER :: nwords,nwwords,ios
     CHARACTER(100) :: buffer, fname
     CHARACTER(100) :: words(100),wwords(2)
     INTEGER :: i, rank,mpi_err, localunit
@@ -2427,7 +2426,7 @@ CONTAINS
   SUBROUTINE legacy_v0_read_inout
 
     ! local variables
-    INTEGER :: nwords,ntmp,i,nwwords,ios
+    INTEGER :: nwords,i,nwwords
     CHARACTER(100) :: buffer, fname
     CHARACTER(100) :: words(100),wwords(2)
     INTEGER :: rank,mpi_err, localunit
@@ -2529,7 +2528,7 @@ CONTAINS
   SUBROUTINE legacy_v0_read_problem
 
     ! local variables
-    INTEGER :: nwords,ntmp,i,nwwords,ios
+    INTEGER :: nwords,i,nwwords,ios
     CHARACTER(100) :: buffer, fname
     CHARACTER(100) :: words(100),wwords(2)
     INTEGER :: rank,mpi_err, localunit
@@ -2779,7 +2778,7 @@ CONTAINS
                   dfact_opt = 2
                 ELSE
                   WRITE(6,*) 'Error. This is not a valid density factor option &
-                        (no/byvolume/fromfile) -- ',wwords(2),' --'
+                    & (no/byvolume/fromfile) -- ',wwords(2),' --'
                   WRITE(6,*) 'Execution will terminate.'
                   STOP
                 END IF

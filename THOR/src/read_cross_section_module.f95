@@ -133,7 +133,7 @@ CONTAINS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE xs_read_legacy_v0()
 
-    INTEGER(kind=li) :: alloc_stat, e1, order, eg_to, eg_from,l,m
+    INTEGER(kind=li) :: alloc_stat, e1, order, eg_to, eg_from,m
 
     READ(local_unit,*) num_mat
 
@@ -209,7 +209,7 @@ CONTAINS
 !currently supports max of 1000 groups
   SUBROUTINE xs_read_current()
     CHARACTER(10000) :: words(1000)
-    INTEGER :: nwords,ios,i,g,alloc_stat,gp,j
+    INTEGER :: nwords,i,g,alloc_stat,gp,j
 
     num_mat=0
     egmax=0
@@ -278,7 +278,7 @@ CONTAINS
           words(4)=TRIM(ADJUSTL(words(4)))
           !get or assign mat name
           IF(words(4) .NE. '')THEN
-            xs_mat(i)%mat_name=words(4)
+            xs_mat(i)%mat_name=TRIM(words(4))
           ELSE
             WRITE(xs_mat(i)%mat_name,'(A,I0)')'mat_',xs_mat(i)%mat_id
           ENDIF

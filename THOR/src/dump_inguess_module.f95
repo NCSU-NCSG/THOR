@@ -39,7 +39,7 @@ CONTAINS
 
     ! local variables
 
-    INTEGER(kind=li) :: eg,i,l,p,q
+    INTEGER(kind=li) :: eg,i,l,p
     INTEGER(kind=li) :: egmax_t,num_cells_t,namom_t,num_moments_v_t
     LOGICAL :: existence
 
@@ -100,7 +100,7 @@ CONTAINS
 
     ! local variables
 
-    INTEGER(kind=li) :: eg,i,l,p,q
+    INTEGER(kind=li) :: eg,i,l,p
     LOGICAL :: existence
 
     ! open file
@@ -146,7 +146,7 @@ CONTAINS
 
     ! local variables
 
-    INTEGER(kind=li) :: eg,i,l,p,q
+    INTEGER(kind=li) :: eg,i,l,p
     LOGICAL :: existence
 
     ! open file
