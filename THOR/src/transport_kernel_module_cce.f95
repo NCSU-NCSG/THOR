@@ -374,7 +374,7 @@ CONTAINS
       a=MATMUL(J_inv,a_temp)
       b=MATMUL(J_inv,Js)
 
-      CALL characteristic_solver(i,t,e,a,b,af,bf,incoming_flux,&
+      CALL characteristic_solver(t,e,a,b,af,bf,incoming_flux,&
             subcell_source,outgoing_moments,subcell_flux)
 
       DO l=1, num_moments_f
@@ -735,7 +735,7 @@ CONTAINS
 
   END SUBROUTINE source_projection
 
-  SUBROUTINE characteristic_solver(i,t,e,a,b,af,bf,incoming_flux,subcell_source,&
+  SUBROUTINE characteristic_solver(t,e,a,b,af,bf,incoming_flux,subcell_source,&
         outgoing_moments,subcell_flux)
     !*********************************************************************
     !
@@ -746,7 +746,6 @@ CONTAINS
 
     ! Define variables
 
-    INTEGER(kind=li), INTENT(in) :: i
     INTEGER(kind=li) ::  alloc_stat, l, q, i1, i2, i3, m11, m12, m13, &
           m21, m22, m23, m31, m32, m33, g1, g2, g3, g3p
     REAL(kind=d_t) :: e1, e2, e3, e4, e5, e6, fact, af1temp, af2temp, &
@@ -1063,11 +1062,11 @@ CONTAINS
       rerror=ABS(new_term/face_moment1)
       IF(rerror > eps)THEN
       ELSE
-        go to 10
+        EXIT
       END IF
     END DO
 
-10 END FUNCTION face_moment1
+  END FUNCTION face_moment1
 
   FUNCTION face_moment2(gam1,gam2,gam3,t,e)
     !*********************************************************************
@@ -1114,27 +1113,25 @@ CONTAINS
         new_term1=r1*r2/((ggam3+n+m+3_li)*(ggam2+n+m+2_li)*&
               (ggam1+n+1_li))
         new_term2=new_term2+new_term1
-        IF(new_term2 /= 0)THEN
+        IF(ABS(new_term2) .GT. 0)THEN
           rerror1=ABS(new_term1/new_term2)
         END IF
         IF(rerror1 > eps)THEN
         ELSE
-          go to 10
+          EXIT
         END IF
       END DO
-
-10    CONTINUE
 
       face_moment2=face_moment2+new_term2
       rerror2=ABS(new_term2/face_moment2)
       IF(rerror2 > eps)THEN
         new_term2=0.0_d_t
       ELSE
-        go to 11
+        EXIT
       END IF
     END DO
 
-11 END FUNCTION face_moment2
+  END FUNCTION face_moment2
 
   FUNCTION volume_moment1(gam1,gam2,gam3,e)
     !*********************************************************************
@@ -1172,11 +1169,11 @@ CONTAINS
       rerror=ABS(new_term/volume_moment1)
       IF(rerror > eps)THEN
       ELSE
-        go to 10
+        EXIT
       END IF
     END DO
 
-10 END FUNCTION volume_moment1
+  END FUNCTION volume_moment1
 
   FUNCTION volume_moment2(gam1,gam2,gam3,gam3p,t,e)
     !*********************************************************************
@@ -1223,26 +1220,24 @@ CONTAINS
         new_term1=r1*r2/((ggam3+n+m+4_li)*(ggam2+n+m+3_li)*&
               (ggam1+n+m+2_li)*(gam3p+n+1_li))
         new_term2=new_term2+new_term1
-        IF(new_term2 /= 0)THEN
+        IF(ABS(new_term2) .GT. 0)THEN
           rerror1=ABS(new_term1/new_term2)
         END IF
         IF(rerror1 > eps)THEN
         ELSE
-          go to 10
+          EXIT
         END IF
       END DO
-
-10    CONTINUE
 
       volume_moment2=volume_moment2+new_term2
       rerror2=ABS(new_term2/volume_moment2)
       IF(rerror2 > eps)THEN
         new_term2=0.0_d_t
       ELSE
-        go to 11
+        EXIT
       END IF
     END DO
 
-11 END FUNCTION volume_moment2
+  END FUNCTION volume_moment2
 
 END MODULE transport_kernel_module_CCE

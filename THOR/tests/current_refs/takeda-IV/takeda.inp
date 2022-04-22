@@ -1,0 +1,32 @@
+  execution yes
+  lambda -1
+  type keig ; keigsolver pi ; piacc none
+  page_refl save
+  kconv 1E-4; innerconv 1E-12 ; outerconv 1E-7
+  maxinner 2 ; maxouter 500
+
+  mesh ./takeda.thrm
+  xs ./takeda.xs
+  flux_out takeda-IV-ari.flux
+  print_xs yes
+
+  ngroups 4 ; upscattering no
+
+  qdtype levelsym ; qdorder 4
+
+  region_map
+  1 1
+  2 2
+  3 3
+  4 4
+  5 5
+  6 6
+  7 7
+  8 8
+  9 9
+  10 10
+  11 11
+  12 12
+  13 13
+  14 14
+  15 15

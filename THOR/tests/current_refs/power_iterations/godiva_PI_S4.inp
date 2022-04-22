@@ -1,0 +1,18 @@
+  execution yes
+  lambda 0
+  type keig ; keigsolver pi ; piacc none
+  page_refl save
+  kconv 1E-4; innerconv 1E-12 ; outerconv 1E-7
+  maxinner 2 ; maxouter 500
+
+  mesh godiva.mesh
+  xs godiva.xs
+  flux_out godiva.flux
+  print_xs yes
+
+  ngroups 6 ; upscattering no
+
+  qdtype levelsym ; qdorder 4
+
+  region_map
+  1 1

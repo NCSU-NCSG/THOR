@@ -43,7 +43,6 @@ CONTAINS
     INTEGER(kind=li), INTENT(inout) :: max_p
     REAL(kind=d_t), DIMENSION(nang,8,max_p) :: Y
     REAL(kind=d_t) :: mu,eta,xi
-    TYPE(vector) :: omega
 
     ! Do even contributions
     DO l=0,sord

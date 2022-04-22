@@ -29,7 +29,7 @@ CONTAINS
 
     ! local variables
 
-    INTEGER(kind=li) :: i,l,eg
+    INTEGER(kind=li) :: i,l,eg,src_indx
 
     OPEN(unit=10,file=TRIM(vtk_src_filename),status='unknown',action='write')
 
@@ -68,8 +68,8 @@ CONTAINS
     DO eg=1, egmax
       WRITE(10,'(i12,1x,i12,1x,i12,1x,a5)') eg,1,num_cells,'float'
       DO i=1, num_cells
-        WRITE(10,'(es12.5)') &
-              src_str(cells(i)%src,eg)*src_m(1,cells(i)%src,eg)
+        src_indx=src_pointer(cells(i)%src)
+        WRITE(10,'(es12.5)')ext_src(src_indx)%mom(1,1,eg)
       END DO
     END DO
 
@@ -194,7 +194,7 @@ CONTAINS
 
     ! Local variables
 
-    INTEGER :: g,gp,m,l,order
+    INTEGER :: g,gp,m,order
     REAL(kind=d_t) :: sigs(egmax)
 
     ! Print cross sections
@@ -213,7 +213,7 @@ CONTAINS
       WRITE(6,101) 'Most thermal group:              ',most_thermal
     END IF
     DO m=1,num_mat
-      WRITE(6,102) 'Material ',xs_mat(m)%mat_name,' with ID ',xs_mat(m)%mat_id
+      WRITE(6,102) 'Material ',TRIM(xs_mat(m)%mat_name),' with ID ',xs_mat(m)%mat_id
       WRITE(6,103) 'Group','SigT','SigF','SigS','nu*SigF','chi'
       DO g=1,egmax
         sigs=0.0_d_t
@@ -228,13 +228,13 @@ CONTAINS
       DO order=1, xs_ord+1
         WRITE(6,101) 'Scattering order: ',order-1
         DO g=1,egmax
-          WRITE(6,105) (xs_mat(m)%sigma_scat(order,gp,g),gp=1,egmax)
+          WRITE(6,105) (xs_mat(m)%sigma_scat(order,g,gp),gp=1,egmax)
         END DO
       END DO
     END DO
     WRITE(6,*)
 101 FORMAT(1X,A,I8)
-102 FORMAT(1X,A,I8,A,I8)
+102 FORMAT(1X,A,A,A,I8)
 103 FORMAT(1X,A9,5A15)
 104 FORMAT(1X,I9,5ES15.4)
 105 FORMAT(1X,12ES15.4)

@@ -52,7 +52,7 @@ CONTAINS
       IF(ios .NE. 0)THEN
         !legacy original THOR xs format with no format indicater
         REWIND(local_unit)
-        CALL xs_read_legacyv0()
+        CALL xs_read_legacy_v0()
         EXIT
       ENDIF
       xs_format=TRIM(ADJUSTL(xs_format))
@@ -122,7 +122,7 @@ CONTAINS
       IF(xs_mat(i)%mat_id .LE. mat_id_min)mat_id_min=xs_mat(i)%mat_id
     ENDDO
     !allocate and assign pointer values
-    !everywhere else will be
+    !everywhere else will be 0
     ALLOCATE(mat_pointer(mat_id_min:mat_id_max))
     mat_pointer=0
     DO i=1,num_mat
@@ -131,9 +131,9 @@ CONTAINS
   END SUBROUTINE read_xs
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE xs_read_legacyv0()
+  SUBROUTINE xs_read_legacy_v0()
 
-    INTEGER(kind=li) :: alloc_stat, e1, order, eg_to, eg_from,l,m
+    INTEGER(kind=li) :: alloc_stat, e1, order, eg_to, eg_from,m
 
     READ(local_unit,*) num_mat
 
@@ -203,13 +203,13 @@ CONTAINS
         END DO
       END IF
     END DO
-  END SUBROUTINE xs_read_legacyv0
+  END SUBROUTINE xs_read_legacy_v0
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !currently supports max of 1000 groups
   SUBROUTINE xs_read_current()
     CHARACTER(10000) :: words(1000)
-    INTEGER :: nwords,ios,i,g,alloc_stat,gp,j
+    INTEGER :: nwords,i,g,alloc_stat,gp,j
 
     num_mat=0
     egmax=0
@@ -278,31 +278,43 @@ CONTAINS
           words(4)=TRIM(ADJUSTL(words(4)))
           !get or assign mat name
           IF(words(4) .NE. '')THEN
-            xs_mat(i)%mat_name=words(4)
+            xs_mat(i)%mat_name=TRIM(words(4))
           ELSE
             WRITE(xs_mat(i)%mat_name,'(A,I0)')'mat_',xs_mat(i)%mat_id
           ENDIF
           !read in the fission spectrum
           CALL get_next_line(words,nwords)
-          IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
+          IF(nwords .NE. egmax)THEN
+            WRITE(*,*)'bad amount of xs data on line for chi',nwords,TRIM(words(1))
+            STOP 'fatal error'
+          ENDIF
           DO g=1,egmax
             READ(words(g),*)xs_mat(i)%chi(g)
           ENDDO
           !read in SigmaF
           CALL get_next_line(words,nwords)
-          IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
+          IF(nwords .NE. egmax)THEN
+            WRITE(*,*)'bad amount of xs data on line for SigmaF',nwords,TRIM(words(1))
+            STOP 'fatal error'
+          ENDIF
           DO g=1,egmax
             READ(words(g),*)xs_mat(i)%sigma_f(g)
           ENDDO
           !read in nu
           CALL get_next_line(words,nwords)
-          IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
+          IF(nwords .NE. egmax)THEN
+            WRITE(*,*)'bad amount of xs data on line for nu',nwords,TRIM(words(1))
+            STOP 'fatal error'
+          ENDIF
           DO g=1,egmax
             READ(words(g),*)xs_mat(i)%nu(g)
           ENDDO
           !read in total/transport xs
           CALL get_next_line(words,nwords)
-          IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
+          IF(nwords .NE. egmax)THEN
+            WRITE(*,*)'bad amount of xs data on line for total xs',nwords,TRIM(words(1))
+            STOP 'fatal error'
+          ENDIF
           DO g=1,egmax
             READ(words(g),*)xs_mat(i)%sigma_t(g)
           ENDDO
@@ -310,7 +322,10 @@ CONTAINS
           DO j=1,xs_ord+1
             DO g=1,egmax
               CALL get_next_line(words,nwords)
-              IF(nwords .NE. egmax)STOP 'bad amount of xs data on line'
+              IF(nwords .NE. egmax)THEN
+                WRITE(*,*)'bad amount of xs data on line for sigmas',g,nwords,TRIM(words(1))
+                STOP 'fatal error'
+              ENDIF
               DO gp=1,egmax
                 READ(words(gp),*)xs_mat(i)%sigma_scat(j,g,gp)
               ENDDO

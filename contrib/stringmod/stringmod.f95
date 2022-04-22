@@ -189,7 +189,7 @@ if( abs(rnumd) > huge(rnum) ) then
   return
 end if
 if( abs(rnumd) < tiny(rnum) ) rnum=0.0_kr4
-rnum=rnumd
+rnum=REAL(rnumd,kr4)
 
 end subroutine value_sr
 
@@ -204,7 +204,7 @@ integer(ki8) :: inum
 real(kr8) :: rnum
 
 call value_dr(str,rnum,ios)
-if(abs(rnum)>huge(inum)) then
+if(INT(abs(rnum))>huge(inum)) then
   ios=15
   return
 end if

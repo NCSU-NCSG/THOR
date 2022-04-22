@@ -1,0 +1,18 @@
+  execution yes
+  lambda 0
+  type keig ; keigsolver jfnk ; jfnk_method outer
+  page_refl save
+  kconv 1E-8; innerconv 1E-12 ; outerconv 1E-7
+  maxinner 2 ; maxouter 5000
+
+  mesh cube_level1.mesh
+  xs cube_eigenvalue_1g.xs
+  flux_out pi_hard_eig_1grp.flux
+  print_xs yes
+
+  ngroups 1 ; upscattering yes
+
+  qdtype levelsym ; qdorder 12
+
+  region_map
+  1 0

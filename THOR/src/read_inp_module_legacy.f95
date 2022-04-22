@@ -26,7 +26,6 @@ CONTAINS
     !INTEGER :: i = 1
     INTEGER :: verbose=0
     INTEGER :: ioerr=0
-    CHARACTER(50) :: in_file = ""
     !CHARACTER(50) :: out_file = ""
 
     !Input File Parsing
@@ -2066,7 +2065,7 @@ CONTAINS
     END IF
   END SUBROUTINE yaml_input_flag_generic
 
-  SUBROUTINE legacyv1_read(localunit)
+  SUBROUTINE legacy_v0_read(localunit)
     INTEGER,INTENT(IN) :: localunit
     !***********************************************************************
     !
@@ -2076,9 +2075,9 @@ CONTAINS
 
     ! local variables
 
-    CHARACTER(100) :: buffer, fname, tchar
+    CHARACTER(100) :: buffer, fname
     LOGICAL :: done
-    INTEGER :: i, rank,mpi_err,ios,legacyv,nwords
+    INTEGER :: i, rank,mpi_err,ios,nwords
     CHARACTER(100000) :: regmap
     CHARACTER(10) :: words(25000)
     !get rank
@@ -2094,26 +2093,25 @@ CONTAINS
     regmap=""
     DO WHILE(done .EQV. .FALSE.)
 
-      READ(localunit,101,END=999) buffer
+      READ(localunit,101,IOSTAT=ios) buffer
+      IF(ios .NE. 0)EXIT
       IF     ( INDEX( lowercase(buffer) ,'start') > 0 .AND. INDEX( lowercase(buffer) ,'problem')>0 ) THEN
-        CALL legacyv1_read_problem
+        CALL legacy_v0_read_problem
       ELSE IF( INDEX( lowercase(buffer) ,'start') > 0 .AND. INDEX( lowercase(buffer) ,'inout')>0   ) THEN
-        CALL legacyv1_read_inout
+        CALL legacy_v0_read_inout
       ELSE IF( INDEX( lowercase(buffer) ,'start') > 0 .AND. INDEX( lowercase(buffer) ,'cross_sections')>0   ) THEN
-        CALL legacyv1_read_cross_sections
+        CALL legacy_v0_read_cross_sections
       ELSE IF( INDEX( lowercase(buffer) ,'start') > 0 .AND. INDEX( lowercase(buffer) ,'quadrature')>0   ) THEN
-        CALL legacyv1_read_quadrature_field
+        CALL legacy_v0_read_quadrature_field
       ELSE IF( INDEX( lowercase(buffer) ,'start') > 0 .AND. INDEX( lowercase(buffer) ,'postprocess')>0   ) THEN
-        CALL legacyv1_read_postprocess_field
+        CALL legacy_v0_read_postprocess_field
       ELSE IF( INDEX( lowercase(buffer) ,'start') > 0 .AND. INDEX( lowercase(buffer) ,'regionmap')>0   ) THEN
-        CALL legacyv1_read_regionmap_field(regmap)
+        CALL legacy_v0_read_regionmap_field(regmap)
       ELSE IF( INDEX( lowercase(buffer) ,'end') > 0   .AND. INDEX( lowercase(buffer) ,'file')   >0 ) THEN
         done=.TRUE.
       END IF
 
     END DO
-
-999 CONTINUE
 
 101 FORMAT(A100)
 
@@ -2128,9 +2126,9 @@ CONTAINS
       READ(regmap,*) (reg2mat(i),i=minreg,maxreg)
     ENDIF
 
-  END SUBROUTINE legacyv1_read
+  END SUBROUTINE legacy_v0_read
 
-  SUBROUTINE legacyv1_read_regionmap_field(regmap)
+  SUBROUTINE legacy_v0_read_regionmap_field(regmap)
 
     ! reads the regionmap into array regmap
 
@@ -2142,7 +2140,7 @@ CONTAINS
 
     CHARACTER(100) :: line, fname
     INTEGER :: l,lr
-    INTEGER :: i, rank,mpi_err, localunit
+    INTEGER :: rank,mpi_err, localunit
     CALL GET_COMMAND_ARGUMENT(1,fname)
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
     localunit = rank+100
@@ -2163,12 +2161,12 @@ CONTAINS
 
 101 FORMAT(A100)
 
-  END SUBROUTINE legacyv1_read_regionmap_field
+  END SUBROUTINE legacy_v0_read_regionmap_field
 
-  SUBROUTINE legacyv1_read_quadrature_field
+  SUBROUTINE legacy_v0_read_quadrature_field
 
     ! local variables
-    INTEGER :: nwords,ntmp,i,nwwords,ios
+    INTEGER :: nwords,i,nwwords,ios
     CHARACTER(100) :: buffer, fname
     CHARACTER(100) :: words(100),wwords(2)
     INTEGER :: rank,mpi_err, localunit
@@ -2226,19 +2224,20 @@ CONTAINS
 
 101 FORMAT(A100)
 
-  END SUBROUTINE legacyv1_read_quadrature_field
+  END SUBROUTINE legacy_v0_read_quadrature_field
 
-  SUBROUTINE legacyv1_read_postprocess_field
+  SUBROUTINE legacy_v0_read_postprocess_field
 
     ! local variables
-    INTEGER :: nwords, ntmp, i, l, j, nwwords, ios, nwwwords
-    CHARACTER(1000) :: buffer, fname
+    INTEGER :: nwords, i, l, j, nwwords, nwwwords
+    CHARACTER(1000) :: buffer, fname, msg
     CHARACTER(1000) :: words(100), wwords(2), wwwords(100)
-    INTEGER :: rank, mpi_err, localunit
+    INTEGER :: rank, mpi_err, localunit, minint
     CALL GET_COMMAND_ARGUMENT(1,fname)
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
     localunit = rank+100
 
+    minint=1
     ! read loop over inout block
     DO WHILE(.TRUE.)
       READ(localunit,101) buffer
@@ -2259,24 +2258,33 @@ CONTAINS
                 WRITE(6,*) 'Following cartesian map nine entries are required; Found: ',&
                       TRIM(wwords(2)),' has ', nwwwords, ' entries.'
               END IF
-              glob_cmap_min_x = string_to_real(wwwords(1), 'Conversion to cartesian map xmin failed')
-              glob_cmap_max_x = string_to_real(wwwords(2), 'Conversion to cartesian map xmax failed')
+              msg='Conversion to cartesian map xmin failed'
+              glob_cmap_min_x = string_to_real(wwwords(1), msg)
+              msg='Conversion to cartesian map xmax failed'
+              glob_cmap_max_x = string_to_real(wwwords(2), msg)
               IF (ABS(glob_cmap_max_x - glob_cmap_min_x) < small_real) THEN
                 WRITE(6, *) "cartesian_map xmin and xmax are too close to each other"
               END IF
-              glob_cmap_nx = string_to_int(wwwords(3), 'Conversion to cartesian map nx failed', 1)
-              glob_cmap_min_y = string_to_real(wwwords(4), 'Conversion to cartesian map ymin failed')
-              glob_cmap_max_y = string_to_real(wwwords(5), 'Conversion to cartesian map ymax failed')
+              msg='Conversion to cartesian map nx failed'
+              glob_cmap_nx = string_to_int(wwwords(3), msg, minint)
+              msg='Conversion to cartesian map ymin failed'
+              glob_cmap_min_y = string_to_real(wwwords(4), msg)
+              msg='Conversion to cartesian map ymax failed'
+              glob_cmap_max_y = string_to_real(wwwords(5), msg)
               IF (ABS(glob_cmap_max_y - glob_cmap_min_y) < small_real) THEN
                 WRITE(6, *) "cartesian_map xmin and xmax are too close to each other"
               END IF
-              glob_cmap_ny = string_to_int(wwwords(6), 'Conversion to cartesian map ny failed', 1)
-              glob_cmap_min_z = string_to_real(wwwords(7), 'Conversion to cartesian map zmin failed')
-              glob_cmap_max_z = string_to_real(wwwords(8), 'Conversion to cartesian map zmax failed')
+              msg='Conversion to cartesian map ny failed'
+              glob_cmap_ny = string_to_int(wwwords(6), msg, minint)
+              msg='Conversion to cartesian map zmin failed'
+              glob_cmap_min_z = string_to_real(wwwords(7), msg)
+              msg='Conversion to cartesian map zmax failed'
+              glob_cmap_max_z = string_to_real(wwwords(8), msg)
               IF (ABS(glob_cmap_max_z - glob_cmap_min_z) < small_real) THEN
                 WRITE(6, *) "cartesian_map zmin and zmax are too close to each other"
               END IF
-              glob_cmap_nz = string_to_int(wwwords(9), 'Conversion to cartesian map nz failed', 1)
+              msg='Conversion to cartesian map nz failed'
+              glob_cmap_nz = string_to_int(wwwords(9), msg, minint)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'point_value_locations'
             ELSE IF ( TRIM(lowercase(wwords(1))) .EQ. 'point_value_locations' ) THEN
               wwords(2)=TRIM(lowercase(wwords(2)))
@@ -2288,10 +2296,10 @@ CONTAINS
               ELSE
                 number_point_flux_locations = nwwwords / 3
                 ALLOCATE(point_flux_locations(number_point_flux_locations, 3))
+                msg='Conversion to point flux location failed'
                 DO l = 1, number_point_flux_locations
                   DO j = 1, 3
-                    point_flux_locations(l, j) = string_to_real(wwwords((l - 1) * 3 + j),&
-                      'Conversion to point flux location failed')
+                    point_flux_locations(l, j) = string_to_real(wwwords((l - 1) * 3 + j),msg)
                   END DO
                 END DO
               END IF
@@ -2312,12 +2320,12 @@ CONTAINS
 
 101 FORMAT(A1000)
 
-  END SUBROUTINE legacyv1_read_postprocess_field
+  END SUBROUTINE legacy_v0_read_postprocess_field
 
-  SUBROUTINE legacyv1_read_cross_sections
+  SUBROUTINE legacy_v0_read_cross_sections
 
     ! local variables
-    INTEGER :: nwords,ntmp,nwwords,ios
+    INTEGER :: nwords,nwwords,ios
     CHARACTER(100) :: buffer, fname
     CHARACTER(100) :: words(100),wwords(2)
     INTEGER :: i, rank,mpi_err, localunit
@@ -2413,12 +2421,12 @@ CONTAINS
 
 101 FORMAT(A100)
 
-  END SUBROUTINE legacyv1_read_cross_sections
+  END SUBROUTINE legacy_v0_read_cross_sections
 
-  SUBROUTINE legacyv1_read_inout
+  SUBROUTINE legacy_v0_read_inout
 
     ! local variables
-    INTEGER :: nwords,ntmp,i,nwwords,ios
+    INTEGER :: nwords,i,nwwords
     CHARACTER(100) :: buffer, fname
     CHARACTER(100) :: words(100),wwords(2)
     INTEGER :: rank,mpi_err, localunit
@@ -2515,12 +2523,12 @@ CONTAINS
 
 101 FORMAT(A100)
 
-  END SUBROUTINE legacyv1_read_inout
+  END SUBROUTINE legacy_v0_read_inout
 
-  SUBROUTINE legacyv1_read_problem
+  SUBROUTINE legacy_v0_read_problem
 
     ! local variables
-    INTEGER :: nwords,ntmp,i,nwwords,ios
+    INTEGER :: nwords,i,nwwords,ios
     CHARACTER(100) :: buffer, fname
     CHARACTER(100) :: words(100),wwords(2)
     INTEGER :: rank,mpi_err, localunit
@@ -2770,7 +2778,7 @@ CONTAINS
                   dfact_opt = 2
                 ELSE
                   WRITE(6,*) 'Error. This is not a valid density factor option &
-                        (no/byvolume/fromfile) -- ',wwords(2),' --'
+                    & (no/byvolume/fromfile) -- ',wwords(2),' --'
                   WRITE(6,*) 'Execution will terminate.'
                   STOP
                 END IF
@@ -2805,11 +2813,11 @@ CONTAINS
     END DO
 
 101 FORMAT(A100)
-  END SUBROUTINE legacyv1_read_problem
+  END SUBROUTINE legacy_v0_read_problem
 
   INTEGER(kind=li) FUNCTION string_to_int(string, msg, min_int)
-    CHARACTER(100), INTENT(in) :: string
-    CHARACTER(100), INTENT(in) :: msg
+    CHARACTER(1000), INTENT(in) :: string
+    CHARACTER(1000), INTENT(in) :: msg
     INTEGER(kind=li), OPTIONAL, INTENT(inout) :: min_int
 
     INTEGER(kind=li) :: ios
@@ -2823,8 +2831,8 @@ CONTAINS
   END FUNCTION string_to_int
 
   REAL(kind=d_t) FUNCTION string_to_real(string, msg)
-    CHARACTER(100), INTENT(in) :: string
-    CHARACTER(100), INTENT(in) :: msg
+    CHARACTER(1000), INTENT(in) :: string
+    CHARACTER(1000), INTENT(in) :: msg
 
     INTEGER(kind=li) :: ios
 

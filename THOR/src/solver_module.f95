@@ -45,7 +45,7 @@ CONTAINS
 
     ! Define temporary variables
 
-    INTEGER(kind=li) :: alloc_stat, k
+    INTEGER(kind=li) :: alloc_stat
     REAL(kind=d_t), DIMENSION(:,:), ALLOCATABLE :: M, LL, U, &
           Mf, Lf, Uf
 
@@ -108,7 +108,7 @@ CONTAINS
 
     ! Define temporary variables
 
-    INTEGER(kind=li) :: alloc_stat, k
+    INTEGER(kind=li) :: alloc_stat
     REAL(kind=d_t), DIMENSION(:,:), ALLOCATABLE :: M, LL, U, &
           Mf, Lf, Uf
 

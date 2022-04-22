@@ -1,0 +1,18 @@
+  execution yes
+  lambda -1
+  type keig ;
+  page_refl save
+  innerconv 1E-12 ; outerconv 1E-7
+  maxinner 4 ; maxouter 500
+
+  mesh keig_homogeneous.thrm
+  xs keig_homogeneous.xs
+  flux_out keig_homogeneous.flux
+  print_xs yes
+
+  ngroups 1 ; upscattering no
+  multiplying yes
+
+  qdtype levelsym ; qdorder 2
+
+  region_map 0 1

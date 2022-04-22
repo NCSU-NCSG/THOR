@@ -65,7 +65,7 @@ CONTAINS
 
     ! Define temporary variables
 
-    INTEGER(kind=li) :: l, i, q, octant, order, alloc_stat,&
+    INTEGER(kind=li) :: l, i,&
           n,m, k, indx, mat_indx
     REAL(kind=d_t) :: error,te,ts
 
@@ -78,7 +78,7 @@ CONTAINS
     REAL(kind=d_t) :: sc_flux_old (num_moments_v,namom,num_cells)
 
     ! Define MPI environment and get rank
-    INTEGER ::rank,mpi_err, localunit
+    INTEGER ::rank,mpi_err
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
 
 
@@ -152,7 +152,7 @@ CONTAINS
       ! Test convergence of current-group scalar flux
 
       IF(inner > 1 .AND. max_error(eg) < inner_conv)THEN
-        go to 10
+        EXIT
       END IF
 
       IF(inner < max_inner)THEN
@@ -185,8 +185,6 @@ CONTAINS
     END DO
 
     inner=inner-1_li
-
-10  CONTINUE
 
     tot_nInners=tot_nInners+inner
 

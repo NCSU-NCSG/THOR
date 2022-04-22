@@ -1,0 +1,21 @@
+  execution yes
+  lambda 0
+  type keig
+  page_refl save
+  innerconv 1E-12 ; outerconv 1E-7
+  maxinner  4 ; maxouter 500
+
+
+  mesh brick_tet_mesh.thrm
+  xs   six_group.xs
+  flux_out six_group_keig_analytical.flux
+  print_xs yes
+
+  ngroups 6
+  upscattering yes
+  multiplying yes
+
+  qdtype levelsym
+  qdorder 2
+
+  region_map 1 1

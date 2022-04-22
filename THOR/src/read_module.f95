@@ -46,7 +46,7 @@ CONTAINS
     ! Declare temporary variable
 
     INTEGER(kind=li) :: alloc_stat
-    INTEGER ::rank,mpi_err, localunit
+    INTEGER ::rank,mpi_err
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
 
     ! Set the defaults
@@ -85,8 +85,10 @@ CONTAINS
 
     IF(execution .EQ. 0) CALL stop_thor(1_li)
 
-    ! Call generate_num_moments and generate_multi_index to create indices
+    !set the namom here so we know for the source file
+    namom=(scatt_ord+1)**2
 
+    ! Call generate_num_moments and generate_multi_index to create indices
     CALL generate_num_moments(space_ord,num_moments_v,num_moments_f)
 
     ALLOCATE(index_v(num_moments_v),index_f(num_moments_f),&
@@ -487,8 +489,6 @@ CONTAINS
 
     ! Echo out problem specifications
 
-    INTEGER :: i
-
     IF (rank .EQ. 0) THEN
       WRITE(6,*)
       WRITE(6,*) "--------------------------------------------------------"
@@ -586,9 +586,6 @@ CONTAINS
 
 101 FORMAT(1X,A60,I5)
 102 FORMAT(A60,ES12.4)
-202 FORMAT(1X,A60,ES12.4)
-103 FORMAT(1X,I5,ES12.4)
-104 FORMAT(1X,I14,A,I14)
 
   END SUBROUTINE echo_input
 
@@ -602,12 +599,13 @@ CONTAINS
     ! local variables
 
     CHARACTER(100) :: fname, tchar
-    INTEGER :: i,rank,mpi_err,localunit,ios,legacyv
+    INTEGER :: rank,mpi_err,localunit,ios,legacy_v
     CALL GET_COMMAND_ARGUMENT(1,fname)
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
     localunit = rank+100
 
     OPEN(unit = localunit, file = fname , status = 'old', action = 'read',IOSTAT=ios)
+    jobname=TRIM(ADJUSTL(fname))
     IF(ios .NE. 0)THEN
       WRITE(*,*)'error opening ',TRIM(fname)
       STOP 'fatal error'
@@ -616,29 +614,29 @@ CONTAINS
       WRITE(*,*) "<><><><><><><><>", fname
     ENDIF
 
-    legacyv=0
+    legacy_v=-9999
     !determine if the input is yaml
     IF(fname(LEN(TRIM(fname))-4: LEN(TRIM(fname))) .EQ. ".yaml")THEN
-      legacyv=-1
+      legacy_v=-1
     ELSE
       !determine if the input is legacy
       DO
         READ(localunit,'(A100)',IOSTAT=ios) tchar
         !legacy version 2
-        IF(trim(adjustl(tchar)) .EQ. "start problem")legacyv=1
+        IF(trim(adjustl(tchar)) .EQ. "start problem")legacy_v=0
         IF(ios .NE. 0)EXIT
       ENDDO
       REWIND(localunit)
     ENDIF
 
-    SELECTCASE(legacyv)
+    SELECTCASE(legacy_v)
       CASE(-1)
         !yaml read case
         CALL yaml_read(localunit)
-      CASE(1)
-        !original THOR input version, for backwards compatibility
-        CALL legacyv1_read(localunit)
       CASE(0)
+        !original THOR input version, for backwards compatibility
+        CALL legacy_v0_read(localunit)
+      CASE(-9999)
         !current THOR input format
         CALL inputfile_read(localunit)
       CASE DEFAULT

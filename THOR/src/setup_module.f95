@@ -41,14 +41,14 @@ CONTAINS
     ! Local variables
 
     INTEGER(kind=li) :: i,alloc_stat
-    INTEGER(kind=li) :: q,oct,summe
+    INTEGER(kind=li) :: q
     TYPE(vector) :: v0, v1, v2, v3, n0, n1, n2, n3
     INTEGER(kind=li) :: reflective(3,2)
     REAL(kind=d_t) :: ts,te
     REAL(kind=d_t), DIMENSION(3,3) :: J, J_inv
-    REAL(kind=d_t)                 :: det_J,tot_vol
+    REAL(kind=d_t)                 :: det_J
     LOGICAL :: existence
-    INTEGER :: rank, num_p, mpi_err, localunit
+    INTEGER :: rank, num_p, mpi_err
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
     CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
 
@@ -176,8 +176,9 @@ CONTAINS
     END IF
 
     ! Error out if we have reflecting BCs, JFNK, and nproc > 1
-    IF (eig_switch .EQ. one .and. SUM(reflective) .NE. zero .and. num_p > one) THEN
+    IF (eig_switch .EQ. 1 .and. ABS(SUM(reflective)) .GT. 1.0D-16 .and. num_p > 1) THEN
       CALL stop_thor(-1_li, "Parallel execution of JFNK with reflecting BC is currently not supported in THOR.")
+      !TODO: This should be analyzed and figured out if we can do something different, or if we can just set it to 1 thread
     END IF
 
 101 FORMAT(1X,A,ES12.4)
@@ -308,7 +309,7 @@ CONTAINS
     ! --- Local variables
     INTEGER(kind=li) :: xd = 0, yd = 0, zd=0
     INTEGER(kind=li) :: parallel_i, k, oct, permutation(8), q
-    INTEGER :: rank, num_p, mpi_err, localunit
+    INTEGER :: rank, num_p, mpi_err
 
     CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
@@ -397,16 +398,15 @@ CONTAINS
 
     ! Define temporary variables
 
-    INTEGER(kind=li) :: alloc_stat, q, oct, octt, octant,&
-                        i, f, l, rcell, j, k, index
+    INTEGER(kind=li) :: q, oct, octant,&
+                        i, k, index
     TYPE(vector) :: omega
 
     ! Temporary variables
 
-    INTEGER(kind=li) :: tpe, mate
     REAL(kind=d_t) :: te,ts
 
-    INTEGER ::rank,mpi_err, localunit, num_p, optimal_tasks
+    INTEGER ::rank,mpi_err, num_p, optimal_tasks
     CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
 
@@ -543,9 +543,9 @@ CONTAINS
     DO cell=1,num_cells
       DO face=0,3
         IF      (dadj(face,cell)>0) THEN
-          odegr(cell)=odegr(cell)+1
+          odegr(cell)=odegr(cell)+INT(1,1)
         ELSE IF (dadj(face,cell)<0) THEN
-          idegr(cell)=idegr(cell)+1
+          idegr(cell)=idegr(cell)+INT(1,1)
         END IF
       END DO
     END DO
@@ -589,7 +589,7 @@ CONTAINS
         DO j=0,3
           neigh=dadj(j,cell)
           IF(neigh>0) THEN
-            idegr(neigh)=idegr(neigh)-1
+            idegr(neigh)=idegr(neigh)-INT(1,1)
             IF(idegr(neigh).EQ.0 .AND. solved(neigh) .EQ. 0) THEN
               qmarker=qmarker+1
               queue(qmarker)=neigh
@@ -631,7 +631,7 @@ CONTAINS
           DO j=0,3
             neigh=dadj(j,cell)
             IF(neigh<0) THEN
-              odegr(ABS(neigh))=odegr(ABS(neigh))-1
+              odegr(ABS(neigh))=odegr(ABS(neigh))-INT(1,1)
               IF(odegr(ABS(neigh)).EQ.0 .AND. solved(ABS(neigh)) .EQ. 0) THEN
                 iqmarker=iqmarker-1
                 queue(iqmarker)=ABS(neigh)
@@ -680,9 +680,9 @@ CONTAINS
               current_el%face = j
               current_el => current_el%next
               neldep(octant,q)=neldep(octant,q)+1_li
-              odegr(i)=odegr(i)-1
+              odegr(i)=odegr(i)-INT(1,1)
             ELSE IF ( neigh>0 .AND. solved(i) .EQ. 0 ) THEN
-              idegr(i)=idegr(i)-1
+              idegr(i)=idegr(i)-INT(1,1)
             END IF
           END IF
         END DO
@@ -727,7 +727,6 @@ CONTAINS
     IF(page_sweep.EQ.1) THEN
       WRITE(99,rec=8*(q-1)+octant) sweep_path(:,1,1)
     END IF
-101 FORMAT(1X,I12)
 
   END SUBROUTINE pre_queue
 
@@ -896,7 +895,7 @@ CONTAINS
     IMPLICIT NONE
 
     INTEGER:: i, p, k=0
-    INTEGER ::rank,mpi_err, localunit, num_p, optimal_tasks
+    INTEGER ::rank,mpi_err, num_p, optimal_tasks
     CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
 

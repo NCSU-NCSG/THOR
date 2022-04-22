@@ -1,0 +1,34 @@
+Multigroup localized source
+
+  start problem
+    execution = yes
+    lambda = 0
+    type=fsrc ;
+    sweep=precomp
+    page_refl=save
+    innerconv=1E-12 ; outerconv=1E-5
+    maxinner = 2 ; maxouter = 500
+  end problem
+
+  start inout
+    mesh_file     = two_region_cube.thrm
+    xs_file       = two_group_upscattering.xs
+    source_file   = two_region_cube.src
+    flux_file     = multigroup_two_region_cube.flux
+    print_xs = yes
+  end inout
+
+  start cross_sections
+     ngroups=2 ; upscattering = yes ;
+     multiplying = no
+  end cross_sections
+
+  start quadrature
+    qdtype=levelsym ; qdorder = 2
+  end quadrature
+
+  start regionmap
+     1 1
+  end regionmap
+
+end file
