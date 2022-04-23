@@ -8,6 +8,7 @@ MODULE read_inp_module
   USE mpi
   USE stringmod
   USE global_variables
+  USE error_module
 
   IMPLICIT NONE
   PRIVATE
@@ -56,7 +57,7 @@ CONTAINS
     CHARACTER(ll_max) :: words(lp_max),wwords(lp_max)
     INTEGER :: ios,rank,mpi_err,nwords,nwwords,iw,ic
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
-    IF(localunit .NE. 100+rank)STOP 'rank mismatch in input file reading'
+    IF(localunit .NE. 100+rank)CALL raise_fatal_error('rank mismatch in input file reading')
     local_unit=localunit
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -166,8 +167,7 @@ CONTAINS
         DO ic=1,num_cards
           IF(wwords(1) .EQ. cards(ic)%cname)THEN
             IF(cards(ic)%used)THEN
-              WRITE(*,*) 'duplicate params: ',cards(ic)%cname
-              STOP
+              CALL raise_fatal_error('duplicate params: '//TRIM(cards(ic)%cname))
             ENDIF
             CALL cards(ic)%getcard(wwords)
             cards(ic)%used=.TRUE.
@@ -175,8 +175,7 @@ CONTAINS
           ENDIF
         ENDDO
         IF(ic .GE. num_cards+1)THEN
-          IF(rank .EQ. 0)WRITE(*,'(2A)')'STOPPING: bad input, unrecognized card: ',wwords(1)
-          STOP
+          CALL raise_fatal_error('bad input, unrecognized card: '//TRIM(wwords(1)))
         ENDIF
       ENDDO
     ENDDO
@@ -193,9 +192,7 @@ CONTAINS
     ELSEIF(wwords(2) .EQ. 'fsrc') THEN
       problem=0
     ELSE
-      WRITE(6,*) 'Error. This is not a valid problem type -- ',wwords(2),' --'
-      WRITE(6,*) 'Execution will terminate.'
-      STOP
+      CALL raise_fatal_error('This is not a valid problem type -- '//TRIM(wwords(2))//' --')
     ENDIF
   END SUBROUTINE get_type
 
@@ -210,9 +207,7 @@ CONTAINS
     ELSEIF(wwords(2) .EQ. 'jfnk') THEN
       eig_switch=1
     ELSE
-      WRITE(6,*) 'Error. This is not a valid eigenvalue solver -- ',wwords(2),' --'
-      WRITE(6,*) 'Execution will terminate.'
-      STOP
+      CALL raise_fatal_error('This is not a valid eigenvalue solver -- '//TRIM(wwords(2))//' --')
     ENDIF
   END SUBROUTINE get_keigsolver
 
@@ -225,8 +220,7 @@ CONTAINS
     wwords(2)=TRIM(lowercase(wwords(2)))
     READ(wwords(2),'(i10)',iostat=ios) space_ord
     IF(ios.NE.0) THEN
-      WRITE(6,*) 'Invalid spatial order in problem specification -- ',TRIM(wwords(2)),' --'
-      STOP
+      CALL raise_fatal_error('Invalid spatial order in problem specification -- '//TRIM(wwords(2))//' --')
     ENDIF
   END SUBROUTINE get_lambda
 
@@ -257,9 +251,7 @@ CONTAINS
     ELSEIF(wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
       outer_acc=1
     ELSE
-      WRITE(6,*) 'Error. This is not a valid acceleration option for PI -- ',wwords(2),' --'
-      WRITE(6,*) 'Execution will terminate.'
-      STOP
+      CALL raise_fatal_error('This is not a valid acceleration option for PI -- '//TRIM(wwords(2))//' --')
     ENDIF
   END SUBROUTINE get_piacc
 
@@ -274,9 +266,7 @@ CONTAINS
     ELSEIF(wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
       page_sweep=0
     ELSE
-      WRITE(6,*) 'Error. This is not a valid sweep page option -- ',wwords(2),' --'
-      WRITE(6,*) 'Execution will terminate.'
-      STOP
+      CALL raise_fatal_error('This is not a valid sweep page option -- '//TRIM(wwords(2))//' --')
     ENDIF
   END SUBROUTINE get_page_sweep
 
@@ -293,9 +283,7 @@ CONTAINS
     ELSEIF(wwords(2) .EQ. 'inner') THEN
       page_refl=2
     ELSE
-      WRITE(6,*) 'Error. This is not a valid page reflective BC option -- ',wwords(2),' --'
-      WRITE(6,*) 'Execution will terminate.'
-      STOP
+      CALL raise_fatal_error('This is not a valid page reflective BC option -- '//TRIM(wwords(2))//' --')
     ENDIF
   END SUBROUTINE get_page_refl
 
@@ -310,9 +298,7 @@ CONTAINS
     ELSEIF(wwords(2) .EQ. 'all') THEN
       page_iflw=0
     ELSE
-      WRITE(6,*) 'Error. This is not a valid page inflow option -- ',wwords(2),' --'
-      WRITE(6,*) 'Execution will terminate.'
-      STOP
+      CALL raise_fatal_error('This is not a valid page inflow option -- '//TRIM(wwords(2))//' --')
     END IF
   END SUBROUTINE get_page_iflw
 
@@ -325,8 +311,7 @@ CONTAINS
     wwords(2)=TRIM(lowercase(wwords(2)))
     READ(wwords(2),*,iostat=ios) k_conv
     IF(ios.NE.0) THEN
-      WRITE(6,*) 'Invalid stopping criterion for keff in problem specification -- ',TRIM(wwords(2)),' --'
-      STOP
+      CALL raise_fatal_error('Invalid stopping criterion for keff in problem specification -- '//TRIM(wwords(2))//' --')
     END IF
   END SUBROUTINE get_kconv
 
@@ -339,8 +324,7 @@ CONTAINS
     wwords(2)=TRIM(lowercase(wwords(2)))
     READ(wwords(2),*,iostat=ios) inner_conv
     IF(ios.NE.0) THEN
-      WRITE(6,*) 'Invalid stopping criterion for inner iterations in problem specification -- ',TRIM(wwords(2)),' --'
-      STOP
+      CALL raise_fatal_error('Invalid stopping criterion for inner iterations in problem specification -- '//TRIM(wwords(2))//' --')
     END IF
   END SUBROUTINE get_innerconv
 
@@ -353,8 +337,7 @@ CONTAINS
     wwords(2)=TRIM(lowercase(wwords(2)))
     READ(wwords(2),*,iostat=ios) outer_conv
     IF(ios.NE.0) THEN
-      WRITE(6,*) 'Invalid stopping criterion for outer iterations in problem specification -- ',TRIM(wwords(2)),' --'
-      STOP
+      CALL raise_fatal_error('Invalid stopping criterion for outer iterations in problem specification -- '//TRIM(wwords(2))//' --')
     END IF
   END SUBROUTINE get_outerconv
 
@@ -367,8 +350,7 @@ CONTAINS
     wwords(2)=TRIM(lowercase(wwords(2)))
     READ(wwords(2),'(i10)',iostat=ios) max_inner
     IF(ios.NE.0 .OR. max_inner<1 ) THEN
-      WRITE(6,*) 'Invalid maximum number of inner iteration in problem specification -- ',TRIM(wwords(2)),' --'
-      STOP
+      CALL raise_fatal_error('Invalid maximum number of inner iteration in problem specification -- '//TRIM(wwords(2))//' --')
     END IF
   END SUBROUTINE get_maxinner
 
@@ -381,8 +363,7 @@ CONTAINS
     wwords(2)=TRIM(lowercase(wwords(2)))
     READ(wwords(2),'(i10)',iostat=ios) max_outer
     IF(ios.NE.0 .OR. max_outer<1 ) THEN
-      WRITE(6,*) 'Invalid maximum number of outer iteration in problem specification -- ',TRIM(wwords(2)),' --'
-      STOP
+      CALL raise_fatal_error('Invalid maximum number of outer iteration in problem specification -- '//TRIM(wwords(2))//' --')
     END IF
   END SUBROUTINE get_maxouter
 
@@ -395,8 +376,7 @@ CONTAINS
     wwords(2)=TRIM(lowercase(wwords(2)))
     READ(wwords(2),'(i10)',iostat=ios) rd_restart
     IF(ios.NE.0 .OR. rd_restart<1 ) THEN
-      WRITE(6,*) 'Invalid Krylov subspace size for JFNK in problem specification -- ',TRIM(wwords(2)),' --'
-      STOP
+      CALL raise_fatal_error('Invalid Krylov subspace size for JFNK in problem specification -- '//TRIM(wwords(2))//' --')
     END IF
   END SUBROUTINE get_jfnk_krsze
 
@@ -409,9 +389,8 @@ CONTAINS
     wwords(2)=TRIM(lowercase(wwords(2)))
     READ(wwords(2),'(i10)',iostat=ios) rd_max_kit
     IF(ios.NE.0 .OR. rd_max_kit < 1 ) THEN
-      WRITE(6,*) 'Invalid maximum number of Krylov iterations for JFNK in problem specification -- '&
-            ,TRIM(wwords(2)),' --'
-      STOP
+      CALL raise_fatal_error('Invalid maximum number of Krylov iterations for JFNK in problem specification -- '&
+            //TRIM(wwords(2))//' --')
     ENDIF
   END SUBROUTINE get_jfnk_maxkr
 
@@ -428,9 +407,7 @@ CONTAINS
     ELSEIF(wwords(2) .EQ. 'flat_wds') THEN
       rd_method=3
     ELSE
-      WRITE(6,*) 'Error. This is not a valid jfnk solution method -- ',wwords(2),' --'
-      WRITE(6,*) 'Execution will terminate.'
-      STOP
+      CALL raise_fatal_error('This is not a valid jfnk solution method -- '//TRIM(wwords(2))//' --')
     END IF
   END SUBROUTINE get_jfnk_method
 
@@ -475,9 +452,8 @@ CONTAINS
     wwords(2)=TRIM(lowercase(wwords(2)))
     READ(wwords(2),'(i10)',iostat=ios) ipow
     IF(ios.NE.0 ) THEN
-      WRITE(6,*) 'Invalid number of initial power iterations -- '&
-            ,TRIM(wwords(2)),' --'
-      STOP
+      CALL raise_fatal_error('Invalid number of initial power iterations -- '&
+            //TRIM(wwords(2))//' --')
     END IF
   END SUBROUTINE get_ipiter
 
@@ -492,9 +468,7 @@ CONTAINS
     ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
       print_conv=0
     ELSE
-      WRITE(6,*) 'Error. This is not a valid execution option (yes/no) -- ',wwords(2),' --'
-      WRITE(6,*) 'Execution will terminate.'
-      STOP
+      CALL raise_fatal_error('This is not a valid execution option (yes/no) -- '//TRIM(wwords(2))//' --')
     END IF
   END SUBROUTINE get_print_conv
 
@@ -512,10 +486,8 @@ CONTAINS
       ELSE IF ( wwords(2) .EQ. 'fromfile') THEN
         dfact_opt = 2
       ELSE
-        WRITE(6,*) 'Error. This is not a valid density factor option &
-          & (no/byvolume/fromfile) -- ',wwords(2),' --'
-        WRITE(6,*) 'Execution will terminate.'
-        STOP
+        CALL raise_fatal_error('This is not a valid density factor option &
+          & (no/byvolume/fromfile) -- '//TRIM(wwords(2))//' --')
       END IF
     END IF
     wwords(3)=TRIM(wwords(3))
@@ -537,9 +509,7 @@ CONTAINS
     ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
       execution=0
     ELSE
-      WRITE(6,*) 'Error. This is not a valid execution option (yes/no) -- ',wwords(2),' --'
-      WRITE(6,*) 'Execution will terminate.'
-      STOP
+      CALL raise_fatal_error('This is not a valid execution option (yes/no) -- '//TRIM(wwords(2))//' --')
     END IF
   END SUBROUTINE get_execution
 
@@ -677,9 +647,7 @@ CONTAINS
     ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
       print_xs_flag=0
     ELSE
-      WRITE(6,*) 'Error. This is not a valid cross section print option (yes/no) -- ',wwords(2),' --'
-      WRITE(6,*) 'Execution will terminate.'
-      STOP
+      CALL raise_fatal_error('This is not a valid cross section print option (yes/no) -- '//TRIM(wwords(2))//' --')
     END IF
   END SUBROUTINE get_print_xs
 
@@ -692,8 +660,7 @@ CONTAINS
     wwords(2)=TRIM(lowercase(wwords(2)))
     READ(wwords(2),'(i10)',iostat=ios) egmax
     IF(ios.NE.0 .OR. egmax<1) THEN
-      WRITE(6,*) 'Invalid number of energy groups in cross section specification -- ',TRIM(wwords(2)),' --'
-      STOP
+      CALL raise_fatal_error('Invalid number of energy groups in cross section specification -- '//TRIM(wwords(2))//' --')
     END IF
   END SUBROUTINE get_ngroups
 
@@ -706,8 +673,7 @@ CONTAINS
     wwords(2)=TRIM(lowercase(wwords(2)))
     READ(wwords(2),'(i10)',iostat=ios) scatt_ord
     IF(ios.NE.0 .OR. scatt_ord < 0) THEN
-      WRITE(6,*) 'Invalid scattering expansion in cross section specification -- ',TRIM(wwords(2)),' --'
-      STOP
+      CALL raise_fatal_error('Invalid scattering expansion in cross section specification -- '//TRIM(wwords(2))//' --')
     END IF
   END SUBROUTINE get_pnorder
 
@@ -720,8 +686,7 @@ CONTAINS
     wwords(2)=TRIM(lowercase(wwords(2)))
     READ(wwords(2),'(i10)',iostat=ios) xs_ord
     IF(ios.NE.0 .OR. xs_ord < 0) THEN
-      WRITE(6,*) 'Invalid cross section expansion in cross section specification -- ',TRIM(wwords(2)),' --'
-      STOP
+      CALL raise_fatal_error('Invalid cross section expansion in cross section specification -- '//TRIM(wwords(2))//' --')
     END IF
   END SUBROUTINE get_pnread
 
@@ -736,9 +701,7 @@ CONTAINS
     ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
       upscattering=0
     ELSE
-      WRITE(6,*) 'Error. This is not a valid upscattering flag -- ',wwords(2),' --'
-      WRITE(6,*) 'Execution will terminate.'
-      STOP
+      CALL raise_fatal_error('This is not a valid upscattering flag -- '//TRIM(wwords(2))//' --')
     END IF
   END SUBROUTINE get_upscattering
 
@@ -753,9 +716,7 @@ CONTAINS
     ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
       multiplying=0
     ELSE
-      WRITE(6,*) 'Error. This is not a valid multiplying flag -- ',wwords(2),' --'
-      WRITE(6,*) 'Execution will terminate.'
-      STOP
+      CALL raise_fatal_error('This is not a valid multiplying flag -- '//TRIM(wwords(2))//' --')
     END IF
   END SUBROUTINE get_multiplying
 
@@ -770,9 +731,7 @@ CONTAINS
     ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
       scat_mult_flag=0
     ELSE
-      WRITE(6,*) 'Error. This is not a valid scattering multiplier flag -- ',wwords(2),' --'
-      WRITE(6,*) 'Execution will terminate.'
-      STOP
+      CALL raise_fatal_error('This is not a valid scattering multiplier flag -- '//TRIM(wwords(2))//' --')
     END IF
   END SUBROUTINE get_scatt_mult_included
 
@@ -801,8 +760,7 @@ CONTAINS
     wwords(2)=TRIM(lowercase(wwords(2)))
     READ(wwords(2),'(i10)',iostat=ios) quad_ord
     IF(ios.NE.0 ) THEN
-      WRITE(6,*) 'Invalid quadrature order -- ',TRIM(wwords(2)),' --'
-      STOP
+      CALL raise_fatal_error('Invalid quadrature order -- '//TRIM(wwords(2))//' --')
     END IF
   END SUBROUTINE get_qdorder
 
@@ -939,8 +897,7 @@ CONTAINS
       IF(tempintarray(i) .GE. maxreg)maxreg=tempintarray(i)
       IF(tempintarray(i) .LE. minreg)minreg=tempintarray(i)
     ENDDO
-    IF(ABS(nwords-2*(maxreg-minreg+1)) .GT. 0) &
-      STOP "region map bounds and number of entries don't match"
+    IF(ABS(nwords-2*(maxreg-minreg+1)) .GT. 0)CALL raise_fatal_error("region map bounds and number of entries don't match")
     ALLOCATE(reg2mat(minreg:maxreg))
     !assign region mapping
     DO i=1,nwords,2
@@ -959,8 +916,7 @@ CONTAINS
     IF (.NOT. PRESENT(min_int)) min_int = -glob_max_int
     READ(string, '(i10)', iostat=ios) string_to_int
     IF(ios .NE. 0 .OR. string_to_int < min_int) THEN
-      WRITE(6,*) TRIM(msg), TRIM(string)
-      STOP
+      CALL raise_fatal_error('string_to_int failed: '//TRIM(msg)//' '//TRIM(string))
     END IF
   END FUNCTION string_to_int
 
@@ -973,8 +929,7 @@ CONTAINS
 
     READ(string, *, iostat=ios) string_to_real
     IF(ios .NE. 0) THEN
-      WRITE(6,*) TRIM(msg), TRIM(string)
-      STOP
+      CALL raise_fatal_error('string_to_real failed: '//TRIM(msg)//' '//TRIM(string))
     END IF
   END FUNCTION string_to_real
 

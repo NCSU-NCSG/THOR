@@ -16,7 +16,7 @@ MODULE wrapup_module
   USE geometry_types
   USE angle_types
   USE global_variables
-  USE termination_module
+  USE error_module
   USE general_utility_module
 
   IMPLICIT NONE
@@ -68,6 +68,7 @@ CONTAINS
       WRITE(unit_number,*) "--------------------------------------------------------"
       IF (conv_flag==0) THEN
         WRITE(unit_number,*) "Warning! Execution finished without satisfying all stopping criteria. Warning!"
+        CALL raise_warning("Execution finished without satisfying all stopping criteria.")
       ELSE IF(conv_flag==1) THEN
         WRITE(unit_number,*) "Execution finished successfully. All stopping criteria satisfied."
       END IF
@@ -379,6 +380,7 @@ CONTAINS
           END DO
         ELSE
           WRITE(unit_number, 510) "Warning. Point: ", point_flux_locations(j, :), " was not found."
+        CALL raise_warning("A flux point was not found.")
         END IF
       END DO
     END IF

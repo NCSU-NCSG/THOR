@@ -103,9 +103,9 @@ CONTAINS
     ! allocate residual and du
 
     IF(.NOT.ALLOCATED(du)) ALLOCATE(du(num_var+1),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
     IF(.NOT.ALLOCATED(residual)) ALLOCATE(residual(num_var+1),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! set dflag, igflag
 
@@ -123,12 +123,12 @@ CONTAINS
 
     ! make sure that niter .eq. 2
 
-    IF (niter .NE. 2) CALL stop_thor(.FALSE.,"JFNK module requires niter to be equal to 2. This is a coding mistake!")
+    IF (niter .NE. 2) CALL raise_fatal_error("JFNK module requires niter to be equal to 2. This is a coding mistake!")
 
     ! Allocate max_error
 
     ALLOCATE(max_error(egmax),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! Set grs
 
@@ -477,7 +477,7 @@ CONTAINS
       ! initialize reflected_flux
 
       ALLOCATE(reflected_flux(num_moments_f,grs,8,nangle,egmax),stat=alloc_stat)
-      IF(alloc_stat /=0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
+      IF(alloc_stat /=0) CALL raise_fatal_error("*** Not enough memory ***")
       reflected_flux = 0.0_d_t
 
     ELSE IF(method==2 .OR. method==3) THEN
@@ -485,7 +485,7 @@ CONTAINS
       ! initialize reflected_flux
 
       ALLOCATE(reflected_flux(num_moments_f,grs,8,nangle,1),stat=alloc_stat)
-      IF(alloc_stat /=0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
+      IF(alloc_stat /=0) CALL raise_fatal_error("*** Not enough memory ***")
       reflected_flux = 0.0_d_t
 
       ! initialize source
@@ -574,7 +574,7 @@ CONTAINS
         CALL sweep(eg,flux(:,:,:,eg,2),src(:,:,:,eg),grs,reflected_flux,LL,U,Lf,Uf)
       END DO
     ELSE
-      CALL stop_thor(.FALSE.,"Method needs to be 1, 2 or 3.")
+      CALL raise_fatal_error("Method needs to be 1, 2 or 3.")
     END IF
 
     ! Compute evaluate_residual
@@ -901,7 +901,7 @@ CONTAINS
     ! Allocate and initialize  work
 
     ALLOCATE(work(ws),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
     work = 0.0_d_t
 
     ! Initialize solution, ipar and fpar
@@ -953,19 +953,19 @@ CONTAINS
                                 ! overhead variables
               flux,keff,LL,U,Lf,Uf)
       ELSEIF(ipar(1).EQ.2) THEN    ! this means code wants A^T x
-        CALL stop_thor(.FALSE.,"GMRES error")
+        CALL raise_fatal_error("GMRES error")
       ELSEIF(ipar(1).EQ.3) THEN    ! this means code wants P(l)^{-1} z
-        CALL stop_thor(.FALSE.,"GMRES error")
+        CALL raise_fatal_error("GMRES error")
       ELSEIF(ipar(1).EQ.3) THEN    ! this means code wants P(l)^{-T} z
-        CALL stop_thor(.FALSE.,"GMRES error")
+        CALL raise_fatal_error("GMRES error")
       ELSEIF(ipar(1).EQ.5) THEN    ! this means code wants P(r)^{-1} z
-        CALL stop_thor(.FALSE.,"GMRES error")
+        CALL raise_fatal_error("GMRES error")
       ELSEIF(ipar(1).EQ.6) THEN    ! this means code wants P(r)^{-T} z
-        CALL stop_thor(.FALSE.,"GMRES error")
+        CALL raise_fatal_error("GMRES error")
       ELSEIF(ipar(1).EQ.10) THEN   ! call self-supplied stopping test
-        CALL stop_thor(.FALSE.,"GMRES error")
+        CALL raise_fatal_error("GMRES error")
       ELSEIF(ipar(1).GT.0) THEN    ! shouldn't happen
-        CALL stop_thor(.FALSE.,"GMRES error")
+        CALL raise_fatal_error("GMRES error")
       ELSEIF(ipar(1).EQ.0) THEN    ! successful solve
         error=fpar(6)/nres         ! pass back error
         kit=ipar(7)                ! pass back number of iters
@@ -975,7 +975,7 @@ CONTAINS
         kit=ipar(7)                ! pass back number of iters
         EXIT
       ELSEIF(ipar(1).EQ.-2) THEN   ! insufficient workspace
-        CALL stop_thor(.FALSE.,"GMRES error")
+        CALL raise_fatal_error("GMRES error")
       ELSEIF(ipar(1).LT.-2) THEN   ! some other error, investigate further
         WRITE(6,*) 'SPARSKIT error is ', ipar(1)
       ENDIF

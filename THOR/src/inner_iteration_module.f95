@@ -22,7 +22,7 @@ MODULE inner_iteration_module
   ! Use modules that pertain setting up problem
 
   USE sweep_module
-  USE termination_module
+  USE error_module
 
   IMPLICIT NONE
 

@@ -12,7 +12,7 @@ MODULE read_cross_section_module
   USE filename_types
   USE cross_section_types
   USE global_variables
-  USE termination_module
+  USE error_module
   USE stringmod
 
   IMPLICIT NONE
@@ -43,8 +43,7 @@ CONTAINS
 
     OPEN(unit=local_unit,file=TRIM(cross_section_filename),status='old',action='read',IOSTAT=ios)
     IF(ios .NE. 0)THEN
-      WRITE(*,*)'error opening ',TRIM(cross_section_filename)
-      STOP 'fatal error'
+      CALL raise_fatal_error('error opening '//TRIM(cross_section_filename))
     ENDIF
 
     DO
@@ -141,13 +140,13 @@ CONTAINS
     ALLOCATE(xs_mat(num_mat),&
           eg_bounds(egmax+1),&
           stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     DO m=1,num_mat
       ALLOCATE(xs_mat(m)%chi(egmax),xs_mat(m)%sigma_f(egmax),xs_mat(m)%nu(egmax), &
         xs_mat(m)%sigma_t(egmax),xs_mat(m)%tsigs(egmax), &
         xs_mat(m)%sigma_scat(xs_ord+1,egmax,egmax),stat=alloc_stat)
-      IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
+      IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
       !set everything to 0
       xs_mat(m)%chi(:)=0
       xs_mat(m)%sigma_f(:)=0
@@ -232,13 +231,13 @@ CONTAINS
     READ(words(4),*)xs_ord
     ! Allocate cross-section arrays and check if enough memory is available
     ALLOCATE(xs_mat(num_mat),eg_bounds(egmax+1),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     DO i=1,num_mat
       ALLOCATE(xs_mat(i)%chi(egmax),xs_mat(i)%sigma_f(egmax),xs_mat(i)%nu(egmax), &
         xs_mat(i)%sigma_t(egmax),xs_mat(i)%tsigs(egmax), &
         xs_mat(i)%sigma_scat(xs_ord+1,egmax,egmax),stat=alloc_stat)
-      IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
+      IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
       !set everything to 0
       xs_mat(i)%chi(:)=0
       xs_mat(i)%sigma_f(:)=0
@@ -258,7 +257,7 @@ CONTAINS
     CALL get_next_line(words,nwords)
     words(1)=TRIM(ADJUSTL(words(1)))
     IF(words(1) .NE. 'id')THEN
-      IF(nwords .NE. egmax)STOP 'bad amount of energy data on line'
+      IF(nwords .NE. egmax)CALL raise_fatal_error('bad amount of energy data on line in xs file')
       DO g=1,egmax
         READ(words(g),*)eg_bounds(g)
       ENDDO
@@ -273,7 +272,7 @@ CONTAINS
         CALL get_next_line(words,nwords)
         words(1)=TRIM(ADJUSTL(words(1)))
         IF(words(1) .EQ. 'id')THEN
-          IF(nwords .LT. 2)STOP 'no id number'
+          IF(nwords .LT. 2)CALL raise_fatal_error('no id number in xs file')
           READ(words(2),*)xs_mat(i)%mat_id
           words(4)=TRIM(ADJUSTL(words(4)))
           !get or assign mat name
@@ -285,8 +284,7 @@ CONTAINS
           !read in the fission spectrum
           CALL get_next_line(words,nwords)
           IF(nwords .NE. egmax)THEN
-            WRITE(*,*)'bad amount of xs data on line for chi',nwords,TRIM(words(1))
-            STOP 'fatal error'
+            CALL raise_fatal_error('bad amount of xs data on chi line for mat '//TRIM(STR(xs_mat(i)%mat_id)))
           ENDIF
           DO g=1,egmax
             READ(words(g),*)xs_mat(i)%chi(g)
@@ -294,8 +292,7 @@ CONTAINS
           !read in SigmaF
           CALL get_next_line(words,nwords)
           IF(nwords .NE. egmax)THEN
-            WRITE(*,*)'bad amount of xs data on line for SigmaF',nwords,TRIM(words(1))
-            STOP 'fatal error'
+            CALL raise_fatal_error('bad amount of xs data on SigmaF line for mat '//TRIM(STR(xs_mat(i)%mat_id)))
           ENDIF
           DO g=1,egmax
             READ(words(g),*)xs_mat(i)%sigma_f(g)
@@ -303,8 +300,7 @@ CONTAINS
           !read in nu
           CALL get_next_line(words,nwords)
           IF(nwords .NE. egmax)THEN
-            WRITE(*,*)'bad amount of xs data on line for nu',nwords,TRIM(words(1))
-            STOP 'fatal error'
+            CALL raise_fatal_error('bad amount of xs data on nu line for mat '//TRIM(STR(xs_mat(i)%mat_id)))
           ENDIF
           DO g=1,egmax
             READ(words(g),*)xs_mat(i)%nu(g)
@@ -312,8 +308,7 @@ CONTAINS
           !read in total/transport xs
           CALL get_next_line(words,nwords)
           IF(nwords .NE. egmax)THEN
-            WRITE(*,*)'bad amount of xs data on line for total xs',nwords,TRIM(words(1))
-            STOP 'fatal error'
+            CALL raise_fatal_error('bad amount of xs data on total xs line for mat '//TRIM(STR(xs_mat(i)%mat_id)))
           ENDIF
           DO g=1,egmax
             READ(words(g),*)xs_mat(i)%sigma_t(g)
@@ -323,8 +318,7 @@ CONTAINS
             DO g=1,egmax
               CALL get_next_line(words,nwords)
               IF(nwords .NE. egmax)THEN
-                WRITE(*,*)'bad amount of xs data on line for sigmas',g,nwords,TRIM(words(1))
-                STOP 'fatal error'
+                CALL raise_fatal_error('bad amount of xs data on sigmas line for mat '//TRIM(STR(xs_mat(i)%mat_id)))
               ENDIF
               DO gp=1,egmax
                 READ(words(gp),*)xs_mat(i)%sigma_scat(j,g,gp)
@@ -345,7 +339,7 @@ CONTAINS
     INTEGER :: ios
     DO
       READ(local_unit,'(A10000)',IOSTAT=ios)line
-      IF(ios .NE. 0)STOP 'end of xs file was reached before all data/materials were found'
+      CALL raise_fatal_error('end of xs file was reached before all data/materials were found')
       line=TRIM(ADJUSTL(line))
       !finding uncommented line that isn't empty
       IF(line(1:1) .NE. '!' .AND. line .NE. '')THEN

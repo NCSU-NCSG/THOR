@@ -16,7 +16,7 @@ MODULE dump_inguess_module
   USE angle_types
   USE multindex_types
   USE global_variables
-  USE termination_module
+  USE error_module
 
   IMPLICIT NONE
 
@@ -53,7 +53,7 @@ CONTAINS
       ! check if data in file and data from stdin are identical
       IF(egmax_t .NE. egmax .OR. num_cells_t .NE. num_cells .OR.    &
             num_moments_v_t .NE. num_moments_v .OR. namom_t .NE. namom ) THEN
-        CALL stop_thor(.FALSE.,"Reading initial guess file failed")
+        CALL raise_fatal_error("Reading initial guess file failed")
       END IF
       DO eg =1,egmax
         DO i=1,num_cells

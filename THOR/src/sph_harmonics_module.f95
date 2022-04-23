@@ -16,7 +16,7 @@ MODULE sph_harmonics_module
 
   ! Use modules that pertain setting up problem
 
-  USE termination_module
+  USE error_module
 
   IMPLICIT NONE
 
@@ -174,7 +174,7 @@ CONTAINS
     REAL(kind=d_t), PARAMETER :: PI = 3.141592653589793_d_t
 
     IF (m < 0 .or. m > l .or. abs(x) > 1.0_d_t) THEN
-      CALL stop_thor(.FALSE., "Bad arguments in routine plegendre")
+      CALL raise_fatal_error( "Bad arguments in routine plegendre")
     END IF
 
     pmm = 1.0_d_t

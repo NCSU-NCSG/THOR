@@ -1,4 +1,4 @@
-MODULE termination_module
+MODULE error_module
   !***********************************************************************
   ! This module contains subroutines for terminating the execution of
   ! THOR either successfully or unsuccessfully.
@@ -7,14 +7,14 @@ MODULE termination_module
   IMPLICIT NONE
   PRIVATE
   !
-  PUBLIC :: stop_thor, warn_thor
+  PUBLIC :: raise_fatal_error, thor_success, raise_warning
 
 CONTAINS
 
   !------------------------------------------------------------------------------------------------------------!
   !------------------------------------------------------------------------------------------------------------!
 
-  SUBROUTINE cleanup
+  SUBROUTINE cleanup_thor
     !**********************************************************************
     !
     ! Deallocates global allocatable variables
@@ -77,10 +77,10 @@ CONTAINS
     IF(page_sweep.EQ.1_li) CLOSE(unit=99)
     IF(page_iflw .EQ.1_li) CLOSE(unit=97)
 
-  END SUBROUTINE cleanup
+  END SUBROUTINE cleanup_thor
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE stop_thor(success, message)
+  SUBROUTINE raise_fatal_error(message)
     !**********************************************************************
     !
     ! Terminates THOR and prints message according to scode
@@ -88,42 +88,63 @@ CONTAINS
     !**********************************************************************
 
     ! Pass argument
-
-    LOGICAL,INTENT(IN) :: success
     CHARACTER(*), OPTIONAL,INTENT(IN) :: message
 
     ! Print message
     IF(rank .EQ. 0)THEN
-      IF(success)THEN
-        IF (PRESENT(message)) THEN
-          WRITE(6,*)TRIM(ADJUSTL(message))
-        END IF
-        WRITE(6,'(A)')
-        WRITE(6,'(A)') "--------------------------------------------------------"
-        WRITE(6,'(A)') "   Execution of THOR completed successfully  "
-        WRITE(6,'(A)') "--------------------------------------------------------"
-        WRITE(6,'(A)')
+      WRITE(6,'(A)') "--------------------------------------------------------"
+      IF (PRESENT(message)) THEN
+        WRITE(6,'(A)')'FATAL ERROR!'
+        WRITE(6,'(2A)')'ERROR: ',TRIM(ADJUSTL(message))
       ELSE
-        IF (PRESENT(message)) THEN
-          WRITE(6,'(2A)')'ERROR! ',TRIM(ADJUSTL(message))
-        ELSE
-          WRITE(6,'(A)')'No error message given'
-        ENDIF
-        WRITE(6,'(A)') '>> THOR encounrted a fatal error!'
-        WRITE(6,'(A)') '>> Execution terminated unsuccessfully!'
+        WRITE(6,'(A)')'FATAL ERROR!'
+        WRITE(6,'(A)')'...'
+        WRITE(6,'(A)')'No error message given'
       ENDIF
+      WRITE(6,'(A)') '>> THOR encountered a fatal error!'
+      WRITE(6,'(A)') '>> Execution of THOR terminated UNsuccessfully!'
+      WRITE(6,'(A)') "--------------------------------------------------------"
     ENDIF
 
 
     ! Cleanup and terminate
 
-    CALL cleanup
+    CALL cleanup_thor
     STOP
 
-  END SUBROUTINE stop_thor
+  END SUBROUTINE raise_fatal_error
+
+  SUBROUTINE thor_success(message)
+    !**********************************************************************
+    !
+    ! Terminates THOR and prints message according to scode
+    !
+    !**********************************************************************
+
+    ! Pass argument
+    CHARACTER(*), OPTIONAL,INTENT(IN) :: message
+
+    IF(rank .EQ. 0)THEN
+      IF (PRESENT(message)) THEN
+        WRITE(6,*)TRIM(ADJUSTL(message))
+      END IF
+      WRITE(6,'(A)')
+      WRITE(6,'(A)') "--------------------------------------------------------"
+      WRITE(6,'(A)') "   Execution of THOR completed successfully  "
+      WRITE(6,'(A)') "--------------------------------------------------------"
+      WRITE(6,'(A)')
+    ENDIF
+
+
+    ! Cleanup and terminate
+
+    CALL cleanup_thor
+    STOP
+
+  ENDSUBROUTINE thor_success
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE warn_thor(message)
+  SUBROUTINE raise_warning(message)
     !**********************************************************************
     !
     ! Throws a warning for THOR
@@ -131,7 +152,7 @@ CONTAINS
     !**********************************************************************
     CHARACTER(*), INTENT(IN):: message
 
-    WRITE(6,'(2A)')'WARNING: ',message
+    IF(rank .EQ. 0)WRITE(6,'(2A)')'WARNING: ',message
 
-  END SUBROUTINE warn_thor
-END MODULE termination_module
+  END SUBROUTINE raise_warning
+END MODULE error_module

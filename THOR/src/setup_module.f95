@@ -23,7 +23,7 @@ MODULE setup_module
   USE read_module
   USE quadrature_module
   USE sweep_module
-  USE termination_module
+  USE error_module
 
   IMPLICIT NONE
 
@@ -119,7 +119,7 @@ CONTAINS
     ! Pre-compute the cell outward normal vectors
 
     ALLOCATE(outward_normal(num_cells,0:3),stat=alloc_stat)
-    IF(alloc_stat /=0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
+    IF(alloc_stat /=0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! Generate outward normal vectors for all cells for performance
 
@@ -171,14 +171,14 @@ CONTAINS
     ! permitted
     IF(problem .EQ. 1 .AND. eig_switch .EQ. 1 .AND. rd_method > 1) THEN
       DO i = 1, 3
-        IF(reflective(i,1) .EQ. 1 .AND. reflective(i,2).EQ.1 ) CALL stop_thor(.FALSE.,"JFNK option &
+        IF(reflective(i,1) .EQ. 1 .AND. reflective(i,2).EQ.1 ) CALL raise_fatal_error("JFNK option &
           & in combination with reflective boundary conditions on opposite faces is not permitted")
       END DO
     END IF
 
     ! Error out if we have reflecting BCs, JFNK, and nproc > 1
     IF (eig_switch .EQ. 1 .and. ABS(SUM(reflective)) .GT. 1.0D-16 .and. num_p > 1) THEN
-      CALL stop_thor(.FALSE., "Parallel execution of JFNK with reflecting BC is currently not supported in THOR.")
+      CALL raise_fatal_error( "Parallel execution of JFNK with reflecting BC is currently not supported in THOR.")
       !TODO: This should be analyzed and figured out if we can do something different, or if we can just set it to 1 thread
     END IF
 
@@ -187,10 +187,10 @@ CONTAINS
     ! Set up the variables to memorize rings in the mesh sweep
 
     ALLOCATE(neldep(8,nangle),stat=alloc_stat)
-    IF(alloc_stat /=0) CALL stop_thor(.FALSE.,'*** Not enough memory ***')
+    IF(alloc_stat /=0) CALL raise_fatal_error('*** Not enough memory ***')
     neldep=0_li
     ALLOCATE(eldep(8,nangle,egmax) ,stat=alloc_stat)
-    IF(alloc_stat /=0) CALL stop_thor(.FALSE.,'*** Not enough memory ***')
+    IF(alloc_stat /=0) CALL raise_fatal_error('*** Not enough memory ***')
     ALLOCATE( is_cycle(0:3,num_cells) )
 
     ! Pre-compute sweep if sweep_tpe = 1
@@ -200,10 +200,10 @@ CONTAINS
       ! allocate sweep path
       IF      (page_sweep .EQ. 0) THEN
         ALLOCATE( sweep_path(num_cells,8,nangle),stat=alloc_stat)
-        IF(alloc_stat /=0) CALL stop_thor(.FALSE.,'*** Not enough memory ***')
+        IF(alloc_stat /=0) CALL raise_fatal_error('*** Not enough memory ***')
       ELSE IF (page_sweep .EQ. 1) THEN
         ALLOCATE( sweep_path(num_cells,1,1),stat=alloc_stat)
-        IF(alloc_stat /=0) CALL stop_thor(.FALSE.,'*** Not enough memory ***')
+        IF(alloc_stat /=0) CALL raise_fatal_error('*** Not enough memory ***')
         ! open scratch file that contains sweep path
         INQUIRE(file="sweep_path.pg",exist=existence)
         IF( existence .EQV. .TRUE.) THEN
@@ -290,7 +290,7 @@ CONTAINS
       READ(51,*) (dens_fact(i),i=minreg,maxreg)
       CLOSE(unit=51)
     ELSE
-      CALL stop_thor(.FALSE.,"Density factors were requested but referenced file was not found.")
+      CALL raise_fatal_error("Density factors were requested but referenced file was not found.")
       RETURN
     END IF
   END SUBROUTINE read_density_factors
@@ -422,7 +422,7 @@ CONTAINS
       q = CEILING(k/8.0)
 
       index = indexOf(oct, octants_to_sweep)
-      IF (index > 8_li .or. index < 1) CALL stop_thor(.FALSE., "Sweep order index out of bounds")
+      IF (index > 8_li .or. index < 1) CALL raise_fatal_error( "Sweep order index out of bounds")
       octant = ordering(ordered_octants_to_sweep(index))
 
       IF(octant == 1)THEN
@@ -747,7 +747,7 @@ CONTAINS
     ! allocate refl_face_tpe
 
     ALLOCATE( refl_face_tpe(rside_cells) , stat=alloc_stat)
-    IF(alloc_stat /=0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
+    IF(alloc_stat /=0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! run through all boundary faces and check their type
 
@@ -775,7 +775,7 @@ CONTAINS
       ELSE IF (d3 < tol .AND. normal%x3 < zero) THEN
         refl_face_tpe(face)=-3_li
       ELSE
-        CALL stop_thor(.FALSE.,"Reflective boundary face could not be determined.")
+        CALL raise_fatal_error("Reflective boundary face could not be determined.")
       END IF
     END DO
 
@@ -811,7 +811,7 @@ CONTAINS
       d2 = SQRT( (x1)**2 + (x2-one)**2 + (x3)**2 )
       d3 = SQRT( (x1)**2 + (x2)**2 + (x3-one)**2 )
       IF(d1 > tol .AND. d2 > tol .AND. d3 > tol) THEN
-        CALL stop_thor(.FALSE.,'Reflective boundary conditions on boundary face #, cell # ' &
+        CALL raise_fatal_error('Reflective boundary conditions on boundary face #, cell # ' &
           //TRIM(STR(c))//', '//TRIM(STR(f))//' located on a non-permissible boundary face.')
       END IF
     END DO

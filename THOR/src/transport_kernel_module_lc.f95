@@ -21,7 +21,7 @@ MODULE transport_kernel_module_LC
   USE angle_types
   USE multindex_types
   USE global_variables
-  USE termination_module
+  USE error_module
   USE general_utility_module
 
   IMPLICIT NONE
@@ -166,7 +166,7 @@ CONTAINS
           R0up=vertices(cells(adjacency_list(i,&
                 incoming_face(ii))%cell)%R(0))%v
         ELSE
-          CALL stop_thor(.FALSE.,"Upstream face moment determination failed.")
+          CALL raise_fatal_error("Upstream face moment determination failed.")
         END IF
 
         IF(incoming_face(ii) == 0)THEN
@@ -202,7 +202,7 @@ CONTAINS
           JFdown(3,2)=J(3,2)
           R0down=vertices(cells(i)%R(0))%v
         ELSE
-          CALL stop_thor(.FALSE.,"Downstream face moment determination failed.")
+          CALL raise_fatal_error("Downstream face moment determination failed.")
         END IF
 
         CALL invert_face_jacobian(JFup,JFup_inv)
@@ -286,7 +286,7 @@ CONTAINS
         JF(3,2)=J(3,2)
         R0F=vertices(cells(i)%R(0))%v
       ELSE
-        CALL stop_thor(.FALSE.,"Incoming face moments determination failed.")
+        CALL raise_fatal_error("Incoming face moments determination failed.")
       END IF
 
       CALL invert_face_jacobian(JF,JF_inv)
@@ -361,7 +361,7 @@ CONTAINS
         JF(3,2)=J(3,2)
         R0F=vertices(cells(i)%R(0))%v
       ELSE
-        CALL stop_thor(.FALSE.,"Outgoing face moments determination failed.")
+        CALL raise_fatal_error("Outgoing face moments determination failed.")
       END IF
 
       CALL invert_face_jacobian(JF,JF_inv)
@@ -866,7 +866,7 @@ CONTAINS
         i1F=index_v(q)%i1
         i2F=index_v(q)%i2
       ELSE
-        CALL stop_thor(.FALSE.,'Face moments transformation failed.')
+        CALL raise_fatal_error('Face moments transformation failed.')
       ENDIF
       DO l=1, num_moments_f
         TF(q,l)=2.0_d_t/REAL((index_f(l)%i1+i1F+index_f(l)%i2+&

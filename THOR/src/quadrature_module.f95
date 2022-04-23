@@ -13,7 +13,7 @@ MODULE quadrature_module
   USE vector_types
   USE angle_types
   USE global_variables
-  USE termination_module
+  USE error_module
 
   IMPLICIT NONE
 
@@ -43,7 +43,7 @@ CONTAINS
       END IF
       nangle=quad_ord*(quad_ord+2)/8
       ALLOCATE(quadrature(quad_ord*(quad_ord+2)/8),stat=alloc_stat)
-      IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
+      IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
       SELECT CASE(quad_ord)
       CASE(2)
@@ -372,13 +372,13 @@ CONTAINS
     ELSE IF(quad_tpe==2) THEN
 
       IF(MOD(quad_ord,2).NE. 0 .OR. quad_ord>26) THEN
-        CALL stop_thor(.FALSE.,"SLC quadrature only available for orders 1, 2, 3 and 5")
+        CALL raise_fatal_error("SLC quadrature only available for orders 1, 2, 3 and 5")
       END IF
       ! Square Legendre-Chebychev quadrature
 
       nangle=quad_ord*(quad_ord+2_li)/8
       ALLOCATE(quadrature(nangle),stat=alloc_stat)
-      IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
+      IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
       SELECT CASE(quad_ord)
       CASE(2)
@@ -616,14 +616,14 @@ CONTAINS
       !  else if(quad_tpe==2) then
       !
       !    if(quad_ord < 1 .or. quad_ord >  5 .or. quad_ord .eq. 4) then
-      !       call stop_thor(.FALSE.,"SLC quadrature only available for orders 1, 2, 3 and 5")
+      !       call raise_fatal_error("SLC quadrature only available for orders 1, 2, 3 and 5")
       !    end if
       !
       !  ! Square Legendre-Chebychev quadrature
       !
       !    nangle=quad_ord**2
       !    allocate(quadrature(nangle),stat=alloc_stat)
-      !    if(alloc_stat /= 0) call stop_thor(.FALSE.,"*** Not enough memory ***")
+      !    if(alloc_stat /= 0) call raise_fatal_error("*** Not enough memory ***")
       !
       !    select case(quad_ord)
       !      case(1)

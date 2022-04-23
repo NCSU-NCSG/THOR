@@ -25,7 +25,7 @@ MODULE outer_iteration_module
 
   ! Use modules that pertain setting up problem
 
-  USE termination_module
+  USE error_module
   USE inner_iteration_module
   USE dump_inguess_module
 
@@ -81,13 +81,13 @@ CONTAINS
       rg=1_li
     END IF
     ALLOCATE( reflected_flux(num_moments_f,rs,8,nangle,rg),stat=alloc_stat )
-    IF(alloc_stat /=0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
+    IF(alloc_stat /=0) CALL raise_fatal_error("*** Not enough memory ***")
     reflected_flux=0.0_d_t
 
     !  Allocate group-dependent maximum spatial error array
 
     ALLOCATE(max_error(egmax),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! Open file to page out reflective BC if desired
 
@@ -371,7 +371,7 @@ CONTAINS
       rg=1_li
     END IF
     ALLOCATE( reflected_flux(num_moments_f,rs,8,nangle,rg),stat=alloc_stat )
-    IF(alloc_stat /=0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
+    IF(alloc_stat /=0) CALL raise_fatal_error("*** Not enough memory ***")
     reflected_flux=0.0_d_t
 
     ! Initialize fiss_src
@@ -410,7 +410,7 @@ CONTAINS
     !  Allocate group-dependent maximum spatial error array
 
     ALLOCATE(max_error(egmax),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! Open file to page out reflective BC if desired
 
