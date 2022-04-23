@@ -41,7 +41,7 @@ CONTAINS
     ! is fixed boundary faces then octants then angles, then groups
 
     ALLOCATE(binflx(num_moments_f,fside_cells,8,nangle,eg_iflw),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
 
     ! if page_iflw == 0 then read binflow in full, otherwise just open a file
 
@@ -59,7 +59,7 @@ CONTAINS
             DO f=1,fside_cells
               READ(10,*) face    ! this is the face number in the b_cells array
               IF( b_cells(face)%bc .NE. 2 ) THEN
-                CALL stop_thor(16_li)
+                CALL stop_thor(.FALSE.,"A fixed inflow flux value is placed in a boundary face that is not declared fixed inflow.")
               END IF
               face = b_cells(face)%ptr   ! make sure that bc are stored in the same order as in fb_cells
               READ(10,*) (binflx(m,face,octant,q,eg),m=1,num_moments_f)
@@ -81,7 +81,7 @@ CONTAINS
             DO f=1,fside_cells
               READ(97,*) face    ! this is the face number in the b_cells array
               IF( b_cells(face)%bc .NE. 2 ) THEN
-                CALL stop_thor(16_li)
+                CALL stop_thor(.FALSE.,"A fixed inflow flux value is placed in a boundary face that is not declared fixed inflow.")
               END IF
               READ(97,*) (dmy,m=1,num_moments_f)
             END DO

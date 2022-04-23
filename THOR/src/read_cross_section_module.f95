@@ -123,10 +123,10 @@ CONTAINS
     ENDDO
     !allocate and assign pointer values
     !everywhere else will be 0
-    ALLOCATE(mat_pointer(mat_id_min:mat_id_max))
-    mat_pointer=0
+    ALLOCATE(material_ids(mat_id_min:mat_id_max))
+    material_ids=0
     DO i=1,num_mat
-      mat_pointer(xs_mat(i)%mat_id)=i
+      material_ids(xs_mat(i)%mat_id)=i
     ENDDO
   END SUBROUTINE read_xs
 
@@ -141,13 +141,13 @@ CONTAINS
     ALLOCATE(xs_mat(num_mat),&
           eg_bounds(egmax+1),&
           stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
 
     DO m=1,num_mat
       ALLOCATE(xs_mat(m)%chi(egmax),xs_mat(m)%sigma_f(egmax),xs_mat(m)%nu(egmax), &
         xs_mat(m)%sigma_t(egmax),xs_mat(m)%tsigs(egmax), &
         xs_mat(m)%sigma_scat(xs_ord+1,egmax,egmax),stat=alloc_stat)
-      IF(alloc_stat /= 0) CALL stop_thor(2_li)
+      IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
       !set everything to 0
       xs_mat(m)%chi(:)=0
       xs_mat(m)%sigma_f(:)=0
@@ -232,13 +232,13 @@ CONTAINS
     READ(words(4),*)xs_ord
     ! Allocate cross-section arrays and check if enough memory is available
     ALLOCATE(xs_mat(num_mat),eg_bounds(egmax+1),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
 
     DO i=1,num_mat
       ALLOCATE(xs_mat(i)%chi(egmax),xs_mat(i)%sigma_f(egmax),xs_mat(i)%nu(egmax), &
         xs_mat(i)%sigma_t(egmax),xs_mat(i)%tsigs(egmax), &
         xs_mat(i)%sigma_scat(xs_ord+1,egmax,egmax),stat=alloc_stat)
-      IF(alloc_stat /= 0) CALL stop_thor(2_li)
+      IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
       !set everything to 0
       xs_mat(i)%chi(:)=0
       xs_mat(i)%sigma_f(:)=0

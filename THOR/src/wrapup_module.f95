@@ -188,7 +188,7 @@ CONTAINS
       reg_volume=0.0_d_t
       reac_rates=0.0_d_t
       DO i=1,num_cells
-        mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+        mat_indx=material_ids(reg2mat(cells(i)%reg))
         DO eg=1,egmax
           IF(eg.EQ.1) reg_volume(cells(i)%reg)=reg_volume(cells(i)%reg)+ cells(i)%volume
           reac_rates(1,cells(i)%reg,eg)=reac_rates(1,cells(i)%reg,eg)  + cells(i)%volume * &
@@ -259,7 +259,7 @@ CONTAINS
       ! TODO: might want to consider a flag for providing group fluxes/reac_rates?
       DO eg = 1, egmax
         DO i = 1, num_cells
-          mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+          mat_indx=material_ids(reg2mat(cells(i)%reg))
 
           ! this is the current cell with index i, first we need to find out
           ! which x/y/z cartesian this cell belongs to

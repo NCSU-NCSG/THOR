@@ -110,9 +110,9 @@ CONTAINS
     ! Allocate angular flux
 
     ALLOCATE(an_flux%vol_flux(num_moments_v,num_cells)     ,stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
     ALLOCATE(an_flux%face_flux(num_moments_f,0:3,num_cells),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
 
     ! Begin parallel loop over quadrature octant
     DO parallel_i = 1, optimal_tasks
@@ -121,7 +121,7 @@ CONTAINS
       oct = MOD(k, 8) + 1
       q = CEILING(k / 8.0)
       indx = indexOf(oct, octants_to_sweep)
-      IF (indx > 8_li .or. indx < 1) CALL stop_thor(-1_li, "Sweep order index out of bounds")
+      IF (indx > 8_li .or. indx < 1) CALL stop_thor(.FALSE., "Sweep order index out of bounds")
       octant = ordering(ordered_octants_to_sweep(indx))
       IF(octant == 1)THEN
         omega%x1=quadrature(q)%mu%x1
@@ -261,7 +261,7 @@ CONTAINS
       IF (sweep_tpe .EQ.1) THEN
         CALL queue(eg,q,octant,dir_src,an_flux,LL,U,Lf,Uf,omega,face_known)
       ELSE
-        CALL stop_thor(9_li)
+        CALL stop_thor(.FALSE.,"Sweep type specification not recognized. Execution terminates.")
       END IF
 
       ! Increment scalar flux using
@@ -365,7 +365,7 @@ CONTAINS
 
       i=sweep_path(j,soct,sq)
 
-      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      mat_indx=material_ids(reg2mat(cells(i)%reg))
       sigmat=dens_fact(cells(i)%reg)*xs_mat(mat_indx)%sigma_t(eg)
 
       n0=outward_normal(i,0)
@@ -451,7 +451,7 @@ CONTAINS
     ELSEIF(incoming == 1 .AND. outgoing == 1)THEN
       CASE=6
     ELSE
-      CALL stop_thor(10_li)
+      CALL stop_thor(.FALSE.,"Unacceptable splitting in cell")
     END IF
 
   END SUBROUTINE cell_orientation
@@ -578,7 +578,7 @@ CONTAINS
       END IF
 
     ELSE
-      CALL stop_thor(11_li)
+      CALL stop_thor(.FALSE.,"Unacceptable case from cell splitting in cell")
     END IF
 
   END SUBROUTINE check_incoming

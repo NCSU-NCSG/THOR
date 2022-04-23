@@ -106,7 +106,7 @@ PROGRAM ahot_c_ug
   !***********************************************************************
 
   ALLOCATE(flux(num_moments_v,namom,num_cells,egmax,niter),stat=alloc_stat)
-  IF(alloc_stat /= 0) CALL stop_thor(2_li)
+  IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
   flux = zero
 
 
@@ -164,7 +164,7 @@ PROGRAM ahot_c_ug
   CALL MPI_BARRIER(MPI_COMM_WORLD, mpi_err)
   IF (do_timing .EQ. 1) CALL write_timing
   CALL MPI_FINALIZE(mpi_err)
-  CALL stop_thor(1_li)
+  CALL stop_thor(.TRUE.)
 
 END PROGRAM ahot_c_ug
 

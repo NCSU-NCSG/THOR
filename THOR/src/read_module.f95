@@ -83,7 +83,7 @@ CONTAINS
 
     ! If execution is not desired then stop here
 
-    IF(execution .EQ. 0) CALL stop_thor(1_li)
+    IF(execution .EQ. 0) CALL stop_thor(.FALSE.,'*** Not enough memory ***')
 
     !set the namom here so we know for the source file
     namom=(scatt_ord+1)**2
@@ -93,7 +93,7 @@ CONTAINS
 
     ALLOCATE(index_v(num_moments_v),index_f(num_moments_f),&
           stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL stop_thor(.FALSE.,"*** Not enough memory ***")
 
     CALL generate_multi_index(space_ord,num_moments_v,num_moments_f,&
           index_v,index_f)
@@ -263,7 +263,7 @@ CONTAINS
       END DO
       IF(l == numv+1)THEN
       ELSE
-        CALL stop_thor(21_li)
+        CALL stop_thor(.FALSE.,"Counter fail to correctly count number of moments!")
       END IF
       l=1
       DO i=0, ABS(spord)
@@ -287,7 +287,7 @@ CONTAINS
       END DO
       IF(l == numf+1)THEN
       ELSE
-        CALL stop_thor(21_li)
+        CALL stop_thor(.FALSE.,"Counter fail to correctly count number of moments!")
       END IF
     ELSE
       DO i=0, spord
@@ -357,7 +357,7 @@ CONTAINS
       END DO
       IF(l == numv+1)THEN
       ELSE
-        CALL stop_thor(21_li)
+        CALL stop_thor(.FALSE.,"Counter fail to correctly count number of moments!")
       END IF
       l=1
       DO i=0, 2*spord
@@ -382,7 +382,7 @@ CONTAINS
       END DO
       IF(l == numf+1)THEN
       ELSE
-        CALL stop_thor(21_li)
+        CALL stop_thor(.FALSE.,"Counter fail to correctly count number of moments!")
       END IF
     END IF
 
@@ -454,32 +454,33 @@ CONTAINS
 
     ! problem must be 0 or 1
     IF(problem > 1 .OR. problem < 0)THEN
-      CALL stop_thor(8_li)
+      CALL stop_thor(.FALSE.,"Please select problem type 1 (eigenvalue search) or 2 (external source) to perform calculation")
     ENDIF
 
     ! jfnk parameters
     IF(eig_switch==1) THEN
       IF (rd_restart<0) THEN
-        CALL stop_thor(18_li)
+        CALL stop_thor(.FALSE.,"Number of Krylov Iterations between restarts must be greater than 0")
       END IF
       IF (rd_max_kit<rd_restart) THEN
-        CALL stop_thor(19_li)
+        CALL stop_thor(.FALSE.,"Maximum number of krylov iterations must be greater than number of iterations between restarts.")
       END IF
       IF (rd_method<1 .OR. rd_method >3) THEN
-        CALL stop_thor(20_li)
+        CALL stop_thor(.FALSE.,"Method has to be 1 (Outer iteration with lagged upscattering),  &
+          & 2(Flat iteration), or 3(Flat iteration with updated downscattering).")
       END IF
     END IF
 
     ! in case problem == 1, no inflow file allowed
 
     IF(problem .EQ. 1 .AND. finflow .EQ. 1) THEN
-      CALL stop_thor(29_li)
+      CALL stop_thor(.FALSE.,"Inflow file only allowed for fixed source problems")
     END IF
 
     ! in case problem == 1, no vtk source file allowed
 
     IF(problem .EQ. 1 .AND. vtk_src_output .EQ. 1) THEN
-      CALL stop_thor(30_li)
+      CALL stop_thor(.FALSE.,"VTK source file only allowed for fixed source problems")
     END IF
 
 

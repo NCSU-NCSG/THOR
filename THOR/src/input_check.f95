@@ -68,7 +68,7 @@ CONTAINS
     DO eg=1, egmax
       WRITE(10,'(i12,1x,i12,1x,i12,1x,a5)') eg,1,num_cells,'float'
       DO i=1, num_cells
-        src_indx=src_pointer(cells(i)%src)
+        src_indx=source_ids(cells(i)%src)
         WRITE(10,'(es12.5)')ext_src(src_indx)%mom(1,1,eg)
       END DO
     END DO

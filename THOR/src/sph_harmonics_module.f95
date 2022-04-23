@@ -7,6 +7,7 @@ MODULE sph_harmonics_module
   !*********************************************************************
   ! User derived-type modules
 
+  USE global_variables
   USE types
   USE parameter_types
   USE vector_types
@@ -173,7 +174,7 @@ CONTAINS
     REAL(kind=d_t), PARAMETER :: PI = 3.141592653589793_d_t
 
     IF (m < 0 .or. m > l .or. abs(x) > 1.0_d_t) THEN
-      CALL stop_thor(1000_li, "Bad arguments in routine plegendre")
+      CALL stop_thor(.FALSE., "Bad arguments in routine plegendre")
     END IF
 
     pmm = 1.0_d_t

@@ -198,7 +198,7 @@ cell_splitting_module.o cell_splitting_module.mod: \
   geometry_types.mod angle_types.mod multindex_types.mod \
   global_variables.mod general_utility_module.mod \
   transport_kernel_module_sc.mod transport_kernel_module_lc.mod \
-  transport_kernel_module_cce.mod termination_module.mod
+  transport_kernel_module_cce.mod termination_module.mod stringmod.mod
 
 cross_section_types.o cross_section_types.mod: cross_section_types.f95 \
   types.mod
@@ -321,7 +321,7 @@ solver_module.o solver_module.mod: solver_module.f95 types.mod \
 
 sph_harmonics_module.o sph_harmonics_module.mod: sph_harmonics_module.f95 \
   types.mod parameter_types.mod vector_types.mod angle_types.mod \
-  multindex_types.mod termination_module.mod
+  multindex_types.mod termination_module.mod global_variables.mod
 
 sweep_module.o sweep_module.mod: sweep_module.f95  \
   types.mod parameter_types.mod filename_types.mod vector_types.mod \

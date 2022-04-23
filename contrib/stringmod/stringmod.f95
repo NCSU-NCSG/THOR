@@ -780,4 +780,11 @@ end subroutine removebksl
 
 !**********************************************************************
 
+character(len=64) function str(k)
+!   "Convert an integer to string."
+    integer, intent(in) :: k
+    write (str, *) k
+    str = adjustl(str)
+end function str
+
 end module stringmod

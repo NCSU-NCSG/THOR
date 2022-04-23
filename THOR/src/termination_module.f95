@@ -5,6 +5,9 @@ MODULE termination_module
   !***********************************************************************
   USE global_variables
   IMPLICIT NONE
+  PRIVATE
+  !
+  PUBLIC :: stop_thor, warn_thor
 
 CONTAINS
 
@@ -20,12 +23,14 @@ CONTAINS
 
     ! src types
     IF ( ALLOCATED( ext_src   ) ) DEALLOCATE( ext_src)
+    IF ( ALLOCATED( source_ids   ) ) DEALLOCATE( source_ids)
 
     ! cross section types
 
     IF( ALLOCATED(xs_mat) )     DEALLOCATE(xs_mat)
     IF( ALLOCATED(eg_bounds) )  DEALLOCATE(eg_bounds)
     IF( ALLOCATED(scat_mult)  ) DEALLOCATE(scat_mult)
+    IF( ALLOCATED(material_ids)  ) DEALLOCATE(material_ids)
 
     ! fixed inflow flux
 
@@ -57,6 +62,13 @@ CONTAINS
     IF( ALLOCATED(neldep) )   DEALLOCATE(neldep)
     IF( ALLOCATED( eldep) )   DEALLOCATE( eldep)
 
+    !cycle variables
+    IF( ALLOCATED( is_cycle) )   DEALLOCATE( is_cycle)
+
+    !parallel variables
+    IF( ALLOCATED( parallel_map_g2l) )   DEALLOCATE( parallel_map_g2l)
+    IF( ALLOCATED( parallel_map_l2g) )   DEALLOCATE( parallel_map_l2g)
+
     ! post-processing variables
     IF( ALLOCATED(point_flux_locations) ) DEALLOCATE(point_flux_locations)
 
@@ -67,10 +79,8 @@ CONTAINS
 
   END SUBROUTINE cleanup
 
-  !------------------------------------------------------------------------------------------------------------!
-  !------------------------------------------------------------------------------------------------------------!
-
-  SUBROUTINE stop_thor(scode, message)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  SUBROUTINE stop_thor(success, message)
     !**********************************************************************
     !
     ! Terminates THOR and prints message according to scode
@@ -79,130 +89,30 @@ CONTAINS
 
     ! Pass argument
 
-    INTEGER(kind=li) :: scode
-    CHARACTER(*), OPTIONAL:: message
+    LOGICAL,INTENT(IN) :: success
+    CHARACTER(*), OPTIONAL,INTENT(IN) :: message
 
     ! Print message
-    SELECT CASE(scode)
-
-    CASE(1_li)
-      IF (rank .EQ. 0) THEN
-        WRITE(6,*)
-        WRITE(6,*) "--------------------------------------------------------"
-        WRITE(6,*) "   Execution of THOR completed successfully  "
-        WRITE(6,*) "--------------------------------------------------------"
-        WRITE(6,*)
-      END IF
-    CASE(2_li)
-      WRITE(6,*) '*** Not enough memory ***'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(3_li)
-      WRITE(6,*) "Upstream face moment determination failed."
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(4_li)
-      WRITE(6,*) "Downstream face moment determination failed."
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(5_li)
-      WRITE(6,*) "Incoming face moments determination failed."
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(6_li)
-      WRITE(6,*) "Outgoing face moments determination failed."
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(7_li)
-      WRITE(6,*) 'Face moments transformation failed.'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(8_li)
-      WRITE(6,*) "Please select problem type 1 (eigenvalue search)",&
-            "or 2 (external source) to perform calculation"
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(9_li)
-      WRITE(6,*) 'Sweep type specification not recognized. Execution terminates.'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(10_li)
-      WRITE(6,*) "Unacceptable splitting in cell"
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(11_li)
-      WRITE(6,*) "Unacceptable case from cell splitting in cell"
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(12_li)
-      WRITE(6,*) 'Some boundary faces feature a fixed inflow flux but the inflow flag is set to false. Execution terminates.'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(13_li)
-      WRITE(6,*) 'Precomputed sweep path inconsistent. Execution terminates'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(14_li)
-      WRITE(6,*)  'Reflective boundary face could not be determined.'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(15_li)
-      WRITE(6,*) 'SLC quadrature only available for orders 1, 2, 3 and 5'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(16_li)
-      WRITE(6,*) 'A fixed inflow flux value is placed in a boundary face that is not declared fixed inflow.'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(17_li)
-      WRITE(6,*) "Only lambda=-1 is allowed!"
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(18_li)
-      WRITE(6,*) "Number of Krylov Iterations between restarts must be greater than 0"
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(19_li)
-      WRITE(6,*) "Maximum number of krylov iterations must be greater than number of",&
-            "iterations between restarts."
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(20_li)
-      WRITE(6,*) "Method has to be 1 (Outer iteration with lagged upscattering)",&
-            " 2(Flat iteration) or 3(Flat iteration with updated downscattering)."
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(21_li)
-      WRITE(6,*) 'Counter fail to correctly count number of moments!'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(22_li)
-      WRITE(6,*) 'Higher Order Spherical Harmonic Not Available!'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(23_li)
-      WRITE(6,*) 'Legendre Scattering Order Limited to P7'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(24_li)
-      WRITE(6,*) 'Reading initial guess file failed'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(25_li)
-      WRITE(6,*) "JFNK module requires niter to be equal to 2. This is a coding mistake!"
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(26_li)
-      WRITE(6,*) 'Method needs to be 1, 2 or 3.'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(27_li)
-      WRITE(6,*) 'GMRES error'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(28_li)
-      WRITE(6,*) 'Only lambda=0 is allowed'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(29_li)
-      WRITE(6,*) 'Inflow file only allowed for fixed source problems'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(30_li)
-      WRITE(6,*) 'VTK source file only allowed for fixed source problems'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(31_li)
-      WRITE(6,*) 'JFNK option in combination with reflective boundary conditions on opposite faces is not permitted'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(32_li)
-      WRITE(6,*) 'Call to associated Legendre Polynomials features impossible combination of l and m.'
-      WRITE(6,*) 'This is a coding mistake. Contact the developers.'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(33_li)
-      WRITE(6,*) 'Associated Legendre Polynomial order limited to 5.'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE(34_li)
-      WRITE(6,*) 'Density factors were requested but referenced file was not found.'
-      WRITE(6,*) '>> Execution terminates unsuccessfully!'
-    CASE default
-      IF (PRESENT(message)) THEN
-        WRITE(6,*) message
+    IF(rank .EQ. 0)THEN
+      IF(success)THEN
+        IF (PRESENT(message)) THEN
+          WRITE(6,*)TRIM(ADJUSTL(message))
+        END IF
+        WRITE(6,'(A)')
+        WRITE(6,'(A)') "--------------------------------------------------------"
+        WRITE(6,'(A)') "   Execution of THOR completed successfully  "
+        WRITE(6,'(A)') "--------------------------------------------------------"
+        WRITE(6,'(A)')
       ELSE
-        WRITE(6,*) "No Error message given - Format should be <ERR #> <Messsage>"
-      END IF
-    END SELECT
+        IF (PRESENT(message)) THEN
+          WRITE(6,'(2A)')'ERROR! ',TRIM(ADJUSTL(message))
+        ELSE
+          WRITE(6,'(A)')'No error message given'
+        ENDIF
+        WRITE(6,'(A)') '>> THOR encounrted a fatal error!'
+        WRITE(6,'(A)') '>> Execution terminated unsuccessfully!'
+      ENDIF
+    ENDIF
 
 
     ! Cleanup and terminate
@@ -212,4 +122,16 @@ CONTAINS
 
   END SUBROUTINE stop_thor
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  SUBROUTINE warn_thor(message)
+    !**********************************************************************
+    !
+    ! Throws a warning for THOR
+    !
+    !**********************************************************************
+    CHARACTER(*), INTENT(IN):: message
+
+    WRITE(6,'(2A)')'WARNING: ',message
+
+  END SUBROUTINE warn_thor
 END MODULE termination_module
