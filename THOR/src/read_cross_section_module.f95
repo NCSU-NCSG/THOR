@@ -339,7 +339,7 @@ CONTAINS
     INTEGER :: ios
     DO
       READ(local_unit,'(A10000)',IOSTAT=ios)line
-      CALL raise_fatal_error('end of xs file was reached before all data/materials were found')
+      IF( ios .NE. 0)CALL raise_fatal_error('end of xs file was reached before all data/materials were found')
       line=TRIM(ADJUSTL(line))
       !finding uncommented line that isn't empty
       IF(line(1:1) .NE. '!' .AND. line .NE. '')THEN

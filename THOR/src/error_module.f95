@@ -4,6 +4,7 @@ MODULE error_module
   ! THOR either successfully or unsuccessfully.
   !***********************************************************************
   USE global_variables
+  USE mpi
   IMPLICIT NONE
   PRIVATE
   !
@@ -89,10 +90,13 @@ CONTAINS
 
     ! Pass argument
     CHARACTER(*), OPTIONAL,INTENT(IN) :: message
+    INTEGER :: mpi_err
 
     ! Print message
     IF(rank .EQ. 0)THEN
-      WRITE(6,'(A)') "--------------------------------------------------------"
+      WRITE(6,'(A)') "*****************************************************************************"
+      WRITE(6,'(A)') "*****************************************************************************"
+      WRITE(6,'(A)') "*****************************************************************************"
       IF (PRESENT(message)) THEN
         WRITE(6,'(A)')'FATAL ERROR!'
         WRITE(6,'(2A)')'ERROR: ',TRIM(ADJUSTL(message))
@@ -103,8 +107,12 @@ CONTAINS
       ENDIF
       WRITE(6,'(A)') '>> THOR encountered a fatal error!'
       WRITE(6,'(A)') '>> Execution of THOR terminated UNsuccessfully!'
-      WRITE(6,'(A)') "--------------------------------------------------------"
+      WRITE(6,'(A)') "*****************************************************************************"
+      WRITE(6,'(A)') "*****************************************************************************"
+      WRITE(6,'(A)') "*****************************************************************************"
     ENDIF
+    CALL MPI_BARRIER(MPI_COMM_WORLD, mpi_err)
+    CALL MPI_FINALIZE(mpi_err)
 
 
     ! Cleanup and terminate
