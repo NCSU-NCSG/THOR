@@ -68,7 +68,6 @@ CONTAINS
       WRITE(unit_number,*) "--------------------------------------------------------"
       IF (conv_flag==0) THEN
         WRITE(unit_number,*) "Warning! Execution finished without satisfying all stopping criteria. Warning!"
-        CALL raise_warning("Execution finished without satisfying all stopping criteria.")
       ELSE IF(conv_flag==1) THEN
         WRITE(unit_number,*) "Execution finished successfully. All stopping criteria satisfied."
       END IF

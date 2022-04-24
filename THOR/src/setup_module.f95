@@ -216,17 +216,17 @@ CONTAINS
 
       ! pre-compute sweep
       IF (rank .EQ. 0) THEN
-        WRITE(6,*) "--------------------------------------------------------"
-        WRITE(6,*) "   Precomputing sweep path   "
-        WRITE(6,*) "--------------------------------------------------------"
+        WRITE(stdout_unit,*) "--------------------------------------------------------"
+        WRITE(stdout_unit,*) "   Precomputing sweep path   "
+        WRITE(stdout_unit,*) "--------------------------------------------------------"
       END IF
       !FIX ME - pre sweep efficiency and threading
       CALL CPU_TIME(ts)
       CALL pre_sweep
       CALL CPU_TIME(te)
       IF (rank .EQ. 0) THEN
-        WRITE(6,101) '-- Finished precomputing sweep path. Time (sec.) ', te-ts
-        WRITE(6,*)
+        WRITE(stdout_unit,101) '-- Finished precomputing sweep path. Time (sec.) ', te-ts
+        WRITE(stdout_unit,*)
       END IF
     END IF
 
@@ -253,14 +253,14 @@ CONTAINS
 
     ! Write region information
     IF (rank .EQ. 0) THEN
-      WRITE(6,*)
-      WRITE(6,*) "--------------------------------------------------------"
-      WRITE(6,*) "   Region Information  "
-      WRITE(6,*) "--------------------------------------------------------"
-      WRITE(6,*)
-      WRITE(6,*) "     Region ID","   Material ID","  Region Volume"," Density Factor"
+      WRITE(stdout_unit,*)
+      WRITE(stdout_unit,*) "--------------------------------------------------------"
+      WRITE(stdout_unit,*) "   Region Information  "
+      WRITE(stdout_unit,*) "--------------------------------------------------------"
+      WRITE(stdout_unit,*)
+      WRITE(stdout_unit,*) "     Region ID","   Material ID","  Region Volume"," Density Factor"
       DO i = minreg,maxreg
-        WRITE(6,104) i,reg2mat(i),reg_vol(i),dens_fact(i)
+        WRITE(stdout_unit,104) i,reg2mat(i),reg_vol(i),dens_fact(i)
       END DO
     END IF
 
@@ -470,7 +470,7 @@ CONTAINS
       CALL CPU_TIME(te)
       !FIX ME - Only prints angles belonging to root process
       IF (rank .EQ. 0) THEN
-        WRITE(6,101) ' - Computation of sweep path for octant: ',octant,' angle: ',q,' . Ex. Time(sec.): ',te-ts
+        WRITE(stdout_unit,101) ' - Computation of sweep path for octant: ',octant,' angle: ',q,' . Ex. Time(sec.): ',te-ts
       END IF
 
 
@@ -695,7 +695,7 @@ CONTAINS
 
     ! --- Copy over the eliminated dependencies into
     j=MAX(neldep(octant,q),1)
-    IF(j>1) WRITE(6,*) '  -- Cycles detected. Number: ',j
+    IF(j>1) WRITE(stdout_unit,*) '  -- Cycles detected. Number: ',j
     DO g=1,egmax
       ALLOCATE( eldep(octant,q,g)%cells(j) )
       ALLOCATE( eldep(octant,q,g)%faces(j) )

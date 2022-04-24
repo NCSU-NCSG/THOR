@@ -94,22 +94,22 @@ CONTAINS
 
     ! Print message
     IF(rank .EQ. 0)THEN
-      WRITE(6,'(A)') "*****************************************************************************"
-      WRITE(6,'(A)') "*****************************************************************************"
-      WRITE(6,'(A)') "*****************************************************************************"
+      WRITE(stdout_unit,'(A)') "*****************************************************************************"
+      WRITE(stdout_unit,'(A)') "*****************************************************************************"
+      WRITE(stdout_unit,'(A)') "*****************************************************************************"
       IF (PRESENT(message)) THEN
-        WRITE(6,'(A)')'FATAL ERROR!'
-        WRITE(6,'(2A)')'ERROR: ',TRIM(ADJUSTL(message))
+        WRITE(stdout_unit,'(A)')'FATAL ERROR!'
+        WRITE(stdout_unit,'(2A)')'ERROR: ',TRIM(ADJUSTL(message))
       ELSE
-        WRITE(6,'(A)')'FATAL ERROR!'
-        WRITE(6,'(A)')'...'
-        WRITE(6,'(A)')'No error message given'
+        WRITE(stdout_unit,'(A)')'FATAL ERROR!'
+        WRITE(stdout_unit,'(A)')'...'
+        WRITE(stdout_unit,'(A)')'No error message given'
       ENDIF
-      WRITE(6,'(A)') '>> THOR encountered a fatal error!'
-      WRITE(6,'(A)') '>> Execution of THOR terminated UNsuccessfully!'
-      WRITE(6,'(A)') "*****************************************************************************"
-      WRITE(6,'(A)') "*****************************************************************************"
-      WRITE(6,'(A)') "*****************************************************************************"
+      WRITE(stdout_unit,'(A)') '>> THOR encountered a fatal error!'
+      WRITE(stdout_unit,'(A)') '>> Execution of THOR terminated UNsuccessfully!'
+      WRITE(stdout_unit,'(A)') "*****************************************************************************"
+      WRITE(stdout_unit,'(A)') "*****************************************************************************"
+      WRITE(stdout_unit,'(A)') "*****************************************************************************"
     ENDIF
     CALL MPI_BARRIER(MPI_COMM_WORLD, mpi_err)
     CALL MPI_FINALIZE(mpi_err)
@@ -134,13 +134,13 @@ CONTAINS
 
     IF(rank .EQ. 0)THEN
       IF (PRESENT(message)) THEN
-        WRITE(6,*)TRIM(ADJUSTL(message))
+        WRITE(stdout_unit,*)TRIM(ADJUSTL(message))
       END IF
-      WRITE(6,'(A)')
-      WRITE(6,'(A)') "--------------------------------------------------------"
-      WRITE(6,'(A)') "   Execution of THOR completed successfully  "
-      WRITE(6,'(A)') "--------------------------------------------------------"
-      WRITE(6,'(A)')
+      WRITE(stdout_unit,'(A)')
+      WRITE(stdout_unit,'(A)') "--------------------------------------------------------"
+      WRITE(stdout_unit,'(A)') "   Execution of THOR completed successfully  "
+      WRITE(stdout_unit,'(A)') "--------------------------------------------------------"
+      WRITE(stdout_unit,'(A)')
     ENDIF
 
 
@@ -160,7 +160,7 @@ CONTAINS
     !**********************************************************************
     CHARACTER(*), INTENT(IN):: message
 
-    IF(rank .EQ. 0)WRITE(6,'(2A)')'WARNING: ',message
+    IF(rank .EQ. 0)WRITE(stdout_unit,'(2A)')'WARNING: ',message
 
   END SUBROUTINE raise_warning
 END MODULE error_module

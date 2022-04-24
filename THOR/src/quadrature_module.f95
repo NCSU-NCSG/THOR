@@ -37,7 +37,7 @@ CONTAINS
 
       IF(MOD(quad_ord,2).NE. 0 .OR. quad_ord>16) THEN
         IF (rank .EQ. 0) THEN
-          WRITE(6,*) 'Level symmetric quadrature is selected. The order must be even &
+          WRITE(stdout_unit,*) 'Level symmetric quadrature is selected. The order must be even &
             & and less than 16.'
         END IF
       END IF

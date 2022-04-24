@@ -182,4 +182,7 @@ MODULE global_variables
   INTEGER, ALLOCATABLE:: parallel_map_l2g(:,:)
   INTEGER:: rank
   REAL*8:: parallel_timing(4,2)
+
+  !Input/output units
+  INTEGER :: stdout_unit
 END MODULE global_variables

@@ -17,6 +17,7 @@ PROGRAM ahot_c_ug
 
   !#########
   USE mpi
+  USE ISO_FORTRAN_ENV
   !#########
   USE types
   USE parameter_types
@@ -48,7 +49,7 @@ PROGRAM ahot_c_ug
 
   ! Declare temporary variables
 
-  INTEGER(kind=li) :: alloc_stat
+  INTEGER(kind=li) :: alloc_stat,converge_unit
 
   !######### MPI variables
   INTEGER :: mpi_err, num_p
@@ -58,6 +59,8 @@ PROGRAM ahot_c_ug
   INTEGER:: do_timing = 0
   LOGICAL        :: existence
   CHARACTER(100) :: temp
+
+  stdout_unit=OUTPUT_UNIT
 
   CALL GET_COMMAND_ARGUMENT(2,temp)
   IF (TRIM(temp) .EQ. '-t') do_timing = 1
@@ -75,24 +78,24 @@ PROGRAM ahot_c_ug
 
     ! Print banner for THOR
 
-    WRITE(6,*) "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-    WRITE(6,*)
-    WRITE(6,*) "   TTTTTTT  HH     HH  OOOOO  RRRRRR "
-    WRITE(6,*) "     TTT    HH     HH OOOOOOO RRRRRRR"
-    WRITE(6,*) "     TTT    HH     HH OO   OO RR   RR"
-    WRITE(6,*) "     TTT    HHHHHHHHH OO   OO RRRRRR "
-    WRITE(6,*) "     TTT    HHHHHHHHH OO   OO RRRR   "
-    WRITE(6,*) "     TTT    HH     HH OO   OO RR RR  "
-    WRITE(6,*) "     TTT    HH     HH 0000000 RR  RR "
-    WRITE(6,*) "     TTT    HH     HH  OOOOO  RR   RR"
-    WRITE(6,*)
-    WRITE(6,*) "   Tetrahedral High Order Radiation Transport Code"
-    WRITE(6,*)
-    WRITE(6,*) "   By R. M. Ferrer"
-    WRITE(6,*)
-    WRITE(6,*) "   Version 1.0 BETA - Update 05/10/2012"
-    WRITE(6,*) "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-    WRITE(6,*)
+    WRITE(stdout_unit,*) "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+    WRITE(stdout_unit,*)
+    WRITE(stdout_unit,*) "   TTTTTTT  HH     HH  OOOOO  RRRRRR "
+    WRITE(stdout_unit,*) "     TTT    HH     HH OOOOOOO RRRRRRR"
+    WRITE(stdout_unit,*) "     TTT    HH     HH OO   OO RR   RR"
+    WRITE(stdout_unit,*) "     TTT    HHHHHHHHH OO   OO RRRRRR "
+    WRITE(stdout_unit,*) "     TTT    HHHHHHHHH OO   OO RRRR   "
+    WRITE(stdout_unit,*) "     TTT    HH     HH OO   OO RR RR  "
+    WRITE(stdout_unit,*) "     TTT    HH     HH 0000000 RR  RR "
+    WRITE(stdout_unit,*) "     TTT    HH     HH  OOOOO  RR   RR"
+    WRITE(stdout_unit,*)
+    WRITE(stdout_unit,*) "   Tetrahedral High Order Radiation Transport Code"
+    WRITE(stdout_unit,*)
+    WRITE(stdout_unit,*) "   By R. M. Ferrer"
+    WRITE(stdout_unit,*)
+    WRITE(stdout_unit,*) "   Version 1.0 BETA - Update 05/10/2012"
+    WRITE(stdout_unit,*) "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+    WRITE(stdout_unit,*)
   END IF
 
   !***********************************************************************
@@ -116,14 +119,15 @@ PROGRAM ahot_c_ug
 
   IF(print_conv.EQ.1 .AND. rank .EQ. 0) THEN
     INQUIRE(file = "thor.convergence", exist = existence)
+    converge_unit=21
     IF(existence) THEN
-      OPEN (unit = 21, file = "thor.convergence", status = "OLD", action = "WRITE")
+      OPEN(unit = converge_unit, file = "thor.convergence", status = "OLD", action = "WRITE")
     ELSE
-      OPEN (unit = 21, file = "thor.convergence", status = "NEW", action = "WRITE")
+      OPEN(unit = converge_unit, file = "thor.convergence", status = "NEW", action = "WRITE")
     END IF
-    WRITE(21,*) '========================================================'
-    WRITE(21,*) '   Begin outer iterations.'
-    WRITE(21,*) '========================================================'
+    WRITE(converge_unit,*) '========================================================'
+    WRITE(converge_unit,*) '   Begin outer iterations.'
+    WRITE(converge_unit,*) '========================================================'
   END IF
 
 
@@ -186,19 +190,19 @@ SUBROUTINE write_timing
   IF (rank .EQ. 0 .AND. do_timing .EQ. 1) THEN
     DO i =0, num_p-1
       CALL MPI_RECV(print_timing, 8, MPI_DOUBLE, i, i, MPI_COMM_WORLD, err_size, mpi_err )
-      WRITE(*,*)
-      WRITE(*,*)'/====================================================='
-      WRITE(*,*)'| Timing Data for process: ', i
-      WRITE(*,*)'|-----------------------------------------------------'
-      WRITE(*,*)'| Total Measured Time:      ', print_timing(1,2)- print_timing(1,1)
-      WRITE(*,*)'| Total Setup Time:         ', print_timing(2,2)- print_timing(2,1)
-      WRITE(*,*)'| Total Execute Time:       ', print_timing(3,2)- print_timing(3,1)
-      WRITE(*,*)'| Total Wrapup Time:        ', print_timing(4,2)- print_timing(4,1)
-      WRITE(*,*)'| Total Non-Accounted Time: ',(print_timing(1,2)- print_timing(1,1))- &
+      WRITE(stdout_unit,*)
+      WRITE(stdout_unit,*)'/====================================================='
+      WRITE(stdout_unit,*)'| Timing Data for process: ', i
+      WRITE(stdout_unit,*)'|-----------------------------------------------------'
+      WRITE(stdout_unit,*)'| Total Measured Time:      ', print_timing(1,2)- print_timing(1,1)
+      WRITE(stdout_unit,*)'| Total Setup Time:         ', print_timing(2,2)- print_timing(2,1)
+      WRITE(stdout_unit,*)'| Total Execute Time:       ', print_timing(3,2)- print_timing(3,1)
+      WRITE(stdout_unit,*)'| Total Wrapup Time:        ', print_timing(4,2)- print_timing(4,1)
+      WRITE(stdout_unit,*)'| Total Non-Accounted Time: ',(print_timing(1,2)- print_timing(1,1))- &
                                                (print_timing(2,2)- print_timing(2,1)) - &
                                                (print_timing(3,2)- print_timing(3,1)) - &
                                                (print_timing(4,2)- print_timing(4,1))
-      WRITE(*,*)'\====================================================='
+      WRITE(stdout_unit,*)'\====================================================='
     END DO
   END IF
 

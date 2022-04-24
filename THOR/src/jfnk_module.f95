@@ -220,10 +220,10 @@ CONTAINS
     END IF
     ! Perform ipow initial power iterations
     IF (ipow .GT. 0 .AND. rank .EQ. 0) THEN
-      WRITE(6,*)
-      WRITE(6,*) '========================================================'
-      WRITE(6,*) '   Begin Initial Power Iterations.'
-      WRITE(6,*) '========================================================'
+      WRITE(stdout_unit,*)
+      WRITE(stdout_unit,*) '========================================================'
+      WRITE(stdout_unit,*) '   Begin Initial Power Iterations.'
+      WRITE(stdout_unit,*) '========================================================'
     END IF
 
     ! note: we do not need to duplicate reflected_flux on all processors
@@ -271,10 +271,10 @@ CONTAINS
 
       ! write convergence monitor
       IF (rank .EQ. 0) THEN
-        WRITE(6,*)   '---------------------------------------------------------------------------'
-        WRITE(6,401) '---itn        keff    err-keff     err-flx        time---'
-        WRITE(6,402) m,keff, keff_error,max_outer_error,te-ts,' %i'
-        WRITE(6,*)   '---------------------------------------------------------------------------'
+        WRITE(stdout_unit,*)   '---------------------------------------------------------------------------'
+        WRITE(stdout_unit,401) '---itn        keff    err-keff     err-flx        time---'
+        WRITE(stdout_unit,402) m,keff, keff_error,max_outer_error,te-ts,' %i'
+        WRITE(stdout_unit,*)   '---------------------------------------------------------------------------'
         IF(print_conv.EQ.1) THEN
           WRITE(21,*)   '---------------------------------------------------------------------------'
           WRITE(21,401) '---itn        keff    err-keff     err-flx        time---'
@@ -290,17 +290,17 @@ CONTAINS
     IF( ALLOCATED(reflected_flux) ) DEALLOCATE(reflected_flux)
 
     IF (ipow .GT. 0 .AND. rank .EQ. 0) THEN
-      WRITE(6,*)
-      WRITE(6,*) '========================================================'
-      WRITE(6,*) '   End Initial Power Iterations.'
-      WRITE(6,*) '========================================================'
+      WRITE(stdout_unit,*)
+      WRITE(stdout_unit,*) '========================================================'
+      WRITE(stdout_unit,*) '   End Initial Power Iterations.'
+      WRITE(stdout_unit,*) '========================================================'
     END IF
 
     IF (rank .EQ. 0) THEN
-      WRITE(6,*)
-      WRITE(6,*) '========================================================'
-      WRITE(6,*) '   Begin JFNK iterations.'
-      WRITE(6,*) '========================================================'
+      WRITE(stdout_unit,*)
+      WRITE(stdout_unit,*) '========================================================'
+      WRITE(stdout_unit,*) '   Begin JFNK iterations.'
+      WRITE(stdout_unit,*) '========================================================'
     END IF
 
     ! evaluate residual
@@ -359,10 +359,10 @@ CONTAINS
 
       ! output convergence progress
       IF (rank .EQ. 0) THEN
-        WRITE(6,*)   '---------------------------------------------------------------------------'
-        WRITE(6,102) '---nitn  kitn        keff     max-res        time---'
-        WRITE(6,101) nit,kit,keff,nres,te-ts," %n"
-        WRITE(6,*)   '---------------------------------------------------------------------------'
+        WRITE(stdout_unit,*)   '---------------------------------------------------------------------------'
+        WRITE(stdout_unit,102) '---nitn  kitn        keff     max-res        time---'
+        WRITE(stdout_unit,101) nit,kit,keff,nres,te-ts," %n"
+        WRITE(stdout_unit,*)   '---------------------------------------------------------------------------'
         IF(print_conv.EQ.1) THEN
           WRITE(21,*)   '---------------------------------------------------------------------------'
           WRITE(21,102) '---nitn  kitn        keff     max-res        time---'
@@ -376,10 +376,10 @@ CONTAINS
       ! Check for convergence
 
       IF(nres<nit_conv .and. rank .EQ. 0) THEN
-        WRITE(6,*)   '---------------------------------------------------------------------------'
-        WRITE(6,104) 'Newton Iteration Convergence achieved after',nit,' iterations.'
-        WRITE(6,103) 'with final residual ',nres
-        WRITE(6,*)   '---------------------------------------------------------------------------'
+        WRITE(stdout_unit,*)   '---------------------------------------------------------------------------'
+        WRITE(stdout_unit,104) 'Newton Iteration Convergence achieved after',nit,' iterations.'
+        WRITE(stdout_unit,103) 'with final residual ',nres
+        WRITE(stdout_unit,*)   '---------------------------------------------------------------------------'
         conv_flag=1
       END IF
       IF(nres<nit_conv)EXIT
@@ -401,9 +401,9 @@ CONTAINS
     CALL norm_eigmode(flux,tot_vol)
 
     IF (rank .EQ. 0) THEN
-      WRITE(6,*) '========================================================'
-      WRITE(6,*) '   End JFNK iterations.'
-      WRITE(6,*) '========================================================'
+      WRITE(stdout_unit,*) '========================================================'
+      WRITE(stdout_unit,*) '   End JFNK iterations.'
+      WRITE(stdout_unit,*) '========================================================'
     END IF
 
     ! newton iteration end, copy unknown to flux
@@ -929,7 +929,7 @@ CONTAINS
 
     ! Print header for Krylov convergence monitor
 
-    IF(rank .EQ. 0) WRITE(6,102) '---itn         err    trgt-res        time ---'
+    IF(rank .EQ. 0) WRITE(stdout_unit,102) '---itn         err    trgt-res        time ---'
 
     ! Start gmres iteration
 
@@ -977,7 +977,7 @@ CONTAINS
       ELSEIF(ipar(1).EQ.-2) THEN   ! insufficient workspace
         CALL raise_fatal_error("GMRES error")
       ELSEIF(ipar(1).LT.-2) THEN   ! some other error, investigate further
-        WRITE(6,*) 'SPARSKIT error is ', ipar(1)
+        WRITE(stdout_unit,*) 'SPARSKIT error is ', ipar(1)
       ENDIF
 
       ! stop timer
@@ -985,7 +985,7 @@ CONTAINS
       CALL CPU_TIME(te)
 
       ! write convergence monitor
-      IF (rank .EQ. 0) WRITE(6,101) k,fpar(5),tol*nrhs,te-ts,' %%k'
+      IF (rank .EQ. 0) WRITE(stdout_unit,101) k,fpar(5),tol*nrhs,te-ts,' %%k'
 
     END DO
 
@@ -1371,7 +1371,7 @@ CONTAINS
 
     DO eg=1,egmax
       IF  (page_refl.NE.0_li) THEN
-        WRITE(6, *) "Reflective Boundary values must currently be saved in JFNK."
+        WRITE(stdout_unit, *) "Reflective Boundary values must currently be saved in JFNK."
       END IF
 
       CALL inner_iteration(eg,flx(:,:,:,eg,2),src(:,:,:,eg),LL,U,Lf,Uf,grs,reflected_flux(:,:,:,:,eg),prnt)

@@ -86,8 +86,8 @@ CONTAINS
     ELSE
       !region map was found in input file, so check that they match
       IF(temp_maxreg .GT. maxreg .OR. temp_minreg .LT. minreg)THEN
-        WRITE(*,*)'Error: Min index in input file',minreg,'min index in mesh',temp_minreg
-        WRITE(*,*)'Error: Max index in input file',maxreg,'max index in mesh',temp_maxreg
+        WRITE(stdout_unit,*)'Error: Min index in input file',minreg,'min index in mesh',temp_minreg
+        WRITE(stdout_unit,*)'Error: Max index in input file',maxreg,'max index in mesh',temp_maxreg
         CALL raise_fatal_error('Region map in input file and regions in mesh file do not match! Be &
           & sure to index from 1 if using legacy regionmap!')
       ENDIF

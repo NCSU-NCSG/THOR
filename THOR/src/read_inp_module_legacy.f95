@@ -34,7 +34,7 @@ CONTAINS
     CHARACTER(200) :: data_string
     LOGICAL :: set_defaults
     LOGICAL :: sanity_check
-    WRITE(*,*) "UNIT IS: ", local_unit
+    WRITE(stdout_unit,*) "UNIT IS: ", local_unit
 
 
     ! !Fetch command line argument count
@@ -78,10 +78,10 @@ CONTAINS
     ! END IF
     !
     ! !Print out invocation summary
-    ! WRITE(*,*) "INPUT SPECIFICATION"
-    ! WRITE(*,*) "IN FILE: ", in_file
-    ! WRITE(*,*) "OUT FILE: ", out_file
-    ! WRITE(*,*) "VERBOSITY: ", verbose
+    ! WRITE(stdout_unit,*) "INPUT SPECIFICATION"
+    ! WRITE(stdout_unit,*) "IN FILE: ", in_file
+    ! WRITE(stdout_unit,*) "OUT FILE: ", out_file
+    ! WRITE(stdout_unit,*) "VERBOSITY: ", verbose
     !
     ! IF (verbose .EQ. 1) THEN
     !   OPEN(UNIT=14, FILE="sample_input.yaml", ACTION="WRITE", STATUS="REPLACE", IOSTAT=ioerr)
@@ -109,7 +109,7 @@ CONTAINS
       IF (.NOT. set_defaults .AND. .NOT. sanity_check) THEN
         !Consume a line and shift left
         READ(local_unit, '(A)', IOSTAT=ioerr) read_str
-        WRITE(*,*) read_str
+        WRITE(stdout_unit,*) read_str
         IF (ioerr .NE. 0) THEN
           sanity_check = .TRUE.
           CYCLE
@@ -368,7 +368,7 @@ CONTAINS
     CHARACTER(*):: data_string
     LOGICAL:: set_defaults, sanity_check
     INTEGER:: verbose, data_int
-    WRITE(*,*) data_string
+    WRITE(stdout_unit,*) data_string
 
     IF(set_defaults) THEN
       IF (verbose .EQ. 1) THEN
@@ -2247,7 +2247,7 @@ CONTAINS
               ! wwords must be an array with of length 9
               CALL parse(wwords(2), " ", wwwords, nwwwords)
               IF (nwwwords .NE. 9) THEN
-                WRITE(6,*) 'Following cartesian map nine entries are required; Found: ',&
+                WRITE(stdout_unit,*) 'Following cartesian map nine entries are required; Found: ',&
                       TRIM(wwords(2)),' has ', nwwwords, ' entries.'
               END IF
               msg='Conversion to cartesian map xmin failed'
@@ -2255,7 +2255,7 @@ CONTAINS
               msg='Conversion to cartesian map xmax failed'
               glob_cmap_max_x = string_to_real(wwwords(2), msg)
               IF (ABS(glob_cmap_max_x - glob_cmap_min_x) < small_real) THEN
-                WRITE(6, *) "cartesian_map xmin and xmax are too close to each other"
+                WRITE(stdout_unit, *) "cartesian_map xmin and xmax are too close to each other"
               END IF
               msg='Conversion to cartesian map nx failed'
               glob_cmap_nx = string_to_int(wwwords(3), msg, minint)
@@ -2264,7 +2264,7 @@ CONTAINS
               msg='Conversion to cartesian map ymax failed'
               glob_cmap_max_y = string_to_real(wwwords(5), msg)
               IF (ABS(glob_cmap_max_y - glob_cmap_min_y) < small_real) THEN
-                WRITE(6, *) "cartesian_map xmin and xmax are too close to each other"
+                WRITE(stdout_unit, *) "cartesian_map xmin and xmax are too close to each other"
               END IF
               msg='Conversion to cartesian map ny failed'
               glob_cmap_ny = string_to_int(wwwords(6), msg, minint)
@@ -2273,7 +2273,7 @@ CONTAINS
               msg='Conversion to cartesian map zmax failed'
               glob_cmap_max_z = string_to_real(wwwords(8), msg)
               IF (ABS(glob_cmap_max_z - glob_cmap_min_z) < small_real) THEN
-                WRITE(6, *) "cartesian_map zmin and zmax are too close to each other"
+                WRITE(stdout_unit, *) "cartesian_map zmin and zmax are too close to each other"
               END IF
               msg='Conversion to cartesian map nz failed'
               glob_cmap_nz = string_to_int(wwwords(9), msg, minint)
@@ -2283,7 +2283,7 @@ CONTAINS
               CALL parse(wwords(2), " ", wwwords, nwwwords)
               ! must be divisible by 3
               IF (modulo(nwwwords, 3) .ne. 0) THEN
-                WRITE(6,*) 'point_value_locations number of entries must be divisible by 3; Found: ',&
+                WRITE(stdout_unit,*) 'point_value_locations number of entries must be divisible by 3; Found: ',&
                       TRIM(wwords(2)),' has ', nwwwords, ' entries.'
               ELSE
                 number_point_flux_locations = nwwwords / 3
