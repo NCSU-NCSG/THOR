@@ -70,11 +70,16 @@ CONTAINS
       CLOSE(unit=66)
       WRITE(stdout_unit,*)
       WRITE(stdout_unit,*) 'Initial guess file ',TRIM(inguess_file),' was successfully read'
+      WRITE(log_unit,*)
+      WRITE(log_unit,*) 'Initial guess file ',TRIM(inguess_file),' was successfully read'
 
     ELSE
       WRITE(stdout_unit,*)
       WRITE(stdout_unit,*) "Attempted to read initial guess file ",TRIM(inguess_file)," but could not find it."
       WRITE(stdout_unit,*)
+      WRITE(log_unit,*)
+      WRITE(log_unit,*) "Attempted to read initial guess file ",TRIM(inguess_file)," but could not find it."
+      WRITE(log_unit,*)
       flux(:,:,:,:,niter)=zero
       DO eg =1,egmax
         DO i=1,num_cells

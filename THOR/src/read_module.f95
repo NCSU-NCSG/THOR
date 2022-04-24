@@ -498,46 +498,69 @@ CONTAINS
       WRITE(stdout_unit,*) "   Input Summary  "
       WRITE(stdout_unit,*) "--------------------------------------------------------"
 
+      WRITE(log_unit,*)
+      WRITE(log_unit,*) "--------------------------------------------------------"
+      WRITE(log_unit,*) "   Input Summary  "
+      WRITE(log_unit,*) "--------------------------------------------------------"
+
       IF(problem == 1)THEN
         IF ( eig_switch == 0 ) THEN
           WRITE(stdout_unit,*) "Eigenvalue calculation using PI selected"
+          WRITE(log_unit,*) "Eigenvalue calculation using PI selected"
         ELSE
           WRITE(stdout_unit,*) "Eigenvalue calculation using JFNK selected"
+          WRITE(log_unit,*) "Eigenvalue calculation using JFNK selected"
           IF(rd_method == 1) THEN
             WRITE(stdout_unit,*) "Method: F(u) is evaluated using one outer iteration with lagged upscattering."
+            WRITE(log_unit,*) "Method: F(u) is evaluated using one outer iteration with lagged upscattering."
           ELSE IF (rd_method == 2) THEN
             WRITE(stdout_unit,*) "Method: F(u) is evaluated using flat iteration scheme."
+            WRITE(log_unit,*) "Method: F(u) is evaluated using flat iteration scheme."
           ELSE
             WRITE(stdout_unit,*) "Method: F(u) is evaluated using flat iteration scheme wit updated downscattering."
+            WRITE(log_unit,*) "Method: F(u) is evaluated using flat iteration scheme wit updated downscattering."
           END IF
         END IF
       ELSE IF(problem == 0)THEN
         WRITE(stdout_unit,*) "External source calculation selected"
+        WRITE(log_unit,*) "External source calculation selected"
       END IF
 
       ! Print rest of input
 
       WRITE(stdout_unit,*)   "Problem Title:                                              ", jobname
       WRITE(stdout_unit,101) "Spatial order:                                              ", space_ord
+      WRITE(log_unit,*)   "Problem Title:                                              ", jobname
+      WRITE(log_unit,101) "Spatial order:                                              ", space_ord
       IF      (sweep_tpe .EQ. 1) THEN
         WRITE(stdout_unit,*) 'Precomputed mesh sweep is used.'
+        WRITE(log_unit,*) 'Precomputed mesh sweep is used.'
       END IF
       IF      (outer_acc .EQ. 1 .AND. problem .EQ. 1 .AND. eig_switch .EQ. 0) THEN
         WRITE(stdout_unit,*) 'Power iterations are not accelerated'
+        WRITE(log_unit,*) 'Power iterations are not accelerated'
       ELSE IF (outer_acc .EQ. 2 .AND. problem .EQ. 1 .AND. eig_switch .EQ. 0) THEN
         WRITE(stdout_unit,*) 'Error mode extrapolation used for accelerating power iterations'
+        WRITE(log_unit,*) 'Error mode extrapolation used for accelerating power iterations'
       END IF
       WRITE(stdout_unit,101) "Scattering order:                                           ", scatt_ord
+      WRITE(log_unit,101) "Scattering order:                                           ", scatt_ord
       IF(quad_tpe == 1) THEN
         WRITE(stdout_unit,101) "Level symmetric quadrature of order:                        ", quad_ord
+        WRITE(log_unit,101) "Level symmetric quadrature of order:                        ", quad_ord
       ELSE IF(quad_tpe == 2) THEN
         WRITE(stdout_unit,101) "Square Legendre-Chebychev quadrature of order:              ", quad_ord
+        WRITE(log_unit,101) "Square Legendre-Chebychev quadrature of order:              ", quad_ord
       ELSE IF(quad_tpe == 3) THEN
         WRITE(stdout_unit,101) "Quadrature read from file. #Angles/octant:                  ",nangle
         WRITE(stdout_unit,*)   "Quadrature file name:                                       ",quad_file
+        WRITE(log_unit,101) "Quadrature read from file. #Angles/octant:                  ",nangle
+        WRITE(log_unit,*)   "Quadrature file name:                                       ",quad_file
       END IF
       WRITE(stdout_unit,101) "Cross-section order:                                        ", xs_ord
       WRITE(stdout_unit,101) "Energy groups:                                              ", egmax
+      WRITE(log_unit,101) "Cross-section order:                                        ", xs_ord
+      WRITE(log_unit,101) "Energy groups:                                              ", egmax
       IF (problem == 0 .OR. (problem == 1 .AND. eig_switch == 0 ) ) THEN
         WRITE(stdout_unit,101) "Maximum number of outer iterations:                         ", max_outer
         WRITE(stdout_unit,101) "Maximum number of inner iterations:                         ", max_inner
@@ -546,6 +569,13 @@ CONTAINS
         IF(problem==1 .AND. eig_switch==0) WRITE(stdout_unit,102)   " Eigenvalue convergence &
           & criteria:                            ", k_conv
         WRITE(stdout_unit,102)   " Outer convergence criteria:                                 ", outer_conv
+        WRITE(log_unit,101) "Maximum number of outer iterations:                         ", max_outer
+        WRITE(log_unit,101) "Maximum number of inner iterations:                         ", max_inner
+        WRITE(log_unit,102)   " Inner convergence criteria:                                 ", &
+          inner_conv
+        IF(problem==1 .AND. eig_switch==0) WRITE(log_unit,102)   " Eigenvalue convergence &
+          & criteria:                            ", k_conv
+        WRITE(log_unit,102)   " Outer convergence criteria:                                 ", outer_conv
       ELSE
         WRITE(stdout_unit,101) "Maximum number of newton iterations:                        ", max_outer
         WRITE(stdout_unit,101) "Maximum number of inner iterations(if used):                ", max_inner
@@ -553,38 +583,55 @@ CONTAINS
         WRITE(stdout_unit,102) " Inner convergence criteria (if used):                         ", inner_conv
         WRITE(stdout_unit,101) "Number of krylov iterations between restarts:               ",rd_restart
         WRITE(stdout_unit,101) "Maximum number of krylov iterations per newton iteration:   ",rd_max_kit
+        WRITE(log_unit,101) "Maximum number of newton iterations:                        ", max_outer
+        WRITE(log_unit,101) "Maximum number of inner iterations(if used):                ", max_inner
+        WRITE(log_unit,102) " Newton convergence criteria:                                  ", outer_conv
+        WRITE(log_unit,102) " Inner convergence criteria (if used):                         ", inner_conv
+        WRITE(log_unit,101) "Number of krylov iterations between restarts:               ",rd_restart
+        WRITE(log_unit,101) "Maximum number of krylov iterations per newton iteration:   ",rd_max_kit
       END IF
       IF(problem == 0)THEN
         WRITE(stdout_unit,*) "File containing external source:                            ", source_filename
+        WRITE(log_unit,*) "File containing external source:                            ", source_filename
       ENDIF
 
       IF(finflow /= 0 .AND. problem == 0)THEN
         WRITE(stdout_unit,*) "File containing fixed inflow boundary conditions:           ", finflow_filename
+        WRITE(log_unit,*) "File containing fixed inflow boundary conditions:           ", finflow_filename
       END IF
 
       WRITE(stdout_unit,*) "File containing cross-sections:                             ", cross_section_filename
       WRITE(stdout_unit,*) "File containing mesh:                                       ", mesh_filename
       WRITE(stdout_unit,*) "Flux output file:                                           ", flux_filename
+      WRITE(log_unit,*) "File containing cross-sections:                             ", cross_section_filename
+      WRITE(log_unit,*) "File containing mesh:                                       ", mesh_filename
+      WRITE(log_unit,*) "Flux output file:                                           ", flux_filename
 
       IF(vtk_flux_output /= 0)THEN
         WRITE(stdout_unit,*) "VTK-format flux output file:                                ", vtk_flux_filename
+        WRITE(log_unit,*) "VTK-format flux output file:                                ", vtk_flux_filename
       END IF
       IF(vtk_mat_output /= 0)THEN
         WRITE(stdout_unit,*) "VTK-format material output file:                            ", vtk_mat_filename
+        WRITE(log_unit,*) "VTK-format material output file:                            ", vtk_mat_filename
       END IF
       IF(vtk_reg_output /= 0)THEN
         WRITE(stdout_unit,*) "VTK-format region output file:                              ", vtk_reg_filename
+        WRITE(log_unit,*) "VTK-format region output file:                              ", vtk_reg_filename
       END IF
       IF(vtk_src_output /= 0)THEN
         WRITE(stdout_unit,*) "VTK-format region output file:                              ", vtk_src_filename
+        WRITE(log_unit,*) "VTK-format region output file:                              ", vtk_src_filename
       END IF
 
       IF(inguess_flag /= 0)THEN
         WRITE(stdout_unit,*) "Initial guess read from file:                               ", inguess_file
+        WRITE(log_unit,*) "Initial guess read from file:                               ", inguess_file
       END IF
 
       IF(dump_flag /= 0)THEN
         WRITE(stdout_unit,*) "Restart file:                                               ", dump_file
+        WRITE(log_unit,*) "Restart file:                                               ", dump_file
       END IF
     END IF
     ! Formats
@@ -616,6 +663,7 @@ CONTAINS
     ENDIF
     IF(rank .EQ. 0)THEN
       WRITE(stdout_unit,*) "<><><><><><><><>", fname
+      WRITE(log_unit,*) "<><><><><><><><>", fname
     ENDIF
 
     legacy_v=-9999

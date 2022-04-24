@@ -91,6 +91,7 @@ CONTAINS
     ! write header for convergence monitor
     IF (rank .EQ. 0) THEN
       IF(prnt) WRITE(stdout_unit,102) '  grp  itn       error        time'
+      IF(prnt) WRITE(log_unit,102) '  grp  itn       error        time'
     END IF
     ! Begin inner iteration
 
@@ -173,6 +174,7 @@ CONTAINS
       IF (rank .EQ. 0) THEN
         IF(prnt) THEN
           WRITE(stdout_unit,101) eg,inner,max_error(eg),te-ts,' % '
+          WRITE(log_unit,101) eg,inner,max_error(eg),te-ts,' % '
           flush(6)
         END IF
         IF(prnt .AND. print_conv.EQ.1) THEN

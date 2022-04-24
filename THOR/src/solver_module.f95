@@ -77,6 +77,8 @@ CONTAINS
     ! Initate outer iteration
     IF (rank .EQ. 0) THEN
       WRITE(stdout_unit,*) '-- Commencing fixed source computation.'
+
+      WRITE(log_unit,*) '-- Commencing fixed source computation.'
     END IF
     CALL outer_iteration_ext(flux,LL,U,Lf,Uf)
 
@@ -141,12 +143,18 @@ CONTAINS
       IF (rank .EQ. 0) THEN
         WRITE(stdout_unit,*) '-- Commencing eigenvalue computation.'
         WRITE(stdout_unit,*) '-- A power iteration computation is executed.'
+
+        WRITE(log_unit,*) '-- Commencing eigenvalue computation.'
+        WRITE(log_unit,*) '-- A power iteration computation is executed.'
       END IF
       CALL outer_iteration_eig(flux,keff,LL,U,Lf,Uf)
     ELSE
       IF (rank .EQ. 0) THEN
         WRITE(stdout_unit,*) '-- Commencing eigenvalue computation.'
         WRITE(stdout_unit,*) '-- A JFNK computation is executed.'
+
+        WRITE(log_unit,*) '-- Commencing eigenvalue computation.'
+        WRITE(log_unit,*) '-- A JFNK computation is executed.'
       END IF
       CALL set_jfnk
 

@@ -207,14 +207,26 @@ CONTAINS
     WRITE(stdout_unit,101) 'Number of materials:             ',num_mat
     WRITE(stdout_unit,101) 'Number of groups:                ',egmax
     WRITE(stdout_unit,101) 'Scattering expansion order read: ',xs_ord
+    WRITE(log_unit,*)
+    WRITE(log_unit,*) '------------------------------------------------------------------'
+    WRITE(log_unit,*) '--------------------- Echoing Cross Sections ---------------------'
+    WRITE(log_unit,*) '------------------------------------------------------------------'
+    WRITE(log_unit,*)
+    WRITE(log_unit,101) 'Number of materials:             ',num_mat
+    WRITE(log_unit,101) 'Number of groups:                ',egmax
+    WRITE(log_unit,101) 'Scattering expansion order read: ',xs_ord
     IF ( most_thermal>egmax ) THEN
       WRITE(stdout_unit,*) 'No upscattering present.'
+      WRITE(log_unit,*) 'No upscattering present.'
     ELSE
       WRITE(stdout_unit,101) 'Most thermal group:              ',most_thermal
+      WRITE(log_unit,101) 'Most thermal group:              ',most_thermal
     END IF
     DO m=1,num_mat
       WRITE(stdout_unit,102) 'Material ',TRIM(xs_mat(m)%mat_name),' with ID ',xs_mat(m)%mat_id
       WRITE(stdout_unit,103) 'Group','SigT','SigF','SigS','nu*SigF','chi'
+      WRITE(log_unit,102) 'Material ',TRIM(xs_mat(m)%mat_name),' with ID ',xs_mat(m)%mat_id
+      WRITE(log_unit,103) 'Group','SigT','SigF','SigS','nu*SigF','chi'
       DO g=1,egmax
         sigs=0.0_d_t
         DO gp=1,egmax
@@ -223,16 +235,23 @@ CONTAINS
         WRITE(stdout_unit,104) g,xs_mat(m)%sigma_t(g),xs_mat(m)%sigma_f(g), &
               sigs(g),xs_mat(m)%sigma_f(g)*xs_mat(m)%nu(g),&
               xs_mat(m)%chi(g)
+        WRITE(log_unit,104) g,xs_mat(m)%sigma_t(g),xs_mat(m)%sigma_f(g), &
+              sigs(g),xs_mat(m)%sigma_f(g)*xs_mat(m)%nu(g),&
+              xs_mat(m)%chi(g)
       END DO
       WRITE(stdout_unit,*) 'Scattering Matrix, from -> columns, to -> row'
+      WRITE(log_unit,*) 'Scattering Matrix, from -> columns, to -> row'
       DO order=1, xs_ord+1
         WRITE(stdout_unit,101) 'Scattering order: ',order-1
+        WRITE(log_unit,101) 'Scattering order: ',order-1
         DO g=1,egmax
           WRITE(stdout_unit,105) (xs_mat(m)%sigma_scat(order,g,gp),gp=1,egmax)
+          WRITE(log_unit,105) (xs_mat(m)%sigma_scat(order,g,gp),gp=1,egmax)
         END DO
       END DO
     END DO
     WRITE(stdout_unit,*)
+    WRITE(log_unit,*)
 101 FORMAT(1X,A,I8)
 102 FORMAT(1X,A,A,A,I8)
 103 FORMAT(1X,A9,5A15)

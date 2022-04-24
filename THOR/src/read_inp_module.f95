@@ -836,8 +836,8 @@ CONTAINS
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     INTEGER :: ios
-    IF(.FALSE.)WRITE(stdout_unit,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
     READ(wwords(2),'(i10)',iostat=ios) scatt_ord
     IF(ios.NE.0 .OR. scatt_ord < 0) THEN
       CALL raise_fatal_error('Invalid scattering expansion in cross section specification -- '//TRIM(this_card%carg)//' --')
@@ -953,6 +953,8 @@ CONTAINS
       IF(nwwwords .NE. 9) THEN
         WRITE(stdout_unit,*) 'Following cartesian map nine entries are required; Found: ',&
               TRIM(wwords(2)),' has ', nwwwords, ' entries.'
+        WRITE(log_unit,*) 'Following cartesian map nine entries are required; Found: ',&
+              TRIM(wwords(2)),' has ', nwwwords, ' entries.'
       END IF
       msg='Conversion to cartesian map xmin failed'
       glob_cmap_min_x = string_to_real(wwwords(1), msg)
@@ -960,6 +962,7 @@ CONTAINS
       glob_cmap_max_x = string_to_real(wwwords(2), msg)
       IF(ABS(glob_cmap_max_x - glob_cmap_min_x) < small_real) THEN
         WRITE(stdout_unit, *) "cartesian_map xmin and xmax are too close to each other"
+        WRITE(log_unit, *) "cartesian_map xmin and xmax are too close to each other"
       END IF
       msg='Conversion to cartesian map nx failed'
       glob_cmap_nx = string_to_int(wwwords(3), msg, minint)
@@ -969,6 +972,7 @@ CONTAINS
       glob_cmap_max_y = string_to_real(wwwords(5), msg)
       IF(ABS(glob_cmap_max_y - glob_cmap_min_y) < small_real) THEN
         WRITE(stdout_unit, *) "cartesian_map xmin and xmax are too close to each other"
+        WRITE(log_unit, *) "cartesian_map xmin and xmax are too close to each other"
       END IF
       msg='Conversion to cartesian map ny failed'
       glob_cmap_ny = string_to_int(wwwords(6), msg, minint)
@@ -978,6 +982,7 @@ CONTAINS
       glob_cmap_max_z = string_to_real(wwwords(8), msg)
       IF(ABS(glob_cmap_max_z - glob_cmap_min_z) < small_real) THEN
         WRITE(stdout_unit, *) "cartesian_map zmin and zmax are too close to each other"
+        WRITE(log_unit, *) "cartesian_map zmin and zmax are too close to each other"
       END IF
       msg='Conversion to cartesian map nz failed'
       glob_cmap_nz = string_to_int(wwwords(9), msg, minint)
@@ -1004,6 +1009,8 @@ CONTAINS
       ! must be divisible by 3
       IF(modulo(nwwwords, 3) .ne. 0) THEN
         WRITE(stdout_unit,*) 'point_value_locations number of entries must be divisible by 3; Found: ',&
+              TRIM(wwords(2)),' has ', nwwwords, ' entries.'
+        WRITE(log_unit,*) 'point_value_locations number of entries must be divisible by 3; Found: ',&
               TRIM(wwords(2)),' has ', nwwwords, ' entries.'
       ELSE
         number_point_flux_locations = nwwwords / 3
@@ -1149,47 +1156,63 @@ CONTAINS
     WRITE(stdout_unit,'(A)')'***********************************************************************'
     WRITE(stdout_unit,'(A)')'*******************Echoing equivalent complete input*******************'
     WRITE(stdout_unit,'(A)')'***********************************************************************'
+    WRITE(log_unit,'(A)')'***********************************************************************'
+    WRITE(log_unit,'(A)')'*******************Echoing equivalent complete input*******************'
+    WRITE(log_unit,'(A)')'***********************************************************************'
     DO i=1,num_cards
       cards(i)%carg=TRIM(ADJUSTL(cards(i)%carg))
       !echo cards and data
       IF(LEN_TRIM(cards(i)%carg) .LE. MAX_CARDNAME_LEN)THEN
         WRITE(stdout_unit,'(3A)',ADVANCE='NO')cards(i)%cname(1:cnamelg_max),' ',cards(i)%carg(1:strlg_max)
+        WRITE(log_unit,'(3A)',ADVANCE='NO')cards(i)%cname(1:cnamelg_max),' ',cards(i)%carg(1:strlg_max)
       ELSE
         WRITE(stdout_unit,'(3A)',ADVANCE='NO')cards(i)%cname(1:cnamelg_max),' ',TRIM(cards(i)%carg)
+        WRITE(log_unit,'(3A)',ADVANCE='NO')cards(i)%cname(1:cnamelg_max),' ',TRIM(cards(i)%carg)
       ENDIF
       !echo if card is provided
       IF(cards(i)%used)THEN
         WRITE(stdout_unit,'(A)',ADVANCE='NO')' !card provided'
+        WRITE(log_unit,'(A)',ADVANCE='NO')' !card provided'
       ELSE
         WRITE(stdout_unit,'(A)',ADVANCE='NO')' !card NOT provided'
+        WRITE(log_unit,'(A)',ADVANCE='NO')' !card NOT provided'
       ENDIF
       !print info on ignored input cards
       SELECT CASE(cards(i)%csub)
         CASE('keig')
           IF(problem .NE. 1)THEN
             WRITE(stdout_unit,'(A)',ADVANCE='NO')': ignored, not a keig problem'
+            WRITE(log_unit,'(A)',ADVANCE='NO')': ignored, not a keig problem'
           ENDIF
         CASE('poweriter')
           IF(eig_switch .NE. 0)THEN
             WRITE(stdout_unit,'(A)',ADVANCE='NO')': ignored, not using power iterations'
+            WRITE(log_unit,'(A)',ADVANCE='NO')': ignored, not using power iterations'
           ENDIF
         CASE('jfnk')
           IF(eig_switch .NE. 1)THEN
             WRITE(stdout_unit,'(A)',ADVANCE='NO')': ignored, not using jfnk'
+            WRITE(log_unit,'(A)',ADVANCE='NO')': ignored, not using jfnk'
           ENDIF
         CASE('legacyxs')
           WRITE(stdout_unit,'(A)',ADVANCE='NO')': only used with legaxy xs'
+          WRITE(log_unit,'(A)',ADVANCE='NO')': only used with legaxy xs'
         CASE('srcprob')
           IF(problem .NE. 0)THEN
             WRITE(stdout_unit,'(A)',ADVANCE='NO')': ignored, not a fixed source problem'
+            WRITE(log_unit,'(A)',ADVANCE='NO')': ignored, not a fixed source problem'
           ENDIF
         CASE DEFAULT
       ENDSELECT
       WRITE(stdout_unit,*)
+      WRITE(log_unit,*)
     ENDDO
     WRITE(stdout_unit,'(A)')'***********************************************************************'
     WRITE(stdout_unit,'(A)')'******************Equivalent complete input finished*******************'
     WRITE(stdout_unit,'(A)')'***********************************************************************'
+    WRITE(log_unit,'(A)')'***********************************************************************'
+    WRITE(log_unit,'(A)')'******************Equivalent complete input finished*******************'
+    WRITE(log_unit,'(A)')'***********************************************************************'
   ENDSUBROUTINE echo_equiv_inp
 
 END MODULE read_inp_module

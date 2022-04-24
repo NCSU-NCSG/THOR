@@ -60,6 +60,9 @@ PROGRAM ahot_c_ug
   LOGICAL        :: existence
   CHARACTER(100) :: temp
 
+  !log variables
+  CHARACTER(100) :: log_name
+
   stdout_unit=OUTPUT_UNIT
 
   CALL GET_COMMAND_ARGUMENT(2,temp)
@@ -73,6 +76,10 @@ PROGRAM ahot_c_ug
   CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
   CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
   !#########
+
+  !get log filename
+  CALL GET_COMMAND_ARGUMENT(1,log_name)
+  OPEN(unit = log_unit, file = TRIM(ADJUSTL(log_name))//'.log', status = "REPLACE", action = "WRITE")
 
   IF (rank .EQ. 0) THEN
 
@@ -96,6 +103,25 @@ PROGRAM ahot_c_ug
     WRITE(stdout_unit,*) "   Version 1.0 BETA - Update 05/10/2012"
     WRITE(stdout_unit,*) "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
     WRITE(stdout_unit,*)
+
+    WRITE(log_unit,*) "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+    WRITE(log_unit,*)
+    WRITE(log_unit,*) "   TTTTTTT  HH     HH  OOOOO  RRRRRR "
+    WRITE(log_unit,*) "     TTT    HH     HH OOOOOOO RRRRRRR"
+    WRITE(log_unit,*) "     TTT    HH     HH OO   OO RR   RR"
+    WRITE(log_unit,*) "     TTT    HHHHHHHHH OO   OO RRRRRR "
+    WRITE(log_unit,*) "     TTT    HHHHHHHHH OO   OO RRRR   "
+    WRITE(log_unit,*) "     TTT    HH     HH OO   OO RR RR  "
+    WRITE(log_unit,*) "     TTT    HH     HH 0000000 RR  RR "
+    WRITE(log_unit,*) "     TTT    HH     HH  OOOOO  RR   RR"
+    WRITE(log_unit,*)
+    WRITE(log_unit,*) "   Tetrahedral High Order Radiation Transport Code"
+    WRITE(log_unit,*)
+    WRITE(log_unit,*) "   By R. M. Ferrer"
+    WRITE(log_unit,*)
+    WRITE(log_unit,*) "   Version 1.0 BETA - Update 05/10/2012"
+    WRITE(log_unit,*) "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+    WRITE(log_unit,*)
   END IF
 
   !***********************************************************************
@@ -150,7 +176,8 @@ PROGRAM ahot_c_ug
   IF(print_conv.EQ.1) CLOSE(unit=21)
 
   IF (do_timing .EQ. 1) parallel_timing(4,1) = MPI_WTIME()
-  CALL wrapup(flux = flux,keff = keffective, unit_number = 6, suffix = "", is_final = .TRUE.)
+  CALL wrapup(flux = flux,keff = keffective, unit_number = stdout_unit, suffix = "", is_final = .TRUE.)
+  CALL wrapup(flux = flux,keff = keffective, unit_number = log_unit, suffix = "", is_final = .TRUE.)
   IF (do_timing .EQ. 1) parallel_timing(4,2) = MPI_WTIME()
   !***********************************************************************
   ! Cleanup
@@ -203,6 +230,20 @@ SUBROUTINE write_timing
                                                (print_timing(3,2)- print_timing(3,1)) - &
                                                (print_timing(4,2)- print_timing(4,1))
       WRITE(stdout_unit,*)'\====================================================='
+
+      WRITE(log_unit,*)
+      WRITE(log_unit,*)'/====================================================='
+      WRITE(log_unit,*)'| Timing Data for process: ', i
+      WRITE(log_unit,*)'|-----------------------------------------------------'
+      WRITE(log_unit,*)'| Total Measured Time:      ', print_timing(1,2)- print_timing(1,1)
+      WRITE(log_unit,*)'| Total Setup Time:         ', print_timing(2,2)- print_timing(2,1)
+      WRITE(log_unit,*)'| Total Execute Time:       ', print_timing(3,2)- print_timing(3,1)
+      WRITE(log_unit,*)'| Total Wrapup Time:        ', print_timing(4,2)- print_timing(4,1)
+      WRITE(log_unit,*)'| Total Non-Accounted Time: ',(print_timing(1,2)- print_timing(1,1))- &
+                                               (print_timing(2,2)- print_timing(2,1)) - &
+                                               (print_timing(3,2)- print_timing(3,1)) - &
+                                               (print_timing(4,2)- print_timing(4,1))
+      WRITE(log_unit,*)'\====================================================='
     END DO
   END IF
 

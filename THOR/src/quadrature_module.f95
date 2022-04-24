@@ -39,6 +39,8 @@ CONTAINS
         IF (rank .EQ. 0) THEN
           WRITE(stdout_unit,*) 'Level symmetric quadrature is selected. The order must be even &
             & and less than 16.'
+          WRITE(log_unit,*) 'Level symmetric quadrature is selected. The order must be even &
+            & and less than 16.'
         END IF
       END IF
       nangle=quad_ord*(quad_ord+2)/8

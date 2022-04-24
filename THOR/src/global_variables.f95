@@ -185,4 +185,7 @@ MODULE global_variables
 
   !Input/output units
   INTEGER :: stdout_unit
+
+  !log variables
+  INTEGER, PARAMETER :: log_unit=9999
 END MODULE global_variables

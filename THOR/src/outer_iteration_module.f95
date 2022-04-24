@@ -113,6 +113,9 @@ CONTAINS
       WRITE(stdout_unit,*) '========================================================'
       WRITE(stdout_unit,*) '   Begin outer iterations.'
       WRITE(stdout_unit,*) '========================================================'
+      WRITE(log_unit,*) '========================================================'
+      WRITE(log_unit,*) '   Begin outer iterations.'
+      WRITE(log_unit,*) '========================================================'
     END IF
     ! Begin outer iteration
 
@@ -236,6 +239,10 @@ CONTAINS
         WRITE(stdout_unit,103) '---itn i-itn   max error   max error---'
         WRITE(stdout_unit,102) outer,tot_nInners, max_outer_error, MAXVAL(max_error),' %% '
         WRITE(stdout_unit,*)   '---------------------------------------'
+        WRITE(log_unit,*)   '---------------------------------------'
+        WRITE(log_unit,103) '---itn i-itn   max error   max error---'
+        WRITE(log_unit,102) outer,tot_nInners, max_outer_error, MAXVAL(max_error),' %% '
+        WRITE(log_unit,*)   '---------------------------------------'
         flush(6)
       END IF
       IF(print_conv.EQ.1 .AND. rank .EQ. 0) THEN
@@ -270,6 +277,9 @@ CONTAINS
       WRITE(stdout_unit,*) '========================================================'
       WRITE(stdout_unit,*) '   End outer iterations.'
       WRITE(stdout_unit,*) '========================================================'
+      WRITE(log_unit,*) '========================================================'
+      WRITE(log_unit,*) '   End outer iterations.'
+      WRITE(log_unit,*) '========================================================'
     END IF
     ! Close reflected flux file if page_ref .eq. 1
 
@@ -442,6 +452,7 @@ CONTAINS
       keff_old=keff
       IF (rank .EQ. 0) THEN
         WRITE(stdout_unit,*)
+        WRITE(log_unit,*)
       END IF
 
       DO ii=1,niter-1
@@ -476,6 +487,9 @@ CONTAINS
       WRITE(stdout_unit,*) '========================================================'
       WRITE(stdout_unit,*) '   Begin outer iterations.'
       WRITE(stdout_unit,*) '========================================================'
+      WRITE(log_unit,*) '========================================================'
+      WRITE(log_unit,*) '   Begin outer iterations.'
+      WRITE(log_unit,*) '========================================================'
     END IF
 
     ! Set error mode extrapolation parameters
@@ -498,15 +512,20 @@ CONTAINS
       IF ( temp_accel .EQ. '1') THEN
         outer_acc = 1_li
         WRITE(stdout_unit,*) "NO ACCELERATION"
+        WRITE(log_unit,*) "NO ACCELERATION"
       ELSE IF ( temp_accel .EQ. '2') THEN
         outer_acc = 2_li
         WRITE(stdout_unit,*) "FISSION SOURCE ACCELERATION"
+        WRITE(log_unit,*) "FISSION SOURCE ACCELERATION"
       ELSE IF ( temp_accel .EQ. '3') THEN
         outer_acc = 3_li
         WRITE(stdout_unit,*) "CHEBYCHEV ACCELERATION"
+        WRITE(log_unit,*) "CHEBYCHEV ACCELERATION"
       ELSE
         WRITE(stdout_unit,*) "Invalid command line acceleration parameter"
         WRITE(stdout_unit,*) "Using value from input file"
+        WRITE(log_unit,*) "Invalid command line acceleration parameter"
+        WRITE(log_unit,*) "Using value from input file"
       END IF
     END IF                                                                      !FIXME - REMOVE AND IMPLEMENT SWITCH INTO INPUT FILE
 
@@ -648,16 +667,13 @@ CONTAINS
 
         IF(chebychev_error > theor_err .AND. &
               p .GE. 3*(power_iter_count+3)) THEN                                !If insufficient decrease in error,
-          !WRITE(stdout_unit,*) "RESTART FLAG THROWN"                                      !reset chebychev
           extra_flag = 0_li
-          !WRITE(stdout_unit,*) "BEGIN SPECTRAL RADIUS BACKTRACK"
           extra_flag = -1_li                                                    !Set flag to acceleration interrupt
           cheby_pi_rem = cheby_pi
         END IF
 
         p=p+1                                                                   !Increment p
       ELSE IF(extra_flag .EQ. -1_li) THEN                                       !If acceleration is interrupted
-        !WRITE(stdout_unit,*) "Performing Between-Chebychev-Cycle Power Iteration"
         power_iter_count = power_iter_count + 1_li
         cheby_pi_rem = cheby_pi_rem -1_li                                       !Track remaining interrupts
         p=0
@@ -762,6 +778,10 @@ CONTAINS
         WRITE(stdout_unit,101) '---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap        time---'
         WRITE(stdout_unit,102) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,te-ts,' %% '
         WRITE(stdout_unit,*)   '---------------------------------------------------------------------------------------------------'
+        WRITE(log_unit,*)   '---------------------------------------------------------------------------------------------------'
+        WRITE(log_unit,101) '---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap        time---'
+        WRITE(log_unit,102) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,te-ts,' %% '
+        WRITE(log_unit,*)   '---------------------------------------------------------------------------------------------------'
         flush(6)
         IF(print_conv.EQ.1) THEN
           WRITE(21,*)   '---------------------------------------------------------------------------------------------------'
@@ -841,6 +861,9 @@ CONTAINS
       WRITE(stdout_unit,*) '========================================================'
       WRITE(stdout_unit,*) '   End outer iterations.'
       WRITE(stdout_unit,*) '========================================================'
+      WRITE(log_unit,*) '========================================================'
+      WRITE(log_unit,*) '   End outer iterations.'
+      WRITE(log_unit,*) '========================================================'
     END IF
 
     ! Close reflected flux file if page_ref .eq. 1

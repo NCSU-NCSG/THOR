@@ -219,6 +219,10 @@ CONTAINS
         WRITE(stdout_unit,*) "--------------------------------------------------------"
         WRITE(stdout_unit,*) "   Precomputing sweep path   "
         WRITE(stdout_unit,*) "--------------------------------------------------------"
+
+        WRITE(log_unit,*) "--------------------------------------------------------"
+        WRITE(log_unit,*) "   Precomputing sweep path   "
+        WRITE(log_unit,*) "--------------------------------------------------------"
       END IF
       !FIX ME - pre sweep efficiency and threading
       CALL CPU_TIME(ts)
@@ -227,6 +231,9 @@ CONTAINS
       IF (rank .EQ. 0) THEN
         WRITE(stdout_unit,101) '-- Finished precomputing sweep path. Time (sec.) ', te-ts
         WRITE(stdout_unit,*)
+
+        WRITE(log_unit,101) '-- Finished precomputing sweep path. Time (sec.) ', te-ts
+        WRITE(log_unit,*)
       END IF
     END IF
 
@@ -259,8 +266,16 @@ CONTAINS
       WRITE(stdout_unit,*) "--------------------------------------------------------"
       WRITE(stdout_unit,*)
       WRITE(stdout_unit,*) "     Region ID","   Material ID","  Region Volume"," Density Factor"
+
+      WRITE(log_unit,*)
+      WRITE(log_unit,*) "--------------------------------------------------------"
+      WRITE(log_unit,*) "   Region Information  "
+      WRITE(log_unit,*) "--------------------------------------------------------"
+      WRITE(log_unit,*)
+      WRITE(log_unit,*) "     Region ID","   Material ID","  Region Volume"," Density Factor"
       DO i = minreg,maxreg
         WRITE(stdout_unit,104) i,reg2mat(i),reg_vol(i),dens_fact(i)
+        WRITE(log_unit,104) i,reg2mat(i),reg_vol(i),dens_fact(i)
       END DO
     END IF
 
@@ -471,6 +486,7 @@ CONTAINS
       !FIX ME - Only prints angles belonging to root process
       IF (rank .EQ. 0) THEN
         WRITE(stdout_unit,101) ' - Computation of sweep path for octant: ',octant,' angle: ',q,' . Ex. Time(sec.): ',te-ts
+        WRITE(log_unit,101) ' - Computation of sweep path for octant: ',octant,' angle: ',q,' . Ex. Time(sec.): ',te-ts
       END IF
 
 
@@ -696,6 +712,7 @@ CONTAINS
     ! --- Copy over the eliminated dependencies into
     j=MAX(neldep(octant,q),1)
     IF(j>1) WRITE(stdout_unit,*) '  -- Cycles detected. Number: ',j
+    IF(j>1) WRITE(log_unit,*) '  -- Cycles detected. Number: ',j
     DO g=1,egmax
       ALLOCATE( eldep(octant,q,g)%cells(j) )
       ALLOCATE( eldep(octant,q,g)%faces(j) )

@@ -369,6 +369,7 @@ CONTAINS
       r3(3)=Rout
     ELSE
       WRITE(stdout_unit,*) "Cell splitting case 1 failed for cell"
+      WRITE(log_unit,*) "Cell splitting case 1 failed for cell"
     END IF
 
   END SUBROUTINE case1
@@ -494,6 +495,7 @@ CONTAINS
       r3(3)=Rout
     ELSE
       WRITE(stdout_unit,*) "Cell splitting case 2 failed for cell"
+      WRITE(log_unit,*) "Cell splitting case 2 failed for cell"
     END IF
 
   END SUBROUTINE case2
@@ -754,6 +756,7 @@ CONTAINS
       r3(4)=Rout
     ELSE
       WRITE(stdout_unit,*) "Cell splitting case 3 failed for cell"
+      WRITE(log_unit,*) "Cell splitting case 3 failed for cell"
     END IF
 
   END SUBROUTINE case3
@@ -980,6 +983,7 @@ CONTAINS
       ENDIF
     ELSE
       WRITE(stdout_unit,*) "Cell splitting case 4 failed for cell"
+      WRITE(log_unit,*) "Cell splitting case 4 failed for cell"
     END IF
 
   END SUBROUTINE case4
@@ -1205,6 +1209,7 @@ CONTAINS
       ENDIF
     ELSE
       WRITE(stdout_unit,*) "Cell splitting case 5 failed for cell"
+      WRITE(log_unit,*) "Cell splitting case 5 failed for cell"
     END IF
 
   END SUBROUTINE case5
@@ -1347,6 +1352,7 @@ CONTAINS
       ENDIF
     ELSE
       WRITE(stdout_unit,*) "Cell splitting case 6 failed for cell"
+      WRITE(log_unit,*) "Cell splitting case 6 failed for cell"
     END IF
 
   END SUBROUTINE case6
