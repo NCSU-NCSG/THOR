@@ -50,7 +50,7 @@ MODULE global_variables
 
   !External Sources
   TYPE(source_type), ALLOCATABLE :: ext_src(:)
-  INTEGER(kind=li)      , DIMENSION(:)      , ALLOCATABLE :: src_pointer
+  INTEGER(kind=li)      , DIMENSION(:)      , ALLOCATABLE :: source_ids
   INTEGER(kind=li) :: src_id_min,src_id_max
 
   ! Inflow flux derived type
@@ -65,7 +65,7 @@ MODULE global_variables
   ! Cross Sections
   TYPE(xs_material_type) , DIMENSION(:)      , ALLOCATABLE :: xs_mat
   REAL(kind=d_t)         , DIMENSION(:)      , ALLOCATABLE :: eg_bounds
-  INTEGER(kind=li)      , DIMENSION(:)      , ALLOCATABLE :: mat_pointer
+  INTEGER(kind=li)      , DIMENSION(:)      , ALLOCATABLE :: material_ids
   INTEGER(kind=li) :: mat_id_min,mat_id_max
 
   ! Geometry types

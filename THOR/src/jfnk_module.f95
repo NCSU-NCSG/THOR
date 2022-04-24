@@ -103,9 +103,9 @@ CONTAINS
     ! allocate residual and du
 
     IF(.NOT.ALLOCATED(du)) ALLOCATE(du(num_var+1),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
     IF(.NOT.ALLOCATED(residual)) ALLOCATE(residual(num_var+1),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! set dflag, igflag
 
@@ -123,12 +123,12 @@ CONTAINS
 
     ! make sure that niter .eq. 2
 
-    IF (niter .NE. 2) CALL stop_thor(25_li)
+    IF (niter .NE. 2) CALL raise_fatal_error("JFNK module requires niter to be equal to 2. This is a coding mistake!")
 
     ! Allocate max_error
 
     ALLOCATE(max_error(egmax),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! Set grs
 
@@ -477,7 +477,7 @@ CONTAINS
       ! initialize reflected_flux
 
       ALLOCATE(reflected_flux(num_moments_f,grs,8,nangle,egmax),stat=alloc_stat)
-      IF(alloc_stat /=0) CALL stop_thor(2_li)
+      IF(alloc_stat /=0) CALL raise_fatal_error("*** Not enough memory ***")
       reflected_flux = 0.0_d_t
 
     ELSE IF(method==2 .OR. method==3) THEN
@@ -485,7 +485,7 @@ CONTAINS
       ! initialize reflected_flux
 
       ALLOCATE(reflected_flux(num_moments_f,grs,8,nangle,1),stat=alloc_stat)
-      IF(alloc_stat /=0) CALL stop_thor(2_li)
+      IF(alloc_stat /=0) CALL raise_fatal_error("*** Not enough memory ***")
       reflected_flux = 0.0_d_t
 
       ! initialize source
@@ -574,7 +574,7 @@ CONTAINS
         CALL sweep(eg,flux(:,:,:,eg,2),src(:,:,:,eg),grs,reflected_flux,LL,U,Lf,Uf)
       END DO
     ELSE
-      CALL stop_thor(26_li)
+      CALL raise_fatal_error("Method needs to be 1, 2 or 3.")
     END IF
 
     ! Compute evaluate_residual
@@ -650,7 +650,7 @@ CONTAINS
     ! Compute total fission source
 
     DO i = 1, num_cells
-      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      mat_indx=material_ids(reg2mat(cells(i)%reg))
       DO eg = 1, egmax
         DO l = 1, num_moments_v
           tfsrc(l,i) = tfsrc(l,i) + xs_mat(mat_indx)%nu(eg) &
@@ -663,7 +663,7 @@ CONTAINS
     ! Add to src
 
     DO i = 1, num_cells
-      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      mat_indx=material_ids(reg2mat(cells(i)%reg))
       DO eg = 1, egmax
         DO l = 1, num_moments_v
           src(l,1,i,eg) = src(l,1,i,eg) + xs_mat(mat_indx)%chi(eg)*tfsrc(l,i)/keff
@@ -674,7 +674,7 @@ CONTAINS
     ! Add upscattering
 
     DO i=1,num_cells
-      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      mat_indx=material_ids(reg2mat(cells(i)%reg))
       DO eg=most_thermal,egmax    ! eg is the group that it is scattered to
         ! even contribution
         DO l=0,scatt_ord
@@ -746,7 +746,7 @@ CONTAINS
     ! Start adding downscattering source
 
     DO i = 1, num_cells
-      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      mat_indx=material_ids(reg2mat(cells(i)%reg))
       DO eg = 1, egg-1
         ! even contribution
         DO l=0, scatt_ord
@@ -776,7 +776,7 @@ CONTAINS
     ! Add selfscattering source
 
     DO i = 1, num_cells
-      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      mat_indx=material_ids(reg2mat(cells(i)%reg))
       ! Even contributions
       DO l = 0, scatt_ord
         DO m = 0,l
@@ -838,7 +838,7 @@ CONTAINS
     ! compute tfission
 
     DO i = 1, num_cells
-      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      mat_indx=material_ids(reg2mat(cells(i)%reg))
       DO eg = 1, egmax
         tfissions = tfissions+ &
               xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg)* &
@@ -901,7 +901,7 @@ CONTAINS
     ! Allocate and initialize  work
 
     ALLOCATE(work(ws),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
     work = 0.0_d_t
 
     ! Initialize solution, ipar and fpar
@@ -953,19 +953,19 @@ CONTAINS
                                 ! overhead variables
               flux,keff,LL,U,Lf,Uf)
       ELSEIF(ipar(1).EQ.2) THEN    ! this means code wants A^T x
-        CALL stop_thor(27_li)
+        CALL raise_fatal_error("GMRES error")
       ELSEIF(ipar(1).EQ.3) THEN    ! this means code wants P(l)^{-1} z
-        CALL stop_thor(27_li)
+        CALL raise_fatal_error("GMRES error")
       ELSEIF(ipar(1).EQ.3) THEN    ! this means code wants P(l)^{-T} z
-        CALL stop_thor(27_li)
+        CALL raise_fatal_error("GMRES error")
       ELSEIF(ipar(1).EQ.5) THEN    ! this means code wants P(r)^{-1} z
-        CALL stop_thor(27_li)
+        CALL raise_fatal_error("GMRES error")
       ELSEIF(ipar(1).EQ.6) THEN    ! this means code wants P(r)^{-T} z
-        CALL stop_thor(27_li)
+        CALL raise_fatal_error("GMRES error")
       ELSEIF(ipar(1).EQ.10) THEN   ! call self-supplied stopping test
-        CALL stop_thor(27_li)
+        CALL raise_fatal_error("GMRES error")
       ELSEIF(ipar(1).GT.0) THEN    ! shouldn't happen
-        CALL stop_thor(27_li)
+        CALL raise_fatal_error("GMRES error")
       ELSEIF(ipar(1).EQ.0) THEN    ! successful solve
         error=fpar(6)/nres         ! pass back error
         kit=ipar(7)                ! pass back number of iters
@@ -975,7 +975,7 @@ CONTAINS
         kit=ipar(7)                ! pass back number of iters
         EXIT
       ELSEIF(ipar(1).EQ.-2) THEN   ! insufficient workspace
-        CALL stop_thor(27_li)
+        CALL raise_fatal_error("GMRES error")
       ELSEIF(ipar(1).LT.-2) THEN   ! some other error, investigate further
         WRITE(6,*) 'SPARSKIT error is ', ipar(1)
       ENDIF
@@ -1344,7 +1344,7 @@ CONTAINS
     ! build fission source and initialize src with chi*fiss_src
 
     DO i = 1, num_cells
-      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      mat_indx=material_ids(reg2mat(cells(i)%reg))
       DO eg = 1, egmax
         DO l = 1, num_moments_v
           fiss_src(l,i) =fiss_src(l,i)+xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg) *&
@@ -1354,7 +1354,7 @@ CONTAINS
     END DO
     !
     DO i = 1, num_cells
-      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      mat_indx=material_ids(reg2mat(cells(i)%reg))
       DO eg = 1, egmax
         DO l = 1, num_moments_v
           src(l,1,i,eg)=xs_mat(mat_indx)%chi(eg)*fiss_src(l,i)/keff

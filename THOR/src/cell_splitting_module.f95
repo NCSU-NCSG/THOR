@@ -18,6 +18,7 @@ MODULE cell_splitting_module
   USE angle_types
   USE multindex_types
   USE global_variables
+  USE stringmod
 
   ! Use modules that pertain setting up problem
   ! FIXME: You need to find a better place to store cell_jacobian
@@ -27,7 +28,7 @@ MODULE cell_splitting_module
   USE transport_kernel_module_sc, ONLY: transport_kernel_sc
   USE transport_kernel_module_lc, ONLY: transport_kernel_lc
   USE transport_kernel_module_cce, ONLY: transport_kernel_cce
-  USE termination_module
+  USE error_module
 
   IMPLICIT NONE
 
@@ -97,7 +98,7 @@ CONTAINS
             r3(subcells),incoming_face(subcells),&
             outgoing_face(subcells),upstream_moments(num_moments_f,subcells),&
             bc(subcells),stat=alloc_stat)
-      IF(alloc_stat /= 0) CALL stop_thor(2_li)
+      IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
       CALL case1(v0,v1,v2,v3,omega,r0,r1,r2,r3,face0,face1,face2,&
             face3,incoming_face,outgoing_face,omega_local,t)
@@ -110,7 +111,7 @@ CONTAINS
             r3(subcells),incoming_face(subcells),&
             outgoing_face(subcells),upstream_moments(num_moments_f,subcells),&
             bc(subcells),stat=alloc_stat)
-      IF(alloc_stat /= 0) CALL stop_thor(2_li)
+      IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
       CALL case2(v0,v1,v2,v3,omega,r0,r1,r2,r3,face0,face1,face2,&
             face3,incoming_face,outgoing_face,omega_local,t)
@@ -123,7 +124,7 @@ CONTAINS
             r3(subcells),incoming_face(subcells),&
             outgoing_face(subcells),upstream_moments(num_moments_f,subcells),&
             bc(subcells),stat=alloc_stat)
-      IF(alloc_stat /= 0) CALL stop_thor(2_li)
+      IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
       CALL case3(v0,v1,v2,v3,r0,r1,r2,r3,face0,face1,face2,face3,&
             incoming_face,outgoing_face,J,omega_local,t)
@@ -136,7 +137,7 @@ CONTAINS
             r3(subcells),incoming_face(subcells),&
             outgoing_face(subcells),upstream_moments(num_moments_f,subcells),&
             bc(subcells),stat=alloc_stat)
-      IF(alloc_stat /= 0) CALL stop_thor(2_li)
+      IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
       CALL case4(v0,v1,v2,v3,omega,n0,n1,n2,n3,r0,r1,r2,r3,face0,&
             face1,face2,face3,incoming_face,outgoing_face,omega_local,t)
@@ -149,7 +150,7 @@ CONTAINS
             r3(subcells),incoming_face(subcells),&
             outgoing_face(subcells),upstream_moments(num_moments_f,subcells),&
             bc(subcells),stat=alloc_stat)
-      IF(alloc_stat /= 0) CALL stop_thor(2_li)
+      IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
       CALL case5(v0,v1,v2,v3,omega,n0,n1,n2,n3,r0,r1,r2,r3,face0,&
             face1,face2,face3,incoming_face,outgoing_face,omega_local,t)
@@ -162,15 +163,14 @@ CONTAINS
             r3(subcells),incoming_face(subcells),&
             outgoing_face(subcells),upstream_moments(num_moments_f,subcells),&
             bc(subcells),stat=alloc_stat)
-      IF(alloc_stat /= 0) CALL stop_thor(2_li)
+      IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
       CALL case6(v0,v1,v2,v3,omega,n0,n1,n2,n3,r0,r1,r2,r3,face0,&
             face1,face2,face3,incoming_face,outgoing_face,omega_local,t)
 
       ! CASE UNKNOWN: failure
     ELSE
-      WRITE(6,*) "Unacceptable case from cell splitting in cell", i
-      CALL stop_thor(-1_li)
+      CALL raise_fatal_error("Unacceptable case from cell splitting in cell"//TRIM(STR(i)))
     END IF
 
     CALL upstream_mom(adjacent_cells,num_moments_f,     &

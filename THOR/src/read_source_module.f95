@@ -10,7 +10,7 @@ MODULE read_source_module
   USE filename_types
   USE multindex_types
   USE global_variables
-  USE termination_module
+  USE error_module
   USE stringmod
 
   IMPLICIT NONE
@@ -40,8 +40,7 @@ CONTAINS
     ! Open and read source file
     OPEN(unit=local_unit,file=TRIM(source_filename),status='old',action='read',IOSTAT=ios)
     IF(ios .NE. 0)THEN
-      WRITE(*,*)'error opening ',TRIM(source_filename)
-      STOP 'fatal error'
+      CALL raise_fatal_error('error opening '//TRIM(source_filename))
     ENDIF
 
     DO
@@ -73,10 +72,10 @@ CONTAINS
     ENDDO
     !allocate and assign pointer values
     !everywhere else will be 0
-    ALLOCATE(src_pointer(src_id_min:src_id_max))
-    src_pointer=0
+    ALLOCATE(source_ids(src_id_min:src_id_max))
+    source_ids=0
     DO i=1,num_src_mat
-      src_pointer(ext_src(i)%src_id)=i
+      source_ids(ext_src(i)%src_id)=i
     ENDDO
 
   END SUBROUTINE read_src
@@ -102,17 +101,17 @@ CONTAINS
 
     !allocate the external source. For legacy input, only spatial moments are allowed
     ALLOCATE(ext_src(num_src_mat),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
     ext_src(:)%src_id=0.0
     DO m=1,num_src_mat
       ALLOCATE(ext_src(m)%mom(num_moments_v,namom,egmax),stat=alloc_stat)
-      IF(alloc_stat /= 0) CALL stop_thor(2_li)
+      IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
       ext_src(m)%mom(:,:,:)=0.0
     ENDDO
 
     DO m=1, num_src_mat
       READ(local_unit,*) ext_src(m)%src_id
-      IF (ext_src(m)%src_id .ge. num_src_mat) CALL stop_thor(-1_li,&
+      IF (ext_src(m)%src_id .ge. num_src_mat) CALL raise_fatal_error(&
                                        "source region ID is 0-indexed and must be < # source regions")
       DO eg=1, egmax
         src_str=0.0
@@ -141,11 +140,11 @@ CONTAINS
 
     !allocate the external source
     ALLOCATE(ext_src(num_src_mat),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
     ext_src(:)%src_id=0.0
     DO m=1,num_src_mat
       ALLOCATE(ext_src(m)%mom(num_moments_v,namom,egmax),stat=alloc_stat)
-      IF(alloc_stat /= 0) CALL stop_thor(2_li)
+      IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
       ext_src(m)%mom(:,:,:)=0.0
     ENDDO
 
@@ -175,7 +174,8 @@ CONTAINS
     INTEGER :: ios
     DO
       READ(local_unit,'(A10000)',IOSTAT=ios)line
-      IF(ios .NE. 0)STOP 'end of xs file was reached before all data/materials were found'
+      IF(ios .NE. 0)CALL raise_fatal_error('end of xs file was reached before all data/materials &
+        & were found')
       line=TRIM(ADJUSTL(line))
       !finding uncommented line that isn't empty
       IF(line(1:1) .NE. '!' .AND. line .NE. '')THEN

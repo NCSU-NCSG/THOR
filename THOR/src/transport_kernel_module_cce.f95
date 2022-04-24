@@ -21,7 +21,7 @@ MODULE transport_kernel_module_CCE
   USE angle_types
   USE multindex_types
   USE global_variables
-  USE termination_module
+  USE error_module
   USE general_utility_module
 
   IMPLICIT NONE
@@ -107,7 +107,7 @@ CONTAINS
           proj_moments=0.0_d_t;projected_moments=0.0_d_t;&
           face_angular_mom=0.0_d_t;face_angular=0.0_d_t;&
           face_cell_temp=0.0_d_t;subcell_source_moments=0.0_d_t;y=0.0_d_t
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error('*** Not enough memory ***')
 
     ! Compute optical thickness
 
@@ -163,7 +163,7 @@ CONTAINS
           R0up=vertices(cells(adjacency_list(i,&
                 incoming_face(ii))%cell)%R(0))%v
         ELSE
-          CALL stop_thor(3_li)
+          CALL raise_fatal_error("Upstream face moment determination failed.")
         END IF
 
         IF(incoming_face(ii) == 0)THEN
@@ -199,7 +199,7 @@ CONTAINS
           JFdown(3,2)=J(3,2)
           R0down=vertices(cells(i)%R(0))%v
         ELSE
-          CALL stop_thor(4_li)
+          CALL raise_fatal_error("Downstream face moment determination failed.")
         END IF
 
         CALL invert_face_jacobian(JFup,JFup_inv)
@@ -282,7 +282,7 @@ CONTAINS
         JF(3,2)=J(3,2)
         R0F=vertices(cells(i)%R(0))%v
       ELSE
-        CALL stop_thor(5_li)
+        CALL raise_fatal_error("Incoming face moments determination failed.")
       END IF
 
       CALL invert_face_jacobian(JF,JF_inv)
@@ -357,7 +357,7 @@ CONTAINS
         JF(3,2)=J(3,2)
         R0F=vertices(cells(i)%R(0))%v
       ELSE
-        CALL stop_thor(6_li)
+        CALL raise_fatal_error("Outgoing face moments determination failed.")
       END IF
 
       CALL invert_face_jacobian(JF,JF_inv)
@@ -468,7 +468,7 @@ CONTAINS
 
     ALLOCATE(T(num_moments_f,num_moments_f),stat=alloc_stat);&
           T=0.0_d_t
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! Create transformation matrix
 
@@ -562,7 +562,7 @@ CONTAINS
 
     ALLOCATE(p(num_moments_f,num_moments_f),stat=alloc_stat);&
           p=0.0_d_t
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! Create projection matrix
 
@@ -662,7 +662,7 @@ CONTAINS
 
     ALLOCATE(P(num_moments_v,num_moments_v),stat=alloc_stat);&
           P=0.0_d_t;
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! Create projection matrix
 
@@ -771,7 +771,7 @@ CONTAINS
           FV(num_moments_f,num_moments_v),F(num_moments_v,num_moments_f),&
           V(num_moments_v,num_moments_v),stat=alloc_stat);&
           FF=0.0_d_t;FV=0.0_d_t;F=0.0_d_t;V=0.0_d_t
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! Pre-compute optimisers
 
@@ -988,7 +988,7 @@ CONTAINS
 
     ALLOCATE(TF(num_moments_v,num_moments_f),stat=alloc_stat);&
           TF=0.0_d_t
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! Create projection matrix
 
@@ -1006,7 +1006,7 @@ CONTAINS
         i1F=index_v(q)%i1
         i2F=index_v(q)%i2
       ELSE
-        CALL stop_thor(7_li)
+        CALL raise_fatal_error("Face moments transformation failed.")
       ENDIF
       DO l=1, num_moments_f
         TF(q,l)=2.0_d_t/REAL((index_f(l)%i1+i1F+index_f(l)%i2+&

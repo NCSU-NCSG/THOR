@@ -17,7 +17,7 @@ MODULE transport_kernel_module_SC
   USE angle_types
   USE multindex_types
   USE global_variables
-  USE termination_module
+  USE error_module
   USE general_utility_module
 
   IMPLICIT NONE

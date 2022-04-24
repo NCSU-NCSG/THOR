@@ -8,7 +8,7 @@
 MODULE read_inp_module_legacy
   USE mpi
   USE stringmod
-  USE error_generator
+  USE error_module
   USE global_variables
   USE parameter_types
   IMPLICIT NONE
@@ -49,14 +49,14 @@ CONTAINS
     !   IF(INDEX(arg,'-i') .NE. 0) THEN
     !     i=i+1
     !     CALL GETARG(i, arg)
-    !     IF (arg(1:1) .EQ. '-') STOP 'Input File Name Must Follow -i'
+    !     IF (arg(1:1) .EQ. '-') CALL raise_fatal_error('Input File Name Must Follow -i')
     !     in_file = TRIM(arg)
     !
     !   ELSE IF(INDEX(arg,'-o') .NE. 0) THEN
     !     i=i+1
     !     CALL GETARG(i, arg)
     !     IF (arg(1:1) .EQ. '-') THEN
-    !       STOP 'Output File Name Must Follow -o'
+    !       CALL raise_fatal_error('Output File Name Must Follow -o')
     !     END IF
     !     out_file = TRIM(arg)
     !
@@ -65,7 +65,7 @@ CONTAINS
     !     read_str = arg(indx : indx)
     !     READ(read_str, *) verbose
     !     IF (verbose .NE. 1 .AND. verbose .NE. 2) THEN
-    !       CALL genError(0, "--verbose=n must be specified with n=1 or n=2 ")
+    !       CALL raise_fatal_error( "--verbose=n must be specified with n=1 or n=2 ")
     !     END IF
     !   END IF
     !
@@ -74,8 +74,7 @@ CONTAINS
     !
     ! !Check for critical arguments
     ! IF (arg_count .EQ. 0 .OR. in_file .EQ. "" .OR. out_file .EQ. "") THEN
-    !   WRITE(*,*) "BAD INVOCATION - try: ./a.out -i in.file -o out.file <--verbose=1/2>"
-    !   STOP
+    !   CALL raise_fatal_error("BAD INVOCATION - try: ./a.out -i in.file -o out.file <--verbose=1/2>")
     ! END IF
     !
     ! !Print out invocation summary
@@ -86,7 +85,7 @@ CONTAINS
     !
     ! IF (verbose .EQ. 1) THEN
     !   OPEN(UNIT=14, FILE="sample_input.yaml", ACTION="WRITE", STATUS="REPLACE", IOSTAT=ioerr)
-    !   IF (ioerr .NE. 0) CALL genError(0, "Error opening verbose outout file")
+    !   IF (ioerr .NE. 0) CALL raise_fatal_error( "Error opening verbose outout file")
     !   WRITE(14, *) '#Sample THOR yaml_input file with all values set to default'
     !   WRITE(14, *) '#Provide as -i argument to run a THOR'
     !   WRITE(14, *) '#/////////////////////////////////////////////////////'
@@ -94,14 +93,14 @@ CONTAINS
     ! END IF
     ! IF (verbose .EQ. 2) THEN
     !   OPEN(UNIT=14, FILE="complete_input.yaml", ACTION="WRITE", STATUS="REPLACE", IOSTAT=ioerr)
-    !   IF (ioerr .NE. 0) CALL genError(0, "Error opening verbose outout file")
+    !   IF (ioerr .NE. 0) CALL raise_fatal_error( "Error opening verbose outout file")
     !   WRITE(14,*) '#Full THOR yaml_input specification.'
     !   WRITE(14,*) '#Select one argument per key to create in yaml_input file'
     !   WRITE(14, *) '#/////////////////////////////////////////////////////'
     !   WRITE(14, *)
     ! END IF
     !OPEN(UNIT=local_unit, FILE=in_file, ACTION="READ", STATUS="OLD", IOSTAT=ioerr)
-    !IF (ioerr .NE. 0) CALL genError(0, "ERROR READING yaml_input FILE")
+    !IF (ioerr .NE. 0) CALL raise_fatal_error( "ERROR READING yaml_input FILE")
 
     !Until file finished
     set_defaults = .TRUE.
@@ -311,14 +310,14 @@ CONTAINS
       execution = 1
     ELSE IF(sanity_check) THEN
       IF (execution .NE. 1 .AND. execution .NE. 0) &
-            CALL genError(0, '[execution] failed yaml_input validation')
+            CALL raise_fatal_error( '[execution] failed yaml_input validation')
     ELSE
       IF (data_string .EQ. "yes") THEN
         execution = 1
       ELSE IF (data_string .EQ. "no") THEN
         execution = 0
       ELSE
-        CALL genError(0, "Invalid parameter for [execute] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [execute] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_execute
@@ -347,7 +346,7 @@ CONTAINS
       problem = 1
     ELSE IF(sanity_check) THEN
       IF (problem .NE. 1 .AND. problem .NE. 0) &
-            CALL genError(0, '[type] failed yaml_input validation')
+            CALL raise_fatal_error( '[type] failed yaml_input validation')
     ELSE
       IF (data_string .EQ. "keig") THEN
         problem = 1
@@ -355,7 +354,7 @@ CONTAINS
         problem = 0
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [type] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [type] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_type
@@ -384,14 +383,14 @@ CONTAINS
       space_ord = 0
     ELSE IF(sanity_check) THEN
       IF (space_ord .LT. 0) &
-            CALL genError(0, "Invalid parameter for [lambda] yaml_input flag")
+            CALL raise_fatal_error( "Invalid parameter for [lambda] yaml_input flag")
     ELSE
       READ(data_string, *) data_int
       IF (data_int .GE. 0) THEN
         space_ord = data_int
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [lambda] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [lambda] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_lambda
@@ -427,7 +426,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [inflow] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [inflow] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_inflow
@@ -464,7 +463,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [piacc] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [piacc] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_piacc
@@ -496,7 +495,7 @@ CONTAINS
       IF (data_string .EQ. "precomp") THEN
         sweep_tpe = 1
       ELSE
-        CALL genError(0, "Invalid parameter for [sweep] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [sweep] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_sweep
@@ -532,7 +531,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [page_sweep] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [page_sweep] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_page_sweep
@@ -571,7 +570,7 @@ CONTAINS
         page_refl = 2
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [page_refl] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [page_refl] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_page_refl
@@ -607,7 +606,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [page_inflow] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [page_inflow] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_page_inflow
@@ -641,7 +640,7 @@ CONTAINS
         max_outer = data_int
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [maxouter] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [maxouter] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_maxouter
@@ -676,7 +675,7 @@ CONTAINS
         max_inner = data_int
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [maxinner] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [maxinner] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_maxinner
@@ -711,7 +710,7 @@ CONTAINS
         inner_conv = data_real
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [innerconv] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [innerconv] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_innerconv
@@ -746,7 +745,7 @@ CONTAINS
         outer_conv = data_real
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [outerconv] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [outerconv] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_outerconv
@@ -781,7 +780,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [kconv] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [kconv] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_kconv
@@ -817,7 +816,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [keigsolver] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [keigsolver] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_keigsolve
@@ -852,7 +851,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [jfnk_krsze] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [jfnk_krsze] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_jfnk_krsze
@@ -887,7 +886,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [jfnk_maxkr] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [jfnk_maxkr] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_jfnk_maxkr
@@ -925,7 +924,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [jfnk_method] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [jfnk_method] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_jfnk_method
@@ -961,7 +960,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [initial_guess] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [initial_guess] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_initial_guess
@@ -997,7 +996,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [save_restart] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [save_restart] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_save_restart
@@ -1032,7 +1031,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [ipiter] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [ipiter] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_ipiter
@@ -1068,7 +1067,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [generic] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [generic] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_print_conv
@@ -1105,7 +1104,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [density_factor] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [density_factor] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_density_factor
@@ -1140,7 +1139,7 @@ CONTAINS
         source_filename = data_string
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [source_file] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [source_file] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_source_file
@@ -1175,7 +1174,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [inflow_file] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [inflow_file] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_inflow_file
@@ -1210,7 +1209,7 @@ CONTAINS
         cross_section_filename = data_string
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [xs_file] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [xs_file] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_xs_file
@@ -1245,7 +1244,7 @@ CONTAINS
         mesh_filename = data_string
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [mesh_file] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [mesh_file] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_mesh_file
@@ -1280,7 +1279,7 @@ CONTAINS
         flux_filename = data_string
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [flux_file] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [flux_file] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_flux_file
@@ -1315,7 +1314,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [vtk_flux_file] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [vtk_flux_file] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_vtk_flux_file
@@ -1350,7 +1349,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [quad_file] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [quad_file] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_quad_file
@@ -1385,7 +1384,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [restart_file] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [restart_file] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_restart_file
@@ -1420,7 +1419,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [inguess_file] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [inguess_file] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_inguess_file
@@ -1455,7 +1454,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [vtk_mat_file] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [vtk_mat_file] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_vtk_mat_file
@@ -1490,7 +1489,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [vtk_reg_file] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [vtk_reg_file] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_vtk_reg_file
@@ -1525,7 +1524,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [vtk_src_file] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [vtk_src_file] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_vtk_src_file
@@ -1560,7 +1559,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [generic] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [generic] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_density_factor_file
@@ -1596,7 +1595,7 @@ CONTAINS
         print_xs_flag = 0
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [print_xs] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [print_xs] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_print_xs
@@ -1631,7 +1630,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [vtk_flux] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [vtk_flux] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_vtk_flux
@@ -1667,7 +1666,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [vtk_reg] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [vtk_reg] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_vtk_reg
@@ -1703,7 +1702,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [vtk_mat] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [vtk_mat] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_vtk_mat
@@ -1739,7 +1738,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [vtk_src] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [vtk_src] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_vtk_src
@@ -1773,7 +1772,7 @@ CONTAINS
         quad_ord = data_int
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [qdorder] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [qdorder] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_qdorder
@@ -1812,7 +1811,7 @@ CONTAINS
         quad_tpe = 3
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [qdtype] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [qdtype] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_qdtype
@@ -1846,7 +1845,7 @@ CONTAINS
         egmax = data_int
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [ngroups] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [ngroups] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_ngroups
@@ -1881,7 +1880,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [pnorder] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [pnorder] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_pnorder
@@ -1916,7 +1915,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [pnread] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [pnread] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_pnread
@@ -1952,7 +1951,7 @@ CONTAINS
         upscattering = 0
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [upscattering] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [upscattering] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_upscattering
@@ -1988,7 +1987,7 @@ CONTAINS
         multiplying  = 0
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [multiplying] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [multiplying] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_multiplying
@@ -2024,7 +2023,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [scatt_mult_included] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [scatt_mult_included] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_scatt_mult_included
@@ -2060,7 +2059,7 @@ CONTAINS
         !Set variable appropriately
       ELSE
         !Ammend error message
-        CALL genError(0, "Invalid parameter for [generic] yaml_input flag")
+        CALL raise_fatal_error( "Invalid parameter for [generic] yaml_input flag")
       END IF
     END IF
   END SUBROUTINE yaml_input_flag_generic
@@ -2083,7 +2082,7 @@ CONTAINS
     !get rank
     CALL GET_COMMAND_ARGUMENT(1,fname)
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
-    IF(localunit .NE. 100+rank)STOP 'rank mismatch in input file reading'
+    IF(localunit .NE. 100+rank)CALL raise_fatal_error('rank mismatch in input file reading')
     ! read title
     READ(localunit,*) jobname
 
@@ -2194,29 +2193,22 @@ CONTAINS
               ELSE IF ( wwords(2) .EQ. 'fromfile') THEN
                 quad_tpe=3
               ELSE
-                WRITE(6,*) 'Error. This is not a valid quadrature type -- ',wwords(2),' --'
-                WRITE(6,*) 'Execution will terminate.'
-                STOP
+                CALL raise_fatal_error('This is not a valid quadrature type -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'qdorder'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'qdorder' ) THEN
               wwords(2)=TRIM(lowercase(wwords(2)))
               READ(wwords(2),'(i10)',iostat=ios) quad_ord
               IF(ios.NE.0 ) THEN
-                WRITE(6,*) 'Invalid quadrature order -- ',TRIM(wwords(2)),' --'
-                STOP
+                CALL raise_fatal_error('Invalid quadrature order -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > default if keyword is unknown
             ELSE
-              WRITE(6,*) 'Unknown keyword in quadrature specification -- ',TRIM(wwords(1)),' --'
-              WRITE(6,*) 'Execution will terminate.'
-              STOP
+              CALL raise_fatal_error( 'Unknown keyword in quadrature specification -- '//TRIM(wwords(1))//' --')
             END IF
           ELSE
-            WRITE(6,*) 'Error while reading cross section specification'
-            WRITE(6,*) 'Do not understand entry: ',TRIM(words(i))
-            WRITE(6,*) 'Execution will terminate.'
-            STOP
+            CALL raise_fatal_error( 'While reading cross section specification, do not understand &
+              & entry: '//TRIM(words(i)))
           END IF
         END DO
       END IF
@@ -2304,15 +2296,11 @@ CONTAINS
                 END DO
               END IF
             ELSE
-              WRITE(6,*) 'Unknown keyword in postprocess specification -- ',TRIM(wwords(1)),' --'
-              WRITE(6,*) 'Execution will terminate.'
-              STOP
+              CALL raise_fatal_error( 'Unknown keyword in postprocess specification -- '//TRIM(wwords(1))//' --')
             END IF
           ELSE
-            WRITE(6,*) 'Error while reading postprocess specification'
-            WRITE(6,*) 'Do not understand entry: ',TRIM(words(i))
-            WRITE(6,*) 'Execution will terminate.'
-            STOP
+            CALL raise_fatal_error( 'While reading postprocess specification, do not understand &
+              & entry: '//TRIM(words(i)))
           END IF
         END DO
       END IF
@@ -2348,24 +2336,21 @@ CONTAINS
               wwords(2)=TRIM(lowercase(wwords(2)))
               READ(wwords(2),'(i10)',iostat=ios) egmax
               IF(ios.NE.0 .OR. egmax<1) THEN
-                WRITE(6,*) 'Invalid number of energy groups in cross section specification -- ',TRIM(wwords(2)),' --'
-                STOP
+                CALL raise_fatal_error('Invalid number of energy groups in cross section specification -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'pnorder'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'pnorder' ) THEN
               wwords(2)=TRIM(lowercase(wwords(2)))
               READ(wwords(2),'(i10)',iostat=ios) scatt_ord
               IF(ios.NE.0 .OR. scatt_ord < 0) THEN
-                WRITE(6,*) 'Invalid scattering expansion in cross section specification -- ',TRIM(wwords(2)),' --'
-                STOP
+                CALL raise_fatal_error('Invalid scattering expansion in cross section specification -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword pnread'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'pnread' ) THEN
               wwords(2)=TRIM(lowercase(wwords(2)))
               READ(wwords(2),'(i10)',iostat=ios) xs_ord
               IF(ios.NE.0 .OR. xs_ord < 0) THEN
-                WRITE(6,*) 'Invalid cross section expansion in cross section specification -- ',TRIM(wwords(2)),' --'
-                STOP
+                CALL raise_fatal_error('Invalid cross section expansion in cross section specification -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'upscattering'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'upscattering' ) THEN
@@ -2375,9 +2360,7 @@ CONTAINS
               ELSE IF ( wwords(2) .EQ. 'no') THEN
                 upscattering=0
               ELSE
-                WRITE(6,*) 'Error. This is not a valid upscattering flag -- ',wwords(2),' --'
-                WRITE(6,*) 'Execution will terminate.'
-                STOP
+                CALL raise_fatal_error('This is not a valid upscattering flag -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword !'multiplying'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'multiplying' ) THEN
@@ -2387,9 +2370,7 @@ CONTAINS
               ELSE IF ( wwords(2) .EQ. 'no') THEN
                 multiplying=0
               ELSE
-                WRITE(6,*) 'Error. This is not a valid multiplying flag -- ',wwords(2),' --'
-                WRITE(6,*) 'Execution will terminate.'
-                STOP
+                CALL raise_fatal_error('This is not a valid multiplying flag -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'scatt_mult_included'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'scatt_mult_included' ) THEN
@@ -2399,21 +2380,15 @@ CONTAINS
               ELSE IF ( wwords(2) .EQ. 'no') THEN
                 scat_mult_flag=0
               ELSE
-                WRITE(6,*) 'Error. This is not a valid scattering multiplier flag -- ',wwords(2),' --'
-                WRITE(6,*) 'Execution will terminate.'
-                STOP
+                CALL raise_fatal_error('This is not a valid scattering multiplier flag -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > default if keyword is unknown
             ELSE
-              WRITE(6,*) 'Unknown keyword in cross section specification -- ',TRIM(wwords(1)),' --'
-              WRITE(6,*) 'Execution will terminate.'
-              STOP
+              CALL raise_fatal_error( 'Unknown keyword in cross section specification -- '//TRIM(wwords(1))//' --')
             END IF
           ELSE
-            WRITE(6,*) 'Error while reading cross section specification'
-            WRITE(6,*) 'Do not understand entry: ',TRIM(words(i))
-            WRITE(6,*) 'Execution will terminate.'
-            STOP
+            CALL raise_fatal_error( 'While reading cross section specification, do not understand &
+              & entry: '//TRIM(words(i)))
           END IF
         END DO
       END IF
@@ -2501,21 +2476,15 @@ CONTAINS
               ELSE IF ( wwords(2) .EQ. 'no') THEN
                 print_xs_flag=0
               ELSE
-                WRITE(6,*) 'Error. This is not a valid cross section print option (yes/no) -- ',wwords(2),' --'
-                WRITE(6,*) 'Execution will terminate.'
-                STOP
+                CALL raise_fatal_error('This is not a valid cross section print option (yes/no) -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > default if keyword is unknown
             ELSE
-              WRITE(6,*) 'Unknown keyword in inout field -- ',TRIM(wwords(1)),' --'
-              WRITE(6,*) 'Execution will terminate.'
-              STOP
+              CALL raise_fatal_error( 'Unknown keyword in inout field -- '//TRIM(wwords(1))//' --')
             END IF
           ELSE
-            WRITE(6,*) 'Error while reading inout specification'
-            WRITE(6,*) 'Do not understand entry: ',TRIM(words(i))
-            WRITE(6,*) 'Execution will terminate.'
-            STOP
+            CALL raise_fatal_error( 'While reading inout specification, do not understand entry: ' &
+              //TRIM(words(i)))
           END IF
         END DO
       END IF
@@ -2554,9 +2523,7 @@ CONTAINS
               ELSE IF ( wwords(2) .EQ. 'fsrc') THEN
                 problem=0
               ELSE
-                WRITE(6,*) 'Error. This is not a valid problem type -- ',wwords(2),' --'
-                WRITE(6,*) 'Execution will terminate.'
-                STOP
+                CALL raise_fatal_error('This is not a valid problem type -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'keigsolver'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'keigsolver' ) THEN
@@ -2566,17 +2533,14 @@ CONTAINS
               ELSE IF ( wwords(2) .EQ. 'jfnk') THEN
                 eig_switch=1
               ELSE
-                WRITE(6,*) 'Error. This is not a valid eigenvalue solver -- ',wwords(2),' --'
-                WRITE(6,*) 'Execution will terminate.'
-                STOP
+                CALL raise_fatal_error('This is not a valid eigenvalue solver -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'lambda'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'lambda' ) THEN
               wwords(2)=TRIM(lowercase(wwords(2)))
               READ(wwords(2),'(i10)',iostat=ios) space_ord
               IF(ios.NE.0) THEN
-                WRITE(6,*) 'Invalid spatial order in problem specification -- ',TRIM(wwords(2)),' --'
-                STOP
+                CALL raise_fatal_error('Invalid spatial order in problem specification -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'inflow'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'inflow' ) THEN
@@ -2586,9 +2550,7 @@ CONTAINS
               ELSE IF ( wwords(2) .EQ. 'no') THEN
                 finflow=0
               ELSE
-                WRITE(6,*) 'Error. This is not a valid inflow flag -- ',wwords(2),' --'
-                WRITE(6,*) 'Execution will terminate.'
-                STOP
+                CALL raise_fatal_error('This is not a valid inflow flag -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'PIacc'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'piacc' ) THEN
@@ -2598,9 +2560,7 @@ CONTAINS
               ELSE IF ( wwords(2) .EQ. 'none') THEN
                 outer_acc=1
               ELSE
-                WRITE(6,*) 'Error. This is not a valid acceleration option for PI -- ',wwords(2),' --'
-                WRITE(6,*) 'Execution will terminate.'
-                STOP
+                CALL raise_fatal_error('This is not a valid acceleration option for PI -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'sweep'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'sweep' ) THEN
@@ -2608,9 +2568,7 @@ CONTAINS
               IF      ( wwords(2) .EQ. 'precomp') THEN
                 sweep_tpe=1
               ELSE
-                WRITE(6,*) 'Error. This is not a valid mesh sweep type -- ',wwords(2),' --'
-                WRITE(6,*) 'Execution will terminate.'
-                STOP
+                CALL raise_fatal_error('This is not a valid mesh sweep type -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'sweep_page'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'page_sweep' ) THEN
@@ -2620,9 +2578,7 @@ CONTAINS
               ELSE IF ( wwords(2) .EQ. 'no') THEN
                 page_sweep=0
               ELSE
-                WRITE(6,*) 'Error. This is not a valid sweep page option -- ',wwords(2),' --'
-                WRITE(6,*) 'Execution will terminate.'
-                STOP
+                CALL raise_fatal_error('This is not a valid sweep page option -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'page_refl'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'page_refl' ) THEN
@@ -2634,9 +2590,7 @@ CONTAINS
               ELSE IF ( wwords(2) .EQ. 'inner') THEN
                 page_refl=2
               ELSE
-                WRITE(6,*) 'Error. This is not a valid page reflective BC option -- ',wwords(2),' --'
-                WRITE(6,*) 'Execution will terminate.'
-                STOP
+                CALL raise_fatal_error('This is not a valid page reflective BC option -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'page_iflw'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'page_inflow' ) THEN
@@ -2646,66 +2600,62 @@ CONTAINS
               ELSE IF ( wwords(2) .EQ. 'all') THEN
                 page_iflw=0
               ELSE
-                WRITE(6,*) 'Error. This is not a valid page inflow option -- ',wwords(2),' --'
-                WRITE(6,*) 'Execution will terminate.'
-                STOP
+                CALL raise_fatal_error('This is not a valid page inflow option -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'kconv'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'kconv' ) THEN
               wwords(2)=TRIM(lowercase(wwords(2)))
               READ(wwords(2),*,iostat=ios) k_conv
               IF(ios.NE.0) THEN
-                WRITE(6,*) 'Invalid stopping criterion for keff in problem specification -- ',TRIM(wwords(2)),' --'
-                STOP
+                CALL raise_fatal_error('Invalid stopping criterion for keff in problem specification -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'innerconv'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'innerconv' ) THEN
               wwords(2)=TRIM(lowercase(wwords(2)))
               READ(wwords(2),*,iostat=ios) inner_conv
               IF(ios.NE.0) THEN
-                WRITE(6,*) 'Invalid stopping criterion for inner iterations in problem specification -- ',TRIM(wwords(2)),' --'
-                STOP
+                CALL raise_fatal_error('Invalid stopping criterion for inner iterations in problem &
+                  & specification -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'outerconv'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'outerconv' ) THEN
               wwords(2)=TRIM(lowercase(wwords(2)))
               READ(wwords(2),*,iostat=ios) outer_conv
               IF(ios.NE.0) THEN
-                WRITE(6,*) 'Invalid stopping criterion for outer iterations in problem specification -- ',TRIM(wwords(2)),' --'
-                STOP
+                CALL raise_fatal_error('Invalid stopping criterion for outer iterations in problem &
+                  & specification -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'maxinner'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'maxinner' ) THEN
               wwords(2)=TRIM(lowercase(wwords(2)))
               READ(wwords(2),'(i10)',iostat=ios) max_inner
               IF(ios.NE.0 .OR. max_inner<1 ) THEN
-                WRITE(6,*) 'Invalid maximum number of inner iteration in problem specification -- ',TRIM(wwords(2)),' --'
-                STOP
+                CALL raise_fatal_error('Invalid maximum number of inner iteration in problem &
+                  & specification -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'maxouter'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'maxouter' ) THEN
               wwords(2)=TRIM(lowercase(wwords(2)))
               READ(wwords(2),'(i10)',iostat=ios) max_outer
               IF(ios.NE.0 .OR. max_outer<1 ) THEN
-                WRITE(6,*) 'Invalid maximum number of outer iteration in problem specification -- ',TRIM(wwords(2)),' --'
-                STOP
+                CALL raise_fatal_error('Invalid maximum number of outer iteration in problem &
+                  & specification -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'jfnk_krsze'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'jfnk_krsze' ) THEN
               wwords(2)=TRIM(lowercase(wwords(2)))
               READ(wwords(2),'(i10)',iostat=ios) rd_restart
               IF(ios.NE.0 .OR. rd_restart<1 ) THEN
-                WRITE(6,*) 'Invalid Krylov subspace size for JFNK in problem specification -- ',TRIM(wwords(2)),' --'
-                STOP
+                CALL raise_fatal_error('Invalid Krylov subspace size for JFNK in problem &
+                  & specification -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'jfnk_maxkr'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'jfnk_maxkr' ) THEN
               wwords(2)=TRIM(lowercase(wwords(2)))
               READ(wwords(2),'(i10)',iostat=ios) rd_max_kit
               IF(ios.NE.0 .OR. rd_max_kit < 1 ) THEN
-                WRITE(6,*) 'Invalid maximum number of Krylov iterations for JFNK in problem specification -- '&
-                      ,TRIM(wwords(2)),' --'
-                STOP
+                CALL raise_fatal_error('Invalid maximum number of Krylov iterations for JFNK in problem specification -- '&
+                      //TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'jfnk_method'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'jfnk_method' ) THEN
@@ -2717,9 +2667,7 @@ CONTAINS
               ELSE IF ( wwords(2) .EQ. 'flat_wds') THEN
                 rd_method=3
               ELSE
-                WRITE(6,*) 'Error. This is not a valid jfnk solution method -- ',wwords(2),' --'
-                WRITE(6,*) 'Execution will terminate.'
-                STOP
+                CALL raise_fatal_error('This is not a valid jfnk solution method -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'initial_guess'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'initial_guess' ) THEN
@@ -2729,9 +2677,7 @@ CONTAINS
               ELSE IF ( wwords(2) .EQ. 'no') THEN
                 inguess_flag=0
               ELSE
-                WRITE(6,*) 'Error. This is not a valid initial guess option (yes/no) -- ',wwords(2),' --'
-                WRITE(6,*) 'Execution will terminate.'
-                STOP
+                CALL raise_fatal_error('This is not a valid initial guess option (yes/no) -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'save_restart'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'save_restart' ) THEN
@@ -2741,18 +2687,15 @@ CONTAINS
               ELSE IF ( wwords(2) .EQ. 'no') THEN
                 dump_flag=0
               ELSE
-                WRITE(6,*) 'Error. This is not a valid restart file option (yes/no) -- ',wwords(2),' --'
-                WRITE(6,*) 'Execution will terminate.'
-                STOP
+                CALL raise_fatal_error('This is not a valid restart file option (yes/no) -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword !'ipiter'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'ipiter' ) THEN
               wwords(2)=TRIM(lowercase(wwords(2)))
               READ(wwords(2),'(i10)',iostat=ios) ipow
               IF(ios.NE.0 ) THEN
-                WRITE(6,*) 'Invalid number of initial power iterations -- '&
-                      ,TRIM(wwords(2)),' --'
-                STOP
+                CALL raise_fatal_error('Invalid number of initial power iterations -- '&
+                      //TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'print_conv'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'print_conv' ) THEN
@@ -2762,9 +2705,7 @@ CONTAINS
               ELSE IF ( wwords(2) .EQ. 'no') THEN
                 print_conv=0
               ELSE
-                WRITE(6,*) 'Error. This is not a valid execution option (yes/no) -- ',wwords(2),' --'
-                WRITE(6,*) 'Execution will terminate.'
-                STOP
+                CALL raise_fatal_error('This is not a valid execution option (yes/no) -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'density factor option'
             ELSE IF( TRIM(lowercase(wwords(1))) .EQ. 'density_factor' ) THEN
@@ -2777,10 +2718,8 @@ CONTAINS
                 ELSE IF ( wwords(2) .EQ. 'fromfile') THEN
                   dfact_opt = 2
                 ELSE
-                  WRITE(6,*) 'Error. This is not a valid density factor option &
-                    & (no/byvolume/fromfile) -- ',wwords(2),' --'
-                  WRITE(6,*) 'Execution will terminate.'
-                  STOP
+                  CALL raise_fatal_error('This is not a valid density factor option &
+                    & (no/byvolume/fromfile) -- '//TRIM(wwords(2))//' --')
                 END IF
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > keyword 'execution'
@@ -2791,21 +2730,15 @@ CONTAINS
               ELSE IF ( wwords(2) .EQ. 'no') THEN
                 execution=0
               ELSE
-                WRITE(6,*) 'Error. This is not a valid execution option (yes/no) -- ',wwords(2),' --'
-                WRITE(6,*) 'Execution will terminate.'
-                STOP
+                CALL raise_fatal_error('This is not a valid execution option (yes/no) -- '//TRIM(wwords(2))//' --')
               END IF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! > default if keyword is unknown
             ELSE
-              WRITE(6,*) 'Unknown keyword in problem specification -- ',TRIM(wwords(1)),' --'
-              WRITE(6,*) 'Execution will terminate.'
-              STOP
+              CALL raise_fatal_error('Unknown keyword in problem specification -- '//TRIM(wwords(1))//' --')
             END IF
           ELSE
-            WRITE(6,*) 'Error while reading problem specification'
-            WRITE(6,*) 'Do not understand entry: ',TRIM(words(i))
-            WRITE(6,*) 'Execution will terminate.'
-            STOP
+            CALL raise_fatal_error('While reading problem specification, do not understand entry: ' &
+              //TRIM(words(i)))
           END IF
         END DO
       END IF
@@ -2825,8 +2758,7 @@ CONTAINS
     IF (.NOT. PRESENT(min_int)) min_int = -glob_max_int
     READ(string, '(i10)', iostat=ios) string_to_int
     IF(ios .NE. 0 .OR. string_to_int < min_int) THEN
-      WRITE(6,*) TRIM(msg), TRIM(string)
-      STOP
+      CALL raise_fatal_error('string_to_int failed: '//TRIM(msg)//' '//TRIM(string))
     END IF
   END FUNCTION string_to_int
 
@@ -2838,8 +2770,7 @@ CONTAINS
 
     READ(string, *, iostat=ios) string_to_real
     IF(ios .NE. 0) THEN
-      WRITE(6,*) TRIM(msg), TRIM(string)
-      STOP
+      CALL raise_fatal_error('string_to_real failed: '//TRIM(msg)//' '//TRIM(string))
     END IF
   END FUNCTION string_to_real
 

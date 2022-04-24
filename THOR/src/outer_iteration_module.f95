@@ -25,7 +25,7 @@ MODULE outer_iteration_module
 
   ! Use modules that pertain setting up problem
 
-  USE termination_module
+  USE error_module
   USE inner_iteration_module
   USE dump_inguess_module
 
@@ -81,13 +81,13 @@ CONTAINS
       rg=1_li
     END IF
     ALLOCATE( reflected_flux(num_moments_f,rs,8,nangle,rg),stat=alloc_stat )
-    IF(alloc_stat /=0) CALL stop_thor(2_li)
+    IF(alloc_stat /=0) CALL raise_fatal_error("*** Not enough memory ***")
     reflected_flux=0.0_d_t
 
     !  Allocate group-dependent maximum spatial error array
 
     ALLOCATE(max_error(egmax),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! Open file to page out reflective BC if desired
 
@@ -120,7 +120,7 @@ CONTAINS
 
       src = zero
       DO i=1,num_cells
-        src_indx=src_pointer(cells(i)%src)
+        src_indx=source_ids(cells(i)%src)
         DO eg=1,egmax
           ! imposed internal source contribution
           DO l=1,num_moments_v
@@ -167,7 +167,7 @@ CONTAINS
         ! Compute downscattering from eg to egg
 
         DO i=1, num_cells
-          mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+          mat_indx=material_ids(reg2mat(cells(i)%reg))
           DO egg=eg+1, egmax
             DO l=0,scatt_ord
               DO m=0,l
@@ -371,7 +371,7 @@ CONTAINS
       rg=1_li
     END IF
     ALLOCATE( reflected_flux(num_moments_f,rs,8,nangle,rg),stat=alloc_stat )
-    IF(alloc_stat /=0) CALL stop_thor(2_li)
+    IF(alloc_stat /=0) CALL raise_fatal_error("*** Not enough memory ***")
     reflected_flux=0.0_d_t
 
     ! Initialize fiss_src
@@ -397,7 +397,7 @@ CONTAINS
     fiss_src = zero
 
     DO i=1, num_cells
-      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      mat_indx=material_ids(reg2mat(cells(i)%reg))
       DO eg=1, egmax
         DO l=1, num_moments_v
           fiss_src(l,i,1)=fiss_src(l,i,1)                                         +&
@@ -410,7 +410,7 @@ CONTAINS
     !  Allocate group-dependent maximum spatial error array
 
     ALLOCATE(max_error(egmax),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! Open file to page out reflective BC if desired
 
@@ -455,7 +455,7 @@ CONTAINS
       fiss_src = zero
 
       DO i=1, num_cells
-        mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+        mat_indx=material_ids(reg2mat(cells(i)%reg))
         DO eg=1, egmax
           DO l=1, num_moments_v
             fiss_src(l,i,1)=fiss_src(l,i,1)                                       +&
@@ -518,7 +518,7 @@ CONTAINS
       !=========================================================================
       src = zero
       DO i=1,num_cells
-        mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+        mat_indx=material_ids(reg2mat(cells(i)%reg))
         DO eg=1,egmax
           DO l=1,num_moments_v
             src(l,1,i,eg)  =one/keff_new     *&
@@ -669,7 +669,7 @@ CONTAINS
         END DO
       END DO
       DO i=1, num_cells
-        mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+        mat_indx=material_ids(reg2mat(cells(i)%reg))
         DO eg=1, egmax
           DO l=1, num_moments_v
             fiss_src(l,i,2)=fiss_src(l,i,2)                                        +&
@@ -861,7 +861,7 @@ CONTAINS
     REAL(kind=d_t) :: src(num_moments_v,namom,num_cells,egmax)
 
     DO i=1,num_cells
-      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      mat_indx=material_ids(reg2mat(cells(i)%reg))
       DO eg=most_thermal,egmax     ! eg is the group that it is scattered to
         ! even contributions
         DO l=0,scatt_ord
@@ -906,7 +906,7 @@ CONTAINS
     REAL(kind=d_t) :: src(num_moments_v,namom,num_cells,egmax)
 
     DO i = 1, num_cells
-      mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+      mat_indx=material_ids(reg2mat(cells(i)%reg))
       DO eg_from = eg + 1, egmax
         ! Even contributions
         DO l = 0, scatt_ord

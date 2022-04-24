@@ -16,7 +16,7 @@ MODULE wrapup_module
   USE geometry_types
   USE angle_types
   USE global_variables
-  USE termination_module
+  USE error_module
   USE general_utility_module
 
   IMPLICIT NONE
@@ -68,6 +68,7 @@ CONTAINS
       WRITE(unit_number,*) "--------------------------------------------------------"
       IF (conv_flag==0) THEN
         WRITE(unit_number,*) "Warning! Execution finished without satisfying all stopping criteria. Warning!"
+        CALL raise_warning("Execution finished without satisfying all stopping criteria.")
       ELSE IF(conv_flag==1) THEN
         WRITE(unit_number,*) "Execution finished successfully. All stopping criteria satisfied."
       END IF
@@ -188,7 +189,7 @@ CONTAINS
       reg_volume=0.0_d_t
       reac_rates=0.0_d_t
       DO i=1,num_cells
-        mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+        mat_indx=material_ids(reg2mat(cells(i)%reg))
         DO eg=1,egmax
           IF(eg.EQ.1) reg_volume(cells(i)%reg)=reg_volume(cells(i)%reg)+ cells(i)%volume
           reac_rates(1,cells(i)%reg,eg)=reac_rates(1,cells(i)%reg,eg)  + cells(i)%volume * &
@@ -259,7 +260,7 @@ CONTAINS
       ! TODO: might want to consider a flag for providing group fluxes/reac_rates?
       DO eg = 1, egmax
         DO i = 1, num_cells
-          mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+          mat_indx=material_ids(reg2mat(cells(i)%reg))
 
           ! this is the current cell with index i, first we need to find out
           ! which x/y/z cartesian this cell belongs to
@@ -379,6 +380,7 @@ CONTAINS
           END DO
         ELSE
           WRITE(unit_number, 510) "Warning. Point: ", point_flux_locations(j, :), " was not found."
+        CALL raise_warning("A flux point was not found.")
         END IF
       END DO
     END IF

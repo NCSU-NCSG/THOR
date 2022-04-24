@@ -24,7 +24,7 @@ MODULE solver_module
   USE sph_harmonics_module
   USE outer_iteration_module
   USE jfnk_module
-  USE termination_module
+  USE error_module
 
   IMPLICIT NONE
 
@@ -59,11 +59,11 @@ CONTAINS
           Uf(num_moments_f,num_moments_f),&
           stat=alloc_stat);M=zero;&
           LL=zero;U=zero;Mf=zero;Lf=zero;Uf=zero;
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
 
     ALLOCATE(Ysh(nangle,8,namom),stat=alloc_stat)
-    IF(alloc_stat /=0) CALL stop_thor(2_li)
+    IF(alloc_stat /=0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! Pre-compute and apply LU decomposition to 'mass matrices'
 
@@ -122,10 +122,10 @@ CONTAINS
           Uf(num_moments_f,num_moments_f),&
           stat=alloc_stat);M=zero;&
           LL=zero;U=zero;Mf=zero;Lf=zero;Uf=zero;
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ALLOCATE(Ysh(nangle,8,namom),stat=alloc_stat)
-    IF(alloc_stat /=0) CALL stop_thor(2_li)
+    IF(alloc_stat /=0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! Pre-compute and apply LU decomposition to 'mass matrices'
 

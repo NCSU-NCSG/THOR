@@ -22,7 +22,7 @@ MODULE inner_iteration_module
   ! Use modules that pertain setting up problem
 
   USE sweep_module
-  USE termination_module
+  USE error_module
 
   IMPLICIT NONE
 
@@ -103,7 +103,7 @@ CONTAINS
       ! Recompute self-scattering source and add external source
 
       DO i=1,num_cells
-        mat_indx=mat_pointer(reg2mat(cells(i)%reg))
+        mat_indx=material_ids(reg2mat(cells(i)%reg))
         ! even contribution
         DO l=0,scatt_ord
           DO m=0,l

@@ -12,7 +12,7 @@ MODULE read_mesh_module
   USE vector_types
   USE geometry_types
   USE global_variables
-  USE termination_module
+  USE error_module
 
   IMPLICIT NONE
 
@@ -55,7 +55,7 @@ CONTAINS
     ! Allocate vertices type dimension
 
     ALLOCATE(vertices(num_vert),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! Read vertices
 
@@ -66,7 +66,7 @@ CONTAINS
     ! Allocate cell type dimension
 
     ALLOCATE(cells(num_cells),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! Read cell block property list (region and source composition)
     DO i=1, num_cells
@@ -88,7 +88,8 @@ CONTAINS
       IF(temp_maxreg .GT. maxreg .OR. temp_minreg .LT. minreg)THEN
         WRITE(*,*)'Error: Min index in input file',minreg,'min index in mesh',temp_minreg
         WRITE(*,*)'Error: Max index in input file',maxreg,'max index in mesh',temp_maxreg
-        STOP 'Region map in input file and regions in mesh file do not match! Be sure to index from 1 if using legacy regionmap!'
+        CALL raise_fatal_error('Region map in input file and regions in mesh file do not match! Be &
+          & sure to index from 1 if using legacy regionmap!')
       ENDIF
     ENDIF
 
@@ -107,7 +108,7 @@ CONTAINS
     fside_cells=0
 
     ALLOCATE(side_cells_tmp(num_side_sets),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     DO i=1, num_side_sets
 
@@ -131,7 +132,8 @@ CONTAINS
     ! If there are fixed inflow boundary faces then finflow flag must be ==1
 
     IF(fside_cells>0 .AND. finflow .EQ. 0) THEN
-      CALL stop_thor(12_li)
+      CALL raise_fatal_error("Some boundary faces feature a fixed inflow flux but the  &
+        & inflow flag is set to false. Execution terminates.")
     END IF
 
     ! Close file, reopen and read everything up to side_sets into dummies
@@ -160,21 +162,21 @@ CONTAINS
     ! Allocate b_cells and read from side sets
 
     ALLOCATE(b_cells(side_cells),stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     IF(vside_cells .GT. 0) THEN
       ALLOCATE(vb_cells(vside_cells),stat=alloc_stat)
-      IF(alloc_stat /= 0) CALL stop_thor(2_li)
+      IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
     END IF
 
     IF(rside_cells .GT. 0) THEN
       ALLOCATE(rb_cells(rside_cells),stat=alloc_stat)
-      IF(alloc_stat /= 0) CALL stop_thor(2_li)
+      IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
     END IF
 
     IF(fside_cells .GT. 0) THEN
       ALLOCATE(fb_cells(fside_cells),stat=alloc_stat)
-      IF(alloc_stat /= 0) CALL stop_thor(2_li)
+      IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
     END IF
 
     k=1 ; kv=1 ; kr=1 ; kf=1
@@ -218,7 +220,7 @@ CONTAINS
     ALLOCATE(adjacency_list(adjacent_cells,0:3),&
           cell_temp(adjacent_cells),face(adjacent_cells),&
           stat=alloc_stat)
-    IF(alloc_stat /= 0) CALL stop_thor(2_li)
+    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     DO i=1, adjacent_cells
       READ(localunit,*) cell_temp(i), face(i),&
