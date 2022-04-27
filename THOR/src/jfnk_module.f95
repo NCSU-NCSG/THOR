@@ -38,7 +38,7 @@ MODULE jfnk_module
   USE geometry_types
   USE angle_types
   USE multindex_types
-  USE global_variables
+  USE globals
 
   ! Use modules that pertain setting up problem
 
@@ -220,14 +220,10 @@ CONTAINS
     END IF
     ! Perform ipow initial power iterations
     IF (ipow .GT. 0 .AND. rank .EQ. 0) THEN
-      WRITE(stdout_unit,*)
-      WRITE(stdout_unit,*) '========================================================'
-      WRITE(stdout_unit,*) '   Begin Initial Power Iterations.'
-      WRITE(stdout_unit,*) '========================================================'
-      WRITE(log_unit,*)
-      WRITE(log_unit,*) '========================================================'
-      WRITE(log_unit,*) '   Begin Initial Power Iterations.'
-      WRITE(log_unit,*) '========================================================'
+      CALL printlog('')
+      CALL printlog('========================================================')
+      CALL printlog('   Begin Initial Power Iterations.')
+      CALL printlog('========================================================')
     END IF
 
     ! note: we do not need to duplicate reflected_flux on all processors
@@ -275,14 +271,11 @@ CONTAINS
 
       ! write convergence monitor
       IF (rank .EQ. 0) THEN
-        WRITE(stdout_unit,*)   '---------------------------------------------------------------------------'
-        WRITE(stdout_unit,401) '---itn        keff    err-keff     err-flx        time---'
-        WRITE(stdout_unit,402) m,keff, keff_error,max_outer_error,te-ts,' %i'
-        WRITE(stdout_unit,*)   '---------------------------------------------------------------------------'
-        WRITE(log_unit,*)   '---------------------------------------------------------------------------'
-        WRITE(log_unit,401) '---itn        keff    err-keff     err-flx        time---'
-        WRITE(log_unit,402) m,keff, keff_error,max_outer_error,te-ts,' %i'
-        WRITE(log_unit,*)   '---------------------------------------------------------------------------'
+        CALL printlog('---------------------------------------------------------------------------')
+        CALL printlog('---itn        keff    err-keff     err-flx        time---')
+        WRITE(amsg,402) m,keff, keff_error,max_outer_error,te-ts,' %i'
+        CALL printlog(amsg)
+        CALL printlog('---------------------------------------------------------------------------')
         IF(print_conv.EQ.1) THEN
           WRITE(21,*)   '---------------------------------------------------------------------------'
           WRITE(21,401) '---itn        keff    err-keff     err-flx        time---'
@@ -290,33 +283,25 @@ CONTAINS
           WRITE(21,*)   '---------------------------------------------------------------------------'
         END IF
       END IF
-401   FORMAT(1X,A)
-402   FORMAT(1X,I6,4ES12.4,A)
+401   FORMAT(A)
+402   FORMAT(I6,4ES12.4,A)
 
     END DO
 
     IF( ALLOCATED(reflected_flux) ) DEALLOCATE(reflected_flux)
 
     IF (ipow .GT. 0 .AND. rank .EQ. 0) THEN
-      WRITE(stdout_unit,*)
-      WRITE(stdout_unit,*) '========================================================'
-      WRITE(stdout_unit,*) '   End Initial Power Iterations.'
-      WRITE(stdout_unit,*) '========================================================'
-      WRITE(log_unit,*)
-      WRITE(log_unit,*) '========================================================'
-      WRITE(log_unit,*) '   End Initial Power Iterations.'
-      WRITE(log_unit,*) '========================================================'
+      CALL printlog('')
+      CALL printlog('========================================================')
+      CALL printlog('   End Initial Power Iterations.')
+      CALL printlog('========================================================')
     END IF
 
     IF (rank .EQ. 0) THEN
-      WRITE(stdout_unit,*)
-      WRITE(stdout_unit,*) '========================================================'
-      WRITE(stdout_unit,*) '   Begin JFNK iterations.'
-      WRITE(stdout_unit,*) '========================================================'
-      WRITE(log_unit,*)
-      WRITE(log_unit,*) '========================================================'
-      WRITE(log_unit,*) '   Begin JFNK iterations.'
-      WRITE(log_unit,*) '========================================================'
+      CALL printlog('')
+      CALL printlog('========================================================')
+      CALL printlog('   Begin JFNK iterations.')
+      CALL printlog('========================================================')
     END IF
 
     ! evaluate residual
@@ -375,14 +360,11 @@ CONTAINS
 
       ! output convergence progress
       IF (rank .EQ. 0) THEN
-        WRITE(stdout_unit,*)   '---------------------------------------------------------------------------'
-        WRITE(stdout_unit,102) '---nitn  kitn        keff     max-res        time---'
-        WRITE(stdout_unit,101) nit,kit,keff,nres,te-ts," %n"
-        WRITE(stdout_unit,*)   '---------------------------------------------------------------------------'
-        WRITE(log_unit,*)   '---------------------------------------------------------------------------'
-        WRITE(log_unit,102) '---nitn  kitn        keff     max-res        time---'
-        WRITE(log_unit,101) nit,kit,keff,nres,te-ts," %n"
-        WRITE(log_unit,*)   '---------------------------------------------------------------------------'
+        CALL printlog('---------------------------------------------------------------------------')
+        CALL printlog('---nitn  kitn        keff     max-res        time---')
+        WRITE(amsg,101) nit,kit,keff,nres,te-ts," %n"
+        CALL printlog(amsg)
+        CALL printlog('---------------------------------------------------------------------------')
         IF(print_conv.EQ.1) THEN
           WRITE(21,*)   '---------------------------------------------------------------------------'
           WRITE(21,102) '---nitn  kitn        keff     max-res        time---'
@@ -396,14 +378,12 @@ CONTAINS
       ! Check for convergence
 
       IF(nres<nit_conv .and. rank .EQ. 0) THEN
-        WRITE(stdout_unit,*)   '---------------------------------------------------------------------------'
-        WRITE(stdout_unit,104) 'Newton Iteration Convergence achieved after',nit,' iterations.'
-        WRITE(stdout_unit,103) 'with final residual ',nres
-        WRITE(stdout_unit,*)   '---------------------------------------------------------------------------'
-        WRITE(log_unit,*)   '---------------------------------------------------------------------------'
-        WRITE(log_unit,104) 'Newton Iteration Convergence achieved after',nit,' iterations.'
-        WRITE(log_unit,103) 'with final residual ',nres
-        WRITE(log_unit,*)   '---------------------------------------------------------------------------'
+        CALL printlog('---------------------------------------------------------------------------')
+        WRITE(amsg,104) 'Newton Iteration Convergence achieved after',nit,' iterations.'
+        CALL printlog(amsg)
+        WRITE(amsg,103) 'with final residual ',nres
+        CALL printlog(amsg)
+        CALL printlog('---------------------------------------------------------------------------')
         conv_flag=1
       END IF
       IF(nres<nit_conv)EXIT
@@ -425,12 +405,9 @@ CONTAINS
     CALL norm_eigmode(flux,tot_vol)
 
     IF (rank .EQ. 0) THEN
-      WRITE(stdout_unit,*) '========================================================'
-      WRITE(stdout_unit,*) '   End JFNK iterations.'
-      WRITE(stdout_unit,*) '========================================================'
-      WRITE(log_unit,*) '========================================================'
-      WRITE(log_unit,*) '   End JFNK iterations.'
-      WRITE(log_unit,*) '========================================================'
+      CALL printlog('========================================================')
+      CALL printlog('   End JFNK iterations.')
+      CALL printlog('========================================================')
     END IF
 
     ! newton iteration end, copy unknown to flux
@@ -956,8 +933,7 @@ CONTAINS
 
     ! Print header for Krylov convergence monitor
 
-    IF(rank .EQ. 0) WRITE(stdout_unit,102) '---itn         err    trgt-res        time ---'
-    IF(rank .EQ. 0) WRITE(log_unit,102) '---itn         err    trgt-res        time ---'
+    CALL printlog('---itn         err    trgt-res        time ---')
 
     ! Start gmres iteration
 
@@ -1005,8 +981,8 @@ CONTAINS
       ELSEIF(ipar(1).EQ.-2) THEN   ! insufficient workspace
         CALL raise_fatal_error("GMRES error")
       ELSEIF(ipar(1).LT.-2) THEN   ! some other error, investigate further
-        WRITE(stdout_unit,*) 'SPARSKIT error is ', ipar(1)
-        WRITE(log_unit,*) 'SPARSKIT error is ', ipar(1)
+        WRITE(amsg,'(A,I0)') 'SPARSKIT error is ', ipar(1)
+        CALL printlog(amsg)
       ENDIF
 
       ! stop timer
@@ -1014,8 +990,10 @@ CONTAINS
       CALL CPU_TIME(te)
 
       ! write convergence monitor
-      IF (rank .EQ. 0) WRITE(stdout_unit,101) k,fpar(5),tol*nrhs,te-ts,' %%k'
-      IF (rank .EQ. 0) WRITE(log_unit,101) k,fpar(5),tol*nrhs,te-ts,' %%k'
+      IF (rank .EQ. 0) THEN
+        WRITE(amsg,101) k,fpar(5),tol*nrhs,te-ts,' %%k'
+        CALL printlog(amsg)
+      ENDIF
 
     END DO
 
@@ -1025,8 +1003,7 @@ CONTAINS
 
     DEALLOCATE(work)
 
-101 FORMAT(1X,I6,3ES12.4,A)
-102 FORMAT(1X,A)
+101 FORMAT(I6,3ES12.4,A)
   END SUBROUTINE krylovM
 
   !-----------------------------------------------------------------------------------------
@@ -1401,8 +1378,7 @@ CONTAINS
 
     DO eg=1,egmax
       IF  (page_refl.NE.0_li) THEN
-        WRITE(stdout_unit, *) "Reflective Boundary values must currently be saved in JFNK."
-        WRITE(log_unit, *) "Reflective Boundary values must currently be saved in JFNK."
+        CALL printlog("Reflective Boundary values must currently be saved in JFNK.")
       END IF
 
       CALL inner_iteration(eg,flx(:,:,:,eg,2),src(:,:,:,eg),LL,U,Lf,Uf,grs,reflected_flux(:,:,:,:,eg),prnt)

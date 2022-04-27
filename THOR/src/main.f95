@@ -27,7 +27,7 @@ PROGRAM ahot_c_ug
   USE geometry_types
   USE angle_types
   USE multindex_types
-  USE global_variables
+  USE globals
 
   ! Use modules that contain necessary subroutines and functions to
   ! execute transport code
@@ -85,43 +85,24 @@ PROGRAM ahot_c_ug
 
     ! Print banner for THOR
 
-    WRITE(stdout_unit,*) "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-    WRITE(stdout_unit,*)
-    WRITE(stdout_unit,*) "   TTTTTTT  HH     HH  OOOOO  RRRRRR "
-    WRITE(stdout_unit,*) "     TTT    HH     HH OOOOOOO RRRRRRR"
-    WRITE(stdout_unit,*) "     TTT    HH     HH OO   OO RR   RR"
-    WRITE(stdout_unit,*) "     TTT    HHHHHHHHH OO   OO RRRRRR "
-    WRITE(stdout_unit,*) "     TTT    HHHHHHHHH OO   OO RRRR   "
-    WRITE(stdout_unit,*) "     TTT    HH     HH OO   OO RR RR  "
-    WRITE(stdout_unit,*) "     TTT    HH     HH 0000000 RR  RR "
-    WRITE(stdout_unit,*) "     TTT    HH     HH  OOOOO  RR   RR"
-    WRITE(stdout_unit,*)
-    WRITE(stdout_unit,*) "   Tetrahedral High Order Radiation Transport Code"
-    WRITE(stdout_unit,*)
-    WRITE(stdout_unit,*) "   By R. M. Ferrer"
-    WRITE(stdout_unit,*)
-    WRITE(stdout_unit,*) "   Version 1.0 BETA - Update 05/10/2012"
-    WRITE(stdout_unit,*) "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-    WRITE(stdout_unit,*)
-
-    WRITE(log_unit,*) "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-    WRITE(log_unit,*)
-    WRITE(log_unit,*) "   TTTTTTT  HH     HH  OOOOO  RRRRRR "
-    WRITE(log_unit,*) "     TTT    HH     HH OOOOOOO RRRRRRR"
-    WRITE(log_unit,*) "     TTT    HH     HH OO   OO RR   RR"
-    WRITE(log_unit,*) "     TTT    HHHHHHHHH OO   OO RRRRRR "
-    WRITE(log_unit,*) "     TTT    HHHHHHHHH OO   OO RRRR   "
-    WRITE(log_unit,*) "     TTT    HH     HH OO   OO RR RR  "
-    WRITE(log_unit,*) "     TTT    HH     HH 0000000 RR  RR "
-    WRITE(log_unit,*) "     TTT    HH     HH  OOOOO  RR   RR"
-    WRITE(log_unit,*)
-    WRITE(log_unit,*) "   Tetrahedral High Order Radiation Transport Code"
-    WRITE(log_unit,*)
-    WRITE(log_unit,*) "   By R. M. Ferrer"
-    WRITE(log_unit,*)
-    WRITE(log_unit,*) "   Version 1.0 BETA - Update 05/10/2012"
-    WRITE(log_unit,*) "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-    WRITE(log_unit,*)
+    CALL printlog("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    CALL printlog('')
+    CALL printlog("   TTTTTTT  HH     HH  OOOOO  RRRRRR ")
+    CALL printlog("     TTT    HH     HH OOOOOOO RRRRRRR")
+    CALL printlog("     TTT    HH     HH OO   OO RR   RR")
+    CALL printlog("     TTT    HHHHHHHHH OO   OO RRRRRR ")
+    CALL printlog("     TTT    HHHHHHHHH OO   OO RRRR   ")
+    CALL printlog("     TTT    HH     HH OO   OO RR RR  ")
+    CALL printlog("     TTT    HH     HH 0000000 RR  RR ")
+    CALL printlog("     TTT    HH     HH  OOOOO  RR   RR")
+    CALL printlog('')
+    CALL printlog("   Tetrahedral High Order Radiation Transport Code")
+    CALL printlog('')
+    CALL printlog("   By R. M. Ferrer")
+    CALL printlog('')
+    CALL printlog("   Version 1.0 BETA - Update 05/10/2012")
+    CALL printlog("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    CALL printlog('')
   END IF
 
   !***********************************************************************
@@ -202,7 +183,7 @@ END PROGRAM ahot_c_ug
 SUBROUTINE write_timing
 
   USE mpi
-  USE global_variables
+  USE globals
   IMPLICIT NONE
 
   INTEGER :: i, num_p, mpi_err, err_size(MPI_STATUS_SIZE), do_timing=0
@@ -217,33 +198,25 @@ SUBROUTINE write_timing
   IF (rank .EQ. 0 .AND. do_timing .EQ. 1) THEN
     DO i =0, num_p-1
       CALL MPI_RECV(print_timing, 8, MPI_DOUBLE, i, i, MPI_COMM_WORLD, err_size, mpi_err )
-      WRITE(stdout_unit,*)
-      WRITE(stdout_unit,*)'/====================================================='
-      WRITE(stdout_unit,*)'| Timing Data for process: ', i
-      WRITE(stdout_unit,*)'|-----------------------------------------------------'
-      WRITE(stdout_unit,*)'| Total Measured Time:      ', print_timing(1,2)- print_timing(1,1)
-      WRITE(stdout_unit,*)'| Total Setup Time:         ', print_timing(2,2)- print_timing(2,1)
-      WRITE(stdout_unit,*)'| Total Execute Time:       ', print_timing(3,2)- print_timing(3,1)
-      WRITE(stdout_unit,*)'| Total Wrapup Time:        ', print_timing(4,2)- print_timing(4,1)
-      WRITE(stdout_unit,*)'| Total Non-Accounted Time: ',(print_timing(1,2)- print_timing(1,1))- &
+      CALL printlog('')
+      CALL printlog('/=====================================================')
+      WRITE(amsg,'(A,I0)')'| Timing Data for process: ', i
+      CALL printlog(amsg)
+      CALL printlog('|-----------------------------------------------------')
+      WRITE(amsg,'(A,ES12.4)')'| Total Measured Time:      ', print_timing(1,2)- print_timing(1,1)
+      CALL printlog(amsg)
+      WRITE(amsg,'(A,ES12.4)')'| Total Setup Time:         ', print_timing(2,2)- print_timing(2,1)
+      CALL printlog(amsg)
+      WRITE(amsg,'(A,ES12.4)')'| Total Execute Time:       ', print_timing(3,2)- print_timing(3,1)
+      CALL printlog(amsg)
+      WRITE(amsg,'(A,ES12.4)')'| Total Wrapup Time:        ', print_timing(4,2)- print_timing(4,1)
+      CALL printlog(amsg)
+      WRITE(amsg,'(A,ES12.4)')'| Total Non-Accounted Time: ',(print_timing(1,2)- print_timing(1,1))- &
                                                (print_timing(2,2)- print_timing(2,1)) - &
                                                (print_timing(3,2)- print_timing(3,1)) - &
                                                (print_timing(4,2)- print_timing(4,1))
-      WRITE(stdout_unit,*)'\====================================================='
-
-      WRITE(log_unit,*)
-      WRITE(log_unit,*)'/====================================================='
-      WRITE(log_unit,*)'| Timing Data for process: ', i
-      WRITE(log_unit,*)'|-----------------------------------------------------'
-      WRITE(log_unit,*)'| Total Measured Time:      ', print_timing(1,2)- print_timing(1,1)
-      WRITE(log_unit,*)'| Total Setup Time:         ', print_timing(2,2)- print_timing(2,1)
-      WRITE(log_unit,*)'| Total Execute Time:       ', print_timing(3,2)- print_timing(3,1)
-      WRITE(log_unit,*)'| Total Wrapup Time:        ', print_timing(4,2)- print_timing(4,1)
-      WRITE(log_unit,*)'| Total Non-Accounted Time: ',(print_timing(1,2)- print_timing(1,1))- &
-                                               (print_timing(2,2)- print_timing(2,1)) - &
-                                               (print_timing(3,2)- print_timing(3,1)) - &
-                                               (print_timing(4,2)- print_timing(4,1))
-      WRITE(log_unit,*)'\====================================================='
+      CALL printlog(amsg)
+      CALL printlog('\=====================================================')
     END DO
   END IF
 

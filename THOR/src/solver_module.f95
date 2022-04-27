@@ -16,7 +16,7 @@ MODULE solver_module
   USE geometry_types
   USE angle_types
   USE multindex_types
-  USE global_variables
+  USE globals
 
   ! Use modules that pertain setting up problem
 

@@ -14,7 +14,7 @@ MODULE check_input
   USE geometry_types
   USE angle_types
   USE multindex_types
-  USE global_variables
+  USE globals
 
   IMPLICIT NONE
 
@@ -199,64 +199,54 @@ CONTAINS
 
     ! Print cross sections
 
-    WRITE(stdout_unit,*)
-    WRITE(stdout_unit,*) '------------------------------------------------------------------'
-    WRITE(stdout_unit,*) '--------------------- Echoing Cross Sections ---------------------'
-    WRITE(stdout_unit,*) '------------------------------------------------------------------'
-    WRITE(stdout_unit,*)
-    WRITE(stdout_unit,101) 'Number of materials:             ',num_mat
-    WRITE(stdout_unit,101) 'Number of groups:                ',egmax
-    WRITE(stdout_unit,101) 'Scattering expansion order read: ',xs_ord
-    WRITE(log_unit,*)
-    WRITE(log_unit,*) '------------------------------------------------------------------'
-    WRITE(log_unit,*) '--------------------- Echoing Cross Sections ---------------------'
-    WRITE(log_unit,*) '------------------------------------------------------------------'
-    WRITE(log_unit,*)
-    WRITE(log_unit,101) 'Number of materials:             ',num_mat
-    WRITE(log_unit,101) 'Number of groups:                ',egmax
-    WRITE(log_unit,101) 'Scattering expansion order read: ',xs_ord
+    CALL printlog('')
+    CALL printlog('------------------------------------------------------------------')
+    CALL printlog('--------------------- Echoing Cross Sections ---------------------')
+    CALL printlog('------------------------------------------------------------------')
+    CALL printlog('')
+    WRITE(amsg,101) 'Number of materials:             ',num_mat
+    CALL printlog(amsg)
+    WRITE(amsg,101) 'Number of groups:                ',egmax
+    CALL printlog(amsg)
+    WRITE(amsg,101) 'Scattering expansion order read: ',xs_ord
+    CALL printlog(amsg)
     IF ( most_thermal>egmax ) THEN
-      WRITE(stdout_unit,*) 'No upscattering present.'
-      WRITE(log_unit,*) 'No upscattering present.'
+      CALL printlog('No upscattering present.')
     ELSE
-      WRITE(stdout_unit,101) 'Most thermal group:              ',most_thermal
-      WRITE(log_unit,101) 'Most thermal group:              ',most_thermal
+      WRITE(amsg,101) 'Most thermal group:              ',most_thermal
+      CALL printlog(amsg)
     END IF
     DO m=1,num_mat
-      WRITE(stdout_unit,102) 'Material ',TRIM(xs_mat(m)%mat_name),' with ID ',xs_mat(m)%mat_id
-      WRITE(stdout_unit,103) 'Group','SigT','SigF','SigS','nu*SigF','chi'
-      WRITE(log_unit,102) 'Material ',TRIM(xs_mat(m)%mat_name),' with ID ',xs_mat(m)%mat_id
-      WRITE(log_unit,103) 'Group','SigT','SigF','SigS','nu*SigF','chi'
+      WRITE(amsg,102) 'Material ',TRIM(xs_mat(m)%mat_name),' with ID ',xs_mat(m)%mat_id
+      CALL printlog(amsg)
+      WRITE(amsg,103) 'Group','SigT','SigF','SigS','nu*SigF','chi'
+      CALL printlog(amsg)
       DO g=1,egmax
         sigs=0.0_d_t
         DO gp=1,egmax
           sigs(g)=sigs(g)+xs_mat(m)%sigma_scat(1,gp,g)
         END DO
-        WRITE(stdout_unit,104) g,xs_mat(m)%sigma_t(g),xs_mat(m)%sigma_f(g), &
+        WRITE(amsg,104) g,xs_mat(m)%sigma_t(g),xs_mat(m)%sigma_f(g), &
               sigs(g),xs_mat(m)%sigma_f(g)*xs_mat(m)%nu(g),&
               xs_mat(m)%chi(g)
-        WRITE(log_unit,104) g,xs_mat(m)%sigma_t(g),xs_mat(m)%sigma_f(g), &
-              sigs(g),xs_mat(m)%sigma_f(g)*xs_mat(m)%nu(g),&
-              xs_mat(m)%chi(g)
+        CALL printlog(amsg)
       END DO
-      WRITE(stdout_unit,*) 'Scattering Matrix, from -> columns, to -> row'
-      WRITE(log_unit,*) 'Scattering Matrix, from -> columns, to -> row'
+      CALL printlog('Scattering Matrix, from -> columns, to -> row')
       DO order=1, xs_ord+1
-        WRITE(stdout_unit,101) 'Scattering order: ',order-1
-        WRITE(log_unit,101) 'Scattering order: ',order-1
+        WRITE(amsg,101) 'Scattering order: ',order-1
+        CALL printlog(amsg)
         DO g=1,egmax
-          WRITE(stdout_unit,105) (xs_mat(m)%sigma_scat(order,g,gp),gp=1,egmax)
-          WRITE(log_unit,105) (xs_mat(m)%sigma_scat(order,g,gp),gp=1,egmax)
+          WRITE(amsg,105) (xs_mat(m)%sigma_scat(order,g,gp),gp=1,egmax)
+          CALL printlog(amsg)
         END DO
       END DO
     END DO
-    WRITE(stdout_unit,*)
-    WRITE(log_unit,*)
-101 FORMAT(1X,A,I8)
-102 FORMAT(1X,A,A,A,I8)
-103 FORMAT(1X,A9,5A15)
-104 FORMAT(1X,I9,5ES15.4)
-105 FORMAT(1X,12ES15.4)
+    CALL printlog('')
+101 FORMAT(A,I8)
+102 FORMAT(A,A,A,I8)
+103 FORMAT(A9,5A15)
+104 FORMAT(I9,5ES15.4)
+105 FORMAT(12ES15.4)
   END SUBROUTINE print_xs
 
 END MODULE check_input

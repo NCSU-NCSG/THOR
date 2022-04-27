@@ -7,7 +7,7 @@ MODULE sph_harmonics_module
   !*********************************************************************
   ! User derived-type modules
 
-  USE global_variables
+  USE globals
   USE types
   USE parameter_types
   USE vector_types

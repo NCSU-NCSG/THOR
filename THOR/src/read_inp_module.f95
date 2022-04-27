@@ -7,7 +7,7 @@ MODULE read_inp_module
 
   USE mpi
   USE stringmod
-  USE global_variables
+  USE globals
   USE error_module
 
   IMPLICIT NONE
@@ -951,18 +951,16 @@ CONTAINS
       glob_do_cartesian_mesh = .TRUE.
       ! wwords must be an array with of length 9
       IF(nwwwords .NE. 9) THEN
-        WRITE(stdout_unit,*) 'Following cartesian map nine entries are required; Found: ',&
+        WRITE(amsg,'(3A,I0,A)') 'Following cartesian map nine entries are required; Found: ',&
               TRIM(wwords(2)),' has ', nwwwords, ' entries.'
-        WRITE(log_unit,*) 'Following cartesian map nine entries are required; Found: ',&
-              TRIM(wwords(2)),' has ', nwwwords, ' entries.'
+        CALL printlog(amsg)
       END IF
       msg='Conversion to cartesian map xmin failed'
       glob_cmap_min_x = string_to_real(wwwords(1), msg)
       msg='Conversion to cartesian map xmax failed'
       glob_cmap_max_x = string_to_real(wwwords(2), msg)
       IF(ABS(glob_cmap_max_x - glob_cmap_min_x) < small_real) THEN
-        WRITE(stdout_unit, *) "cartesian_map xmin and xmax are too close to each other"
-        WRITE(log_unit, *) "cartesian_map xmin and xmax are too close to each other"
+        CALL printlog("cartesian_map xmin and xmax are too close to each other")
       END IF
       msg='Conversion to cartesian map nx failed'
       glob_cmap_nx = string_to_int(wwwords(3), msg, minint)
@@ -971,8 +969,7 @@ CONTAINS
       msg='Conversion to cartesian map ymax failed'
       glob_cmap_max_y = string_to_real(wwwords(5), msg)
       IF(ABS(glob_cmap_max_y - glob_cmap_min_y) < small_real) THEN
-        WRITE(stdout_unit, *) "cartesian_map xmin and xmax are too close to each other"
-        WRITE(log_unit, *) "cartesian_map xmin and xmax are too close to each other"
+        CALL printlog("cartesian_map xmin and xmax are too close to each other")
       END IF
       msg='Conversion to cartesian map ny failed'
       glob_cmap_ny = string_to_int(wwwords(6), msg, minint)
@@ -981,8 +978,7 @@ CONTAINS
       msg='Conversion to cartesian map zmax failed'
       glob_cmap_max_z = string_to_real(wwwords(8), msg)
       IF(ABS(glob_cmap_max_z - glob_cmap_min_z) < small_real) THEN
-        WRITE(stdout_unit, *) "cartesian_map zmin and zmax are too close to each other"
-        WRITE(log_unit, *) "cartesian_map zmin and zmax are too close to each other"
+        CALL printlog("cartesian_map zmin and zmax are too close to each other")
       END IF
       msg='Conversion to cartesian map nz failed'
       glob_cmap_nz = string_to_int(wwwords(9), msg, minint)
@@ -1008,10 +1004,9 @@ CONTAINS
       ENDDO
       ! must be divisible by 3
       IF(modulo(nwwwords, 3) .ne. 0) THEN
-        WRITE(stdout_unit,*) 'point_value_locations number of entries must be divisible by 3; Found: ',&
+        WRITE(amsg,'(3A,I0,A)') 'point_value_locations number of entries must be divisible by 3; Found: ',&
               TRIM(wwords(2)),' has ', nwwwords, ' entries.'
-        WRITE(log_unit,*) 'point_value_locations number of entries must be divisible by 3; Found: ',&
-              TRIM(wwords(2)),' has ', nwwwords, ' entries.'
+        CALL printlog(amsg)
       ELSE
         number_point_flux_locations = nwwwords / 3
         ALLOCATE(point_flux_locations(number_point_flux_locations, 3))
@@ -1153,66 +1148,53 @@ CONTAINS
       cnamelg_max=MAX(cnamelg_max,LEN_TRIM(cards(i)%cname))
     ENDDO
     strlg_max=MIN(strlg_max,MAX_CARDNAME_LEN)
-    WRITE(stdout_unit,'(A)')'***********************************************************************'
-    WRITE(stdout_unit,'(A)')'*******************Echoing equivalent complete input*******************'
-    WRITE(stdout_unit,'(A)')'***********************************************************************'
-    WRITE(log_unit,'(A)')'***********************************************************************'
-    WRITE(log_unit,'(A)')'*******************Echoing equivalent complete input*******************'
-    WRITE(log_unit,'(A)')'***********************************************************************'
+    CALL printlog('')
+    CALL printlog('***********************************************************************')
+    CALL printlog('*******************Echoing equivalent complete input*******************')
+    CALL printlog('***********************************************************************')
     DO i=1,num_cards
       cards(i)%carg=TRIM(ADJUSTL(cards(i)%carg))
       !echo cards and data
       IF(LEN_TRIM(cards(i)%carg) .LE. MAX_CARDNAME_LEN)THEN
-        WRITE(stdout_unit,'(3A)',ADVANCE='NO')cards(i)%cname(1:cnamelg_max),' ',cards(i)%carg(1:strlg_max)
-        WRITE(log_unit,'(3A)',ADVANCE='NO')cards(i)%cname(1:cnamelg_max),' ',cards(i)%carg(1:strlg_max)
+        WRITE(amsg,'(4A)')cards(i)%cname(1:cnamelg_max),' ',cards(i)%carg(1:strlg_max),' !'
+        CALL printlog(amsg,ADVANCING=.FALSE.)
       ELSE
-        WRITE(stdout_unit,'(3A)',ADVANCE='NO')cards(i)%cname(1:cnamelg_max),' ',TRIM(cards(i)%carg)
-        WRITE(log_unit,'(3A)',ADVANCE='NO')cards(i)%cname(1:cnamelg_max),' ',TRIM(cards(i)%carg)
+        WRITE(amsg,'(4A)')cards(i)%cname(1:cnamelg_max),' ',TRIM(cards(i)%carg),' !'
+        CALL printlog(amsg,ADVANCING=.FALSE.)
       ENDIF
       !echo if card is provided
       IF(cards(i)%used)THEN
-        WRITE(stdout_unit,'(A)',ADVANCE='NO')' !card provided'
-        WRITE(log_unit,'(A)',ADVANCE='NO')' !card provided'
+        CALL printlog('card provided',ADVANCING=.FALSE.)
       ELSE
-        WRITE(stdout_unit,'(A)',ADVANCE='NO')' !card NOT provided'
-        WRITE(log_unit,'(A)',ADVANCE='NO')' !card NOT provided'
+        CALL printlog('card NOT provided (default)',ADVANCING=.FALSE.)
       ENDIF
       !print info on ignored input cards
       SELECT CASE(cards(i)%csub)
         CASE('keig')
           IF(problem .NE. 1)THEN
-            WRITE(stdout_unit,'(A)',ADVANCE='NO')': ignored, not a keig problem'
-            WRITE(log_unit,'(A)',ADVANCE='NO')': ignored, not a keig problem'
+            CALL printlog(': ignored, not a keig problem',ADVANCING=.FALSE.)
           ENDIF
         CASE('poweriter')
           IF(eig_switch .NE. 0)THEN
-            WRITE(stdout_unit,'(A)',ADVANCE='NO')': ignored, not using power iterations'
-            WRITE(log_unit,'(A)',ADVANCE='NO')': ignored, not using power iterations'
+            CALL printlog(': ignored, not using power iterations',ADVANCING=.FALSE.)
           ENDIF
         CASE('jfnk')
           IF(eig_switch .NE. 1)THEN
-            WRITE(stdout_unit,'(A)',ADVANCE='NO')': ignored, not using jfnk'
-            WRITE(log_unit,'(A)',ADVANCE='NO')': ignored, not using jfnk'
+            CALL printlog(': ignored, not using jfnk',ADVANCING=.FALSE.)
           ENDIF
         CASE('legacyxs')
-          WRITE(stdout_unit,'(A)',ADVANCE='NO')': only used with legaxy xs'
-          WRITE(log_unit,'(A)',ADVANCE='NO')': only used with legaxy xs'
+          CALL printlog(': only used with legaxy xs',ADVANCING=.FALSE.)
         CASE('srcprob')
           IF(problem .NE. 0)THEN
-            WRITE(stdout_unit,'(A)',ADVANCE='NO')': ignored, not a fixed source problem'
-            WRITE(log_unit,'(A)',ADVANCE='NO')': ignored, not a fixed source problem'
+            CALL printlog(': ignored, not a fixed source problem',ADVANCING=.FALSE.)
           ENDIF
         CASE DEFAULT
       ENDSELECT
-      WRITE(stdout_unit,*)
-      WRITE(log_unit,*)
+      CALL printlog('')
     ENDDO
-    WRITE(stdout_unit,'(A)')'***********************************************************************'
-    WRITE(stdout_unit,'(A)')'******************Equivalent complete input finished*******************'
-    WRITE(stdout_unit,'(A)')'***********************************************************************'
-    WRITE(log_unit,'(A)')'***********************************************************************'
-    WRITE(log_unit,'(A)')'******************Equivalent complete input finished*******************'
-    WRITE(log_unit,'(A)')'***********************************************************************'
+    CALL printlog('***********************************************************************')
+    CALL printlog('******************Equivalent complete input finished*******************')
+    CALL printlog('***********************************************************************')
   ENDSUBROUTINE echo_equiv_inp
 
 END MODULE read_inp_module

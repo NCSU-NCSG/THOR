@@ -15,7 +15,7 @@ MODULE wrapup_module
   USE cross_section_types
   USE geometry_types
   USE angle_types
-  USE global_variables
+  USE globals
   USE error_module
   USE general_utility_module
 
@@ -63,18 +63,18 @@ CONTAINS
     ! Print runtime
     IF (rank .EQ. 0) THEN
       WRITE(unit_number,*)
-      WRITE(unit_number,*) "--------------------------------------------------------"
-      WRITE(unit_number,*) "   Execution Summary   "
-      WRITE(unit_number,*) "--------------------------------------------------------"
+      WRITE(unit_number,'(A)') "--------------------------------------------------------"
+      WRITE(unit_number,'(A)') "   Execution Summary   "
+      WRITE(unit_number,'(A)') "--------------------------------------------------------"
       IF (conv_flag==0) THEN
-        WRITE(unit_number,*) "Warning! Execution finished without satisfying all stopping criteria. Warning!"
+        WRITE(unit_number,'(A)') "Warning! Execution finished without satisfying all stopping criteria. Warning!"
       ELSE IF(conv_flag==1) THEN
-        WRITE(unit_number,*) "Execution finished successfully. All stopping criteria satisfied."
+        WRITE(unit_number,'(A)') "Execution finished successfully. All stopping criteria satisfied."
       END IF
-      WRITE(unit_number,202) "Runtime (seconds):                                          ", finish-start
+      WRITE(unit_number,202) "Runtime (seconds):                                         ", finish-start
       IF (problem == 0 .OR. (problem == 1 .AND. eig_switch == 0 ) ) THEN
-        WRITE(unit_number,101) "Number of outer iterations:                                 ", outer
-        WRITE(unit_number,101) "Number of inner iterations:                                 ", tot_nInners
+        WRITE(unit_number,101) "Number of outer iterations:                                   ", outer
+        WRITE(unit_number,101) "Number of inner iterations:                                   ", tot_nInners
       ELSE
         WRITE(unit_number,101) "Number of newton iterations:                                ", nit
         IF (rd_method==1) THEN
@@ -88,8 +88,8 @@ CONTAINS
         WRITE(unit_number,102) "Final eigenvalue:                                          ", keff
       END IF
       IF(problem==0) THEN
-        WRITE(unit_number,*) "Maximum scalar group flux error (outer iteration):         ", max_outer_error
-        WRITE(unit_number,*) "Maximum scalar flux error by group:"
+        WRITE(unit_number,102) "Maximum scalar group flux error (outer iteration):         ", max_outer_error
+        WRITE(unit_number,'(A)') "Maximum scalar flux error by group:"
         DO eg=1, egmax
           WRITE(unit_number,103) eg,max_error(eg)
         END DO
@@ -99,18 +99,18 @@ CONTAINS
           WRITE(unit_number,103) eg,max_error(eg)
         END DO
       ELSE IF(problem==1 .AND. eig_switch == 0) THEN
-        WRITE(unit_number,*) "Eigenvalue error:                                           ", k_error
-        WRITE(unit_number,*) "Maximum fission source error:                               ", f_error
-        WRITE(unit_number,*) "Maximum scalar group flux error:                            ", max_outer_error
+        WRITE(unit_number,102) "Eigenvalue error:                                           ", k_error
+        WRITE(unit_number,102) "Maximum fission source error:                               ", f_error
+        WRITE(unit_number,102) "Maximum scalar group flux error:                            ", max_outer_error
       END IF
     END IF
 
     ! Formats
 
-101 FORMAT(1X,A60,I5)
-102 FORMAT(A60,ES25.16)
-202 FORMAT(1X,A60,ES25.16)
-103 FORMAT(1X,I5,ES25.16)
+101 FORMAT(A,I0)
+102 FORMAT(A,ES25.16)
+202 FORMAT(A,ES25.16)
+103 FORMAT(I5,ES25.16)
 
     ! Open angular flux file and write volume and face flux in file
 
@@ -174,16 +174,16 @@ CONTAINS
 
       CLOSE(20)
 
-      WRITE(unit_number,*) "A flux file was been succesfully written!"
+      WRITE(unit_number,'(A)') "A flux file was been succesfully written!"
     END IF
 
     ! Compute region averaged fluxes and reaction rates
 
     IF (rank .EQ. 0) THEN
       WRITE(unit_number,*)
-      WRITE(unit_number,*) "--------------------------------------------------------"
-      WRITE(unit_number,*) "   Region averaged reaction rates  "
-      WRITE(unit_number,*) "--------------------------------------------------------"
+      WRITE(unit_number,'(A)') "--------------------------------------------------------"
+      WRITE(unit_number,'(A)') "   Region averaged reaction rates  "
+      WRITE(unit_number,'(A)') "--------------------------------------------------------"
       WRITE(unit_number,*)
       reg_volume=0.0_d_t
       reac_rates=0.0_d_t
@@ -230,7 +230,7 @@ CONTAINS
           WRITE(unit_number,503) eg,reac_rates(1,region,eg),reac_rates(2,region,eg),&
                 reac_rates(3,region,eg),reac_rates(4,region,eg)
         END DO
-        WRITE(unit_number,504) 'Total   ',reac_rates(1,region,egmax+1),reac_rates(2,region,egmax+1),&
+        WRITE(unit_number,504) '   Total',reac_rates(1,region,egmax+1),reac_rates(2,region,egmax+1),&
               reac_rates(3,region,egmax+1),reac_rates(4,region,egmax+1)
       END DO
     END IF
@@ -367,9 +367,9 @@ CONTAINS
       END DO
       ! print the group averages fluxes
       WRITE(unit_number, *)
-      WRITE(unit_number, *) "--------------------------------------------------------"
-      WRITE(unit_number, *) "   Point flux values  "
-      WRITE(unit_number, *) "--------------------------------------------------------"
+      WRITE(unit_number, '(A)') "--------------------------------------------------------"
+      WRITE(unit_number, '(A)') "   Point flux values  "
+      WRITE(unit_number, '(A)') "--------------------------------------------------------"
       WRITE(unit_number, *)
       DO j = 1, number_point_flux_locations
         IF (point_flux_location_element_indices(j) .GT. 0_li) THEN
@@ -405,18 +405,18 @@ CONTAINS
     END DO
     CLOSE(20)
 
-499 FORMAT(1X,3I6,6ES18.8)
-501 FORMAT(1X,A,I4,A,ES14.6)
-502 FORMAT(1X,A)
-503 FORMAT(1X,I8,4ES14.6)
-504 FORMAT(1X,A8,4ES14.6)
-505 FORMAT(1X,A9,I3,A1)
-506 FORMAT(1X,A9,I3)
-507 FORMAT(1X,ES25.16,A1)
-508 FORMAT(1X,ES25.16)
-509 FORMAT(1X,I3,A1)
-510 FORMAT(1X,A,3ES14.6)
-511 FORMAT(1X,A,I3,ES14.6)
+499 FORMAT(3I6,6ES18.8)
+501 FORMAT(A,I4,A,ES14.6)
+502 FORMAT(A)
+503 FORMAT(I8,4ES14.6)
+504 FORMAT(A8,4ES14.6)
+505 FORMAT(A9,I3,A1)
+506 FORMAT(A9,I3)
+507 FORMAT(ES25.16,A1)
+508 FORMAT(ES25.16)
+509 FORMAT(I3,A1)
+510 FORMAT(A,3ES14.6)
+511 FORMAT(A,I3,ES14.6)
   END SUBROUTINE wrapup
 
 END MODULE wrapup_module

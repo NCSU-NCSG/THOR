@@ -12,7 +12,7 @@ MODULE quadrature_module
   USE parameter_types
   USE vector_types
   USE angle_types
-  USE global_variables
+  USE globals
   USE error_module
 
   IMPLICIT NONE

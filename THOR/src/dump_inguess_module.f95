@@ -15,7 +15,7 @@ MODULE dump_inguess_module
   USE geometry_types
   USE angle_types
   USE multindex_types
-  USE global_variables
+  USE globals
   USE error_module
 
   IMPLICIT NONE
@@ -68,18 +68,13 @@ CONTAINS
       ! close file
 
       CLOSE(unit=66)
-      WRITE(stdout_unit,*)
-      WRITE(stdout_unit,*) 'Initial guess file ',TRIM(inguess_file),' was successfully read'
-      WRITE(log_unit,*)
-      WRITE(log_unit,*) 'Initial guess file ',TRIM(inguess_file),' was successfully read'
+      CALL printlog('')
+      CALL printlog('Initial guess file '//TRIM(inguess_file)//' was successfully read')
 
     ELSE
-      WRITE(stdout_unit,*)
-      WRITE(stdout_unit,*) "Attempted to read initial guess file ",TRIM(inguess_file)," but could not find it."
-      WRITE(stdout_unit,*)
-      WRITE(log_unit,*)
-      WRITE(log_unit,*) "Attempted to read initial guess file ",TRIM(inguess_file)," but could not find it."
-      WRITE(log_unit,*)
+      CALL printlog('')
+      CALL printlog("Attempted to read initial guess file "//TRIM(inguess_file)//" but could not find it.")
+      CALL printlog('')
       flux(:,:,:,:,niter)=zero
       DO eg =1,egmax
         DO i=1,num_cells

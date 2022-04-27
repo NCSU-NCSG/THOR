@@ -20,7 +20,7 @@ MODULE outer_iteration_module
   USE geometry_types
   USE angle_types
   USE multindex_types
-  USE global_variables
+  USE globals
   USE wrapup_module
 
   ! Use modules that pertain setting up problem
@@ -110,12 +110,9 @@ CONTAINS
 
     ! Keep track of iterations
     IF (rank .EQ. 0) THEN
-      WRITE(stdout_unit,*) '========================================================'
-      WRITE(stdout_unit,*) '   Begin outer iterations.'
-      WRITE(stdout_unit,*) '========================================================'
-      WRITE(log_unit,*) '========================================================'
-      WRITE(log_unit,*) '   Begin outer iterations.'
-      WRITE(log_unit,*) '========================================================'
+      CALL printlog('========================================================')
+      CALL printlog('   Begin outer iterations.')
+      CALL printlog('========================================================')
     END IF
     ! Begin outer iteration
 
@@ -235,15 +232,13 @@ CONTAINS
         END DO
       END DO
       IF (rank .EQ. 0) THEN
-        WRITE(stdout_unit,*)   '---------------------------------------'
-        WRITE(stdout_unit,103) '---itn i-itn   max error   max error---'
-        WRITE(stdout_unit,102) outer,tot_nInners, max_outer_error, MAXVAL(max_error),' %% '
-        WRITE(stdout_unit,*)   '---------------------------------------'
-        WRITE(log_unit,*)   '---------------------------------------'
-        WRITE(log_unit,103) '---itn i-itn   max error   max error---'
-        WRITE(log_unit,102) outer,tot_nInners, max_outer_error, MAXVAL(max_error),' %% '
-        WRITE(log_unit,*)   '---------------------------------------'
-        flush(6)
+        CALL printlog('---------------------------------------')
+        CALL printlog('---itn i-itn   max error   max error---')
+        WRITE(amsg,102) outer,tot_nInners, max_outer_error, MAXVAL(max_error),' %% '
+        CALL printlog(amsg)
+        CALL printlog('---------------------------------------')
+        flush(stdout_unit)
+        flush(log_unit)
       END IF
       IF(print_conv.EQ.1 .AND. rank .EQ. 0) THEN
         WRITE(21,*)   '---------------------------------------'
@@ -252,8 +247,8 @@ CONTAINS
         WRITE(21,*)   '---------------------------------------'
         flush(21)
       END IF
-103   FORMAT(1X,A)
-102   FORMAT(1X,2I6,2ES12.4,A)
+103   FORMAT(A)
+102   FORMAT(2I6,2ES12.4,A)
 
       ! Convergence check
 
@@ -274,12 +269,9 @@ CONTAINS
     outer=outer-1
 
     IF (rank .EQ. 0) THEN
-      WRITE(stdout_unit,*) '========================================================'
-      WRITE(stdout_unit,*) '   End outer iterations.'
-      WRITE(stdout_unit,*) '========================================================'
-      WRITE(log_unit,*) '========================================================'
-      WRITE(log_unit,*) '   End outer iterations.'
-      WRITE(log_unit,*) '========================================================'
+      CALL printlog('========================================================')
+      CALL printlog('   End outer iterations.')
+      CALL printlog('========================================================')
     END IF
     ! Close reflected flux file if page_ref .eq. 1
 
@@ -451,8 +443,7 @@ CONTAINS
       keff_new=keff
       keff_old=keff
       IF (rank .EQ. 0) THEN
-        WRITE(stdout_unit,*)
-        WRITE(log_unit,*)
+        CALL printlog('')
       END IF
 
       DO ii=1,niter-1
@@ -484,12 +475,9 @@ CONTAINS
 
     ! Keep track of iterations
     IF (rank .EQ. 0) THEN
-      WRITE(stdout_unit,*) '========================================================'
-      WRITE(stdout_unit,*) '   Begin outer iterations.'
-      WRITE(stdout_unit,*) '========================================================'
-      WRITE(log_unit,*) '========================================================'
-      WRITE(log_unit,*) '   Begin outer iterations.'
-      WRITE(log_unit,*) '========================================================'
+      CALL printlog('========================================================')
+      CALL printlog('   Begin outer iterations.')
+      CALL printlog('========================================================')
     END IF
 
     ! Set error mode extrapolation parameters
@@ -511,21 +499,16 @@ CONTAINS
       CALL get_command_argument(2, temp_accel)
       IF ( temp_accel .EQ. '1') THEN
         outer_acc = 1_li
-        WRITE(stdout_unit,*) "NO ACCELERATION"
-        WRITE(log_unit,*) "NO ACCELERATION"
+        CALL printlog("NO ACCELERATION")
       ELSE IF ( temp_accel .EQ. '2') THEN
         outer_acc = 2_li
-        WRITE(stdout_unit,*) "FISSION SOURCE ACCELERATION"
-        WRITE(log_unit,*) "FISSION SOURCE ACCELERATION"
+        CALL printlog("FISSION SOURCE ACCELERATION")
       ELSE IF ( temp_accel .EQ. '3') THEN
         outer_acc = 3_li
-        WRITE(stdout_unit,*) "CHEBYCHEV ACCELERATION"
-        WRITE(log_unit,*) "CHEBYCHEV ACCELERATION"
+        CALL printlog("CHEBYCHEV ACCELERATION")
       ELSE
-        WRITE(stdout_unit,*) "Invalid command line acceleration parameter"
-        WRITE(stdout_unit,*) "Using value from input file"
-        WRITE(log_unit,*) "Invalid command line acceleration parameter"
-        WRITE(log_unit,*) "Using value from input file"
+        CALL printlog("Invalid command line acceleration parameter")
+        CALL printlog("Using value from input file")
       END IF
     END IF                                                                      !FIXME - REMOVE AND IMPLEMENT SWITCH INTO INPUT FILE
 
@@ -774,15 +757,13 @@ CONTAINS
       ! write information for outer iteration
       !========================================================================
       IF (rank .EQ. 0) THEN
-        WRITE(stdout_unit,*)   '---------------------------------------------------------------------------------------------------'
-        WRITE(stdout_unit,101) '---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap        time---'
-        WRITE(stdout_unit,102) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,te-ts,' %% '
-        WRITE(stdout_unit,*)   '---------------------------------------------------------------------------------------------------'
-        WRITE(log_unit,*)   '---------------------------------------------------------------------------------------------------'
-        WRITE(log_unit,101) '---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap        time---'
-        WRITE(log_unit,102) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,te-ts,' %% '
-        WRITE(log_unit,*)   '---------------------------------------------------------------------------------------------------'
-        flush(6)
+        CALL printlog('---------------------------------------------------------------------------------------------------')
+        CALL printlog('---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap        time---')
+        WRITE(amsg,102) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,te-ts,' %% '
+        CALL printlog(amsg)
+        CALL printlog('---------------------------------------------------------------------------------------------------')
+        flush(stdout_unit)
+        flush(log_unit)
         IF(print_conv.EQ.1) THEN
           WRITE(21,*)   '---------------------------------------------------------------------------------------------------'
           WRITE(21,101) '---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap        time---'
@@ -791,8 +772,8 @@ CONTAINS
           flush(21)
         END IF
       END IF
-101   FORMAT(1X,A)
-102   FORMAT(1X,2I6,5ES12.4,I12,ES12.4,A)
+101   FORMAT(A)
+102   FORMAT(2I6,5ES12.4,I12,ES12.4,A)
 
       !========================================================================
       ! write iteration results to file if desired
@@ -858,12 +839,9 @@ CONTAINS
     keff=keff_old
 
     IF (rank .EQ. 0) THEN
-      WRITE(stdout_unit,*) '========================================================'
-      WRITE(stdout_unit,*) '   End outer iterations.'
-      WRITE(stdout_unit,*) '========================================================'
-      WRITE(log_unit,*) '========================================================'
-      WRITE(log_unit,*) '   End outer iterations.'
-      WRITE(log_unit,*) '========================================================'
+      CALL printlog('========================================================')
+      CALL printlog('   End outer iterations.')
+      CALL printlog('========================================================')
     END IF
 
     ! Close reflected flux file if page_ref .eq. 1

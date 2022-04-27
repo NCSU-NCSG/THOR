@@ -17,7 +17,7 @@ MODULE cell_splitting_module
   USE geometry_types
   USE angle_types
   USE multindex_types
-  USE global_variables
+  USE globals
   USE stringmod
 
   ! Use modules that pertain setting up problem
@@ -368,8 +368,7 @@ CONTAINS
       r2(3)=Rin
       r3(3)=Rout
     ELSE
-      WRITE(stdout_unit,*) "Cell splitting case 1 failed for cell"
-      WRITE(log_unit,*) "Cell splitting case 1 failed for cell"
+      CALL printlog("Cell splitting case 1 failed for cell")
     END IF
 
   END SUBROUTINE case1
@@ -494,8 +493,7 @@ CONTAINS
       r2(3)=Rin
       r3(3)=Rout
     ELSE
-      WRITE(stdout_unit,*) "Cell splitting case 2 failed for cell"
-      WRITE(log_unit,*) "Cell splitting case 2 failed for cell"
+      CALL printlog("Cell splitting case 2 failed for cell")
     END IF
 
   END SUBROUTINE case2
@@ -755,8 +753,7 @@ CONTAINS
       r2(4)=Rin
       r3(4)=Rout
     ELSE
-      WRITE(stdout_unit,*) "Cell splitting case 3 failed for cell"
-      WRITE(log_unit,*) "Cell splitting case 3 failed for cell"
+      CALL printlog("Cell splitting case 3 failed for cell")
     END IF
 
   END SUBROUTINE case3
@@ -982,8 +979,7 @@ CONTAINS
         r3(2)=Rout
       ENDIF
     ELSE
-      WRITE(stdout_unit,*) "Cell splitting case 4 failed for cell"
-      WRITE(log_unit,*) "Cell splitting case 4 failed for cell"
+      CALL printlog("Cell splitting case 4 failed for cell")
     END IF
 
   END SUBROUTINE case4
@@ -1208,8 +1204,7 @@ CONTAINS
         r3(2)=Rout
       ENDIF
     ELSE
-      WRITE(stdout_unit,*) "Cell splitting case 5 failed for cell"
-      WRITE(log_unit,*) "Cell splitting case 5 failed for cell"
+      CALL printlog("Cell splitting case 5 failed for cell")
     END IF
 
   END SUBROUTINE case5
@@ -1351,8 +1346,7 @@ CONTAINS
         r3(1)=Rout
       ENDIF
     ELSE
-      WRITE(stdout_unit,*) "Cell splitting case 6 failed for cell"
-      WRITE(log_unit,*) "Cell splitting case 6 failed for cell"
+      CALL printlog("Cell splitting case 6 failed for cell")
     END IF
 
   END SUBROUTINE case6

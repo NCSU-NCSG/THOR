@@ -20,7 +20,7 @@ MODULE transport_kernel_module_CCE
   USE geometry_types
   USE angle_types
   USE multindex_types
-  USE global_variables
+  USE globals
   USE error_module
   USE general_utility_module
 
