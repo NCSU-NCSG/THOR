@@ -567,8 +567,16 @@ CONTAINS
       ! Check to see if current cycle meets acceleration criteria
       !========================================================================
       IF(outer_acc.EQ.2 .AND. outer.GE.3) THEN
-        a=ABS( ( theta(1) - theta(2) )/theta(1) )
-        b=ABS( ( theta(2) - theta(3) )/theta(2) )
+        IF(ABS(theta(1)) .GE. 1.0E-16)THEN
+          a=ABS( ( theta(1) - theta(2) )/theta(1) )
+        ELSE
+          a=(theta(1) - theta(2))*1.0E+16
+        ENDIF
+        IF(ABS(theta(2)) .GE. 1.0E-16)THEN
+          b=ABS( ( theta(2) - theta(3) )/theta(2) )
+        ELSE
+          b=(theta(2) - theta(3))*1.0E+16
+        ENDIF
         IF( MAX(a,b) < extol .AND. extra_flag.EQ.0_li) THEN
           extra_flag=1_li
         ELSE

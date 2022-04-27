@@ -938,7 +938,7 @@ CONTAINS
     INTEGER :: nwwwords,i,minint
     CHARACTER(ll_max) :: wwwords(lp_max),msg
 
-    IF(lowercase(wwords(2)) .NE. 'none' .OR. lowercase(wwords(2)) .NE. 'no')THEN
+    IF(lowercase(wwords(2)) .NE. 'none' .AND. lowercase(wwords(2)) .NE. 'no')THEN
       minint=1
       !get the cartesian map array
       this_card%carg=''
@@ -992,7 +992,7 @@ CONTAINS
     INTEGER :: nwwwords,j,l
     CHARACTER(ll_max) :: wwwords(lp_max),msg
 
-    IF(lowercase(wwords(2)) .NE. 'none' .OR. lowercase(wwords(2)) .NE. 'no')THEN
+    IF(lowercase(wwords(2)) .NE. 'none' .AND. lowercase(wwords(2)) .NE. 'no')THEN
       msg='Conversion to point flux location failed'
       !get the point value locations array
       this_card%carg=''
@@ -1029,7 +1029,7 @@ CONTAINS
     INTEGER :: rank,mpi_err,local_unit,i,l,lr,nwords,ios
     INTEGER,ALLOCATABLE :: tempintarray(:)
 
-    IF(lowercase(wwords(2)) .NE. 'none' .OR. lowercase(wwords(2)) .NE. 'no')THEN
+    IF(lowercase(wwords(2)) .NE. 'none' .AND. lowercase(wwords(2)) .NE. 'no')THEN
       CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
       local_unit=rank+100
 
@@ -1150,7 +1150,7 @@ CONTAINS
     strlg_max=MIN(strlg_max,MAX_CARDNAME_LEN)
     CALL printlog('')
     CALL printlog('***********************************************************************')
-    CALL printlog('*******************Echoing equivalent complete input*******************')
+    CALL printlog('*******************Echoing verbose equivalent input********************')
     CALL printlog('***********************************************************************')
     DO i=1,num_cards
       cards(i)%carg=TRIM(ADJUSTL(cards(i)%carg))
