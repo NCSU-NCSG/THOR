@@ -319,7 +319,7 @@ CONTAINS
 
       ! write it to file
       OPEN(unit=30, file = TRIM(cartesian_map_filename), status='unknown', action='write')
-      WRITE(30, *) "     ix    iy    iz             flux             total&
+      WRITE(30, '(A)') "     ix    iy    iz             flux             total&
             &        absorption        scattering           fission&
             &       fission src"
       DO iz = 1, glob_cmap_nz
@@ -394,7 +394,7 @@ CONTAINS
     OPEN(unit=20, file=TRIM(fname)//TRIM('_out.csv'), status='unknown', action='write')
     WRITE(20, 502, ADVANCE = "NO") "Region,"
     DO eg = 1, egmax - 1
-      WRITE(20, 505, ADVANCE = "NO") "flux g = ", eg, ","
+      WRITE(20, 505, ADVANCE = "NO") " flux g = ", eg, ","
     END DO
     WRITE(20, 506) "flux g = ", eg
 
