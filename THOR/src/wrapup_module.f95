@@ -166,10 +166,12 @@ CONTAINS
 
       l=1
       WRITE(20,*) num_cells
-      DO eg=1, egmax
-        DO i=1, num_cells
-          WRITE(20,*) cells(i)%volume,flux(1,1,i,eg,niter)
+      DO i=1, num_cells
+        WRITE(20,'(ES24.16)', ADVANCE='NO') cells(i)%volume
+        DO eg=1, egmax
+          WRITE(20,'(ES24.16)', ADVANCE='NO') flux(1,1,i,eg,niter)
         END DO
+        WRITE(20,*)
       END DO
 
       CLOSE(20)
