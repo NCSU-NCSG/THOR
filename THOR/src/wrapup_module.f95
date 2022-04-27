@@ -396,7 +396,7 @@ CONTAINS
     DO eg = 1, egmax - 1
       WRITE(20, 505, ADVANCE = "NO") " flux g = ", eg, ","
     END DO
-    WRITE(20, 506) "flux g = ", eg
+    WRITE(20, 506) " flux g = ", eg
 
     DO region=minreg,maxreg
       WRITE(20, 509, ADVANCE = "NO") region, ","

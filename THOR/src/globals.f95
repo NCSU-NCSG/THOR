@@ -199,15 +199,17 @@ CONTAINS
     CHARACTER(*),INTENT(IN) :: log_msg
     LOGICAL, OPTIONAL, INTENT(IN) :: advancing
     LOGICAL :: advopt
-    advopt=.TRUE.
-    IF(PRESENT(advancing))advopt=advancing
+    IF(rank .EQ. 0)THEN
+      advopt=.TRUE.
+      IF(PRESENT(advancing))advopt=advancing
 
-    IF(advopt)THEN
-      WRITE(stdout_unit,'(A)')TRIM(log_msg)
-      WRITE(log_unit,'(A)')TRIM(log_msg)
-    ELSE
-      WRITE(stdout_unit,'(A)',ADVANCE='NO')TRIM(log_msg)
-      WRITE(log_unit,'(A)',ADVANCE='NO')TRIM(log_msg)
+      IF(advopt)THEN
+        WRITE(stdout_unit,'(A)')TRIM(log_msg)
+        WRITE(log_unit,'(A)')TRIM(log_msg)
+      ELSE
+        WRITE(stdout_unit,'(A)',ADVANCE='NO')TRIM(log_msg)
+        WRITE(log_unit,'(A)',ADVANCE='NO')TRIM(log_msg)
+      ENDIF
     ENDIF
   ENDSUBROUTINE printlog
 END MODULE globals

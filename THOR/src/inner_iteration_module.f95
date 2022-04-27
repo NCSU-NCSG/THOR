@@ -90,7 +90,7 @@ CONTAINS
 
     ! write header for convergence monitor
     IF (rank .EQ. 0) THEN
-      CALL printlog('   grp  itn       error        time')
+      IF(prnt)CALL printlog('   grp  itn       error        time')
     END IF
     ! Begin inner iteration
 
