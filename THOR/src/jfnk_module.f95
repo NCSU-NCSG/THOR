@@ -279,12 +279,13 @@ CONTAINS
         IF(print_conv.EQ.1) THEN
           WRITE(21,*)   '---------------------------------------------------------------------------'
           WRITE(21,401) '---itn        keff    err-keff     err-flx        time---'
-          WRITE(21,402) m,keff, keff_error,max_outer_error,te-ts,' %i'
+          WRITE(21,403) m,keff, keff_error,max_outer_error,' %i'
           WRITE(21,*)   '---------------------------------------------------------------------------'
         END IF
       END IF
 401   FORMAT(A)
 402   FORMAT(I6,4ES12.4,A)
+403   FORMAT(I6,3ES12.4,A)
 
     END DO
 
@@ -368,11 +369,12 @@ CONTAINS
         IF(print_conv.EQ.1) THEN
           WRITE(21,*)   '---------------------------------------------------------------------------'
           WRITE(21,102) '---nitn  kitn        keff     max-res        time---'
-          WRITE(21,101) nit,kit,keff,nres,te-ts," %n"
+          WRITE(21,105) nit,kit,keff,nres," %n"
           WRITE(21,*)   '---------------------------------------------------------------------------'
         END IF
       END IF
 101   FORMAT (1X,I7,I6,3ES12.4,A)
+105   FORMAT (1X,I7,I6,2ES12.4,A)
 102   FORMAT (1X,A)
 
       ! Check for convergence

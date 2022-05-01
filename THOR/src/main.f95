@@ -125,13 +125,9 @@ PROGRAM ahot_c_ug
   !***********************************************************************
 
   IF(print_conv.EQ.1 .AND. rank .EQ. 0) THEN
-    INQUIRE(file = "thor.convergence", exist = existence)
+    INQUIRE(file = converge_filename, exist = existence)
     converge_unit=21
-    IF(existence) THEN
-      OPEN(unit = converge_unit, file = "thor.convergence", status = "OLD", action = "WRITE")
-    ELSE
-      OPEN(unit = converge_unit, file = "thor.convergence", status = "NEW", action = "WRITE")
-    END IF
+    OPEN(unit = converge_unit, file = converge_filename, status = "REPLACE", action = "WRITE")
     WRITE(converge_unit,*) '========================================================'
     WRITE(converge_unit,*) '   Begin outer iterations.'
     WRITE(converge_unit,*) '========================================================'

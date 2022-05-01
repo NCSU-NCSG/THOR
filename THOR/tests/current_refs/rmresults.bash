@@ -13,3 +13,5 @@ find . -name "*.vtkk" -type f -delete
 find . -name "*.pg" -type f -delete
 find . -name "*.convergence" -type f -delete
 find . -name "*.out" -type f -delete
+find . -name "*.outeven" -type f -delete
+find . -name "*.outodd" -type f -delete

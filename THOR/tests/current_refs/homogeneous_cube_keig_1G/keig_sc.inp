@@ -1,4 +1,4 @@
-  execution yes
+  execution yes ; print_conv yes
   lambda 0
   type keig ;
   page_refl save
@@ -7,8 +7,12 @@
 
   mesh keig_homogeneous.thrm
   xs keig_homogeneous.xs
-  flux_out keig_homogeneous.flux
+  flux_out yes
   print_xs yes
+  vtk_flux_out yes
+  vtk_mat_out yes
+  vtk_reg_out yes
+  restart_out yes
 
   ngroups 1 ; upscattering no
   multiplying yes

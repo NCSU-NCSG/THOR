@@ -177,10 +177,11 @@ CONTAINS
           flush(6)
         END IF
         IF(prnt .AND. print_conv.EQ.1) THEN
-          WRITE(21,101) eg,inner,max_error(eg),te-ts,' % '
+          WRITE(21,102) eg,inner,max_error(eg),' % '
           flush(21)
         END IF
 101     FORMAT (1X,2I5,2ES12.4,A)
+102     FORMAT (1X,2I5,ES12.4,A)
       END IF
     END DO
 

@@ -1,4 +1,4 @@
-  execution yes
+  execution yes ; print_conv yes
   lambda 0
   type keig ; keigsolver jfnk
   jfnk_method outer ; ipiter 0
@@ -8,8 +8,12 @@
 
   mesh ./takeda.thrm
   xs ./takeda.xs
-  flux_out takeda-IV-ari.flux
+  flux_out yes
   print_xs yes
+  vtk_flux_out yes
+  vtk_mat_out yes
+  vtk_reg_out yes
+  restart_out yes
 
   ngroups 4 ; upscattering no
 

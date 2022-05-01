@@ -1,4 +1,4 @@
-  execution yes
+  execution yes ; print_conv yes
   lambda 0
   type keig
   page_refl save
@@ -8,8 +8,12 @@
 
   mesh brick_tet_mesh.thrm
   xs   six_group.xs
-  flux_out six_group_keig_analytical.flux
+  flux_out yes
   print_xs yes
+  vtk_flux_out yes
+  vtk_mat_out yes
+  vtk_reg_out yes
+  restart_out yes
 
   ngroups 6
   upscattering yes

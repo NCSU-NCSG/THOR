@@ -654,9 +654,10 @@ CONTAINS
     flux_filename=TRIM(fname)//'_flux.out'
     vtk_flux_filename=TRIM(fname)//'_flux.vtk'
     vtk_mat_filename=TRIM(fname)//'_mat.vtk'
-    vtk_reg_filename=TRIM(fname)//'_reg.vtkk'
+    vtk_reg_filename=TRIM(fname)//'_reg.vtk'
     vtk_src_filename=TRIM(fname)//'_src.vtk'
     cartesian_map_filename=TRIM(fname)//'_cartesian_map.out'
+    converge_filename=TRIM(fname)//'_conv.convergence'
 
     legacy_v=-9999
     !determine if the input is yaml

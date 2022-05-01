@@ -774,14 +774,15 @@ CONTAINS
         flush(log_unit)
         IF(print_conv.EQ.1) THEN
           WRITE(21,*)   '---------------------------------------------------------------------------------------------------'
-          WRITE(21,101) '---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap        time---'
-          WRITE(21,102) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,te-ts,' %% '
+          WRITE(21,101) '---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap---'
+          WRITE(21,105) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,' %% '
           WRITE(21,*)   '---------------------------------------------------------------------------------------------------'
           flush(21)
         END IF
       END IF
 101   FORMAT(A)
 102   FORMAT(2I6,5ES12.4,I12,ES12.4,A)
+105   FORMAT(2I6,5ES12.4,I12,A)
 
       !========================================================================
       ! write iteration results to file if desired

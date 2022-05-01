@@ -1,5 +1,18 @@
+!this is current THOR source format.
+!Lines starting with ! will be ignored, comments starting with ! will be ignored
+!blank lines will also be ignored
+!on the same line directly following the format indicator will be the number of sources. then the
+! number of angular source moments given. then the number of spatial source moments given.
+! If value is more than number of moments in the calculation then extra moments will be ignored. If
+! it is less than the number of moments in the calculation then non-specified moments will be set to 0.
+!If no number of moments is specified then there will be assumed to only be a single moment weighted
+! as 1 and it will be assumed that the other data isn't given and set to 0
 THOR_SRC_V1 2 1 1
+!first uncommented line will be id index for first soure id. Does not need to be in order
 0
+!row of angularly/spatially flat source for 0th spatial/angular source moment. Order of moments is
+! rows of all spatial moments for 0th angular moment, then for 1st angular moment, etc.
 0
+!next uncommented line will be id for index of next source moment.
 1
 1

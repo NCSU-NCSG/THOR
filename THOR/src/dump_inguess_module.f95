@@ -105,13 +105,8 @@ CONTAINS
 
     ! open file
     INQUIRE(file=TRIM(dump_file), exist=existence)
-    IF (existence .EQV. .TRUE.) THEN
-      OPEN(UNIT = 56, FILE = dump_file, STATUS = "OLD", ACTION = "WRITE",&
-            form='unformatted')
-    ELSE
-      OPEN(UNIT = 56, FILE = dump_file, STATUS = "NEW", ACTION ="WRITE",&
-            form='unformatted')
-    END IF
+    OPEN(UNIT = 56, FILE = dump_file, STATUS = "REPLACE", ACTION = "WRITE",&
+          form='unformatted')
 
     ! write dump file
     WRITE(56) egmax,num_cells,namom,num_moments_v
@@ -151,13 +146,8 @@ CONTAINS
 
     ! open file
     INQUIRE(file=TRIM(dump_file), exist=existence)
-    IF (existence .EQV. .TRUE.) THEN
-      OPEN(UNIT = 56, FILE = dump_file, STATUS = "OLD", ACTION = "WRITE",&
-            form='unformatted')
-    ELSE
-      OPEN(UNIT = 56, FILE = dump_file, STATUS = "NEW", ACTION ="WRITE",&
-            form='unformatted')
-    END IF
+    OPEN(UNIT = 56, FILE = dump_file, STATUS = "REPLACE", ACTION = "WRITE",&
+          form='unformatted')
 
     ! write dump file
     WRITE(56) egmax,num_cells,namom,num_moments_v
