@@ -1,4 +1,4 @@
-  execution yes
+  execution yes ; print_conv yes
   lambda -1
   type fsrc;
   page_refl save
@@ -8,8 +8,13 @@
   mesh kobayashi-1-0.thrm
   xs kobayashi.xs
   source kobayashi-LC.src
-  flux_out kobayashi-LC.flux
+  flux_out yes
   print_xs yes
+  vtk_flux_out yes
+  vtk_mat_out yes
+  vtk_reg_out yes
+  restart_out yes
+  vtk_src_out yes
 
   ngroups 1
   upscattering no

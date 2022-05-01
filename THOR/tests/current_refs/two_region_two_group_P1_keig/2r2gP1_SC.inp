@@ -1,4 +1,4 @@
-  execution yes
+  execution yes ; print_conv yes
   lambda 0
   type keig ; keigsolver pi ; piacc none
   page_refl save
@@ -7,8 +7,12 @@
 
   mesh base.thrm
   xs 2r2gP1.xs
-  flux_out 2r2gP1_LC.flux
+  flux_out yes
   print_xs yes
+  vtk_flux_out yes
+  vtk_mat_out yes
+  vtk_reg_out yes
+  restart_out yes
 
   ngroups 2
   pnorder 1

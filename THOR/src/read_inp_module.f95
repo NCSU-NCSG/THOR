@@ -7,7 +7,7 @@ MODULE read_inp_module
 
   USE mpi
   USE stringmod
-  USE global_variables
+  USE globals
   USE error_module
 
   IMPLICIT NONE
@@ -22,20 +22,24 @@ INTEGER,PARAMETER :: MAX_CARDNAME_LEN=32
 INTEGER,PARAMETER :: num_cards=43
 !> The maximum length of a line in the input file
 INTEGER,PARAMETER :: ll_max=200
-!(need to change in interface if changed)
+!(need to change in interface IFchanged)
 !> The maximum number of params on a given line or inputs for a param
 INTEGER,PARAMETER :: lp_max=100
-!(also need to change in interface if changed)
+!(also need to change in interface IFchanged)
 !> The local unit for the input file
 INTEGER :: local_unit
 
 TYPE :: cardType
   !character name of the card
   CHARACTER(MAX_CARDNAME_LEN) :: cname
-  !logical to tell if card has already appeared
+  !logical to tell IFcard has already appeared
   LOGICAL :: used=.FALSE.
   !readin procedure, unique for each card
   PROCEDURE(prototype_wordarg),POINTER :: getcard => NULL()
+  !card argument
+  CHARACTER(ll_max*lp_max) :: carg
+  !card subject matter
+  CHARACTER(MAX_CARDNAME_LEN) :: csub
 ENDTYPE cardType
 
 TYPE(cardType) :: cards(num_cards)
@@ -55,100 +59,244 @@ CONTAINS
     INTEGER, INTENT(IN) :: localunit
     CHARACTER(ll_max) :: tchar
     CHARACTER(ll_max) :: words(lp_max),wwords(lp_max)
-    INTEGER :: ios,rank,mpi_err,nwords,nwwords,iw,ic
+    INTEGER :: ios,rank,mpi_err,nwords,nwwords,iw,ic,card_indx
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
     IF(localunit .NE. 100+rank)CALL raise_fatal_error('rank mismatch in input file reading')
     local_unit=localunit
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    !setup the card objects, add one to here if you need a new one, make sure to change the total
+    !setup the card objects, add one to here IFyou need a new one, make sure to change the total
     !number of cards param as well
-    cards(1)%cname='type'
-    cards(1)%getcard => get_type
-    cards(2)%cname='keigsolver'
-    cards(2)%getcard => get_keigsolver
-    cards(3)%cname='lambda'
-    cards(3)%getcard => get_lambda
-    cards(4)%cname='inflow'
-    cards(4)%getcard => get_inflow
-    cards(5)%cname='piacc'
-    cards(5)%getcard => get_piacc
-    cards(6)%cname='page_sweep'
-    cards(6)%getcard => get_page_sweep
-    cards(7)%cname='page_refl'
-    cards(7)%getcard => get_page_refl
-    cards(8)%cname='page_iflw'
-    cards(8)%getcard => get_page_iflw
-    cards(9)%cname='kconv'
-    cards(9)%getcard => get_kconv
-    cards(10)%cname='innerconv'
-    cards(10)%getcard => get_innerconv
-    cards(11)%cname='outerconv'
-    cards(11)%getcard => get_outerconv
-    cards(12)%cname='maxinner'
-    cards(12)%getcard => get_maxinner
-    cards(13)%cname='maxouter'
-    cards(13)%getcard => get_maxouter
-    cards(14)%cname='jfnk_krsze'
-    cards(14)%getcard => get_jfnk_krsze
-    cards(15)%cname='jfnk_maxkr'
-    cards(15)%getcard => get_jfnk_maxkr
-    cards(16)%cname='jfnk_method'
-    cards(16)%getcard => get_jfnk_method
-    cards(17)%cname='initial_guess'
-    cards(17)%getcard => get_initial_guess
-    cards(18)%cname='restart_out'
-    cards(18)%getcard => get_restart_out
-    cards(19)%cname='ipiter'
-    cards(19)%getcard => get_ipiter
-    cards(20)%cname='print_conv'
-    cards(20)%getcard => get_print_conv
-    cards(21)%cname='density_factor'
-    cards(21)%getcard => get_density_factor
-    cards(22)%cname='execution'
-    cards(22)%getcard => get_execution
-    cards(23)%cname='mesh'
-    cards(23)%getcard => get_mesh
-    cards(24)%cname='source'
-    cards(24)%getcard => get_source
-    cards(25)%cname='flux_out'
-    cards(25)%getcard => get_flux_out
-    cards(26)%cname='xs'
-    cards(26)%getcard => get_xs
-    cards(27)%cname='vtk_flux_out'
-    cards(27)%getcard => get_vtk_flux_out
-    cards(28)%cname='vtk_mat_out'
-    cards(28)%getcard => get_vtk_mat_out
-    cards(29)%cname='vtk_reg_out'
-    cards(29)%getcard => get_vtk_reg_out
-    cards(30)%cname='vtk_src_out'
-    cards(30)%getcard => get_vtk_src_out
-    cards(31)%cname='cartesian_map_out'
-    cards(31)%getcard => get_cartesian_map_out
-    cards(32)%cname='print_xs'
-    cards(32)%getcard => get_print_xs
-    cards(33)%cname='ngroups'
-    cards(33)%getcard => get_ngroups
-    cards(34)%cname='pnorder'
-    cards(34)%getcard => get_pnorder
-    cards(35)%cname='pnread'
-    cards(35)%getcard => get_pnread
-    cards(36)%cname='upscattering'
-    cards(36)%getcard => get_upscattering
-    cards(37)%cname='multiplying'
-    cards(37)%getcard => get_multiplying
-    cards(38)%cname='scatt_mult_included'
-    cards(38)%getcard => get_scatt_mult_included
-    cards(39)%cname='qdtype'
-    cards(39)%getcard => get_qdtype
-    cards(40)%cname='qdorder'
-    cards(40)%getcard => get_qdorder
-    cards(41)%cname='cartesian_map'
-    cards(41)%getcard => get_cartesian_map
-    cards(42)%cname='point_value_locations'
-    cards(42)%getcard => get_point_value_locations
-    cards(43)%cname='region_map'
-    cards(43)%getcard => get_region_map
+    cards(:)%carg=''
+    cards(:)%csub=''
+    !type card
+    card_indx=1
+    cards(card_indx)%cname='type'
+    cards(card_indx)%carg='keig'
+    cards(card_indx)%getcard => get_type
+    !keigsolver card
+    card_indx=2
+    cards(card_indx)%cname='keigsolver'
+    cards(card_indx)%carg='pi'
+    cards(card_indx)%getcard => get_keigsolver
+    cards(card_indx)%csub='keig'
+    !lambda card
+    card_indx=3
+    cards(card_indx)%cname='lambda'
+    WRITE(cards(card_indx)%carg,'(I0)')space_ord
+    cards(card_indx)%getcard => get_lambda
+    !inflow card
+    card_indx=4
+    cards(card_indx)%cname='inflow'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_inflow
+    !piacc card
+    card_indx=5
+    cards(card_indx)%cname='piacc'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_piacc
+    cards(card_indx)%csub='poweriter'
+    !page_sweep card
+    card_indx=6
+    cards(card_indx)%cname='page_sweep'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_page_sweep
+    !page_refl card
+    card_indx=7
+    cards(card_indx)%cname='page_refl'
+    cards(card_indx)%carg='save'
+    cards(card_indx)%getcard => get_page_refl
+    !page_iflw card
+    card_indx=8
+    cards(card_indx)%cname='page_iflw'
+    cards(card_indx)%carg='all'
+    cards(card_indx)%getcard => get_page_iflw
+    !kconv card
+    card_indx=9
+    cards(card_indx)%cname='kconv'
+    WRITE(cards(card_indx)%carg,'(ES12.4)')k_conv
+    cards(card_indx)%getcard => get_kconv
+    cards(card_indx)%csub='keig'
+    !innerconv card
+    card_indx=10
+    cards(card_indx)%cname='innerconv'
+    WRITE(cards(card_indx)%carg,'(ES12.4)')inner_conv
+    cards(card_indx)%getcard => get_innerconv
+    !outerconv card
+    card_indx=11
+    cards(card_indx)%cname='outerconv'
+    WRITE(cards(card_indx)%carg,'(ES12.4)')outer_conv
+    cards(card_indx)%getcard => get_outerconv
+    !maxinner card
+    card_indx=12
+    cards(card_indx)%cname='maxinner'
+    WRITE(cards(card_indx)%carg,'(I0)')max_inner
+    cards(card_indx)%getcard => get_maxinner
+    !maxouter card
+    card_indx=13
+    cards(card_indx)%cname='maxouter'
+    WRITE(cards(card_indx)%carg,'(I0)')max_outer
+    cards(card_indx)%getcard => get_maxouter
+    !jfnk_krsze card
+    card_indx=14
+    cards(card_indx)%cname='jfnk_krsze'
+    WRITE(cards(card_indx)%carg,'(I0)')rd_restart
+    cards(card_indx)%getcard => get_jfnk_krsze
+    cards(card_indx)%csub='jfnk'
+    !jfnk_maxkr card
+    card_indx=15
+    cards(card_indx)%cname='jfnk_maxkr'
+    WRITE(cards(card_indx)%carg,'(I0)')rd_max_kit
+    cards(card_indx)%getcard => get_jfnk_maxkr
+    cards(card_indx)%csub='jfnk'
+    !jfnk_method card
+    card_indx=16
+    cards(card_indx)%cname='jfnk_method'
+    cards(card_indx)%carg='flat'
+    cards(card_indx)%getcard => get_jfnk_method
+    cards(card_indx)%csub='jfnk'
+    !initial_guess card
+    card_indx=17
+    cards(card_indx)%cname='initial_guess'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_initial_guess
+    !restart_out card
+    card_indx=18
+    cards(card_indx)%cname='restart_out'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_restart_out
+    !ipiter card
+    card_indx=19
+    cards(card_indx)%cname='ipiter'
+    WRITE(cards(card_indx)%carg,'(I0)')ipow
+    cards(card_indx)%getcard => get_ipiter
+    cards(card_indx)%csub='poweriter'
+    !print_conv card
+    card_indx=20
+    cards(card_indx)%cname='print_conv'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_print_conv
+    !density_factor card
+    card_indx=21
+    cards(card_indx)%cname='density_factor'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_density_factor
+    !execution card
+    card_indx=22
+    cards(card_indx)%cname='execution'
+    cards(card_indx)%carg='yes'
+    cards(card_indx)%getcard => get_execution
+    !mesh card
+    card_indx=23
+    cards(card_indx)%cname='mesh'
+    cards(card_indx)%carg=mesh_filename
+    cards(card_indx)%getcard => get_mesh
+    !source card
+    card_indx=24
+    cards(card_indx)%cname='source'
+    cards(card_indx)%carg=source_filename
+    cards(card_indx)%getcard => get_source
+    cards(card_indx)%csub='srcprob'
+    !flux_out card
+    card_indx=25
+    cards(card_indx)%cname='flux_out'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_flux_out
+    !xs card
+    card_indx=26
+    cards(card_indx)%cname='xs'
+    cards(card_indx)%carg=cross_section_filename
+    cards(card_indx)%getcard => get_xs
+    !vtk_flux_out card
+    card_indx=27
+    cards(card_indx)%cname='vtk_flux_out'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_vtk_flux_out
+    !vtk_mat_out card
+    card_indx=28
+    cards(card_indx)%cname='vtk_mat_out'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_vtk_mat_out
+    !vtk_reg_out card
+    card_indx=29
+    cards(card_indx)%cname='vtk_reg_out'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_vtk_reg_out
+    !vtk_src_out card
+    card_indx=30
+    cards(card_indx)%cname='vtk_src_out'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_vtk_src_out
+    !cartesian_map_out card
+    card_indx=31
+    cards(card_indx)%cname='cartesian_map_out'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_cartesian_map_out
+    !print_xs card
+    card_indx=32
+    cards(card_indx)%cname='print_xs'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_print_xs
+    !ngroups card
+    card_indx=33
+    cards(card_indx)%cname='ngroups'
+    WRITE(cards(card_indx)%carg,'(I0)')egmax
+    cards(card_indx)%getcard => get_ngroups
+    cards(card_indx)%csub='legacyxs'
+    !pnorder card
+    card_indx=34
+    cards(card_indx)%cname='pnorder'
+    WRITE(cards(card_indx)%carg,'(I0)')scatt_ord
+    cards(card_indx)%getcard => get_pnorder
+    !pnread card
+    card_indx=35
+    cards(card_indx)%cname='pnread'
+    WRITE(cards(card_indx)%carg,'(I0)')xs_ord
+    cards(card_indx)%getcard => get_pnread
+    cards(card_indx)%csub='legacyxs'
+    !upscattering card
+    card_indx=36
+    cards(card_indx)%cname='upscattering'
+    cards(card_indx)%carg='yes'
+    cards(card_indx)%getcard => get_upscattering
+    cards(card_indx)%csub='legacyxs'
+    !multiplying card
+    card_indx=37
+    cards(card_indx)%cname='multiplying'
+    cards(card_indx)%carg='yes'
+    cards(card_indx)%getcard => get_multiplying
+    cards(card_indx)%csub='legacyxs'
+    !scatt_mult_included card
+    card_indx=38
+    cards(card_indx)%cname='scatt_mult_included'
+    cards(card_indx)%carg='yes'
+    cards(card_indx)%getcard => get_scatt_mult_included
+    cards(card_indx)%csub='legacyxs'
+    !qdtype card
+    card_indx=39
+    cards(card_indx)%cname='qdtype'
+    cards(card_indx)%carg='levelsym'
+    cards(card_indx)%getcard => get_qdtype
+    !qdorder card
+    card_indx=40
+    cards(card_indx)%cname='qdorder'
+    WRITE(cards(card_indx)%carg,'(I0)')quad_ord
+    cards(card_indx)%getcard => get_qdorder
+    !cartesian_map card
+    card_indx=41
+    cards(card_indx)%cname='cartesian_map'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_cartesian_map
+    !point_value_locations card
+    card_indx=42
+    cards(card_indx)%cname='point_value_locations'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_point_value_locations
+    !region_map card
+    card_indx=43
+    cards(card_indx)%cname='region_map'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_region_map
     !end of input cards
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     minreg= 100000_li
@@ -179,20 +327,21 @@ CONTAINS
         ENDIF
       ENDDO
     ENDDO
+    IF(rank .EQ. 0)CALL echo_equiv_inp()
   END SUBROUTINE inputfile_read
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_type(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    IF(wwords(2) .EQ. 'keig') THEN
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    IF(this_card%carg .EQ. 'keig') THEN
       problem=1
-    ELSEIF(wwords(2) .EQ. 'fsrc') THEN
+    ELSEIF(this_card%carg .EQ. 'fsrc') THEN
       problem=0
     ELSE
-      CALL raise_fatal_error('This is not a valid problem type -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('This is not a valid problem type -- '//TRIM(this_card%carg)//' --')
     ENDIF
   END SUBROUTINE get_type
 
@@ -200,14 +349,14 @@ CONTAINS
   SUBROUTINE get_keigsolver(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    IF(wwords(2) .EQ. 'pi') THEN
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    IF(this_card%carg .EQ. 'pi') THEN
       eig_switch=0
-    ELSEIF(wwords(2) .EQ. 'jfnk') THEN
+    ELSEIF(this_card%carg .EQ. 'jfnk') THEN
       eig_switch=1
     ELSE
-      CALL raise_fatal_error('This is not a valid eigenvalue solver -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('This is not a valid eigenvalue solver -- '//TRIM(this_card%carg)//' --')
     ENDIF
   END SUBROUTINE get_keigsolver
 
@@ -216,11 +365,11 @@ CONTAINS
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     INTEGER :: ios
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    READ(wwords(2),'(i10)',iostat=ios) space_ord
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    READ(this_card%carg,'(i10)',iostat=ios) space_ord
     IF(ios.NE.0) THEN
-      CALL raise_fatal_error('Invalid spatial order in problem specification -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('Invalid spatial order in problem specification -- '//TRIM(this_card%carg)//' --')
     ENDIF
   END SUBROUTINE get_lambda
 
@@ -228,15 +377,16 @@ CONTAINS
   SUBROUTINE get_inflow(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(wwords(2))
+
+    this_card%carg=TRIM(wwords(2))
     finflow=1
-    IF(lowercase(wwords(2)) .EQ. 'yes') THEN
+    IF(lowercase(this_card%carg) .EQ. 'yes') THEN
       !do nothing, default filename
-    ELSEIF(lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none') THEN
+      this_card%carg=finflow_filename
+    ELSEIF(lowercase(this_card%carg) .EQ. 'no' .OR. lowercase(this_card%carg) .EQ. 'none') THEN
       finflow=0
     ELSE
-      finflow_filename=TRIM(wwords(2))
+      finflow_filename=TRIM(this_card%carg)
     ENDIF
   END SUBROUTINE get_inflow
 
@@ -244,14 +394,14 @@ CONTAINS
   SUBROUTINE get_piacc(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    IF(wwords(2) .EQ. 'errmode') THEN
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    IF(this_card%carg .EQ. 'errmode') THEN
       outer_acc=2
-    ELSEIF(wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+    ELSEIF(this_card%carg .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
       outer_acc=1
     ELSE
-      CALL raise_fatal_error('This is not a valid acceleration option for PI -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('This is not a valid acceleration option for PI -- '//TRIM(this_card%carg)//' --')
     ENDIF
   END SUBROUTINE get_piacc
 
@@ -259,14 +409,14 @@ CONTAINS
   SUBROUTINE get_page_sweep(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    IF(wwords(2) .EQ. 'yes') THEN
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    IF(this_card%carg .EQ. 'yes') THEN
       page_sweep=1
-    ELSEIF(wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+    ELSEIF(this_card%carg .EQ. 'no' .OR. this_card%carg .EQ. 'none') THEN
       page_sweep=0
     ELSE
-      CALL raise_fatal_error('This is not a valid sweep page option -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('This is not a valid sweep page option -- '//TRIM(this_card%carg)//' --')
     ENDIF
   END SUBROUTINE get_page_sweep
 
@@ -274,16 +424,16 @@ CONTAINS
   SUBROUTINE get_page_refl(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    IF(wwords(2) .EQ. 'page') THEN
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    IF(this_card%carg .EQ. 'page') THEN
       page_refl=1
-    ELSEIF(wwords(2) .EQ. 'save') THEN
+    ELSEIF(this_card%carg .EQ. 'save') THEN
       page_refl=0
-    ELSEIF(wwords(2) .EQ. 'inner') THEN
+    ELSEIF(this_card%carg .EQ. 'inner') THEN
       page_refl=2
     ELSE
-      CALL raise_fatal_error('This is not a valid page reflective BC option -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('This is not a valid page reflective BC option -- '//TRIM(this_card%carg)//' --')
     ENDIF
   END SUBROUTINE get_page_refl
 
@@ -291,14 +441,14 @@ CONTAINS
   SUBROUTINE get_page_iflw(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    IF(wwords(2) .EQ. 'bygroup') THEN
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    IF(this_card%carg .EQ. 'bygroup') THEN
       page_iflw=1
-    ELSEIF(wwords(2) .EQ. 'all') THEN
+    ELSEIF(this_card%carg .EQ. 'all') THEN
       page_iflw=0
     ELSE
-      CALL raise_fatal_error('This is not a valid page inflow option -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('This is not a valid page inflow option -- '//TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_page_iflw
 
@@ -307,11 +457,11 @@ CONTAINS
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     INTEGER :: ios
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    READ(wwords(2),*,iostat=ios) k_conv
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    READ(this_card%carg,*,iostat=ios) k_conv
     IF(ios.NE.0) THEN
-      CALL raise_fatal_error('Invalid stopping criterion for keff in problem specification -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('Invalid stopping criterion for keff in problem specification -- '//TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_kconv
 
@@ -320,11 +470,12 @@ CONTAINS
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     INTEGER :: ios
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    READ(wwords(2),*,iostat=ios) inner_conv
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    READ(this_card%carg,*,iostat=ios) inner_conv
     IF(ios.NE.0) THEN
-      CALL raise_fatal_error('Invalid stopping criterion for inner iterations in problem specification -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('Invalid stopping criterion for inner iterations in problem &
+        & specification -- '//TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_innerconv
 
@@ -333,11 +484,12 @@ CONTAINS
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     INTEGER :: ios
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    READ(wwords(2),*,iostat=ios) outer_conv
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    READ(this_card%carg,*,iostat=ios) outer_conv
     IF(ios.NE.0) THEN
-      CALL raise_fatal_error('Invalid stopping criterion for outer iterations in problem specification -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('Invalid stopping criterion for outer iterations in problem &
+        & specification -- '//TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_outerconv
 
@@ -346,11 +498,12 @@ CONTAINS
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     INTEGER :: ios
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    READ(wwords(2),'(i10)',iostat=ios) max_inner
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    READ(this_card%carg,'(i10)',iostat=ios) max_inner
     IF(ios.NE.0 .OR. max_inner<1 ) THEN
-      CALL raise_fatal_error('Invalid maximum number of inner iteration in problem specification -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('Invalid maximum number of inner iteration in problem specification -- ' &
+        //TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_maxinner
 
@@ -359,11 +512,11 @@ CONTAINS
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     INTEGER :: ios
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    READ(wwords(2),'(i10)',iostat=ios) max_outer
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    READ(this_card%carg,'(i10)',iostat=ios) max_outer
     IF(ios.NE.0 .OR. max_outer<1 ) THEN
-      CALL raise_fatal_error('Invalid maximum number of outer iteration in problem specification -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('Invalid maximum number of outer iteration in problem specification -- '//TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_maxouter
 
@@ -372,11 +525,11 @@ CONTAINS
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     INTEGER :: ios
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    READ(wwords(2),'(i10)',iostat=ios) rd_restart
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    READ(this_card%carg,'(i10)',iostat=ios) rd_restart
     IF(ios.NE.0 .OR. rd_restart<1 ) THEN
-      CALL raise_fatal_error('Invalid Krylov subspace size for JFNK in problem specification -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('Invalid Krylov subspace size for JFNK in problem specification -- '//TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_jfnk_krsze
 
@@ -385,12 +538,12 @@ CONTAINS
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     INTEGER :: ios
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    READ(wwords(2),'(i10)',iostat=ios) rd_max_kit
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    READ(this_card%carg,'(i10)',iostat=ios) rd_max_kit
     IF(ios.NE.0 .OR. rd_max_kit < 1 ) THEN
       CALL raise_fatal_error('Invalid maximum number of Krylov iterations for JFNK in problem specification -- '&
-            //TRIM(wwords(2))//' --')
+            //TRIM(this_card%carg)//' --')
     ENDIF
   END SUBROUTINE get_jfnk_maxkr
 
@@ -398,16 +551,16 @@ CONTAINS
   SUBROUTINE get_jfnk_method(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    IF(wwords(2) .EQ. 'outer') THEN
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    IF(this_card%carg .EQ. 'outer') THEN
       rd_method=1
-    ELSEIF(wwords(2) .EQ. 'flat') THEN
+    ELSEIF(this_card%carg .EQ. 'flat') THEN
       rd_method=2
-    ELSEIF(wwords(2) .EQ. 'flat_wds') THEN
+    ELSEIF(this_card%carg .EQ. 'flat_wds') THEN
       rd_method=3
     ELSE
-      CALL raise_fatal_error('This is not a valid jfnk solution method -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('This is not a valid jfnk solution method -- '//TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_jfnk_method
 
@@ -415,15 +568,16 @@ CONTAINS
   SUBROUTINE get_initial_guess(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(wwords(2))
+
+    this_card%carg=TRIM(wwords(2))
     inguess_flag=1
-    IF      ( lowercase(wwords(2)) .EQ. 'yes') THEN
+    IF(lowercase(this_card%carg) .EQ. 'yes') THEN
       !do nothing, default
-    ELSE IF ( lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none') THEN
+      this_card%carg=inguess_file
+    ELSEIF(lowercase(this_card%carg) .EQ. 'no' .OR. lowercase(this_card%carg) .EQ. 'none') THEN
       inguess_flag=0
     ELSE
-      inguess_file=TRIM(wwords(2))
+      inguess_file=TRIM(this_card%carg)
     END IF
   END SUBROUTINE get_initial_guess
 
@@ -431,15 +585,16 @@ CONTAINS
   SUBROUTINE get_restart_out(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(wwords(2))
+
+    this_card%carg=TRIM(wwords(2))
     dump_flag=1
-    IF      ( lowercase(wwords(2)) .EQ. 'yes') THEN
+    IF(lowercase(this_card%carg) .EQ. 'yes') THEN
       !do nothing, default
-    ELSE IF ( lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none') THEN
+      this_card%carg=dump_file
+    ELSEIF(lowercase(this_card%carg) .EQ. 'no' .OR. lowercase(this_card%carg) .EQ. 'none') THEN
       dump_flag=0
     ELSE
-      dump_file=TRIM(wwords(2))
+      dump_file=TRIM(this_card%carg)
     END IF
   END SUBROUTINE get_restart_out
 
@@ -448,12 +603,12 @@ CONTAINS
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     INTEGER :: ios
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    READ(wwords(2),'(i10)',iostat=ios) ipow
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    READ(this_card%carg,'(i10)',iostat=ios) ipow
     IF(ios.NE.0 ) THEN
       CALL raise_fatal_error('Invalid number of initial power iterations -- '&
-            //TRIM(wwords(2))//' --')
+            //TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_ipiter
 
@@ -461,14 +616,14 @@ CONTAINS
   SUBROUTINE get_print_conv(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    IF      ( wwords(2) .EQ. 'yes') THEN
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    IF(this_card%carg .EQ. 'yes') THEN
       print_conv=1
-    ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+    ELSEIF(this_card%carg .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
       print_conv=0
     ELSE
-      CALL raise_fatal_error('This is not a valid execution option (yes/no) -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('This is not a valid execution option (yes/no) -- '//TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_print_conv
 
@@ -476,24 +631,27 @@ CONTAINS
   SUBROUTINE get_density_factor(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    IF      ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    IF(this_card%carg .EQ. 'no' .OR. this_card%carg .EQ. 'none') THEN
       dfact_opt = 0
     ELSE
-      IF      ( wwords(2) .EQ. 'byvolume') THEN
+      IF(this_card%carg .EQ. 'byvolume') THEN
         dfact_opt = 1
-      ELSE IF ( wwords(2) .EQ. 'fromfile') THEN
+      ELSEIF(this_card%carg .EQ. 'fromfile') THEN
         dfact_opt = 2
       ELSE
         CALL raise_fatal_error('This is not a valid density factor option &
-          & (no/byvolume/fromfile) -- '//TRIM(wwords(2))//' --')
+          & (no/byvolume/fromfile) -- '//TRIM(this_card%carg)//' --')
       END IF
     END IF
     wwords(3)=TRIM(wwords(3))
     IF(dfact_opt .NE. 0)THEN
       IF(lowercase(wwords(3)) .NE. '')THEN
+        this_card%carg=TRIM(this_card%carg)//' '//TRIM(wwords(3))
         dens_fact_filename=TRIM(wwords(3))
+      ELSE
+        this_card%carg=TRIM(this_card%carg)//' '//TRIM(dens_fact_filename)
       ENDIF
     ENDIF
   END SUBROUTINE get_density_factor
@@ -502,14 +660,14 @@ CONTAINS
   SUBROUTINE get_execution(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    IF      ( wwords(2) .EQ. 'yes') THEN
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    IF(this_card%carg .EQ. 'yes') THEN
       execution=1
-    ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+    ELSEIF(this_card%carg .EQ. 'no' .OR. this_card%carg .EQ. 'none') THEN
       execution=0
     ELSE
-      CALL raise_fatal_error('This is not a valid execution option (yes/no) -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('This is not a valid execution option (yes/no) -- '//TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_execution
 
@@ -517,21 +675,23 @@ CONTAINS
   SUBROUTINE get_mesh(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    mesh_filename=TRIM(wwords(2))
+
+    this_card%carg=TRIM(wwords(2))
+    mesh_filename=TRIM(this_card%carg)
   END SUBROUTINE get_mesh
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_source(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(wwords(2))
-    IF      ( lowercase(wwords(2)) .EQ. 'yes') THEN
+
+    this_card%carg=TRIM(wwords(2))
+    IF(lowercase(this_card%carg) .EQ. 'yes') THEN
       !do nothing, default
-    ELSE IF ( lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none') THEN
+      this_card%carg=source_filename
+    ELSEIF(lowercase(this_card%carg) .EQ. 'no' .OR. lowercase(this_card%carg) .EQ. 'none') THEN
     ELSE
-      source_filename=TRIM(wwords(2))
+      source_filename=TRIM(this_card%carg)
     ENDIF
   END SUBROUTINE get_source
 
@@ -539,11 +699,12 @@ CONTAINS
   SUBROUTINE get_flux_out(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(wwords(2))
-    IF      ( lowercase(wwords(2)) .EQ. 'yes') THEN
+
+    this_card%carg=TRIM(wwords(2))
+    IF(lowercase(this_card%carg) .EQ. 'yes') THEN
       !do nothing, default
-    ELSE IF ( lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none') THEN
+      this_card%carg=flux_filename
+    ELSEIF(lowercase(this_card%carg) .EQ. 'no' .OR. lowercase(this_card%carg) .EQ. 'none') THEN
     ELSE
       flux_filename=TRIM(wwords(2))
     ENDIF
@@ -553,23 +714,25 @@ CONTAINS
   SUBROUTINE get_xs(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    cross_section_filename=TRIM(wwords(2))
+
+    this_card%carg=TRIM(wwords(2))
+    cross_section_filename=TRIM(this_card%carg)
   END SUBROUTINE get_xs
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_vtk_flux_out(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
+
     vtk_flux_output=1
-    wwords(2)=TRIM(wwords(2))
-    IF(lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none')THEN
+    this_card%carg=TRIM(wwords(2))
+    IF(lowercase(this_card%carg) .EQ. 'no' .OR. lowercase(this_card%carg) .EQ. 'none')THEN
       vtk_flux_output=0
-    ELSEIF(lowercase(wwords(2)) .EQ. 'yes')THEN
+    ELSEIF(lowercase(this_card%carg) .EQ. 'yes')THEN
       !do nothing, default
+      this_card%carg=vtk_flux_filename
     ELSE
-      vtk_flux_filename=TRIM(wwords(2))
+      vtk_flux_filename=TRIM(this_card%carg)
     ENDIF
   END SUBROUTINE get_vtk_flux_out
 
@@ -577,15 +740,16 @@ CONTAINS
   SUBROUTINE get_vtk_mat_out(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
+
     vtk_mat_output=1
-    wwords(2)=TRIM(wwords(2))
-    IF(lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none')THEN
+    this_card%carg=TRIM(wwords(2))
+    IF(lowercase(this_card%carg) .EQ. 'no' .OR. lowercase(this_card%carg) .EQ. 'none')THEN
       vtk_mat_output=0
-    ELSEIF(lowercase(wwords(2)) .EQ. 'yes')THEN
+    ELSEIF(lowercase(this_card%carg) .EQ. 'yes')THEN
       !do nothing, default
+      this_card%carg=vtk_mat_filename
     ELSE
-      vtk_mat_filename=TRIM(wwords(2))
+      vtk_mat_filename=TRIM(this_card%carg)
     ENDIF
   END SUBROUTINE get_vtk_mat_out
 
@@ -593,15 +757,16 @@ CONTAINS
   SUBROUTINE get_vtk_reg_out(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
+
     vtk_reg_output=1
-    wwords(2)=TRIM(wwords(2))
-    IF(lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none')THEN
+    this_card%carg=TRIM(wwords(2))
+    IF(lowercase(this_card%carg) .EQ. 'no' .OR. lowercase(this_card%carg) .EQ. 'none')THEN
       vtk_reg_output=0
-    ELSEIF(lowercase(wwords(2)) .EQ. 'yes')THEN
+    ELSEIF(lowercase(this_card%carg) .EQ. 'yes')THEN
       !do nothing, default
+      this_card%carg=vtk_reg_filename
     ELSE
-      vtk_reg_filename=TRIM(wwords(2))
+      vtk_reg_filename=TRIM(this_card%carg)
     ENDIF
   END SUBROUTINE get_vtk_reg_out
 
@@ -609,15 +774,16 @@ CONTAINS
   SUBROUTINE get_vtk_src_out(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
+
     vtk_src_output=1
-    wwords(2)=TRIM(wwords(2))
-    IF(lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none')THEN
+    this_card%carg=TRIM(wwords(2))
+    IF(lowercase(this_card%carg) .EQ. 'no' .OR. lowercase(this_card%carg) .EQ. 'none')THEN
       vtk_src_output=0
-    ELSEIF(lowercase(wwords(2)) .EQ. 'yes')THEN
+    ELSEIF(lowercase(this_card%carg) .EQ. 'yes')THEN
       !do nothing, default
+      this_card%carg=vtk_src_filename
     ELSE
-      vtk_src_filename=TRIM(wwords(2))
+      vtk_src_filename=TRIM(this_card%carg)
     ENDIF
   END SUBROUTINE get_vtk_src_out
 
@@ -625,14 +791,15 @@ CONTAINS
   SUBROUTINE get_cartesian_map_out(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(wwords(2))
-    IF      ( lowercase(wwords(2)) .EQ. 'yes') THEN
+
+    this_card%carg=TRIM(wwords(2))
+    IF(lowercase(this_card%carg) .EQ. 'yes') THEN
       !do nothing, default
-    ELSE IF ( lowercase(wwords(2)) .EQ. 'no' .OR. lowercase(wwords(2)) .EQ. 'none') THEN
+      this_card%carg=cartesian_map_filename
+    ELSEIF(lowercase(this_card%carg) .EQ. 'no' .OR. lowercase(this_card%carg) .EQ. 'none') THEN
       glob_do_cartesian_mesh = .FALSE.
     ELSE
-      cartesian_map_filename=TRIM(wwords(2))
+      cartesian_map_filename=TRIM(this_card%carg)
     ENDIF
   END SUBROUTINE get_cartesian_map_out
 
@@ -640,14 +807,14 @@ CONTAINS
   SUBROUTINE get_print_xs(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    IF      ( wwords(2) .EQ. 'yes') THEN
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    IF(this_card%carg .EQ. 'yes') THEN
       print_xs_flag=1
-    ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+    ELSEIF(this_card%carg .EQ. 'no' .OR. this_card%carg .EQ. 'none') THEN
       print_xs_flag=0
     ELSE
-      CALL raise_fatal_error('This is not a valid cross section print option (yes/no) -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('This is not a valid cross section print option (yes/no) -- '//TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_print_xs
 
@@ -656,11 +823,11 @@ CONTAINS
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     INTEGER :: ios
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    READ(wwords(2),'(i10)',iostat=ios) egmax
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    READ(this_card%carg,'(i10)',iostat=ios) egmax
     IF(ios.NE.0 .OR. egmax<1) THEN
-      CALL raise_fatal_error('Invalid number of energy groups in cross section specification -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('Invalid number of energy groups in cross section specification -- '//TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_ngroups
 
@@ -669,11 +836,11 @@ CONTAINS
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     INTEGER :: ios
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
     READ(wwords(2),'(i10)',iostat=ios) scatt_ord
     IF(ios.NE.0 .OR. scatt_ord < 0) THEN
-      CALL raise_fatal_error('Invalid scattering expansion in cross section specification -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('Invalid scattering expansion in cross section specification -- '//TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_pnorder
 
@@ -682,11 +849,11 @@ CONTAINS
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     INTEGER :: ios
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    READ(wwords(2),'(i10)',iostat=ios) xs_ord
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    READ(this_card%carg,'(i10)',iostat=ios) xs_ord
     IF(ios.NE.0 .OR. xs_ord < 0) THEN
-      CALL raise_fatal_error('Invalid cross section expansion in cross section specification -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('Invalid cross section expansion in cross section specification -- '//TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_pnread
 
@@ -694,14 +861,14 @@ CONTAINS
   SUBROUTINE get_upscattering(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    IF      ( wwords(2) .EQ. 'yes') THEN
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    IF(this_card%carg .EQ. 'yes') THEN
       upscattering=1
-    ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+    ELSEIF(this_card%carg .EQ. 'no' .OR. this_card%carg .EQ. 'none') THEN
       upscattering=0
     ELSE
-      CALL raise_fatal_error('This is not a valid upscattering flag -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('This is not a valid upscattering flag -- '//TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_upscattering
 
@@ -709,14 +876,14 @@ CONTAINS
   SUBROUTINE get_multiplying(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    IF      ( wwords(2) .EQ. 'yes') THEN
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    IF(this_card%carg .EQ. 'yes') THEN
       multiplying=1
-    ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+    ELSEIF(this_card%carg .EQ. 'no' .OR. this_card%carg .EQ. 'none') THEN
       multiplying=0
     ELSE
-      CALL raise_fatal_error('This is not a valid multiplying flag -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('This is not a valid multiplying flag -- '//TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_multiplying
 
@@ -724,14 +891,14 @@ CONTAINS
   SUBROUTINE get_scatt_mult_included(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    IF      ( wwords(2) .EQ. 'yes') THEN
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    IF(this_card%carg .EQ. 'yes') THEN
       scat_mult_flag=1
-    ELSE IF ( wwords(2) .EQ. 'no' .OR. wwords(2) .EQ. 'none') THEN
+    ELSEIF(this_card%carg .EQ. 'no' .OR. this_card%carg .EQ. 'none') THEN
       scat_mult_flag=0
     ELSE
-      CALL raise_fatal_error('This is not a valid scattering multiplier flag -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('This is not a valid scattering multiplier flag -- '//TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_scatt_mult_included
 
@@ -739,15 +906,15 @@ CONTAINS
   SUBROUTINE get_qdtype(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(wwords(2))
-    IF      ( lowercase(wwords(2)) .EQ. 'levelsym') THEN
+
+    this_card%carg=TRIM(wwords(2))
+    IF(lowercase(this_card%carg) .EQ. 'levelsym') THEN
       quad_tpe=1
-    ELSE IF ( lowercase(wwords(2)) .EQ. 'legcheb') THEN
+    ELSEIF(lowercase(this_card%carg) .EQ. 'legcheb') THEN
       quad_tpe=2
     ELSE
       quad_tpe=3
-      quad_file=TRIM(wwords(2))
+      quad_file=TRIM(this_card%carg)
     END IF
   END SUBROUTINE get_qdtype
 
@@ -756,11 +923,11 @@ CONTAINS
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     INTEGER :: ios
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    wwords(2)=TRIM(lowercase(wwords(2)))
-    READ(wwords(2),'(i10)',iostat=ios) quad_ord
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    READ(this_card%carg,'(i10)',iostat=ios) quad_ord
     IF(ios.NE.0 ) THEN
-      CALL raise_fatal_error('Invalid quadrature order -- '//TRIM(wwords(2))//' --')
+      CALL raise_fatal_error('Invalid quadrature order -- '//TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_qdorder
 
@@ -770,47 +937,52 @@ CONTAINS
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     INTEGER :: nwwwords,i,minint
     CHARACTER(ll_max) :: wwwords(lp_max),msg
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    minint=1
-    !get the cartesian map array
-    DO i=2,lp_max
-      wwwords(i-1)=TRIM(ADJUSTL(lowercase(wwords(i))))
-      IF(TRIM(ADJUSTL(wwords(i))) .EQ. '')EXIT
-      nwwwords=i-1
-    ENDDO
-    glob_do_cartesian_mesh = .TRUE.
-    ! wwords must be an array with of length 9
-    IF (nwwwords .NE. 9) THEN
-      WRITE(6,*) 'Following cartesian map nine entries are required; Found: ',&
-            TRIM(wwords(2)),' has ', nwwwords, ' entries.'
-    END IF
-    msg='Conversion to cartesian map xmin failed'
-    glob_cmap_min_x = string_to_real(wwwords(1), msg)
-    msg='Conversion to cartesian map xmax failed'
-    glob_cmap_max_x = string_to_real(wwwords(2), msg)
-    IF (ABS(glob_cmap_max_x - glob_cmap_min_x) < small_real) THEN
-      WRITE(6, *) "cartesian_map xmin and xmax are too close to each other"
-    END IF
-    msg='Conversion to cartesian map nx failed'
-    glob_cmap_nx = string_to_int(wwwords(3), msg, minint)
-    msg='Conversion to cartesian map ymin failed'
-    glob_cmap_min_y = string_to_real(wwwords(4), msg)
-    msg='Conversion to cartesian map ymax failed'
-    glob_cmap_max_y = string_to_real(wwwords(5), msg)
-    IF (ABS(glob_cmap_max_y - glob_cmap_min_y) < small_real) THEN
-      WRITE(6, *) "cartesian_map xmin and xmax are too close to each other"
-    END IF
-    msg='Conversion to cartesian map ny failed'
-    glob_cmap_ny = string_to_int(wwwords(6), msg, minint)
-    msg='Conversion to cartesian map zmin failed'
-    glob_cmap_min_z = string_to_real(wwwords(7), msg)
-    msg='Conversion to cartesian map zmax failed'
-    glob_cmap_max_z = string_to_real(wwwords(8), msg)
-    IF (ABS(glob_cmap_max_z - glob_cmap_min_z) < small_real) THEN
-      WRITE(6, *) "cartesian_map zmin and zmax are too close to each other"
-    END IF
-    msg='Conversion to cartesian map nz failed'
-    glob_cmap_nz = string_to_int(wwwords(9), msg, minint)
+
+    IF(lowercase(wwords(2)) .NE. 'none' .AND. lowercase(wwords(2)) .NE. 'no')THEN
+      minint=1
+      !get the cartesian map array
+      this_card%carg=''
+      DO i=2,lp_max
+        wwwords(i-1)=TRIM(ADJUSTL(lowercase(wwords(i))))
+        IF(TRIM(ADJUSTL(wwords(i))) .EQ. '')EXIT
+        nwwwords=i-1
+        this_card%carg=TRIM(this_card%carg)//' '//TRIM(wwwords(i-1))
+      ENDDO
+      glob_do_cartesian_mesh = .TRUE.
+      ! wwords must be an array with of length 9
+      IF(nwwwords .NE. 9) THEN
+        WRITE(amsg,'(3A,I0,A)') 'Following cartesian map nine entries are required; Found: ',&
+              TRIM(wwords(2)),' has ', nwwwords, ' entries.'
+        CALL printlog(amsg)
+      END IF
+      msg='Conversion to cartesian map xmin failed'
+      glob_cmap_min_x = string_to_real(wwwords(1), msg)
+      msg='Conversion to cartesian map xmax failed'
+      glob_cmap_max_x = string_to_real(wwwords(2), msg)
+      IF(ABS(glob_cmap_max_x - glob_cmap_min_x) < small_real) THEN
+        CALL printlog("cartesian_map xmin and xmax are too close to each other")
+      END IF
+      msg='Conversion to cartesian map nx failed'
+      glob_cmap_nx = string_to_int(wwwords(3), msg, minint)
+      msg='Conversion to cartesian map ymin failed'
+      glob_cmap_min_y = string_to_real(wwwords(4), msg)
+      msg='Conversion to cartesian map ymax failed'
+      glob_cmap_max_y = string_to_real(wwwords(5), msg)
+      IF(ABS(glob_cmap_max_y - glob_cmap_min_y) < small_real) THEN
+        CALL printlog("cartesian_map xmin and xmax are too close to each other")
+      END IF
+      msg='Conversion to cartesian map ny failed'
+      glob_cmap_ny = string_to_int(wwwords(6), msg, minint)
+      msg='Conversion to cartesian map zmin failed'
+      glob_cmap_min_z = string_to_real(wwwords(7), msg)
+      msg='Conversion to cartesian map zmax failed'
+      glob_cmap_max_z = string_to_real(wwwords(8), msg)
+      IF(ABS(glob_cmap_max_z - glob_cmap_min_z) < small_real) THEN
+        CALL printlog("cartesian_map zmin and zmax are too close to each other")
+      END IF
+      msg='Conversion to cartesian map nz failed'
+      glob_cmap_nz = string_to_int(wwwords(9), msg, minint)
+    ENDIF
   END SUBROUTINE get_cartesian_map
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -819,27 +991,32 @@ CONTAINS
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     INTEGER :: nwwwords,j,l
     CHARACTER(ll_max) :: wwwords(lp_max),msg
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    msg='Conversion to point flux location failed'
-    !get the point value locations array
-    DO j=2,lp_max
-      wwwords(j-1)=TRIM(ADJUSTL(lowercase(wwords(j))))
-      IF(TRIM(ADJUSTL(wwords(j))) .EQ. '')EXIT
-      nwwwords=j-1
-    ENDDO
-    ! must be divisible by 3
-    IF (modulo(nwwwords, 3) .ne. 0) THEN
-      WRITE(6,*) 'point_value_locations number of entries must be divisible by 3; Found: ',&
-            TRIM(wwords(2)),' has ', nwwwords, ' entries.'
-    ELSE
-      number_point_flux_locations = nwwwords / 3
-      ALLOCATE(point_flux_locations(number_point_flux_locations, 3))
-      DO l = 1, number_point_flux_locations
-        DO j = 1, 3
-          point_flux_locations(l, j) = string_to_real(wwwords((l - 1) * 3 + j),msg)
+
+    IF(lowercase(wwords(2)) .NE. 'none' .AND. lowercase(wwords(2)) .NE. 'no')THEN
+      msg='Conversion to point flux location failed'
+      !get the point value locations array
+      this_card%carg=''
+      DO j=2,lp_max
+        wwwords(j-1)=TRIM(ADJUSTL(lowercase(wwords(j))))
+        IF(TRIM(ADJUSTL(wwords(j))) .EQ. '')EXIT
+        nwwwords=j-1
+        this_card%carg=TRIM(this_card%carg)//' '//TRIM(wwwords(j-1))
+      ENDDO
+      ! must be divisible by 3
+      IF(modulo(nwwwords, 3) .ne. 0) THEN
+        WRITE(amsg,'(3A,I0,A)') 'point_value_locations number of entries must be divisible by 3; Found: ',&
+              TRIM(wwords(2)),' has ', nwwwords, ' entries.'
+        CALL printlog(amsg)
+      ELSE
+        number_point_flux_locations = nwwwords / 3
+        ALLOCATE(point_flux_locations(number_point_flux_locations, 3))
+        DO l = 1, number_point_flux_locations
+          DO j = 1, 3
+            point_flux_locations(l, j) = string_to_real(wwwords((l - 1) * 3 + j),msg)
+          END DO
         END DO
-      END DO
-    END IF
+      END IF
+    ENDIF
   END SUBROUTINE get_point_value_locations
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -851,58 +1028,63 @@ CONTAINS
     CHARACTER(MAX_CARDNAME_LEN) :: words(200)
     INTEGER :: rank,mpi_err,local_unit,i,l,lr,nwords,ios
     INTEGER,ALLOCATABLE :: tempintarray(:)
-    IF(.FALSE.)WRITE(6,'(2A)')'Found card: ',TRIM(this_card%cname)
-    CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
-    local_unit=rank+100
 
-    regmap=""
-    !get any region map info on the same line
-    DO i=2,lp_max
-      wwords(i)=ADJUSTL(TRIM(wwords(i)))
-      IF(wwords(i) .EQ. "")EXIT
-      l      = LEN(TRIM(regmap))
-      lr     = LEN(TRIM(wwords(i)))
-      regmap(l+2:l+2+lr) = TRIM(wwords(i))
-    ENDDO
-    !get any region map info on subsequent lines
-    D1: DO
-      READ(local_unit,'(A200)',IOSTAT=ios)line
-      IF(ios .NE. 0)EXIT
-      line=TRIM(ADJUSTL(line))
-      IF(line .NE. '' .AND. line(1:1) .NE. '!')THEN
-        CALL parse(line," ",words,nwords)
-        words(1)=TRIM(ADJUSTL(words(1)))
-        !make sure we're not onto the next param
-        DO i=1,num_cards
-          IF(words(1).EQ. cards(i)%cname)THEN
-            BACKSPACE(local_unit)
-            EXIT D1
-          ENDIF
-        ENDDO
-        !if it didn't exit, then it's legit input
-        DO i=1,nwords
-          words(i)=TRIM(ADJUSTL(words(i)))
-          l      = LEN(TRIM(regmap))
-          lr     = LEN(TRIM(words(i)))
-          regmap(l+2:l+2+lr) = TRIM(words(i))
-        ENDDO
-      ENDIF
-    ENDDO D1
-    regmap=TRIM(ADJUSTL(regmap))
-    CALL parse(regmap," ",words,nwords)
-    ALLOCATE(tempintarray(nwords))
-    READ(regmap,*)(tempintarray(i),i=1,nwords)
-    !odd indexed are the actual region indeces
-    DO i=1,nwords,2
-      IF(tempintarray(i) .GE. maxreg)maxreg=tempintarray(i)
-      IF(tempintarray(i) .LE. minreg)minreg=tempintarray(i)
-    ENDDO
-    IF(ABS(nwords-2*(maxreg-minreg+1)) .GT. 0)CALL raise_fatal_error("region map bounds and number of entries don't match")
-    ALLOCATE(reg2mat(minreg:maxreg))
-    !assign region mapping
-    DO i=1,nwords,2
-      reg2mat(tempintarray(i))=tempintarray(i+1)
-    ENDDO
+    IF(lowercase(wwords(2)) .NE. 'none' .AND. lowercase(wwords(2)) .NE. 'no')THEN
+      CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
+      local_unit=rank+100
+
+      regmap=""
+      !get any region map info on the same line
+      this_card%carg=''
+      DO i=2,lp_max
+        wwords(i)=ADJUSTL(TRIM(wwords(i)))
+        IF(wwords(i) .EQ. "")EXIT
+        l      = LEN(TRIM(regmap))
+        lr     = LEN(TRIM(wwords(i)))
+        regmap(l+2:l+2+lr) = TRIM(wwords(i))
+        this_card%carg=TRIM(this_card%carg)//' '//TRIM(wwords(i))
+      ENDDO
+      !get any region map info on subsequent lines
+      D1: DO
+        READ(local_unit,'(A200)',IOSTAT=ios)line
+        IF(ios .NE. 0)EXIT
+        line=TRIM(ADJUSTL(line))
+        IF(line .NE. '' .AND. line(1:1) .NE. '!')THEN
+          CALL parse(line," ",words,nwords)
+          words(1)=TRIM(ADJUSTL(words(1)))
+          !make sure we're not onto the next param
+          DO i=1,num_cards
+            IF(words(1).EQ. cards(i)%cname)THEN
+              BACKSPACE(local_unit)
+              EXIT D1
+            ENDIF
+          ENDDO
+          !IFit didn't exit, then it's legit input
+          DO i=1,nwords
+            words(i)=TRIM(ADJUSTL(words(i)))
+            l      = LEN(TRIM(regmap))
+            lr     = LEN(TRIM(words(i)))
+            regmap(l+2:l+2+lr) = TRIM(words(i))
+            this_card%carg=TRIM(this_card%carg)//' '//TRIM(wwords(i))
+          ENDDO
+        ENDIF
+      ENDDO D1
+      regmap=TRIM(ADJUSTL(regmap))
+      CALL parse(regmap," ",words,nwords)
+      ALLOCATE(tempintarray(nwords))
+      READ(regmap,*)(tempintarray(i),i=1,nwords)
+      !odd indexed are the actual region indeces
+      DO i=1,nwords,2
+        IF(tempintarray(i) .GE. maxreg)maxreg=tempintarray(i)
+        IF(tempintarray(i) .LE. minreg)minreg=tempintarray(i)
+      ENDDO
+      IF(ABS(nwords-2*(maxreg-minreg+1)) .GT. 0)CALL raise_fatal_error("region map bounds and number of entries don't match")
+      ALLOCATE(reg2mat(minreg:maxreg))
+      !assign region mapping
+      DO i=1,nwords,2
+        reg2mat(tempintarray(i))=tempintarray(i+1)
+      ENDDO
+    ENDIF
   END SUBROUTINE get_region_map
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -913,7 +1095,7 @@ CONTAINS
 
     INTEGER(kind=li) :: ios
 
-    IF (.NOT. PRESENT(min_int)) min_int = -glob_max_int
+    IF(.NOT. PRESENT(min_int)) min_int = -glob_max_int
     READ(string, '(i10)', iostat=ios) string_to_int
     IF(ios .NE. 0 .OR. string_to_int < min_int) THEN
       CALL raise_fatal_error('string_to_int failed: '//TRIM(msg)//' '//TRIM(string))
@@ -952,5 +1134,67 @@ CONTAINS
       ENDIF
     ENDDO
   ENDSUBROUTINE get_next_line
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  SUBROUTINE echo_equiv_inp
+    INTEGER :: i,strlg_max,cnamelg_max
+
+    strlg_max=0
+    cnamelg_max=0
+    DO i=1,num_cards
+      cards(i)%carg=TRIM(ADJUSTL(cards(i)%carg))
+      strlg_max=MAX(strlg_max,LEN_TRIM(cards(i)%carg))
+      cards(i)%cname=TRIM(ADJUSTL(cards(i)%cname))
+      cnamelg_max=MAX(cnamelg_max,LEN_TRIM(cards(i)%cname))
+    ENDDO
+    strlg_max=MIN(strlg_max,MAX_CARDNAME_LEN)
+    CALL printlog('')
+    CALL printlog('***********************************************************************')
+    CALL printlog('*******************Echoing verbose equivalent input********************')
+    CALL printlog('***********************************************************************')
+    DO i=1,num_cards
+      cards(i)%carg=TRIM(ADJUSTL(cards(i)%carg))
+      !echo cards and data
+      IF(LEN_TRIM(cards(i)%carg) .LE. MAX_CARDNAME_LEN)THEN
+        WRITE(amsg,'(4A)')cards(i)%cname(1:cnamelg_max),' ',cards(i)%carg(1:strlg_max),' !'
+        CALL printlog(amsg,ADVANCING=.FALSE.)
+      ELSE
+        WRITE(amsg,'(4A)')cards(i)%cname(1:cnamelg_max),' ',TRIM(cards(i)%carg),' !'
+        CALL printlog(amsg,ADVANCING=.FALSE.)
+      ENDIF
+      !echo if card is provided
+      IF(cards(i)%used)THEN
+        CALL printlog('card provided',ADVANCING=.FALSE.)
+      ELSE
+        CALL printlog('card NOT provided (default)',ADVANCING=.FALSE.)
+      ENDIF
+      !print info on ignored input cards
+      SELECT CASE(cards(i)%csub)
+        CASE('keig')
+          IF(problem .NE. 1)THEN
+            CALL printlog(': ignored, not a keig problem',ADVANCING=.FALSE.)
+          ENDIF
+        CASE('poweriter')
+          IF(eig_switch .NE. 0)THEN
+            CALL printlog(': ignored, not using power iterations',ADVANCING=.FALSE.)
+          ENDIF
+        CASE('jfnk')
+          IF(eig_switch .NE. 1)THEN
+            CALL printlog(': ignored, not using jfnk',ADVANCING=.FALSE.)
+          ENDIF
+        CASE('legacyxs')
+          CALL printlog(': only used with legaxy xs',ADVANCING=.FALSE.)
+        CASE('srcprob')
+          IF(problem .NE. 0)THEN
+            CALL printlog(': ignored, not a fixed source problem',ADVANCING=.FALSE.)
+          ENDIF
+        CASE DEFAULT
+      ENDSELECT
+      CALL printlog('')
+    ENDDO
+    CALL printlog('***********************************************************************')
+    CALL printlog('******************Equivalent complete input finished*******************')
+    CALL printlog('***********************************************************************')
+  ENDSUBROUTINE echo_equiv_inp
 
 END MODULE read_inp_module

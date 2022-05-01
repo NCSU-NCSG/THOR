@@ -37,7 +37,7 @@ SRC :=  \
         filename_types.f95								\
         general_utility_module.f95				\
         geometry_types.f95								\
-        global_variables.f95							\
+        globals.f95							\
         inner_iteration_module.f95				\
         input_check.f95										\
         jfnk_module.f95										\
@@ -195,7 +195,7 @@ cell_splitting_module.o cell_splitting_module.mod: \
   cell_splitting_module.f95 types.mod parameter_types.mod \
   filename_types.mod vector_types.mod cross_section_types.mod \
   geometry_types.mod angle_types.mod multindex_types.mod \
-  global_variables.mod general_utility_module.mod \
+  globals.mod general_utility_module.mod \
   transport_kernel_module_sc.mod transport_kernel_module_lc.mod \
   transport_kernel_module_cce.mod error_module.mod stringmod.mod
 
@@ -205,12 +205,12 @@ cross_section_types.o cross_section_types.mod: cross_section_types.f95 \
 dump_inguess_module.o dump_inguess_module.mod: dump_inguess_module.f95 \
   types.mod parameter_types.mod filename_types.mod vector_types.mod \
   cross_section_types.mod geometry_types.mod angle_types.mod \
-  multindex_types.mod global_variables.mod error_module.mod
+  multindex_types.mod globals.mod error_module.mod
 
 execution_module.o execution_module.mod: execution_module.f95 types.mod \
   parameter_types.mod filename_types.mod vector_types.mod \
   cross_section_types.mod geometry_types.mod angle_types.mod \
-  multindex_types.mod global_variables.mod solver_module.mod
+  multindex_types.mod globals.mod solver_module.mod
 
 filename_types.o filename_types.mod: filename_types.f95
 
@@ -220,7 +220,7 @@ general_utility_module.o general_utility_module.mod: \
 geometry_types.o geometry_types.mod: geometry_types.f95 types.mod \
   vector_types.mod
 
-global_variables.o global_variables.mod: global_variables.f95 types.mod \
+globals.o globals.mod: globals.f95 types.mod \
   parameter_types.mod filename_types.mod vector_types.mod \
   cross_section_types.mod source_types.mod geometry_types.mod angle_types.mod \
   multindex_types.mod integer_array_tools.mod
@@ -229,26 +229,26 @@ inner_iteration_module.o inner_iteration_module.mod: \
   inner_iteration_module.f95  types.mod \
   parameter_types.mod filename_types.mod vector_types.mod \
   cross_section_types.mod geometry_types.mod angle_types.mod \
-  multindex_types.mod global_variables.mod sweep_module.mod \
+  multindex_types.mod globals.mod sweep_module.mod \
   error_module.mod
 
 input_check.o check_input.mod: input_check.f95 types.mod \
   parameter_types.mod filename_types.mod vector_types.mod \
   cross_section_types.mod geometry_types.mod angle_types.mod \
-  multindex_types.mod global_variables.mod
+  multindex_types.mod globals.mod
 
 jfnk_module.o jfnk_module.mod: jfnk_module.f95 types.mod \
   parameter_types.mod filename_types.mod vector_types.mod \
   cross_section_types.mod geometry_types.mod angle_types.mod \
-  multindex_types.mod global_variables.mod inner_iteration_module.mod \
+  multindex_types.mod globals.mod inner_iteration_module.mod \
   dump_inguess_module.mod outer_iteration_module.mod
 
 main.o: main.f95  types.mod parameter_types.mod \
   filename_types.mod vector_types.mod cross_section_types.mod \
   geometry_types.mod angle_types.mod multindex_types.mod \
-  global_variables.mod error_module.mod setup_module.mod \
+  globals.mod error_module.mod setup_module.mod \
   execution_module.mod wrapup_module.mod  \
-  global_variables.mod
+  globals.mod
 
 multindex_types.o multindex_types.mod: multindex_types.f95 types.mod \
   vector_types.mod
@@ -257,7 +257,7 @@ outer_iteration_module.o outer_iteration_module.mod: \
   outer_iteration_module.f95 types.mod parameter_types.mod \
   filename_types.mod vector_types.mod cross_section_types.mod \
   geometry_types.mod angle_types.mod multindex_types.mod \
-  global_variables.mod wrapup_module.mod error_module.mod \
+  globals.mod wrapup_module.mod error_module.mod \
   inner_iteration_module.mod dump_inguess_module.mod
 
 parameter_types.o parameter_types.mod: parameter_types.f95 types.mod
@@ -266,44 +266,44 @@ precision.o precision.mod: precision.f95
 
 quadrature_module.o quadrature_module.mod: quadrature_module.f95 \
   types.mod parameter_types.mod vector_types.mod angle_types.mod \
-  global_variables.mod error_module.mod
+  globals.mod error_module.mod
 
 read_cross_section_module.o read_cross_section_module.mod: \
   read_cross_section_module.f95 types.mod parameter_types.mod \
-  filename_types.mod cross_section_types.mod global_variables.mod \
+  filename_types.mod cross_section_types.mod globals.mod \
   error_module.mod stringmod.mod
 
 read_inflow_module.o read_inflow_module.mod: read_inflow_module.f95 \
   types.mod parameter_types.mod filename_types.mod multindex_types.mod \
-  global_variables.mod error_module.mod
+  globals.mod error_module.mod
 
 read_inp_module.o read_inp_module.mod: read_inp_module.f95  \
-  stringmod.mod global_variables.mod error_module.mod
+  stringmod.mod globals.mod error_module.mod
 
 read_inp_module_legacy.o read_inp_module_legacy.mod: read_inp_module_legacy.f95 \
-  stringmod.mod error_module.mod global_variables.mod parameter_types.mod
+  stringmod.mod error_module.mod globals.mod parameter_types.mod
 
 read_mesh_module.o read_mesh_module.mod: read_mesh_module.f95 \
   types.mod parameter_types.mod filename_types.mod \
-  vector_types.mod geometry_types.mod global_variables.mod \
+  vector_types.mod geometry_types.mod globals.mod \
   error_module.mod
 
 read_module.o read_module.mod: read_module.f95  \
   stringmod.mod types.mod parameter_types.mod filename_types.mod \
   vector_types.mod cross_section_types.mod geometry_types.mod \
-  angle_types.mod multindex_types.mod global_variables.mod \
+  angle_types.mod multindex_types.mod globals.mod \
   read_cross_section_module.mod read_mesh_module.mod read_source_module.mod \
   read_inflow_module.mod quadrature_module.mod check_input.mod \
   error_module.mod read_inp_module_legacy.mod read_inp_module.mod
 
 read_source_module.o read_source_module.mod: read_source_module.f95 \
   types.mod parameter_types.mod filename_types.mod multindex_types.mod \
-  global_variables.mod error_module.mod stringmod.mod
+  globals.mod error_module.mod stringmod.mod
 
 setup_module.o setup_module.mod: setup_module.f95  \
   types.mod parameter_types.mod filename_types.mod vector_types.mod \
   cross_section_types.mod geometry_types.mod angle_types.mod \
-  multindex_types.mod global_variables.mod read_module.mod \
+  multindex_types.mod globals.mod read_module.mod \
   quadrature_module.mod sweep_module.mod error_module.mod
 
 source_types.o source_types.mod: source_types.f95 \
@@ -312,41 +312,41 @@ source_types.o source_types.mod: source_types.f95 \
 solver_module.o solver_module.mod: solver_module.f95 types.mod \
   parameter_types.mod filename_types.mod vector_types.mod \
   cross_section_types.mod geometry_types.mod angle_types.mod \
-  multindex_types.mod global_variables.mod ahotc_matrix_module.mod \
+  multindex_types.mod globals.mod ahotc_matrix_module.mod \
   sph_harmonics_module.mod outer_iteration_module.mod jfnk_module.mod \
   error_module.mod
 
 sph_harmonics_module.o sph_harmonics_module.mod: sph_harmonics_module.f95 \
   types.mod parameter_types.mod vector_types.mod angle_types.mod \
-  multindex_types.mod error_module.mod global_variables.mod
+  multindex_types.mod error_module.mod globals.mod
 
 sweep_module.o sweep_module.mod: sweep_module.f95  \
   types.mod parameter_types.mod filename_types.mod vector_types.mod \
   cross_section_types.mod geometry_types.mod angle_types.mod \
-  multindex_types.mod global_variables.mod cell_splitting_module.mod
+  multindex_types.mod globals.mod cell_splitting_module.mod
 
 error_module.o error_module.mod: error_module.f95 \
-  global_variables.mod
+  globals.mod
 
 transport_kernel_module_cce.o transport_kernel_module_cce.mod: \
   transport_kernel_module_cce.f95 types.mod parameter_types.mod \
   filename_types.mod vector_types.mod cross_section_types.mod \
   geometry_types.mod angle_types.mod multindex_types.mod \
-  global_variables.mod error_module.mod general_utility_module.mod \
+  globals.mod error_module.mod general_utility_module.mod \
   types.mod types.mod types.mod types.mod
 
 transport_kernel_module_lc.o transport_kernel_module_lc.mod: \
   transport_kernel_module_lc.f95 types.mod parameter_types.mod \
   filename_types.mod vector_types.mod cross_section_types.mod \
   geometry_types.mod angle_types.mod multindex_types.mod \
-  global_variables.mod error_module.mod general_utility_module.mod
+  globals.mod error_module.mod general_utility_module.mod
 		$(FC) -c $(OPT) -fdefault-real-8 $<
 
 transport_kernel_module_sc.o transport_kernel_module_sc.mod: \
   transport_kernel_module_sc.f95 types.mod parameter_types.mod \
   filename_types.mod vector_types.mod cross_section_types.mod \
   geometry_types.mod angle_types.mod multindex_types.mod \
-  global_variables.mod error_module.mod general_utility_module.mod
+  globals.mod error_module.mod general_utility_module.mod
 		$(FC) -c $(OPT) -fdefault-real-8 $<
 
 types.o types.mod: types.f95
@@ -356,4 +356,4 @@ vector_types.o vector_types.mod: vector_types.f95 types.mod
 wrapup_module.o wrapup_module.mod: wrapup_module.f95 types.mod \
   parameter_types.mod filename_types.mod vector_types.mod \
   cross_section_types.mod geometry_types.mod angle_types.mod \
-  global_variables.mod error_module.mod general_utility_module.mod
+  globals.mod error_module.mod general_utility_module.mod

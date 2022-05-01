@@ -15,7 +15,7 @@ MODULE dump_inguess_module
   USE geometry_types
   USE angle_types
   USE multindex_types
-  USE global_variables
+  USE globals
   USE error_module
 
   IMPLICIT NONE
@@ -46,7 +46,7 @@ CONTAINS
     ! open file
     INQUIRE(file=TRIM(inguess_file), exist=existence)
     IF (existence .EQV. .TRUE.) THEN
-      OPEN (UNIT = 66, FILE = inguess_file, STATUS = "OLD", ACTION = "READ",&
+      OPEN(UNIT = 66, FILE = inguess_file, STATUS = "OLD", ACTION = "READ",&
             form='unformatted')
       ! read inguess file
       READ(66) egmax_t,num_cells_t,namom_t,num_moments_v_t
@@ -68,13 +68,13 @@ CONTAINS
       ! close file
 
       CLOSE(unit=66)
-      WRITE(6,*)
-      WRITE(6,*) 'Initial guess file ',TRIM(inguess_file),' was successfully read'
+      CALL printlog('')
+      CALL printlog('Initial guess file '//TRIM(inguess_file)//' was successfully read')
 
     ELSE
-      WRITE(6,*)
-      WRITE(6,*) "Attempted to read initial guess file ",TRIM(inguess_file)," but could not find it."
-      WRITE(6,*)
+      CALL printlog('')
+      CALL printlog("Attempted to read initial guess file "//TRIM(inguess_file)//" but could not find it.")
+      CALL printlog('')
       flux(:,:,:,:,niter)=zero
       DO eg =1,egmax
         DO i=1,num_cells
@@ -105,13 +105,8 @@ CONTAINS
 
     ! open file
     INQUIRE(file=TRIM(dump_file), exist=existence)
-    IF (existence .EQV. .TRUE.) THEN
-      OPEN (UNIT = 56, FILE = dump_file, STATUS = "OLD", ACTION = "WRITE",&
-            form='unformatted')
-    ELSE
-      OPEN (UNIT = 56, FILE = dump_file, STATUS = "NEW", ACTION ="WRITE",&
-            form='unformatted')
-    END IF
+    OPEN(UNIT = 56, FILE = dump_file, STATUS = "REPLACE", ACTION = "WRITE",&
+          form='unformatted')
 
     ! write dump file
     WRITE(56) egmax,num_cells,namom,num_moments_v
@@ -151,13 +146,8 @@ CONTAINS
 
     ! open file
     INQUIRE(file=TRIM(dump_file), exist=existence)
-    IF (existence .EQV. .TRUE.) THEN
-      OPEN (UNIT = 56, FILE = dump_file, STATUS = "OLD", ACTION = "WRITE",&
-            form='unformatted')
-    ELSE
-      OPEN (UNIT = 56, FILE = dump_file, STATUS = "NEW", ACTION ="WRITE",&
-            form='unformatted')
-    END IF
+    OPEN(UNIT = 56, FILE = dump_file, STATUS = "REPLACE", ACTION = "WRITE",&
+          form='unformatted')
 
     ! write dump file
     WRITE(56) egmax,num_cells,namom,num_moments_v

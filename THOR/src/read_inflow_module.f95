@@ -9,7 +9,7 @@ MODULE read_inflow_module
   USE parameter_types
   USE filename_types
   USE multindex_types
-  USE global_variables
+  USE globals
   USE error_module
 
   IMPLICIT NONE

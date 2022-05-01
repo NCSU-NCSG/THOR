@@ -11,7 +11,7 @@ MODULE read_cross_section_module
   USE parameter_types
   USE filename_types
   USE cross_section_types
-  USE global_variables
+  USE globals
   USE error_module
   USE stringmod
 

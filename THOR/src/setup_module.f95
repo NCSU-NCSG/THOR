@@ -16,7 +16,7 @@ MODULE setup_module
   USE geometry_types
   USE angle_types
   USE multindex_types
-  USE global_variables
+  USE globals
 
   ! Use modules that pertain setting up problem
 
@@ -182,7 +182,7 @@ CONTAINS
       !TODO: This should be analyzed and figured out if we can do something different, or if we can just set it to 1 thread
     END IF
 
-101 FORMAT(1X,A,ES12.4)
+101 FORMAT(A,ES12.4)
 
     ! Set up the variables to memorize rings in the mesh sweep
 
@@ -216,17 +216,18 @@ CONTAINS
 
       ! pre-compute sweep
       IF (rank .EQ. 0) THEN
-        WRITE(6,*) "--------------------------------------------------------"
-        WRITE(6,*) "   Precomputing sweep path   "
-        WRITE(6,*) "--------------------------------------------------------"
+        CALL printlog("--------------------------------------------------------")
+        CALL printlog("   Precomputing sweep path   ")
+        CALL printlog("--------------------------------------------------------")
       END IF
       !FIX ME - pre sweep efficiency and threading
       CALL CPU_TIME(ts)
       CALL pre_sweep
       CALL CPU_TIME(te)
       IF (rank .EQ. 0) THEN
-        WRITE(6,101) '-- Finished precomputing sweep path. Time (sec.) ', te-ts
-        WRITE(6,*)
+        WRITE(amsg,101)'-- Finished precomputing sweep path. Time (sec.) ', te-ts
+        CALL printlog(amsg)
+        CALL printlog('')
       END IF
     END IF
 
@@ -253,18 +254,19 @@ CONTAINS
 
     ! Write region information
     IF (rank .EQ. 0) THEN
-      WRITE(6,*)
-      WRITE(6,*) "--------------------------------------------------------"
-      WRITE(6,*) "   Region Information  "
-      WRITE(6,*) "--------------------------------------------------------"
-      WRITE(6,*)
-      WRITE(6,*) "     Region ID","   Material ID","  Region Volume"," Density Factor"
+      CALL printlog('')
+      CALL printlog("--------------------------------------------------------")
+      CALL printlog("   Region Information  ")
+      CALL printlog("--------------------------------------------------------")
+      CALL printlog('')
+      CALL printlog("     Region ID   Material ID  Region Volume Density Factor")
       DO i = minreg,maxreg
-        WRITE(6,104) i,reg2mat(i),reg_vol(i),dens_fact(i)
+        WRITE(amsg,104) i,reg2mat(i),reg_vol(i),dens_fact(i)
+        CALL printlog(amsg)
       END DO
     END IF
 
-104 FORMAT(1X,I14,I14,3ES15.4)
+104 FORMAT(I14,I14,3ES15.4)
 
   END SUBROUTINE write_reg_info
 
@@ -470,13 +472,14 @@ CONTAINS
       CALL CPU_TIME(te)
       !FIX ME - Only prints angles belonging to root process
       IF (rank .EQ. 0) THEN
-        WRITE(6,101) ' - Computation of sweep path for octant: ',octant,' angle: ',q,' . Ex. Time(sec.): ',te-ts
+        WRITE(amsg,101) ' - Computation of sweep path for octant: ',octant,' angle: ',q,' . Ex. Time(sec.): ',te-ts
+        CALL printlog(amsg)
       END IF
 
 
     END DO
 
-101 FORMAT(1X,A,I4,A,I4,A,ES12.4)
+101 FORMAT(A,I4,A,I4,A,ES12.4)
   END SUBROUTINE pre_sweep
 
   !------------------------------------------------------------------------------------------------------------------------!
@@ -695,7 +698,8 @@ CONTAINS
 
     ! --- Copy over the eliminated dependencies into
     j=MAX(neldep(octant,q),1)
-    IF(j>1) WRITE(6,*) '  -- Cycles detected. Number: ',j
+    IF(j>1) WRITE(amsg,'(A,I0)') '  -- Cycles detected. Number: ',j
+    IF(j>1) CALL printlog(amsg)
     DO g=1,egmax
       ALLOCATE( eldep(octant,q,g)%cells(j) )
       ALLOCATE( eldep(octant,q,g)%faces(j) )

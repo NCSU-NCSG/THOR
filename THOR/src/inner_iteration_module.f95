@@ -17,7 +17,7 @@ MODULE inner_iteration_module
   USE geometry_types
   USE angle_types
   USE multindex_types
-  USE global_variables
+  USE globals
 
   ! Use modules that pertain setting up problem
 
@@ -90,7 +90,7 @@ CONTAINS
 
     ! write header for convergence monitor
     IF (rank .EQ. 0) THEN
-      IF(prnt) WRITE(6,102) '  grp  itn       error        time'
+      IF(prnt)CALL printlog('   grp  itn       error        time')
     END IF
     ! Begin inner iteration
 
@@ -172,15 +172,16 @@ CONTAINS
       ! write convergence monitor
       IF (rank .EQ. 0) THEN
         IF(prnt) THEN
-          WRITE(6,101) eg,inner,max_error(eg),te-ts,' % '
+          WRITE(amsg,101) eg,inner,max_error(eg),te-ts,' % '
+          CALL printlog(amsg)
           flush(6)
         END IF
         IF(prnt .AND. print_conv.EQ.1) THEN
-          WRITE(21,101) eg,inner,max_error(eg),te-ts,' % '
+          WRITE(21,102) eg,inner,max_error(eg),' % '
           flush(21)
         END IF
 101     FORMAT (1X,2I5,2ES12.4,A)
-102     FORMAT (1X,A)
+102     FORMAT (1X,2I5,ES12.4,A)
       END IF
     END DO
 

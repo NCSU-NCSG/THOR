@@ -11,7 +11,7 @@ MODULE read_mesh_module
   USE filename_types
   USE vector_types
   USE geometry_types
-  USE global_variables
+  USE globals
   USE error_module
 
   IMPLICIT NONE
@@ -86,8 +86,10 @@ CONTAINS
     ELSE
       !region map was found in input file, so check that they match
       IF(temp_maxreg .GT. maxreg .OR. temp_minreg .LT. minreg)THEN
-        WRITE(*,*)'Error: Min index in input file',minreg,'min index in mesh',temp_minreg
-        WRITE(*,*)'Error: Max index in input file',maxreg,'max index in mesh',temp_maxreg
+        WRITE(amsg,'(A,I0,A,I0)')'Error: Min index in input file ',minreg,' min index in mesh ',temp_minreg
+        CALL printlog(amsg)
+        WRITE(amsg,'(A,I0,A,I0)')'Error: Max index in input file ',maxreg,' max index in mesh ',temp_maxreg
+        CALL printlog(amsg)
         CALL raise_fatal_error('Region map in input file and regions in mesh file do not match! Be &
           & sure to index from 1 if using legacy regionmap!')
       ENDIF

@@ -9,7 +9,7 @@ MODULE read_inp_module_legacy
   USE mpi
   USE stringmod
   USE error_module
-  USE global_variables
+  USE globals
   USE parameter_types
   IMPLICIT NONE
 
@@ -34,73 +34,8 @@ CONTAINS
     CHARACTER(200) :: data_string
     LOGICAL :: set_defaults
     LOGICAL :: sanity_check
-    WRITE(*,*) "UNIT IS: ", local_unit
-
-
-    ! !Fetch command line argument count
-    ! arg_count = COMMAND_ARGUMENT_COUNT()
-    !
-    ! !Parse args in any order
-    ! !NOTE:: Probably will not work if multiple args share a
-    ! !       substring - i.e <-i> <-iter> would collide
-    ! DO WHILE (i .LE. arg_count)
-    !   CALL GETARG(i, arg)
-    !
-    !   IF(INDEX(arg,'-i') .NE. 0) THEN
-    !     i=i+1
-    !     CALL GETARG(i, arg)
-    !     IF (arg(1:1) .EQ. '-') CALL raise_fatal_error('Input File Name Must Follow -i')
-    !     in_file = TRIM(arg)
-    !
-    !   ELSE IF(INDEX(arg,'-o') .NE. 0) THEN
-    !     i=i+1
-    !     CALL GETARG(i, arg)
-    !     IF (arg(1:1) .EQ. '-') THEN
-    !       CALL raise_fatal_error('Output File Name Must Follow -o')
-    !     END IF
-    !     out_file = TRIM(arg)
-    !
-    !   ELSE IF(INDEX(arg,'--verbose=') .NE. 0) THEN
-    !     indx = LNBLNK(arg)
-    !     read_str = arg(indx : indx)
-    !     READ(read_str, *) verbose
-    !     IF (verbose .NE. 1 .AND. verbose .NE. 2) THEN
-    !       CALL raise_fatal_error( "--verbose=n must be specified with n=1 or n=2 ")
-    !     END IF
-    !   END IF
-    !
-    !   i=i+1
-    ! END DO
-    !
-    ! !Check for critical arguments
-    ! IF (arg_count .EQ. 0 .OR. in_file .EQ. "" .OR. out_file .EQ. "") THEN
-    !   CALL raise_fatal_error("BAD INVOCATION - try: ./a.out -i in.file -o out.file <--verbose=1/2>")
-    ! END IF
-    !
-    ! !Print out invocation summary
-    ! WRITE(*,*) "INPUT SPECIFICATION"
-    ! WRITE(*,*) "IN FILE: ", in_file
-    ! WRITE(*,*) "OUT FILE: ", out_file
-    ! WRITE(*,*) "VERBOSITY: ", verbose
-    !
-    ! IF (verbose .EQ. 1) THEN
-    !   OPEN(UNIT=14, FILE="sample_input.yaml", ACTION="WRITE", STATUS="REPLACE", IOSTAT=ioerr)
-    !   IF (ioerr .NE. 0) CALL raise_fatal_error( "Error opening verbose outout file")
-    !   WRITE(14, *) '#Sample THOR yaml_input file with all values set to default'
-    !   WRITE(14, *) '#Provide as -i argument to run a THOR'
-    !   WRITE(14, *) '#/////////////////////////////////////////////////////'
-    !   WRITE(14, *)
-    ! END IF
-    ! IF (verbose .EQ. 2) THEN
-    !   OPEN(UNIT=14, FILE="complete_input.yaml", ACTION="WRITE", STATUS="REPLACE", IOSTAT=ioerr)
-    !   IF (ioerr .NE. 0) CALL raise_fatal_error( "Error opening verbose outout file")
-    !   WRITE(14,*) '#Full THOR yaml_input specification.'
-    !   WRITE(14,*) '#Select one argument per key to create in yaml_input file'
-    !   WRITE(14, *) '#/////////////////////////////////////////////////////'
-    !   WRITE(14, *)
-    ! END IF
-    !OPEN(UNIT=local_unit, FILE=in_file, ACTION="READ", STATUS="OLD", IOSTAT=ioerr)
-    !IF (ioerr .NE. 0) CALL raise_fatal_error( "ERROR READING yaml_input FILE")
+    WRITE(amsg,'(A,I0)') "UNIT IS: ", local_unit
+    CALL printlog(amsg)
 
     !Until file finished
     set_defaults = .TRUE.
@@ -109,7 +44,7 @@ CONTAINS
       IF (.NOT. set_defaults .AND. .NOT. sanity_check) THEN
         !Consume a line and shift left
         READ(local_unit, '(A)', IOSTAT=ioerr) read_str
-        WRITE(*,*) read_str
+        CALL printlog(read_str)
         IF (ioerr .NE. 0) THEN
           sanity_check = .TRUE.
           CYCLE
@@ -368,7 +303,7 @@ CONTAINS
     CHARACTER(*):: data_string
     LOGICAL:: set_defaults, sanity_check
     INTEGER:: verbose, data_int
-    WRITE(*,*) data_string
+    CALL printlog(data_string)
 
     IF(set_defaults) THEN
       IF (verbose .EQ. 1) THEN
@@ -2247,15 +2182,16 @@ CONTAINS
               ! wwords must be an array with of length 9
               CALL parse(wwords(2), " ", wwwords, nwwwords)
               IF (nwwwords .NE. 9) THEN
-                WRITE(6,*) 'Following cartesian map nine entries are required; Found: ',&
+                WRITE(amsg,'(3A,I0,A)') 'Following cartesian map nine entries are required; Found: ',&
                       TRIM(wwords(2)),' has ', nwwwords, ' entries.'
+                CALL printlog(amsg)
               END IF
               msg='Conversion to cartesian map xmin failed'
               glob_cmap_min_x = string_to_real(wwwords(1), msg)
               msg='Conversion to cartesian map xmax failed'
               glob_cmap_max_x = string_to_real(wwwords(2), msg)
               IF (ABS(glob_cmap_max_x - glob_cmap_min_x) < small_real) THEN
-                WRITE(6, *) "cartesian_map xmin and xmax are too close to each other"
+                CALL printlog("cartesian_map xmin and xmax are too close to each other")
               END IF
               msg='Conversion to cartesian map nx failed'
               glob_cmap_nx = string_to_int(wwwords(3), msg, minint)
@@ -2264,7 +2200,7 @@ CONTAINS
               msg='Conversion to cartesian map ymax failed'
               glob_cmap_max_y = string_to_real(wwwords(5), msg)
               IF (ABS(glob_cmap_max_y - glob_cmap_min_y) < small_real) THEN
-                WRITE(6, *) "cartesian_map xmin and xmax are too close to each other"
+                CALL printlog("cartesian_map xmin and xmax are too close to each other")
               END IF
               msg='Conversion to cartesian map ny failed'
               glob_cmap_ny = string_to_int(wwwords(6), msg, minint)
@@ -2273,7 +2209,7 @@ CONTAINS
               msg='Conversion to cartesian map zmax failed'
               glob_cmap_max_z = string_to_real(wwwords(8), msg)
               IF (ABS(glob_cmap_max_z - glob_cmap_min_z) < small_real) THEN
-                WRITE(6, *) "cartesian_map zmin and zmax are too close to each other"
+                CALL printlog("cartesian_map zmin and zmax are too close to each other")
               END IF
               msg='Conversion to cartesian map nz failed'
               glob_cmap_nz = string_to_int(wwwords(9), msg, minint)
@@ -2283,8 +2219,9 @@ CONTAINS
               CALL parse(wwords(2), " ", wwwords, nwwwords)
               ! must be divisible by 3
               IF (modulo(nwwwords, 3) .ne. 0) THEN
-                WRITE(6,*) 'point_value_locations number of entries must be divisible by 3; Found: ',&
+                WRITE(amsg,'(3A,I0,A)') 'point_value_locations number of entries must be divisible by 3; Found: ',&
                       TRIM(wwords(2)),' has ', nwwwords, ' entries.'
+                CALL printlog(amsg)
               ELSE
                 number_point_flux_locations = nwwwords / 3
                 ALLOCATE(point_flux_locations(number_point_flux_locations, 3))

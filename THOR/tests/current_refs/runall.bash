@@ -7,7 +7,7 @@ for folder in */ ; do
   pwd
   for file in *.inp ; do
     echo $file
-    mpiexec -np 24 $codeexec $file | tee $file".out"
+    mpiexec -np 24 $codeexec $file
   done
   cd ../
 done

@@ -20,7 +20,7 @@ MODULE outer_iteration_module
   USE geometry_types
   USE angle_types
   USE multindex_types
-  USE global_variables
+  USE globals
   USE wrapup_module
 
   ! Use modules that pertain setting up problem
@@ -95,9 +95,11 @@ CONTAINS
 
       INQUIRE(file="reflected_flux.pg",exist=existence)
       IF( existence .EQV. .TRUE.) THEN
-        OPEN(unit=98,file='reflected_flux.pg',status='replace',form='unformatted',access='direct',recl=64*nangle*rs*num_moments_f)
+        OPEN(unit=98,file='reflected_flux.pg',status='replace',form='unformatted', &
+          access='direct',recl=64*nangle*rs*num_moments_f)
       ELSE
-        OPEN(unit=98,file='reflected_flux.pg',status='new'    ,form='unformatted',access='direct',recl=64*nangle*rs*num_moments_f)
+        OPEN(unit=98,file='reflected_flux.pg',status='new'    ,form='unformatted', &
+          access='direct',recl=64*nangle*rs*num_moments_f)
       END IF
 
       DO eg = 1,egmax
@@ -108,9 +110,9 @@ CONTAINS
 
     ! Keep track of iterations
     IF (rank .EQ. 0) THEN
-      WRITE(6,*) '========================================================'
-      WRITE(6,*) '   Begin outer iterations.'
-      WRITE(6,*) '========================================================'
+      CALL printlog('========================================================')
+      CALL printlog('   Begin outer iterations.')
+      CALL printlog('========================================================')
     END IF
     ! Begin outer iteration
 
@@ -230,11 +232,13 @@ CONTAINS
         END DO
       END DO
       IF (rank .EQ. 0) THEN
-        WRITE(6,*)   '---------------------------------------'
-        WRITE(6,103) '---itn i-itn   max error   max error---'
-        WRITE(6,102) outer,tot_nInners, max_outer_error, MAXVAL(max_error),' %% '
-        WRITE(6,*)   '---------------------------------------'
-        flush(6)
+        CALL printlog('---------------------------------------')
+        CALL printlog('---itn i-itn   max error   max error---')
+        WRITE(amsg,102) outer,tot_nInners, max_outer_error, MAXVAL(max_error),' %% '
+        CALL printlog(amsg)
+        CALL printlog('---------------------------------------')
+        flush(stdout_unit)
+        flush(log_unit)
       END IF
       IF(print_conv.EQ.1 .AND. rank .EQ. 0) THEN
         WRITE(21,*)   '---------------------------------------'
@@ -243,8 +247,8 @@ CONTAINS
         WRITE(21,*)   '---------------------------------------'
         flush(21)
       END IF
-103   FORMAT(1X,A)
-102   FORMAT(1X,2I6,2ES12.4,A)
+103   FORMAT(A)
+102   FORMAT(2I6,2ES12.4,A)
 
       ! Convergence check
 
@@ -265,9 +269,9 @@ CONTAINS
     outer=outer-1
 
     IF (rank .EQ. 0) THEN
-      WRITE(6,*) '========================================================'
-      WRITE(6,*) '   End outer iterations.'
-      WRITE(6,*) '========================================================'
+      CALL printlog('========================================================')
+      CALL printlog('   End outer iterations.')
+      CALL printlog('========================================================')
     END IF
     ! Close reflected flux file if page_ref .eq. 1
 
@@ -418,9 +422,11 @@ CONTAINS
 
       INQUIRE(file="reflected_flux.pg",exist=existence)
       IF( existence .EQV. .TRUE.) THEN
-        OPEN(unit=98,file='reflected_flux.pg',status='replace',form='unformatted',access='direct',recl=64*nangle*rs*num_moments_f)
+        OPEN(unit=98,file='reflected_flux.pg',status='replace',form='unformatted', &
+          access='direct',recl=64*nangle*rs*num_moments_f)
       ELSE
-        OPEN(unit=98,file='reflected_flux.pg',status='new'    ,form='unformatted',access='direct',recl=64*nangle*rs*num_moments_f)
+        OPEN(unit=98,file='reflected_flux.pg',status='new'    ,form='unformatted', &
+          access='direct',recl=64*nangle*rs*num_moments_f)
       END IF
 
       DO eg = 1,egmax
@@ -437,7 +443,7 @@ CONTAINS
       keff_new=keff
       keff_old=keff
       IF (rank .EQ. 0) THEN
-        WRITE(6,*)
+        CALL printlog('')
       END IF
 
       DO ii=1,niter-1
@@ -469,9 +475,9 @@ CONTAINS
 
     ! Keep track of iterations
     IF (rank .EQ. 0) THEN
-      WRITE(6,*) '========================================================'
-      WRITE(6,*) '   Begin outer iterations.'
-      WRITE(6,*) '========================================================'
+      CALL printlog('========================================================')
+      CALL printlog('   Begin outer iterations.')
+      CALL printlog('========================================================')
     END IF
 
     ! Set error mode extrapolation parameters
@@ -493,16 +499,16 @@ CONTAINS
       CALL get_command_argument(2, temp_accel)
       IF ( temp_accel .EQ. '1') THEN
         outer_acc = 1_li
-        WRITE(*,*) "NO ACCELERATION"
+        CALL printlog("NO ACCELERATION")
       ELSE IF ( temp_accel .EQ. '2') THEN
         outer_acc = 2_li
-        WRITE(*,*) "FISSION SOURCE ACCELERATION"
+        CALL printlog("FISSION SOURCE ACCELERATION")
       ELSE IF ( temp_accel .EQ. '3') THEN
         outer_acc = 3_li
-        WRITE(*,*) "CHEBYCHEV ACCELERATION"
+        CALL printlog("CHEBYCHEV ACCELERATION")
       ELSE
-        WRITE(*,*) "Invalid command line acceleration parameter"
-        WRITE(*,*) "Using value from input file"
+        CALL printlog("Invalid command line acceleration parameter")
+        CALL printlog("Using value from input file")
       END IF
     END IF                                                                      !FIXME - REMOVE AND IMPLEMENT SWITCH INTO INPUT FILE
 
@@ -561,8 +567,16 @@ CONTAINS
       ! Check to see if current cycle meets acceleration criteria
       !========================================================================
       IF(outer_acc.EQ.2 .AND. outer.GE.3) THEN
-        a=ABS( ( theta(1) - theta(2) )/theta(1) )
-        b=ABS( ( theta(2) - theta(3) )/theta(2) )
+        IF(ABS(theta(1)) .GE. 1.0E-16)THEN
+          a=ABS( ( theta(1) - theta(2) )/theta(1) )
+        ELSE
+          a=(theta(1) - theta(2))*1.0E+16
+        ENDIF
+        IF(ABS(theta(2)) .GE. 1.0E-16)THEN
+          b=ABS( ( theta(2) - theta(3) )/theta(2) )
+        ELSE
+          b=(theta(2) - theta(3))*1.0E+16
+        ENDIF
         IF( MAX(a,b) < extol .AND. extra_flag.EQ.0_li) THEN
           extra_flag=1_li
         ELSE
@@ -644,16 +658,13 @@ CONTAINS
 
         IF(chebychev_error > theor_err .AND. &
               p .GE. 3*(power_iter_count+3)) THEN                                !If insufficient decrease in error,
-          !write(*,*) "RESTART FLAG THROWN"                                      !reset chebychev
           extra_flag = 0_li
-          !write(*,*) "BEGIN SPECTRAL RADIUS BACKTRACK"
           extra_flag = -1_li                                                    !Set flag to acceleration interrupt
           cheby_pi_rem = cheby_pi
         END IF
 
         p=p+1                                                                   !Increment p
       ELSE IF(extra_flag .EQ. -1_li) THEN                                       !If acceleration is interrupted
-        !write(*,*) "Performing Between-Chebychev-Cycle Power Iteration"
         power_iter_count = power_iter_count + 1_li
         cheby_pi_rem = cheby_pi_rem -1_li                                       !Track remaining interrupts
         p=0
@@ -754,21 +765,24 @@ CONTAINS
       ! write information for outer iteration
       !========================================================================
       IF (rank .EQ. 0) THEN
-        WRITE(6,*)   '---------------------------------------------------------------------------------------------------'
-        WRITE(6,101) '---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap        time---'
-        WRITE(6,102) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,te-ts,' %% '
-        WRITE(6,*)   '---------------------------------------------------------------------------------------------------'
-        flush(6)
+        CALL printlog('---------------------------------------------------------------------------------------------------')
+        CALL printlog('---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap        time---')
+        WRITE(amsg,102) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,te-ts,' %% '
+        CALL printlog(amsg)
+        CALL printlog('---------------------------------------------------------------------------------------------------')
+        flush(stdout_unit)
+        flush(log_unit)
         IF(print_conv.EQ.1) THEN
           WRITE(21,*)   '---------------------------------------------------------------------------------------------------'
-          WRITE(21,101) '---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap        time---'
-          WRITE(21,102) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,te-ts,' %% '
+          WRITE(21,101) '---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap---'
+          WRITE(21,105) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,' %% '
           WRITE(21,*)   '---------------------------------------------------------------------------------------------------'
           flush(21)
         END IF
       END IF
-101   FORMAT(1X,A)
-102   FORMAT(1X,2I6,5ES12.4,I12,ES12.4,A)
+101   FORMAT(A)
+102   FORMAT(2I6,5ES12.4,I12,ES12.4,A)
+105   FORMAT(2I6,5ES12.4,I12,A)
 
       !========================================================================
       ! write iteration results to file if desired
@@ -834,9 +848,9 @@ CONTAINS
     keff=keff_old
 
     IF (rank .EQ. 0) THEN
-      WRITE(6,*) '========================================================'
-      WRITE(6,*) '   End outer iterations.'
-      WRITE(6,*) '========================================================'
+      CALL printlog('========================================================')
+      CALL printlog('   End outer iterations.')
+      CALL printlog('========================================================')
     END IF
 
     ! Close reflected flux file if page_ref .eq. 1

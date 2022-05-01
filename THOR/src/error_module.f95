@@ -3,7 +3,7 @@ MODULE error_module
   ! This module contains subroutines for terminating the execution of
   ! THOR either successfully or unsuccessfully.
   !***********************************************************************
-  USE global_variables
+  USE globals
   USE mpi
   IMPLICIT NONE
   PRIVATE
@@ -94,22 +94,22 @@ CONTAINS
 
     ! Print message
     IF(rank .EQ. 0)THEN
-      WRITE(6,'(A)') "*****************************************************************************"
-      WRITE(6,'(A)') "*****************************************************************************"
-      WRITE(6,'(A)') "*****************************************************************************"
+      CALL printlog("*****************************************************************************")
+      CALL printlog("*****************************************************************************")
+      CALL printlog("*****************************************************************************")
       IF (PRESENT(message)) THEN
-        WRITE(6,'(A)')'FATAL ERROR!'
-        WRITE(6,'(2A)')'ERROR: ',TRIM(ADJUSTL(message))
+        CALL printlog('FATAL ERROR!')
+        CALL printlog('ERROR: '//TRIM(ADJUSTL(message)))
       ELSE
-        WRITE(6,'(A)')'FATAL ERROR!'
-        WRITE(6,'(A)')'...'
-        WRITE(6,'(A)')'No error message given'
+        CALL printlog('FATAL ERROR!')
+        CALL printlog('...')
+        CALL printlog('No error message given')
       ENDIF
-      WRITE(6,'(A)') '>> THOR encountered a fatal error!'
-      WRITE(6,'(A)') '>> Execution of THOR terminated UNsuccessfully!'
-      WRITE(6,'(A)') "*****************************************************************************"
-      WRITE(6,'(A)') "*****************************************************************************"
-      WRITE(6,'(A)') "*****************************************************************************"
+      CALL printlog('>> THOR encountered a fatal error!')
+      CALL printlog('>> Execution of THOR terminated UNsuccessfully!')
+      CALL printlog("*****************************************************************************")
+      CALL printlog("*****************************************************************************")
+      CALL printlog("*****************************************************************************")
     ENDIF
     CALL MPI_BARRIER(MPI_COMM_WORLD, mpi_err)
     CALL MPI_FINALIZE(mpi_err)
@@ -134,13 +134,13 @@ CONTAINS
 
     IF(rank .EQ. 0)THEN
       IF (PRESENT(message)) THEN
-        WRITE(6,*)TRIM(ADJUSTL(message))
+        CALL printlog(TRIM(ADJUSTL(message)))
       END IF
-      WRITE(6,'(A)')
-      WRITE(6,'(A)') "--------------------------------------------------------"
-      WRITE(6,'(A)') "   Execution of THOR completed successfully  "
-      WRITE(6,'(A)') "--------------------------------------------------------"
-      WRITE(6,'(A)')
+      CALL printlog('')
+      CALL printlog("--------------------------------------------------------")
+      CALL printlog("   Execution of THOR completed successfully  ")
+      CALL printlog("--------------------------------------------------------")
+      CALL printlog('')
     ENDIF
 
 
@@ -160,7 +160,7 @@ CONTAINS
     !**********************************************************************
     CHARACTER(*), INTENT(IN):: message
 
-    IF(rank .EQ. 0)WRITE(6,'(2A)')'WARNING: ',message
+    IF(rank .EQ. 0)CALL printlog('WARNING: '//TRIM(ADJUSTL(message)))
 
   END SUBROUTINE raise_warning
 END MODULE error_module

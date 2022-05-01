@@ -17,6 +17,7 @@ PROGRAM ahot_c_ug
 
   !#########
   USE mpi
+  USE ISO_FORTRAN_ENV
   !#########
   USE types
   USE parameter_types
@@ -26,7 +27,7 @@ PROGRAM ahot_c_ug
   USE geometry_types
   USE angle_types
   USE multindex_types
-  USE global_variables
+  USE globals
 
   ! Use modules that contain necessary subroutines and functions to
   ! execute transport code
@@ -48,7 +49,7 @@ PROGRAM ahot_c_ug
 
   ! Declare temporary variables
 
-  INTEGER(kind=li) :: alloc_stat
+  INTEGER(kind=li) :: alloc_stat,converge_unit
 
   !######### MPI variables
   INTEGER :: mpi_err, num_p
@@ -58,6 +59,11 @@ PROGRAM ahot_c_ug
   INTEGER:: do_timing = 0
   LOGICAL        :: existence
   CHARACTER(100) :: temp
+
+  !log variables
+  CHARACTER(100) :: log_name
+
+  stdout_unit=OUTPUT_UNIT
 
   CALL GET_COMMAND_ARGUMENT(2,temp)
   IF (TRIM(temp) .EQ. '-t') do_timing = 1
@@ -71,28 +77,32 @@ PROGRAM ahot_c_ug
   CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
   !#########
 
+  !get log filename
+  CALL GET_COMMAND_ARGUMENT(1,log_name)
+  OPEN(unit = log_unit, file = TRIM(ADJUSTL(log_name))//'.log', status = "REPLACE", action = "WRITE")
+
   IF (rank .EQ. 0) THEN
 
     ! Print banner for THOR
 
-    WRITE(6,*) "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-    WRITE(6,*)
-    WRITE(6,*) "   TTTTTTT  HH     HH  OOOOO  RRRRRR "
-    WRITE(6,*) "     TTT    HH     HH OOOOOOO RRRRRRR"
-    WRITE(6,*) "     TTT    HH     HH OO   OO RR   RR"
-    WRITE(6,*) "     TTT    HHHHHHHHH OO   OO RRRRRR "
-    WRITE(6,*) "     TTT    HHHHHHHHH OO   OO RRRR   "
-    WRITE(6,*) "     TTT    HH     HH OO   OO RR RR  "
-    WRITE(6,*) "     TTT    HH     HH 0000000 RR  RR "
-    WRITE(6,*) "     TTT    HH     HH  OOOOO  RR   RR"
-    WRITE(6,*)
-    WRITE(6,*) "   Tetrahedral High Order Radiation Transport Code"
-    WRITE(6,*)
-    WRITE(6,*) "   By R. M. Ferrer"
-    WRITE(6,*)
-    WRITE(6,*) "   Version 1.0 BETA - Update 05/10/2012"
-    WRITE(6,*) "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-    WRITE(6,*)
+    CALL printlog("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    CALL printlog('')
+    CALL printlog("   TTTTTTT  HH     HH  OOOOO  RRRRRR ")
+    CALL printlog("     TTT    HH     HH OOOOOOO RRRRRRR")
+    CALL printlog("     TTT    HH     HH OO   OO RR   RR")
+    CALL printlog("     TTT    HHHHHHHHH OO   OO RRRRRR ")
+    CALL printlog("     TTT    HHHHHHHHH OO   OO RRRR   ")
+    CALL printlog("     TTT    HH     HH OO   OO RR RR  ")
+    CALL printlog("     TTT    HH     HH 0000000 RR  RR ")
+    CALL printlog("     TTT    HH     HH  OOOOO  RR   RR")
+    CALL printlog('')
+    CALL printlog("   Tetrahedral High Order Radiation Transport Code")
+    CALL printlog('')
+    CALL printlog("   By R. M. Ferrer")
+    CALL printlog('')
+    CALL printlog("   Version 1.0 BETA - Update 05/10/2012")
+    CALL printlog("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    CALL printlog('')
   END IF
 
   !***********************************************************************
@@ -115,15 +125,12 @@ PROGRAM ahot_c_ug
   !***********************************************************************
 
   IF(print_conv.EQ.1 .AND. rank .EQ. 0) THEN
-    INQUIRE(file = "thor.convergence", exist = existence)
-    IF(existence) THEN
-      OPEN (unit = 21, file = "thor.convergence", status = "OLD", action = "WRITE")
-    ELSE
-      OPEN (unit = 21, file = "thor.convergence", status = "NEW", action = "WRITE")
-    END IF
-    WRITE(21,*) '========================================================'
-    WRITE(21,*) '   Begin outer iterations.'
-    WRITE(21,*) '========================================================'
+    INQUIRE(file = converge_filename, exist = existence)
+    converge_unit=21
+    OPEN(unit = converge_unit, file = converge_filename, status = "REPLACE", action = "WRITE")
+    WRITE(converge_unit,*) '========================================================'
+    WRITE(converge_unit,*) '   Begin outer iterations.'
+    WRITE(converge_unit,*) '========================================================'
   END IF
 
 
@@ -146,7 +153,8 @@ PROGRAM ahot_c_ug
   IF(print_conv.EQ.1) CLOSE(unit=21)
 
   IF (do_timing .EQ. 1) parallel_timing(4,1) = MPI_WTIME()
-  CALL wrapup(flux = flux,keff = keffective, unit_number = 6, suffix = "", is_final = .TRUE.)
+  CALL wrapup(flux = flux,keff = keffective, unit_number = stdout_unit, suffix = "", is_final = .TRUE.)
+  CALL wrapup(flux = flux,keff = keffective, unit_number = log_unit, suffix = "", is_final = .TRUE.)
   IF (do_timing .EQ. 1) parallel_timing(4,2) = MPI_WTIME()
   !***********************************************************************
   ! Cleanup
@@ -171,7 +179,7 @@ END PROGRAM ahot_c_ug
 SUBROUTINE write_timing
 
   USE mpi
-  USE global_variables
+  USE globals
   IMPLICIT NONE
 
   INTEGER :: i, num_p, mpi_err, err_size(MPI_STATUS_SIZE), do_timing=0
@@ -186,19 +194,25 @@ SUBROUTINE write_timing
   IF (rank .EQ. 0 .AND. do_timing .EQ. 1) THEN
     DO i =0, num_p-1
       CALL MPI_RECV(print_timing, 8, MPI_DOUBLE, i, i, MPI_COMM_WORLD, err_size, mpi_err )
-      WRITE(*,*)
-      WRITE(*,*)'/====================================================='
-      WRITE(*,*)'| Timing Data for process: ', i
-      WRITE(*,*)'|-----------------------------------------------------'
-      WRITE(*,*)'| Total Measured Time:      ', print_timing(1,2)- print_timing(1,1)
-      WRITE(*,*)'| Total Setup Time:         ', print_timing(2,2)- print_timing(2,1)
-      WRITE(*,*)'| Total Execute Time:       ', print_timing(3,2)- print_timing(3,1)
-      WRITE(*,*)'| Total Wrapup Time:        ', print_timing(4,2)- print_timing(4,1)
-      WRITE(*,*)'| Total Non-Accounted Time: ',(print_timing(1,2)- print_timing(1,1))- &
+      CALL printlog('')
+      CALL printlog('/=====================================================')
+      WRITE(amsg,'(A,I0)')'| Timing Data for process: ', i
+      CALL printlog(amsg)
+      CALL printlog('|-----------------------------------------------------')
+      WRITE(amsg,'(A,ES12.4)')'| Total Measured Time:      ', print_timing(1,2)- print_timing(1,1)
+      CALL printlog(amsg)
+      WRITE(amsg,'(A,ES12.4)')'| Total Setup Time:         ', print_timing(2,2)- print_timing(2,1)
+      CALL printlog(amsg)
+      WRITE(amsg,'(A,ES12.4)')'| Total Execute Time:       ', print_timing(3,2)- print_timing(3,1)
+      CALL printlog(amsg)
+      WRITE(amsg,'(A,ES12.4)')'| Total Wrapup Time:        ', print_timing(4,2)- print_timing(4,1)
+      CALL printlog(amsg)
+      WRITE(amsg,'(A,ES12.4)')'| Total Non-Accounted Time: ',(print_timing(1,2)- print_timing(1,1))- &
                                                (print_timing(2,2)- print_timing(2,1)) - &
                                                (print_timing(3,2)- print_timing(3,1)) - &
                                                (print_timing(4,2)- print_timing(4,1))
-      WRITE(*,*)'\====================================================='
+      CALL printlog(amsg)
+      CALL printlog('\=====================================================')
     END DO
   END IF
 

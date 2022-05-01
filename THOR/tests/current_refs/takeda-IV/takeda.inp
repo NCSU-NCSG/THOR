@@ -1,14 +1,18 @@
-  execution yes
+  execution yes ; print_conv yes
   lambda -1
-  type keig ; keigsolver pi ; piacc none
+  type keig ; keigsolver pi ; piacc errmode
   page_refl save
   kconv 1E-4; innerconv 1E-12 ; outerconv 1E-7
   maxinner 2 ; maxouter 500
 
   mesh ./takeda.thrm
   xs ./takeda.xs
-  flux_out takeda-IV-ari.flux
+  flux_out yes
   print_xs yes
+  vtk_flux_out yes
+  vtk_mat_out yes
+  vtk_reg_out yes
+  restart_out yes
 
   ngroups 4 ; upscattering no
 
