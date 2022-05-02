@@ -665,7 +665,7 @@ CONTAINS
         ELSE
           b=(theta(2) - theta(3))*1.0E+16
         ENDIF
-        IF( MAX(a,b) < extol .AND. extra_flag.EQ.0_li) THEN
+        IF( MAX(a,b) < extol) THEN
           extra_flag=1_li
         ELSE
           extra_flag=0_li
