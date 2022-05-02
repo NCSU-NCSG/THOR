@@ -226,7 +226,6 @@ CONTAINS
       END DO
       DO region=minreg,maxreg
         WRITE(unit_number,501) '-- Region --',region,' Volume= ',reg_volume(region)
-        WRITE(unit_number,*)
         WRITE(unit_number,502) '   Group          Flux       Fission    Absorption      Fiss Src'
         DO eg=1,egmax
           WRITE(unit_number,503) eg,reac_rates(1,region,eg),reac_rates(2,region,eg),&
@@ -234,6 +233,7 @@ CONTAINS
         END DO
         WRITE(unit_number,504) '   Total',reac_rates(1,region,egmax+1),reac_rates(2,region,egmax+1),&
               reac_rates(3,region,egmax+1),reac_rates(4,region,egmax+1)
+        WRITE(unit_number,*)
       END DO
     END IF
 

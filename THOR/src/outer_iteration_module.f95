@@ -73,6 +73,10 @@ CONTAINS
 
     REAL(kind=d_t) :: src(num_moments_v,namom,num_cells,egmax)
 
+    ! Define fission source
+
+    REAL(kind=d_t) :: fiss_src(num_moments_v,num_cells)
+
     ! Prepare array reflected_flux
     rs=MAX(1_li,rside_cells)
     IF(page_refl.EQ.0_li) THEN
@@ -133,9 +137,35 @@ CONTAINS
         END DO
       END DO
 
-      ! ... and upscattering
-
+      ! ... and upscattering ...
       CALL compute_upscattering(flux, src)
+
+      ! ... and fission.
+      DO i=1, num_cells
+        DO l=1, num_moments_v
+          fiss_src(l,i)=zero
+        END DO
+      END DO
+      DO i=1, num_cells
+        mat_indx=material_ids(reg2mat(cells(i)%reg))
+        DO eg=1, egmax
+          DO l=1, num_moments_v
+            fiss_src(l,i)=fiss_src(l,i)                                        +&
+                  xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg) *&
+                  dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
+          END DO
+        END DO
+      END DO
+      DO i=1,num_cells
+        mat_indx=material_ids(reg2mat(cells(i)%reg))
+        DO eg=1,egmax
+          DO l=1,num_moments_v
+            src(l,1,i,eg)  =src(l,1,i,eg)+xs_mat(mat_indx)%chi(eg)*fiss_src(l,i)
+          END DO
+        END DO
+      END DO
+      IF(MAXVAL(flux(:,:,:,:,niter)) .GE. 1.0E+30)CALL raise_fatal_error('Flux exceeded 1.0E+30, &
+        & fixed source problem appears to be supercritical and cannot be solved.')
 
       DO eg=1, egmax
 
@@ -200,10 +230,10 @@ CONTAINS
         IF(page_iflw.EQ.1_li) REWIND(unit=97)
       END DO
 
+      !TODO: Putt acceleration here
+
       ! Compute error ...
-
       max_outer_error = zero
-
       DO eg =1,egmax
         DO i=1,num_cells
           IF( ABS(flux(1,1,i,eg,niter)) >  1.0e-12_d_t) THEN
@@ -219,7 +249,6 @@ CONTAINS
       END DO
 
       ! ... and copy over iterates
-
       DO ii=2,niter
         DO eg=1, egmax
           DO i=1,num_cells
