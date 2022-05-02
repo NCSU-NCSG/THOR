@@ -77,6 +77,12 @@ CONTAINS
 
     REAL(kind=d_t) :: fiss_src(num_moments_v,num_cells)
 
+    ! Error mode extrapolation variables
+
+    REAL(kind=d_t)   :: theta(3),thet
+    INTEGER(kind=li) :: extra_flag
+    REAL(kind=d_t)   :: a,b,flux_dist_error(2)
+
     ! Prepare array reflected_flux
     rs=MAX(1_li,rside_cells)
     IF(page_refl.EQ.0_li) THEN
@@ -118,8 +124,12 @@ CONTAINS
       CALL printlog('   Begin outer iterations.')
       CALL printlog('========================================================')
     END IF
-    ! Begin outer iteration
 
+    ! Set error mode extrapolation parameters
+    theta=0.0_d_t
+    extra_flag=0_li
+
+    ! Begin outer iteration
     DO outer=1, max_outer
 
       ! Initialize the src with external source ...
@@ -230,12 +240,56 @@ CONTAINS
         IF(page_iflw.EQ.1_li) REWIND(unit=97)
       END DO
 
-      !TODO: Putt acceleration here
+      !========================================================================
+      ! Check to see if current cycle meets acceleration criteria
+      !========================================================================
+      IF(outer_acc.EQ.2 .AND. outer.GE.3) THEN
+        IF(ABS(theta(1)) .GE. 1.0E-16)THEN
+          a=ABS( ( theta(1) - theta(2) )/theta(1) )
+        ELSE
+          a=(theta(1) - theta(2))*1.0E+16
+        ENDIF
+        IF(ABS(theta(2)) .GE. 1.0E-16)THEN
+          b=ABS( ( theta(2) - theta(3) )/theta(2) )
+        ELSE
+          b=(theta(2) - theta(3))*1.0E+16
+        ENDIF
+        IF( MAX(a,b) < extol ) THEN
+          extra_flag=1_li
+        ELSE
+          extra_flag=0_li
+        END IF
+      END IF
+
+      !========================================================================
+      ! If yes, perform acceleration
+      !========================================================================
+      IF(extra_flag .EQ. 1_li .AND. outer_acc.EQ.2) THEN
+        write(*,*)'thet',exmax/max_outer_error,theta(3)/(1.0_d_t-theta(3))
+        ! make sure that the fractional extrapolation is not larger than exmax
+        thet=MIN(exmax/max_outer_error,theta(3)/(1.0_d_t-theta(3)))
+        ! extrapolation
+        DO eg=1, egmax
+          DO i=1,num_cells
+            DO n=1,namom
+              DO l=1,num_moments_v
+                flux(l,n,i,eg,niter)=flux(l,n,i,eg,niter)+thet*(flux(l,n,i,eg,niter)-flux(l,n,i,eg,niter-1))
+              END DO
+            END DO
+          END DO
+        END DO
+      END IF
 
       ! Compute error ...
+      !compute convergence based on flux
+      flux_dist_error(1)=flux_dist_error(2)
+      IF (outer .LE. 1) flux_dist_error(1) = 1
+      flux_dist_error(2)=0.0_d_t
       max_outer_error = zero
       DO eg =1,egmax
         DO i=1,num_cells
+          flux_dist_error(2)=flux_dist_error(2)+cells(i)%volume*    &
+              ABS( flux(1,1,i,eg,niter)-flux(1,1,i,eg,niter-1) )
           IF( ABS(flux(1,1,i,eg,niter)) >  1.0e-12_d_t) THEN
             t_error = ABS( flux(1,1,i,eg,niter)-flux(1,1,i,eg,niter-1)) / &
                   flux(1,1,i,eg,niter)
@@ -247,6 +301,11 @@ CONTAINS
           END IF
         END DO
       END DO
+
+      !compute flux theta
+      theta(1)=theta(2)
+      theta(2)=theta(3)
+      theta(3)=flux_dist_error(2)/flux_dist_error(1)
 
       ! ... and copy over iterates
       DO ii=2,niter
