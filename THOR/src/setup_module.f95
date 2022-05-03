@@ -233,8 +233,8 @@ CONTAINS
 
     ! set variables that should eventually be moved to input
 
-    exmax = 0.5_d_t
-    extol = 0.05_d_t
+    exmax = 5_d_t
+    extol = 5_d_t
 
   END SUBROUTINE setup
 

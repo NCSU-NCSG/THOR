@@ -3,7 +3,7 @@
   type fsrc ; piacc errmode
   page_refl save
   innerconv 1E-12 ; outerconv 1E-8
-  maxinner 4000 ; maxouter 5000
+  maxinner 5 ; maxouter 500000
 
   mesh ./noshield.thrm
   xs ./noshield_2group.xs

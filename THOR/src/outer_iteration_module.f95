@@ -265,7 +265,6 @@ CONTAINS
       ! If yes, perform acceleration
       !========================================================================
       IF(extra_flag .EQ. 1_li .AND. outer_acc.EQ.2) THEN
-        write(*,*)'thet',exmax/max_outer_error,theta(3)/(1.0_d_t-theta(3))
         ! make sure that the fractional extrapolation is not larger than exmax
         thet=MIN(exmax/max_outer_error,theta(3)/(1.0_d_t-theta(3)))
         ! extrapolation
@@ -321,8 +320,8 @@ CONTAINS
       END DO
       IF (rank .EQ. 0) THEN
         CALL printlog('---------------------------------------')
-        CALL printlog('---itn i-itn   max error   max error---')
-        WRITE(amsg,102) outer,tot_nInners, max_outer_error, MAXVAL(max_error),' %% '
+        CALL printlog('---itn i-itn   max error   max error      extrap---')
+        WRITE(amsg,102) outer,tot_nInners, max_outer_error, MAXVAL(max_error),extra_flag,' %% '
         CALL printlog(amsg)
         CALL printlog('---------------------------------------')
         flush(stdout_unit)
@@ -330,13 +329,13 @@ CONTAINS
       END IF
       IF(print_conv.EQ.1 .AND. rank .EQ. 0) THEN
         WRITE(21,*)   '---------------------------------------'
-        WRITE(21,103) '---itn i-itn   max error   max error---'
-        WRITE(21,102) outer,tot_nInners, max_outer_error, MAXVAL(max_error),' %% '
+        WRITE(21,103) '---itn i-itn   max error   max error      extrap---'
+        WRITE(21,102) outer,tot_nInners, max_outer_error, MAXVAL(max_error),extra_flag,' %% '
         WRITE(21,*)   '---------------------------------------'
         flush(21)
       END IF
 103   FORMAT(A)
-102   FORMAT(2I6,2ES12.4,A)
+102   FORMAT(2I6,2ES12.4,I12,A)
 
       ! Convergence check
 
