@@ -18,6 +18,8 @@ MODULE cross_section_types
     CHARACTER(name_size) :: mat_name
     !material ID
     INTEGER(kind=li) :: mat_id
+    !indicator if material is fissile
+    LOGICAL :: fissile=.TRUE.
     !fission spectrum
     REAL(kind=d_t), DIMENSION(:), ALLOCATABLE :: chi
     !fission cross section SigmaF

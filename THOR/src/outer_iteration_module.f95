@@ -61,7 +61,7 @@ CONTAINS
 
     INTEGER(kind=li)               :: alloc_stat, eg, egg, q, octant, i, l, &
           n, m, ii, k, indx,face,f,mat_indx,src_indx
-    REAL(kind=d_t)                 :: t_error
+    REAL(kind=d_t)                 :: t_error,ts,te
     LOGICAL                        :: existence
 
     ! Define reflected flux
@@ -131,6 +131,7 @@ CONTAINS
 
     ! Begin outer iteration
     DO outer=1, max_outer
+      CALL CPU_TIME(ts)
 
       ! Initialize the src with external source ...
 
@@ -151,28 +152,28 @@ CONTAINS
       CALL compute_upscattering(flux, src)
 
       ! ... and fission.
-      DO i=1, num_cells
-        DO l=1, num_moments_v
-          fiss_src(l,i)=zero
-        END DO
-      END DO
+      fiss_src(:,:)=0.0
       DO i=1, num_cells
         mat_indx=material_ids(reg2mat(cells(i)%reg))
-        DO eg=1, egmax
-          DO l=1, num_moments_v
-            fiss_src(l,i)=fiss_src(l,i)                                        +&
-                  xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg) *&
-                  dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
+        IF(xs_mat(mat_indx)%fissile)THEN
+          DO eg=1, egmax
+            DO l=1, num_moments_v
+              fiss_src(l,i)=fiss_src(l,i)                                        +&
+                    xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg) *&
+                    dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
+            END DO
           END DO
-        END DO
+        ENDIF
       END DO
       DO i=1,num_cells
         mat_indx=material_ids(reg2mat(cells(i)%reg))
-        DO eg=1,egmax
-          DO l=1,num_moments_v
-            src(l,1,i,eg)  =src(l,1,i,eg)+xs_mat(mat_indx)%chi(eg)*fiss_src(l,i)
+        IF(xs_mat(mat_indx)%fissile)THEN
+          DO eg=1,egmax
+            DO l=1,num_moments_v
+              src(l,1,i,eg)  =src(l,1,i,eg)+xs_mat(mat_indx)%chi(eg)*fiss_src(l,i)
+            END DO
           END DO
-        END DO
+        ENDIF
       END DO
       IF(MAXVAL(flux(:,:,:,:,niter)) .GE. 1.0E+30)CALL raise_fatal_error('Flux exceeded 1.0E+30, &
         & fixed source problem appears to be supercritical and cannot be solved.')
@@ -318,24 +319,27 @@ CONTAINS
           END DO
         END DO
       END DO
+
+      CALL CPU_TIME(te)
       IF (rank .EQ. 0) THEN
-        CALL printlog('---------------------------------------')
-        CALL printlog('---itn i-itn   max error   max error      extrap---')
-        WRITE(amsg,102) outer,tot_nInners, max_outer_error, MAXVAL(max_error),extra_flag,' %% '
+        CALL printlog('---------------------------------------------------------------')
+        CALL printlog('---itn i-itn   max error   max error      extrap        time---')
+        WRITE(amsg,104) outer,tot_nInners, max_outer_error, MAXVAL(max_error),extra_flag,te-ts,' %% '
         CALL printlog(amsg)
-        CALL printlog('---------------------------------------')
+        CALL printlog('---------------------------------------------------------------')
         flush(stdout_unit)
         flush(log_unit)
       END IF
       IF(print_conv.EQ.1 .AND. rank .EQ. 0) THEN
-        WRITE(21,*)   '---------------------------------------'
+        WRITE(21,103) '---------------------------------------------------'
         WRITE(21,103) '---itn i-itn   max error   max error      extrap---'
         WRITE(21,102) outer,tot_nInners, max_outer_error, MAXVAL(max_error),extra_flag,' %% '
-        WRITE(21,*)   '---------------------------------------'
+        WRITE(21,103) '---------------------------------------------------'
         flush(21)
       END IF
 103   FORMAT(A)
 102   FORMAT(2I6,2ES12.4,I12,A)
+104   FORMAT(2I6,2ES12.4,I12,ES12.4,A)
 
       ! Convergence check
 
@@ -489,13 +493,15 @@ CONTAINS
 
     DO i=1, num_cells
       mat_indx=material_ids(reg2mat(cells(i)%reg))
-      DO eg=1, egmax
-        DO l=1, num_moments_v
-          fiss_src(l,i,1)=fiss_src(l,i,1)                                         +&
-                xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg)* &
-                dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
+      IF(xs_mat(mat_indx)%fissile)THEN
+        DO eg=1, egmax
+          DO l=1, num_moments_v
+            fiss_src(l,i,1)=fiss_src(l,i,1)                                         +&
+                  xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg)* &
+                  dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
+          END DO
         END DO
-      END DO
+      ENDIF
     END DO
 
     !  Allocate group-dependent maximum spatial error array
@@ -549,13 +555,15 @@ CONTAINS
 
       DO i=1, num_cells
         mat_indx=material_ids(reg2mat(cells(i)%reg))
-        DO eg=1, egmax
-          DO l=1, num_moments_v
-            fiss_src(l,i,1)=fiss_src(l,i,1)                                       +&
-                  xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg) *&
-                  dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
+        IF(xs_mat(mat_indx)%fissile)THEN
+          DO eg=1, egmax
+            DO l=1, num_moments_v
+              fiss_src(l,i,1)=fiss_src(l,i,1)                                       +&
+                    xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg) *&
+                    dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
+            END DO
           END DO
-        END DO
+        ENDIF
       END DO
 
     END IF
@@ -612,12 +620,14 @@ CONTAINS
       src = zero
       DO i=1,num_cells
         mat_indx=material_ids(reg2mat(cells(i)%reg))
-        DO eg=1,egmax
-          DO l=1,num_moments_v
-            src(l,1,i,eg)  =one/keff_new     *&
-                  xs_mat(mat_indx)%chi(eg)*fiss_src(l,i,1)
+        IF(xs_mat(mat_indx)%fissile)THEN
+          DO eg=1,egmax
+            DO l=1,num_moments_v
+              src(l,1,i,eg)  =one/keff_new     *&
+                    xs_mat(mat_indx)%chi(eg)*fiss_src(l,i,1)
+            END DO
           END DO
-        END DO
+        ENDIF
       END DO
 
       !=========================================================================
@@ -664,7 +674,7 @@ CONTAINS
         ELSE
           b=(theta(2) - theta(3))*1.0E+16
         ENDIF
-        IF( MAX(a,b) < extol) THEN
+        IF( MAX(a,b) < extol ) THEN
           extra_flag=1_li
         ELSE
           extra_flag=0_li
@@ -761,20 +771,18 @@ CONTAINS
       !========================================================================
       ! Zero fission source. Then, recompute fission source using new update
       !========================================================================
-      DO i=1, num_cells
-        DO l=1, num_moments_v
-          fiss_src(l,i,2)=zero
-        END DO
-      END DO
+      fiss_src(:,:,2)=zero
       DO i=1, num_cells
         mat_indx=material_ids(reg2mat(cells(i)%reg))
-        DO eg=1, egmax
-          DO l=1, num_moments_v
-            fiss_src(l,i,2)=fiss_src(l,i,2)                                        +&
-                  xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg) *&
-                  dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
+        IF(xs_mat(mat_indx)%fissile)THEN
+          DO eg=1, egmax
+            DO l=1, num_moments_v
+              fiss_src(l,i,2)=fiss_src(l,i,2)                                        +&
+                    xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg) *&
+                    dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
+            END DO
           END DO
-        END DO
+        ENDIF
       END DO
 
       !========================================================================
@@ -860,10 +868,10 @@ CONTAINS
         flush(stdout_unit)
         flush(log_unit)
         IF(print_conv.EQ.1) THEN
-          WRITE(21,*)   '---------------------------------------------------------------------------------------------------'
+          WRITE(21,101) '---------------------------------------------------------------------------------------'
           WRITE(21,101) '---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap---'
           WRITE(21,105) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,' %% '
-          WRITE(21,*)   '---------------------------------------------------------------------------------------------------'
+          WRITE(21,101) '---------------------------------------------------------------------------------------'
           flush(21)
         END IF
       END IF
@@ -919,11 +927,7 @@ CONTAINS
       ! copy over the fission source: Note, that if the flux is accelerated the
       ! newly computed fission source will also be accelerated
       !========================================================================
-      DO i=1, num_cells
-        DO l=1, num_moments_v
-          fiss_src(l,i,1)=fiss_src(l,i,2)
-        END DO
-      END DO
+      fiss_src(:,:,1)=fiss_src(:,:,2)
 
     END DO
 

@@ -104,6 +104,8 @@ CONTAINS
       CALL read_src
     END IF
 
+    IF(vtk_src_output .EQ. 1 .AND. rank .EQ. 0) CALL plot_source
+
     ! Call quad_gen to generate quadrature
 
     CALL quad_gen

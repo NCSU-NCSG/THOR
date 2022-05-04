@@ -128,9 +128,9 @@ PROGRAM ahot_c_ug
     INQUIRE(file = converge_filename, exist = existence)
     converge_unit=21
     OPEN(unit = converge_unit, file = converge_filename, status = "REPLACE", action = "WRITE")
-    WRITE(converge_unit,*) '========================================================'
-    WRITE(converge_unit,*) '   Begin outer iterations.'
-    WRITE(converge_unit,*) '========================================================'
+    WRITE(converge_unit,'(A)') '========================================================'
+    WRITE(converge_unit,'(A)') '   Begin outer iterations.'
+    WRITE(converge_unit,'(A)') '========================================================'
   END IF
 
 

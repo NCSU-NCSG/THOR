@@ -157,6 +157,7 @@ CONTAINS
     ENDDO
     xs_mat(:)%mat_id=0
     eg_bounds(:)=0
+    xs_mat(:)%fissile=.TRUE.
 
     ! Read material total & scattering cross-section
     DO m=1, num_mat
@@ -167,8 +168,13 @@ CONTAINS
         READ(local_unit,*) (eg_bounds(e1),e1=1,egmax)
         eg_bounds(egmax+1)=0.0_d_t
         READ(local_unit,*) (xs_mat(m)%sigma_f(e1),e1=1,egmax)
+        IF(MAXVAL(xs_mat(m)%sigma_f(:)) .LE. 0.0 .AND. MINVAL(xs_mat(m)%sigma_f(:)) .GE. 0.0) &
+          xs_mat(m)%fissile=.FALSE.
         READ(local_unit,*) (xs_mat(m)%nu(e1),e1=1,egmax)
+        IF(MAXVAL(xs_mat(m)%nu(:)) .LE. 0.0 .AND. MINVAL(xs_mat(m)%nu(:)) .GE. 0.0) &
+          xs_mat(m)%fissile=.FALSE.
       ELSE
+        xs_mat(m)%fissile=.FALSE.
         DO e1 = 1, egmax
           xs_mat(m)%chi(e1) = zero
           eg_bounds(e1) = zero
@@ -249,6 +255,7 @@ CONTAINS
     xs_mat(:)%mat_id=0
     xs_mat(:)%mat_name=''
     eg_bounds(:)=0
+    xs_mat(:)%fissile=.TRUE.
     !set everything to 0
     xs_mat(:)%mat_id=0
     eg_bounds(:)=0
@@ -297,6 +304,8 @@ CONTAINS
           DO g=1,egmax
             READ(words(g),*)xs_mat(i)%sigma_f(g)
           ENDDO
+          IF(MAXVAL(xs_mat(i)%sigma_f(:)) .LE. 0.0 .AND. MINVAL(xs_mat(i)%sigma_f(:)) .GE. 0.0) &
+            xs_mat(i)%fissile=.FALSE.
           !read in nu
           CALL get_next_line(words,nwords)
           IF(nwords .NE. egmax)THEN
@@ -305,6 +314,8 @@ CONTAINS
           DO g=1,egmax
             READ(words(g),*)xs_mat(i)%nu(g)
           ENDDO
+          IF(MAXVAL(xs_mat(i)%nu(:)) .LE. 0.0 .AND. MINVAL(xs_mat(i)%nu(:)) .GE. 0.0) &
+            xs_mat(i)%fissile=.FALSE.
           !read in total/transport xs
           CALL get_next_line(words,nwords)
           IF(nwords .NE. egmax)THEN

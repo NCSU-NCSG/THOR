@@ -94,7 +94,7 @@ CONTAINS
           WRITE(unit_number,103) eg,max_error(eg)
         END DO
       ELSE IF(problem==1 .AND. eig_switch == 1) THEN
-        WRITE(unit_number,*) "Maximum residual by group:"
+        WRITE(unit_number,'(A)') "Maximum residual by group:"
         DO eg=1, egmax
           WRITE(unit_number,103) eg,max_error(eg)
         END DO
@@ -165,7 +165,7 @@ CONTAINS
       OPEN(unit=20,file=TRIM(flux_filename)//TRIM(suffix),status='unknown',action='write')
 
       l=1
-      WRITE(20,*) num_cells
+      WRITE(20,'(I0)') num_cells
       DO i=1, num_cells
         WRITE(20,'(ES24.16)', ADVANCE='NO') cells(i)%volume
         DO eg=1, egmax
