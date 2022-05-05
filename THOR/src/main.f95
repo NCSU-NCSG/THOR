@@ -56,7 +56,7 @@ PROGRAM ahot_c_ug
   !#########
 
   ! timing variables
-  INTEGER:: do_timing = 0
+  INTEGER:: do_timing = 0,imain
   LOGICAL        :: existence
   CHARACTER(100) :: temp
 
@@ -77,8 +77,24 @@ PROGRAM ahot_c_ug
   CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
   !#########
 
-  !get log filename
+  !set log filename
   CALL GET_COMMAND_ARGUMENT(1,log_name)
+  !find extension start
+  DO imain=LEN_TRIM(log_name),1,-1
+    IF(log_name(imain:imain) .EQ. '.')EXIT
+  ENDDO
+  !if it has an extension, check if it's an input extension and cut it from the logname
+  temp=TRIM(log_name)
+  IF(imain .GE. 2)THEN
+    temp=log_name(imain:LEN_TRIM(log_name))
+    SELECTCASE(TRIM(temp))
+      CASE('.i','in','.inp')
+        temp=log_name(1:imain-1)
+      CASE DEFAULT
+        temp=TRIM(log_name)
+    ENDSELECT
+  ENDIF
+  log_name=TRIM(temp)
   OPEN(unit = log_unit, file = TRIM(ADJUSTL(log_name))//'.log', status = "REPLACE", action = "WRITE")
 
   IF (rank .EQ. 0) THEN

@@ -56,10 +56,6 @@ CONTAINS
     TYPE(vector) :: v0, v1, v2, v3, point, barycentric
     INTEGER(kind=li) :: point_flux_location_element_indices(number_point_flux_locations)
 
-    ! input file name for convenience
-
-    CHARACTER(100) :: fname
-
     ! Print runtime
     IF (rank .EQ. 0) THEN
       WRITE(unit_number,*)
@@ -390,8 +386,7 @@ CONTAINS
 
     ! write a csv output file containing all region averaged
     ! TODO: make this more flexible, currently this is for testing only
-    CALL GET_COMMAND_ARGUMENT(1,fname)
-    OPEN(unit=20, file=TRIM(fname)//TRIM('_out.csv'), status='unknown', action='write')
+    OPEN(unit=20, file=TRIM(jobname)//TRIM('_out.csv'), status='unknown', action='write')
     WRITE(20, 502, ADVANCE = "NO") "Region,"
     DO eg = 1, egmax - 1
       WRITE(20, 505, ADVANCE = "NO") " flux g = ", eg, ","

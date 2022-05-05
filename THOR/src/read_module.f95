@@ -639,27 +639,42 @@ CONTAINS
     ! local variables
 
     CHARACTER(100) :: fname, tchar
-    INTEGER :: rank,mpi_err,localunit,ios,legacy_v
+    INTEGER :: rank,mpi_err,localunit,ios,legacy_v,i
     CALL GET_COMMAND_ARGUMENT(1,fname)
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
     localunit = rank+100
 
+    !find extension start
+    DO i=LEN_TRIM(fname),1,-1
+      IF(fname(i:i) .EQ. '.')EXIT
+    ENDDO
+    !if it has an extension, check if it's an input extension and cut it from the jobname
+    jobname=TRIM(fname)
+    IF(i .GE. 2)THEN
+      jobname=fname(i:LEN_TRIM(fname))
+      SELECTCASE(TRIM(jobname))
+        CASE('.i','in','.inp')
+          jobname=fname(1:i-1)
+        CASE DEFAULT
+          jobname=TRIM(fname)
+      ENDSELECT
+    ENDIF
+
     OPEN(unit = localunit, file = fname , status = 'old', action = 'read',IOSTAT=ios)
-    jobname=TRIM(ADJUSTL(fname))
     IF(ios .NE. 0)THEN
       CALL raise_fatal_error('error opening '//TRIM(fname))
     ENDIF
     IF(rank .EQ. 0)THEN
       CALL printlog("<><><><><><><><>"//TRIM(fname))
     ENDIF
-    dump_file=TRIM(fname)//'_restart.out'
-    flux_filename=TRIM(fname)//'_flux.out'
-    vtk_flux_filename=TRIM(fname)//'_flux.vtk'
-    vtk_mat_filename=TRIM(fname)//'_mat.vtk'
-    vtk_reg_filename=TRIM(fname)//'_reg.vtk'
-    vtk_src_filename=TRIM(fname)//'_src.vtk'
-    cartesian_map_filename=TRIM(fname)//'_cartesian_map.out'
-    converge_filename=TRIM(fname)//'_conv.convergence'
+    dump_file=TRIM(jobname)//'_restart.out'
+    flux_filename=TRIM(jobname)//'_flux.out'
+    vtk_flux_filename=TRIM(jobname)//'_flux.vtk'
+    vtk_mat_filename=TRIM(jobname)//'_mat.vtk'
+    vtk_reg_filename=TRIM(jobname)//'_reg.vtk'
+    vtk_src_filename=TRIM(jobname)//'_src.vtk'
+    cartesian_map_filename=TRIM(jobname)//'_cartesian_map.out'
+    converge_filename=TRIM(jobname)//'_conv.convergence'
 
     legacy_v=-9999
     !determine if the input is yaml
