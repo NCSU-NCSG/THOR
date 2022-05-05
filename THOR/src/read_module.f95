@@ -639,26 +639,10 @@ CONTAINS
     ! local variables
 
     CHARACTER(100) :: fname, tchar
-    INTEGER :: rank,mpi_err,localunit,ios,legacy_v,i
+    INTEGER :: rank,mpi_err,localunit,ios,legacy_v
     CALL GET_COMMAND_ARGUMENT(1,fname)
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
     localunit = rank+100
-
-    !find extension start
-    DO i=LEN_TRIM(fname),1,-1
-      IF(fname(i:i) .EQ. '.')EXIT
-    ENDDO
-    !if it has an extension, check if it's an input extension and cut it from the jobname
-    jobname=TRIM(fname)
-    IF(i .GE. 2)THEN
-      jobname=fname(i:LEN_TRIM(fname))
-      SELECTCASE(TRIM(jobname))
-        CASE('.i','in','.inp')
-          jobname=fname(1:i-1)
-        CASE DEFAULT
-          jobname=TRIM(fname)
-      ENDSELECT
-    ENDIF
 
     OPEN(unit = localunit, file = fname , status = 'old', action = 'read',IOSTAT=ios)
     IF(ios .NE. 0)THEN

@@ -1,5 +1,5 @@
 # vtk DataFile Version 3.0
-six_group_keig_analytical.inp                                           
+six_group_keig_analytical                                               
 ASCII
 DATASET UNSTRUCTURED_GRID
 POINTS           29 float

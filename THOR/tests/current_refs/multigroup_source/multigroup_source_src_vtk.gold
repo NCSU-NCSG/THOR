@@ -1,5 +1,5 @@
 # vtk DataFile Version 3.0
-multigroup_source.inp                                                   
+multigroup_source                                                       
 ASCII
 DATASET UNSTRUCTURED_GRID
 POINTS          216 float
