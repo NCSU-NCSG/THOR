@@ -104,6 +104,8 @@ CONTAINS
       CALL read_src
     END IF
 
+    IF(vtk_src_output .EQ. 1 .AND. rank .EQ. 0) CALL plot_source
+
     ! Call quad_gen to generate quadrature
 
     CALL quad_gen
@@ -643,21 +645,20 @@ CONTAINS
     localunit = rank+100
 
     OPEN(unit = localunit, file = fname , status = 'old', action = 'read',IOSTAT=ios)
-    jobname=TRIM(ADJUSTL(fname))
     IF(ios .NE. 0)THEN
       CALL raise_fatal_error('error opening '//TRIM(fname))
     ENDIF
     IF(rank .EQ. 0)THEN
       CALL printlog("<><><><><><><><>"//TRIM(fname))
     ENDIF
-    dump_file=TRIM(fname)//'_restart.out'
-    flux_filename=TRIM(fname)//'_flux.out'
-    vtk_flux_filename=TRIM(fname)//'_flux.vtk'
-    vtk_mat_filename=TRIM(fname)//'_mat.vtk'
-    vtk_reg_filename=TRIM(fname)//'_reg.vtk'
-    vtk_src_filename=TRIM(fname)//'_src.vtk'
-    cartesian_map_filename=TRIM(fname)//'_cartesian_map.out'
-    converge_filename=TRIM(fname)//'_conv.convergence'
+    dump_file=TRIM(jobname)//'_restart.out'
+    flux_filename=TRIM(jobname)//'_flux.out'
+    vtk_flux_filename=TRIM(jobname)//'_flux.vtk'
+    vtk_mat_filename=TRIM(jobname)//'_mat.vtk'
+    vtk_reg_filename=TRIM(jobname)//'_reg.vtk'
+    vtk_src_filename=TRIM(jobname)//'_src.vtk'
+    cartesian_map_filename=TRIM(jobname)//'_cartesian_map.out'
+    converge_filename=TRIM(jobname)//'_conv.convergence'
 
     legacy_v=-9999
     !determine if the input is yaml

@@ -56,12 +56,9 @@ PROGRAM ahot_c_ug
   !#########
 
   ! timing variables
-  INTEGER:: do_timing = 0
+  INTEGER:: do_timing = 0,imain
   LOGICAL        :: existence
   CHARACTER(100) :: temp
-
-  !log variables
-  CHARACTER(100) :: log_name
 
   stdout_unit=OUTPUT_UNIT
 
@@ -77,9 +74,25 @@ PROGRAM ahot_c_ug
   CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)
   !#########
 
-  !get log filename
-  CALL GET_COMMAND_ARGUMENT(1,log_name)
-  OPEN(unit = log_unit, file = TRIM(ADJUSTL(log_name))//'.log', status = "REPLACE", action = "WRITE")
+  !set log filename
+  CALL GET_COMMAND_ARGUMENT(1,jobname)
+  !find extension start
+  DO imain=LEN_TRIM(jobname),1,-1
+    IF(jobname(imain:imain) .EQ. '.')EXIT
+  ENDDO
+  !if it has an extension, check if it's an input extension and cut it from the logname
+  temp=TRIM(jobname)
+  IF(imain .GE. 2)THEN
+    temp=jobname(imain:LEN_TRIM(jobname))
+    SELECTCASE(TRIM(temp))
+      CASE('.i','in','.inp')
+        temp=jobname(1:imain-1)
+      CASE DEFAULT
+        temp=TRIM(jobname)
+    ENDSELECT
+  ENDIF
+  jobname=TRIM(temp)
+  OPEN(unit = log_unit, file = TRIM(ADJUSTL(jobname))//'.log', status = "REPLACE", action = "WRITE")
 
   IF (rank .EQ. 0) THEN
 
@@ -128,9 +141,9 @@ PROGRAM ahot_c_ug
     INQUIRE(file = converge_filename, exist = existence)
     converge_unit=21
     OPEN(unit = converge_unit, file = converge_filename, status = "REPLACE", action = "WRITE")
-    WRITE(converge_unit,*) '========================================================'
-    WRITE(converge_unit,*) '   Begin outer iterations.'
-    WRITE(converge_unit,*) '========================================================'
+    WRITE(converge_unit,'(A)') '========================================================'
+    WRITE(converge_unit,'(A)') '   Begin outer iterations.'
+    WRITE(converge_unit,'(A)') '========================================================'
   END IF
 
 

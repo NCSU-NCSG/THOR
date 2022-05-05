@@ -3,7 +3,7 @@
   type fsrc;
   page_refl save
   innerconv 1E-7 ; outerconv 1E-6
-  maxinner 100; maxouter 2
+  maxinner 4 ; maxouter 200
 
   mesh kobayashi-3-0.thrm
   xs kobayashi.xs

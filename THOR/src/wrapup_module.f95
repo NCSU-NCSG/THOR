@@ -56,10 +56,6 @@ CONTAINS
     TYPE(vector) :: v0, v1, v2, v3, point, barycentric
     INTEGER(kind=li) :: point_flux_location_element_indices(number_point_flux_locations)
 
-    ! input file name for convenience
-
-    CHARACTER(100) :: fname
-
     ! Print runtime
     IF (rank .EQ. 0) THEN
       WRITE(unit_number,*)
@@ -94,7 +90,7 @@ CONTAINS
           WRITE(unit_number,103) eg,max_error(eg)
         END DO
       ELSE IF(problem==1 .AND. eig_switch == 1) THEN
-        WRITE(unit_number,*) "Maximum residual by group:"
+        WRITE(unit_number,'(A)') "Maximum residual by group:"
         DO eg=1, egmax
           WRITE(unit_number,103) eg,max_error(eg)
         END DO
@@ -165,7 +161,7 @@ CONTAINS
       OPEN(unit=20,file=TRIM(flux_filename)//TRIM(suffix),status='unknown',action='write')
 
       l=1
-      WRITE(20,*) num_cells
+      WRITE(20,'(I0)') num_cells
       DO i=1, num_cells
         WRITE(20,'(ES24.16)', ADVANCE='NO') cells(i)%volume
         DO eg=1, egmax
@@ -226,7 +222,6 @@ CONTAINS
       END DO
       DO region=minreg,maxreg
         WRITE(unit_number,501) '-- Region --',region,' Volume= ',reg_volume(region)
-        WRITE(unit_number,*)
         WRITE(unit_number,502) '   Group          Flux       Fission    Absorption      Fiss Src'
         DO eg=1,egmax
           WRITE(unit_number,503) eg,reac_rates(1,region,eg),reac_rates(2,region,eg),&
@@ -234,6 +229,7 @@ CONTAINS
         END DO
         WRITE(unit_number,504) '   Total',reac_rates(1,region,egmax+1),reac_rates(2,region,egmax+1),&
               reac_rates(3,region,egmax+1),reac_rates(4,region,egmax+1)
+        WRITE(unit_number,*)
       END DO
     END IF
 
@@ -390,8 +386,7 @@ CONTAINS
 
     ! write a csv output file containing all region averaged
     ! TODO: make this more flexible, currently this is for testing only
-    CALL GET_COMMAND_ARGUMENT(1,fname)
-    OPEN(unit=20, file=TRIM(fname)//TRIM('_out.csv'), status='unknown', action='write')
+    OPEN(unit=20, file=TRIM(jobname)//TRIM('_out.csv'), status='unknown', action='write')
     WRITE(20, 502, ADVANCE = "NO") "Region,"
     DO eg = 1, egmax - 1
       WRITE(20, 505, ADVANCE = "NO") " flux g = ", eg, ","

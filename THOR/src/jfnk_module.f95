@@ -271,16 +271,16 @@ CONTAINS
 
       ! write convergence monitor
       IF (rank .EQ. 0) THEN
-        CALL printlog('---------------------------------------------------------------------------')
+        CALL printlog('---------------------------------------------------------')
         CALL printlog('---itn        keff    err-keff     err-flx        time---')
         WRITE(amsg,402) m,keff, keff_error,max_outer_error,te-ts,' %i'
         CALL printlog(amsg)
-        CALL printlog('---------------------------------------------------------------------------')
+        CALL printlog('---------------------------------------------------------')
         IF(print_conv.EQ.1) THEN
-          WRITE(21,*)   '---------------------------------------------------------------------------'
+          WRITE(21,401) '---------------------------------------------------------'
           WRITE(21,401) '---itn        keff    err-keff     err-flx        time---'
           WRITE(21,403) m,keff, keff_error,max_outer_error,' %i'
-          WRITE(21,*)   '---------------------------------------------------------------------------'
+          WRITE(21,401) '---------------------------------------------------------'
         END IF
       END IF
 401   FORMAT(A)
@@ -361,21 +361,21 @@ CONTAINS
 
       ! output convergence progress
       IF (rank .EQ. 0) THEN
-        CALL printlog('---------------------------------------------------------------------------')
+        CALL printlog('----------------------------------------------------')
         CALL printlog('---nitn  kitn        keff     max-res        time---')
         WRITE(amsg,101) nit,kit,keff,nres,te-ts," %n"
         CALL printlog(amsg)
-        CALL printlog('---------------------------------------------------------------------------')
+        CALL printlog('----------------------------------------------------')
         IF(print_conv.EQ.1) THEN
-          WRITE(21,*)   '---------------------------------------------------------------------------'
+          WRITE(21,102) '----------------------------------------------------'
           WRITE(21,102) '---nitn  kitn        keff     max-res        time---'
           WRITE(21,105) nit,kit,keff,nres," %n"
-          WRITE(21,*)   '---------------------------------------------------------------------------'
+          WRITE(21,102) '----------------------------------------------------'
         END IF
       END IF
-101   FORMAT (1X,I7,I6,3ES12.4,A)
-105   FORMAT (1X,I7,I6,2ES12.4,A)
-102   FORMAT (1X,A)
+101   FORMAT (I7,I6,3ES12.4,A)
+105   FORMAT (I7,I6,2ES12.4,A)
+102   FORMAT (A)
 
       ! Check for convergence
 
