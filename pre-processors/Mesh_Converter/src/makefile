@@ -2,24 +2,20 @@
 #Compile Options
 #-----------------------------------------------------------------------------------
 FC := gfortran
-EXE := Thor_Mesh_Generator
+EXE := Mesh_Converter
 EXT := .exe
 
 all:			TYPE :=
 MPparallel:    TYPE := _MP
 debug:    TYPE := _Debug
+catch:    TYPE := _Catch
 coverage: TYPE := _Coverage
 
 all:      OPT := -O3
 MPparallel: OPT := -O3 -fopenmp
 debug:    OPT := -O0 -g -fbacktrace -ffpe-trap=zero,overflow,underflow
+catch:    OPT := -O0 -g -Wall -W -Wsurprising -Werror
 coverage: OPT := -O0 -g --coverage
-
-#-----------------------------------------------------------------------------------
-#Directory Paths
-#-----------------------------------------------------------------------------------
-CONTRIB := ../../../contrib
-LIB     := ../../../lib
 
 #-----------------------------------------------------------------------------------
 #Add source files as necessary
@@ -27,12 +23,11 @@ LIB     := ../../../lib
 #rule declaration. Add these items to FILTER
 #-----------------------------------------------------------------------------------
 SRC := \
-				mesh_converter.f95 	      	\
+				main.f95 	      	\
 				globals.f95        					\
-				thor_mesh.f95      					\
-				unv.f95      					\
+				output_thrm.f95      					\
 				boundary_conditions.f95      					\
-				gmesh.f95
+				read_gmsh.f95
 
 OBJ := $(SRC:.f95=.o)
 MOD := $(OBJ:.o=.mod)
@@ -41,26 +36,6 @@ FILTER := \
 
 OBJ_FILTER := $(FILTER:.f95=.o)
 MOD_FILTER := $(FILTER:.f95=.mod)
-
-#-----------------------------------------------------------------------------------
-#Add simple compile contrib files
-#-----------------------------------------------------------------------------------
-CONT_SRC :=\
-						$(CONTRIB)/tet_mesh_tet_neighbors/tet_mesh_tet_neighbors.f95
-
-CONT_OBJ := $(patsubst %.f95,%.o,$(notdir $(CONT_SRC)))
-
-CONT_MOD := $(CONT_OBJ:.o=.mod)
-
-#-----------------------------------------------------------------------------------
-#Add lib files
-#-----------------------------------------------------------------------------------
-LIB_SRC := \
-						$(LIB)/integer_array_tools/integer_array_tools.f95
-
-LIB_OBJ := $(patsubst %.f95,%.o,$(notdir $(LIB_SRC)))
-
-LIB_MOD := $(LIB_OBJ:.o=.mod)
 
 #-----------------------------------------------------------------------------------
 #Complex external dependencies. Each of these requires a custom build rule.
@@ -79,6 +54,8 @@ all: $(EXE)
 MPparallel: $(EXE)
 
 debug: $(EXE)
+
+catch: $(EXE)
 
 coverage: $(EXE)
 
@@ -133,17 +110,10 @@ $(LIB_MOD): %.mod:	$(filter %.f95, $(LIB_SRC))
 #Dependency List
 #Use [gfortran -M -cpp *.f95] repeatedly until clean compile to update rules below
 #-----------------------------------------------------------------------------------
-boundary_conditions.o boundary_conditions.mod: boundary_conditions.f95
-
-globals.o globals.mod: globals.f95 integer_array_tools.mod \
- tet_mesh_tet_neighbors.mod
-
-gmesh.o gmesh.mod: gmesh.f95 globals.mod
-
-mesh_converter.o: mesh_converter.f95 globals.mod gmesh.mod unv.mod \
- thor_mesh.mod integer_array_tools.mod
-
-thor_mesh.o thor_mesh.mod: thor_mesh.f95 globals.mod \
- tet_mesh_tet_neighbors.mod
-
-unv.o unv.mod: unv.f95 globals.mod boundary_conditions.mod
+boundary_conditions.o boundary_conditions.mod: boundary_conditions.f95 \
+ globals.mod
+globals.o globals.mod: globals.f95
+main.o: main.f95 globals.mod read_gmsh.mod output_thrm.mod \
+ boundary_conditions.mod
+output_thrm.o output_thrm.mod: output_thrm.f95 globals.mod
+read_gmsh.o read_gmsh.mod: read_gmsh.f95 globals.mod
