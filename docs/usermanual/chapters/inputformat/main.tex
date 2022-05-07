@@ -1,39 +1,22 @@
-\subsection{THOR Transport Solver}\label{sec:THOR_format}
-add a description of input format for
+\section{THOR Inputs}\label{sec:THOR_format}
+
+The THOR transport solver has distinct user input formats for the following separate input files:
 \begin{itemize}
-    \item standard input
-    \item XS
-    \item mesh
-    \item source
+    \item Standard Input (Sec.~\ref{ch:inp:sec:stdinput}) - The primary input file to be run by THOR.
+    All other input files will either be listed in this file, or assumed to be the default filenames as described in Section~\ref{ch:inp:sec:stdinput}.
+    This is the only input file given to THOR by way of the command line.
+    \item Mesh File (Sec.~\ref{ch:inp:sec:meshfile}) - File containing the physical 1st order tet mesh for the problem.
+    \item Cross Section File (Sec.~\ref{ch:inp:sec:xsfile}) - File containing cross sections for the problem.
+    \item Density Factor File (Sec.~\ref{ch:inp:sec:densfact}) - File containing the density factors for each adjustment of cross sections in each region.
+    \item Initial Guess File (Sec.~\ref{ch:inp:sec:initguess}) - File containing the initial guess for the problem.
+    \item Source File (Sec.~\ref{ch:inp:sec:srcfile}) - File containing the source for a fixed source problem.
+    \item Inflow File (Sec.~\ref{ch:inp:sec:inflow}) - File containing the boundary condition inflow data for a fixed source problem.
 \end{itemize}
 
-This section describes the input format of the THOR transport solver. 
+This chapter describes the input formats of the THOR transport solver.
 
-\subsection{Compilation and Invocation}
-Navigate to:
-\begin{verbatim}
-    >> cd /home/<usr>/projects/THOR/THOR/src
-\end{verbatim}
-and make the application:
-\begin{verbatim}
-    >> make
-\end{verbatim}
-The executable \verb"THOR_TRANSPORT_SOLVER.exe" should have been created here:
-\begin{verbatim}
-    >> /home/<usr>/projects/THOR/THOR/THOR_TRANSPORT_SOLVER.exe
-\end{verbatim}
-
-The THOR transport solver is invoked by 
-
-\begin{verbatim}
-    >> mpiexec -n <n> THOR_TRANSPORT_SOLVER.exe -i standard_input -t
-\end{verbatim}
-where \verb"-i" precedes the name of the standard input file \verb"standard_input" and \verb"-t" is an optional parameter
-for additional timing. 
-\noindent\textbf{Remark:} \verb"-i standard_input" must currently follow the executable name \verb"THOR_TRANSPORT_SOLVER.exe". This will be fixed in future versions.
-
-\subsection{Standard Input}
-THOR input is organized in blocks. The blocks are 
+\section{Standard Input}\label{ch:inp:sec:stdinput}
+THOR input is organized in blocks. The blocks are
 \begin{itemize}
     \item The first line must contain a user selected name for the problem.
     \item \verb"problem": general parameters to define the problem to be solved
@@ -135,10 +118,10 @@ All keywords are listed in Table~\ref{tab:thor_solver_parameters}.
     \end{tabular}
 \end{table}
 
-The \verb"regionmap" block does not contain keyword-value pairs. Instead, it maps region ids to cross section ids. We denote by 
+The \verb"regionmap" block does not contain keyword-value pairs. Instead, it maps region ids to cross section ids. We denote by
 \verb"min_reg" and \verb"max_reg" the smallest and largest region ids in the mesh file. The number of entries in the \verb"regionmap"
-field must then be \verb"num_entries" = \verb"max_reg" - \verb"min_reg" + 1. The assignment is best illustrated for an example. 
-Let us assume that \verb"min_reg" = -1 and \verb"max_reg" = 2 and we want to assign 
+field must then be \verb"num_entries" = \verb"max_reg" - \verb"min_reg" + 1. The assignment is best illustrated for an example.
+Let us assume that \verb"min_reg" = -1 and \verb"max_reg" = 2 and we want to assign
 \begin{verbatim}
     -1 -> 12
      0 -> 1
@@ -151,9 +134,9 @@ start regionmap
  12 1 1 3
 end regionmap
 \end{verbatim}
-Unused region ids can be accommodated by padding the entries in the regionmap field. 
+Unused region ids can be accommodated by padding the entries in the regionmap field.
 
-\subsection{THOR Mesh Format}\label{sec:mesh_format}
+\section{THOR Mesh Format}\label{ch:inp:sec:meshfile}
 Line 1: number of vertices
 \vspace{2mm}
 
@@ -172,7 +155,7 @@ Line 1: number of vertices
 \noindent Block 2: region and source id assignments, number of lines = number of elements; each line is as follows: element\_id region\_id source\_id (all integers). For setting up Monte Carlo on the tet mesh, this block can be ignored.
 \vspace{2mm}
 
-\noindent Block 3: element descriptions, the vertex\_ids that form each element. Number of lines = number of elements; each line is as follows: element\_id vertex\_id1 vertex\_id2 vertex\_id3 vertex\_id4 (all integers). 
+\noindent Block 3: element descriptions, the vertex\_ids that form each element. Number of lines = number of elements; each line is as follows: element\_id vertex\_id1 vertex\_id2 vertex\_id3 vertex\_id4 (all integers).
 \vspace{2mm}
 
 \noindent Next line: number of boundary face edits
@@ -181,8 +164,8 @@ Line 1: number of vertices
 \noindent Block 4: boundary face descriptions. All exterior faces associated with their boundary condition id, number if lines = number of boundary face edits; each line is as follows: element\_id local\_tetrahedron\_face\_id boundary\_condition\_id.
 \vspace{2mm}
 
-\noindent \textbf{Explanation}: 
-local\_tetrahedron\_face\_id: natural local id of tetrahedron’s face which is the id of the vertex opposite to this face. Note: indexed 0-3. 
+\noindent \textbf{Explanation}:
+local\_tetrahedron\_face\_id: natural local id of tetrahedron’s face which is the id of the vertex opposite to this face. Note: indexed 0-3.
 boundary\_condition\_id:
 value = 0: vacuum BC
 value = 1: reflective BC
@@ -195,11 +178,11 @@ value = 2: fixed inflow
 \noindent Block 5: adjacency list, number of lines = number of adjacency list entries; each line is as follows: element\_id face\_id neighbor\_id neighbor\_face\_id.
 Explanation: The element\_id is the current element. The neighbor across the face indexed by face\_id has the element id neighbor\_id and the its own local index for the said common face is neighbor\_face\_id.
 
-\subsection{THOR Cross Section Format}\label{sec:cross_section_format}
+\section{THOR Cross Section Format}\label{ch:inp:sec:xsfile}
 \begin{verbatim}
 Line 1: number of materials
 
-Block 1: each entry in this block contains cross sections for a single material. Each entry contains  L *G+ 6 lines. 
+Block 1: each entry in this block contains cross sections for a single material. Each entry contains  L *G+ 6 lines.
 
 Entry line 1: material_id
 Entry line 2: fission_spectrum_1 fission_spectrum_2 … fission_spectrum_G
@@ -234,19 +217,19 @@ Entry line 2 * G + 6: sig_scat_{1, 1->G} sig_scat_{1, 2->G} … sig_scat_{1, G->
 
 
 
-\subsection{List of all Inputs and Outputs of THOR transport solver}
+\section{List of all Inputs and Outputs of THOR transport solver}
 
-\subsection{THOR Mesh Generator}
+\section{THOR Mesh Generator}
 This section discusses the input of THOR's mesh generator tool. The mesh generator tool provides the following capabilties:
 \begin{itemize}
     \item Convert exodus~\cite{exodus_format} formatted meshes to THOR format.
     \item Convert gmsh~\cite{gmsh_ref} formatted meshes to THOR format.
     \item Convert universal file format meshes to THOR format.
     \item Split the elements of hexahedra and wedge (triangular prisms) meshes into tetrahedra before comverting to THOR mesh format.
-    \item Conversion of legacy THOR mesh format to new format. 
+    \item Conversion of legacy THOR mesh format to new format.
 \end{itemize}
 
-\subsubsection{Compilation and Invocation}
+\subsection{Compilation and Invocation}
 Navigate to:
 \begin{verbatim}
     >> cd /home/<usr>/projects/THOR/pre-processors/THOR_Mesh_Generator/src
@@ -267,7 +250,7 @@ where \verb"standard_input" is the standard input file.
 
 \noindent\textbf{Remark:} Conversion of exodus files to gmsh files relies on using libMesh's \verb"mesh-tool"~\cite{libMeshPaper}. You must compile libMesh and set the environment variable \verb"THOR_LIBMESH_DIRECTORY".
 
-\subsubsection{Format of the THOR's mesh generator standard input}
+\subsection{Format of the THOR's mesh generator standard input}
 The standard input file of the THOR mesh generator contains the following lines:
 \begin{verbatim}
 input_mesh_file
@@ -289,7 +272,7 @@ The purpose of these files is as follows:
     \item  \verb"boundary_id_file": name of file that contains instructions to reassign boundary ids. Formatting instructions for this file is provided in Sect.~\ref{sec:reassign_file_format}.
 \end{itemize}
 
-\subsubsection{Formatting instructions for regions, source, and boundary id reassignment files}\label{sec:reassign_file_format}
+\subsection{Formatting instructions for regions, source, and boundary id reassignment files}\label{sec:reassign_file_format}
 IDs are integers that are assigned to each tetrahedral element to group it into a region, a source region or assigned to boundary
 faces to group it into a set of faces for boundary assignment.
 The file format for id reassignment files is:
@@ -312,7 +295,7 @@ The meaning is as follows:
     \item The boundary id characterizes the boundary condition. It must be 0, 1, or 2, where 0 is a vacuum, 1 is a reflective, and 2 is a fixed inflow boundary.
 \end{itemize}
 
-\subsection{Testing}
+\section{Testing}
 THOR provides a convenient test harness that can be executed by the user by navigating to the \verb"scripts" directory that exists as subdirectory for all applications; for example, for the THOR transport solver the test file is located in:
 \begin{verbatim}
     >> /home/<usr>/projects/THOR/THOR/scripts
@@ -320,7 +303,7 @@ THOR provides a convenient test harness that can be executed by the user by navi
 The tests are executed via the \verb"run_thor_tests.py" python script. The execution of the python script requires \textit{python3}. Tests are executed by:
 \begin{verbatim}
     >> cd /home/<usr>/projects/THOR/THOR/scripts
-    >> python run_thor_tests.py 
+    >> python run_thor_tests.py
 \end{verbatim}
 The output of the test script should look like this:
 \begin{verbatim}

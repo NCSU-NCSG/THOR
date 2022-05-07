@@ -915,6 +915,8 @@ CONTAINS
     ELSE
       quad_tpe=3
       quad_file=TRIM(this_card%carg)
+      CALL raise_fatal_error('Quadrature file given. THOR does not currently support user provided &
+        & user provied quadrature files -- '//TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_qdtype
 

@@ -1,33 +1,20 @@
-A Hello World example for THOR
+!A Hello World example for THOR
 
-  start problem
-    execution = yes
-    lambda = 0
-    type= keig ;
-    sweep=precomp
-    page_refl=save
-    innerconv=1E-12 ; outerconv=1E-7
-    maxinner = 4 ; maxouter = 500
-  end problem
+  execution  yes
+  lambda     0
+  type       keig
+  page_refl  save
+  innerconv  1e-12
+  outerconv  1e-7
+  maxinner   4
+  maxouter   500
 
-  start inout
-    mesh_file     = hello_world.thrm
-    xs_file       = hello_world.xs
-    flux_file     = hello_world.flux
-    print_xs = yes
-  end inout
+  mesh       hello_world.thrm
+  xs         hello_world.xs
+  flux_out   hello_world.flux
+  print_xs   yes
 
-  start cross_sections
-     ngroups=1 ; upscattering = no
-     multiplying = yes
-  end cross_sections
+  qdtype     levelsym
+  qdorder    2
 
-  start quadrature
-    qdtype=levelsym ; qdorder = 2
-  end quadrature
-
-  start regionmap
-     1
-  end regionmap
-
-end file
+  region_map 0 1
