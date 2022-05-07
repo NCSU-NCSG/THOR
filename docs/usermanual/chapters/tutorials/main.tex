@@ -1,7 +1,21 @@
-Godiva is an un-shielded, pulsed, nuclear burst reactor. It is essentially a homogeneous sphere of highly enriched uranium with a diameter of $30$ cm, that was operated by inserting a piston of fissile material~\cite{Godiva1961}. In this tutorial the critical benchmark configuration described in Ref.~\cite{GodivaBenchmark} is considered. The geometry that is modeled by THOR is a homogeneous sphere of radius $8.71$ cm discretized by tetrahedra similar to Fig.~\ref{fig:godiva_coarse} (with the exception that Fig.~\ref{fig:godiva_coarse} shows on-eighth of the domain). The energy domain is discretized with six energy groups, and cross sections are provided by~\cite{GodivaBenchmark}.
+THOR currently includes two tutorials to guide new users through the process of creating a mesh with Gmsh, using the Mesh Converter to make it a THOR mesh, and running THOR using that mesh.
+The first tutorial is the Godiva tutorial, creating a model of the bare Godiva critical experiment sphere, meshing it, and running it with THOR.
+This tutorial demonstrates basic THOR problem creation and running concepts.
+
+The second tutorial is the BeRP tutorial, creating a model of the BeRP ball with 3 inches of polyethylene reflector surrounding the BeRP ball.
+This tutorial demonstrates a more advanced problem involving multiple materials and regions.
+
+Since both systems are effectively one-dimensional spherical problems, the symmetry is taken advantage of and the problems are modeled using a one/eighth model with reflective boundary conditions to be equivalent to the full spheres for the tutorial.
+In the tutorial folders, \verb"<thor_dir>/THOR/examples/Godiva_tutorial" and \verb"<thor_dir>/THOR/examples/BeRP_tutorial", versions of these tutorials with full spheres, half spheres, and quarter spheres are also included along with reference results.
+
+\section{Godiva Tutorial}
+
+Godiva is an un-shielded, pulsed, nuclear burst reactor. It is essentially a homogeneous sphere of highly enriched uranium with a diameter of $30$ cm, that was operated by inserting a piston of fissile material~\cite{Godiva1961}.
+In this tutorial the critical benchmark configuration described in Ref.~\cite{GodivaBenchmark} is considered. The geometry that is modeled by THOR is a homogeneous sphere of radius $8.7407$ cm discretized by tetrahedra similar to Fig.~\ref{fig:godiva_coarse} (with the exception that Fig.~\ref{fig:godiva_coarse} shows on-eighth of the domain).
+The energy domain is discretized with six energy groups, and cross sections are provided by~\cite{GodivaBenchmark}.
 
 \begin{figure}[th]
-  \includegraphics[width=1.0\textwidth]{chapters/godivatutorial/figures/godiva_coarse.png}
+  \includegraphics[width=1.0\textwidth]{chapters/tutorials/figures/godiva_coarse.png}
   \caption{Coarse mesh for Godiva problem, picture courtesy~\cite{FerrerPhD}}
   \label{fig:godiva_coarse}
 \end{figure}
@@ -9,7 +23,7 @@ Godiva is an un-shielded, pulsed, nuclear burst reactor. It is essentially a hom
 This tutorial first explains how a tetrahedral mesh is created for the Godiva problem, then the cross sections data input is discussed, and finally the standard input to THOR is covered.
 The input files discussed below for the Godiva tutorial are located in:
 \begin{verbatim}
-    >> /home/<usr>/projects/THOR/THOR/examples/Godiva_tutorial
+    >> <thor_dir>/THOR/examples/Godiva_tutorial
 \end{verbatim}
 
 \subsection{Godiva Mesh}

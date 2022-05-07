@@ -22,7 +22,8 @@ CONTAINS
     READ(20,*)temp_str
     IF(temp_str .NE. '$MeshFormat')STOP 'Not a gmesh file'
     READ(20,*)temp_str
-    IF(temp_str .NE. '4.1')STOP 'gmesh format is wrong, should be 4.1'
+    temp_str=TRIM(ADJUSTL(temp_str))
+    IF(temp_str(1:2) .NE. '4.')STOP 'gmesh format is wrong, should be 4 version'
 
     !find the nodes
     REWIND(20)
