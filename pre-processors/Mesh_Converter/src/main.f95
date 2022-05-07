@@ -28,20 +28,40 @@ PROGRAM thor_mesh_converter
   DO
     CALL GET_COMMAND_ARGUMENT(i, temp_string)
     IF(temp_string .EQ. '-bc')THEN
+      !boundary conditions are ordered -x, +x, -y, +y, -z, +z
+      !0 is vacuum, 1 is reflective, and 2 is fixed inflow
       DO j=1,6
         i=i+1
         CALL GET_COMMAND_ARGUMENT(i, temp_string)
         READ(temp_string,*)side_bc(j)
+        IF(side_bc(j) .GT. 2 .OR. side_bc(j) .LT. 0)STOP 'Invalid BC'
       ENDDO
     ENDIF
     IF(i .GE. arg_count)EXIT
     i=i+1
   ENDDO
 
+  WRITE(*,'(A)')'---------------------Reading in gmsh:'
+  WRITE(*,*)
   CALL read_gmsh_file()
 
+
+  WRITE(*,'(A)')'---------------------Calculating Adjacencies:'
+  WRITE(*,*)
   CALL adjacency_calc()
 
-  CALL output_gmsh_file()
-  stop 'testing converter'
+  WRITE(*,'(A)')'---------------------Outputting thrm file:'
+  WRITE(*,*)
+  CALL output_thrm_file()
+
+  WRITE(*,'(A)')'---------------------Calculating volumes:'
+  WRITE(*,*)
+  CALL calcvols()
+
+  WRITE(*,*)
+  WRITE(*,'(A)')'**********************************************************************************'
+  WRITE(*,'(A)')'**********************************************************************************'
+  WRITE(*,'(A)')'**********************************************************************************'
+  WRITE(*,'(A)')'**************************THOR mesh converter sucessful.**************************'
+  WRITE(*,'(2A)')'--------------- Output written to ',TRIM(ADJUSTL(mesh_infile))//'_out.thrm'
 END PROGRAM thor_mesh_converter

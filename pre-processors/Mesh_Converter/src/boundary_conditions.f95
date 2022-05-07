@@ -10,6 +10,7 @@ MODULE boundary_conditions
     PUBLIC :: adjacency_calc
 
     INTEGER, ALLOCATABLE :: tbound_cond(:,:)
+    INTEGER, ALLOCATABLE :: bc_side(:)
 CONTAINS
 
   SUBROUTINE adjacency_calc()
@@ -21,6 +22,7 @@ CONTAINS
 
     ALLOCATE(adj_list(num_tets*4,4),tbound_cond(num_tets*4,3))
     adj_list=0
+    tbound_cond=0
     !loop over all tets
     adj_idx=0
     num_bcf=0
@@ -38,11 +40,21 @@ CONTAINS
       og_face=(/element(i,1),element(i,2),element(i,3)/)
       CALL find_adj(og_face,i,3,adj_idx)
     ENDDO
-    ALLOCATE(bc_data(num_bcf,3))
+    ALLOCATE(bc_data(num_bcf,3),bc_side(num_bcf))
+    bc_data=0
+    bc_side=0
     DO i=1,num_bcf
       bc_data(i,:)=tbound_cond(i,:)
     ENDDO
-    DEALLOCATE(tbound_cond)
+
+    bc_side=0
+    !determine which sides are flat
+    IF(MINVAL(side_bc) .EQ. MAXVAL(side_bc))THEN
+      bc_data(:,3)=side_bc(1)
+    ELSE
+      CALL det_side_flatness()
+    ENDIF
+    DEALLOCATE(tbound_cond,bc_side)
   ENDSUBROUTINE adjacency_calc
 
   SUBROUTINE find_adj(face,el_idx,faceid,adj_idx)
@@ -50,8 +62,8 @@ CONTAINS
     INTEGER,INTENT(IN) :: el_idx
     INTEGER,INTENT(IN) :: faceid
     INTEGER,INTENT(INOUT) :: adj_idx
-    INTEGER :: j,comp_face(3)
-    LOGICAL :: match
+    INTEGER :: j,comp_face(3),side_id
+    LOGICAL :: match,flat
 
     match=.FALSE.
     DO j=1,num_tets
@@ -83,11 +95,8 @@ CONTAINS
       num_bcf=num_bcf+1
       tbound_cond(num_bcf,1)=el_idx
       tbound_cond(num_bcf,2)=faceid
-      IF(MINVAL(side_bc(:)) .EQ. MAXVAL(side_bc(:)))THEN
-        tbound_cond(num_bcf,3)=0
-      ElSE
-        CALL determine_side()
-      ENDIF
+      !assign bc to 0 for now (this will change later
+      tbound_cond(num_bcf,3)=0
     ENDIF
   ENDSUBROUTINE find_adj
 
@@ -113,13 +122,88 @@ CONTAINS
     ENDIF
   ENDSUBROUTINE check_face
 
-  SUBROUTINE determine_side()
-    STOP 'need to determine the side that this boundary face is on'
-  ENDSUBROUTINE determine_side
+  SUBROUTINE det_side_flatness()
+    INTEGER :: i,j,el_id,vert_id,face_idx,loc_max,loc_min
+    REAL(8) :: face_point(3,3),ext_point(3),norm_vec(3),lambda,offset
+
+    !sides are assumed to be flat, and if they are not this is set to false.
+    side_flat=.TRUE.
+    DO i=1,num_bcf
+      el_id=bc_data(i,1)
+      face_idx=0
+      !assign extruded and face boundary points
+      DO j=1,4
+        IF(bc_data(i,2) .NE. j-1)THEN
+          face_idx=face_idx+1
+          face_point(face_idx,:)=vertex(element(el_id,j),:)
+        ELSE
+          ext_point(:)=vertex(element(el_id,j),:)
+        ENDIF
+      ENDDO
+      !get the outward going unit normal vector for the tet for this face
+      norm_vec=cross(face_point(2,:)-face_point(1,:), face_point(3,:)-face_point(1,:))
+      offset=face_point(1,1)*norm_vec(1)+face_point(1,2)*norm_vec(2)+face_point(1,3)*norm_vec(3)
+      lambda=(offset-norm_vec(1)*ext_point(1)-norm_vec(2)*ext_point(2)-norm_vec(3)*ext_point(3)) &
+        /(norm_vec(1)**2+norm_vec(2)**2+norm_vec(3)**2)
+      norm_vec=norm_vec*lambda
+      norm_vec=norm_vec/(SQRT(norm_vec(1)**2+norm_vec(2)**2+norm_vec(3)**2))
+
+      !figure out which side of the problem this bc faces
+      IF(ABS(MAXVAL(norm_vec)) .GT. ABS(MINVAL(norm_vec)))THEN
+        !face on a positive side, assign the side for that face
+        IF(MAXLOC(norm_vec,1) .EQ. 1)THEN
+          bc_side(i)=2
+        ELSEIF(MAXLOC(norm_vec,1) .EQ. 2)THEN
+          bc_side(i)=4
+        ELSE
+          bc_side(i)=6
+        ENDIF
+        IF(ABS(MAXVAL(norm_vec)-1.0) .LE. 1.0E-14)THEN
+          !face is flat, do nothing
+        ElSE
+          !face is not flat, it only takes 1 for the side to not be flat
+          side_flat(bc_side(i))=.FALSE.
+        ENDIF
+      ELSE
+        !face on a negative side, assign the side for that face
+        IF(MINLOC(norm_vec,1) .EQ. 1)THEN
+          bc_side(i)=1
+        ELSEIF(MINLOC(norm_vec,1) .EQ. 2)THEN
+          bc_side(i)=3
+        ELSE
+          bc_side(i)=5
+        ENDIF
+        IF(ABS(MINVAL(norm_vec)+1.0) .LE. 1.0E-14)THEN
+          !face is flat, do nothing
+        ElSE
+          !face is not flat, it only takes 1 for the side to not be flat
+          side_flat(bc_side(i))=.FALSE.
+        ENDIF
+      ENDIF
+    ENDDO
+    DO i=1,6
+      IF(.NOT. side_flat(i) .AND. side_bc(i) .EQ. 1)THEN
+        WRITE(*,*)'ERROR: side ',i,' is reflective but not flat'
+        STOP
+      ENDIF
+    ENDDO
+    DO i=1,num_bcf
+      bc_data(i,3)=side_bc(bc_side(i))
+    ENDDO
+  ENDSUBROUTINE det_side_flatness
+
+  FUNCTION cross(a, b)
+    REAL(8) :: cross(3)
+    REAL(8), INTENT(IN) :: a(3), b(3)
+
+    cross(1) = a(2) * b(3) - a(3) * b(2)
+    cross(2) = a(3) * b(1) - a(1) * b(3)
+    cross(3) = a(1) * b(2) - a(2) * b(1)
+  END FUNCTION cross
 
   FUNCTION orderedverts(verts)
-    INTEGER, INTENT(IN) :: verts(4)
     INTEGER :: orderedverts(4)
+    INTEGER, INTENT(IN) :: verts(4)
     INTEGER :: i,temp_vert,changes
     orderedverts=verts
     !bubble sort algorithm, pretty cheap for only 4 elements

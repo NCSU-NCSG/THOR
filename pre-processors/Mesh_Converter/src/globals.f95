@@ -39,8 +39,14 @@ MODULE globals
   !boundary conditions data
   INTEGER, ALLOCATABLE :: bc_data(:,:)
 
-  !boundary conditions on each side
+  !boundary conditions on each side ordered -x, +x, -y, +y, -z, +z
   INTEGER :: side_bc(6)=0
+
+  !side flatnesses, ordered same as BCs.
+  LOGICAL :: side_flat(6)=.FALSE.
+
+  !pi
+  REAL(8),PARAMETER :: PI=4.D0*DATAN(1.D0)
 CONTAINS
 
 END MODULE globals
