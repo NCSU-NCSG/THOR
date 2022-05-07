@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------
 //
-//  Godiva Half Sphere
+//  Godiva Quarter Sphere
 //
 //  Constructive Solid Geometry, OpenCASCADE geometry kernel
 //
@@ -12,13 +12,15 @@
 
 SetFactory("OpenCASCADE");
 
-// Godiva is just a sphere of diameter 8.7407, also make a box to remove the left half
-Sphere(1) = {0,0,0,4.37035};
-Box(2) = {-5,-5,-5, 5,10,10};
+// Godiva is just a sphere of diameter 8.7407, also make a boxes to remove left half and bottom
+Sphere(1) = {0,0,0,8.7407};
+Box(2) = {-10,-10,-10, 10,20,20};
+Box(3) = {0,-10,-10, 10,20,10};
+Box(4) = {0,-10,0, 10,10,10};
 
 // this creates a new volume removing the box from the sphere.
 // this also deletes the previous volumes so we don't get overlaying meshes.
-BooleanDifference(3) = { Volume{1}; Delete; }{ Volume{2}; Delete; };
+BooleanDifference(5) = { Volume{1}; Delete; }{ Volume{2:4}; Delete; };
 
 // Assign a mesh size to all the points of all the volumes:
-MeshSize{ PointsOf{ Volume{:}; } } = 2;
+MeshSize{ PointsOf{ Volume{:}; } } = 4;

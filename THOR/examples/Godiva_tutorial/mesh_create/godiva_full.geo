@@ -13,7 +13,7 @@
 SetFactory("OpenCASCADE");
 
 // Godiva is just a sphere of diameter 8.7407
-Sphere(1) = {0,0,0,4.37035};
+Sphere(1) = {0,0,0,8.7407};
 
 // Assign a mesh size to all the points of all the volumes:
-MeshSize{ PointsOf{ Volume{:}; } } = 2;
+MeshSize{ PointsOf{ Volume{:}; } } = 4;
