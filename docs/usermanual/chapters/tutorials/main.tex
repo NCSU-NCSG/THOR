@@ -26,7 +26,7 @@ The input files discussed below for the Godiva tutorial are located in:
     >> <thor_dir>/THOR/examples/Godiva_tutorial
 \end{verbatim}
 
-\subsection{Godiva Mesh}
+\subsection{Godiva Mesh}\label{ch:tuts:sec:godiva:ssec:mesh}
 
 The workflow described here is suitable if the user has access to a compatible version of \href{https://gmsh.info/}{Gmsh}.
 Any version 4 Gmsh should work, but the example specifically performed here was done using Gmsh version 4.10.1.
@@ -69,26 +69,43 @@ Equivalent Radius:   4.2911933629822876E+00
 \end{verbatim}
 
 The file \verb"godiva_octant.msh_out.thrm" should result from this execution for use by THOR.
+This mesh may be compared to the provided
+\begin{verbatim}
+  <thor_dir>/THOR/examples/Godiva_tutorial/run_files/godiva_octant_thrm.ref
+\end{verbatim}
+which it should match if \verb"godiva_octant.msh" matches \verb"godiva_octant_msh.ref".
 Notice that the given volume for Region 5 (the Godiva eighth of a sphere as seen in \verb"godiva_octant.geo") is 330.996~cm$^3$, but the actual octant volume for the Godiva sphere is 349.653~cm$^3$.
 The ratio of the actual volume to the meshed volume is then 1.056366, which will come in handy later.
 This concludes the mesh generation step for this tutorial.
 
-TODO: This is next.
-
 \subsection{Cross section data}
+
 The THOR cross section file for the Godiva benchmark is provided by:
 \begin{verbatim}
-    /home/<usr>/projects/THOR/THOR/examples/Godiva_tutorial/cross_sections/godiva.xs
+    <thor_dir>/THOR/examples/Godiva_tutorial/run_files/godiva.xs
 \end{verbatim}
-THOR uses a custom cross section format that is explained in detail in Sec.~\ref{sec:THOR_format}.
+THOR uses a custom cross section format that is explained in detail in Sec.~\ref{ch:inp:sec:xsfile}.
+
+At the end of Section~\ref{ch:tuts:sec:godiva:ssec:mesh}, it was observed that there was a discrepancy in the volume of the Godiva mesh compared to the original problem.
+To preserve material mass, the cross sections must be altered by increasing them by a factor of 1.056366.
+In THOR, the user need not alter the cross sections themselves to make this adjustment.
+Instead, THOR will automatically adjust reaction and material attenuation calculations by a given density factor.
+By default, this factor is 1.0, which will lead to use of the original cross sections unaltered.
+However, the user may specify density factors in a density factor file, described in Section~\ref{ch:inp:sec:densfact}.
+For this tutorial, this density factor adjustment is provided by:
+\begin{verbatim}
+    <thor_dir>/THOR/examples/Godiva_tutorial/run_files/godiva_octant.dens
+\end{verbatim}
+
 
 \subsection{THOR input file and executing THOR}
+
 The THOR input file is
 \begin{verbatim}
-   /home/<usr>/projects/THOR/THOR/examples/Godiva_tutorial/...
-   THOR/godiva.i
+   <thor_dir>/THOR/examples/Godiva_tutorial/run_files/godiva_octant.inp
 \end{verbatim}
-THOR uses a keyword-based input that is listed in Sect.~\ref{sec:THOR_format}. The Godiva tutorial input file is now explained in detail; note that this listing includes comments separated by \verb"#" at the end of each line that are not present in the original input file.
+THOR uses a keyword-based input that is listed in Sect.~\ref{sec:THOR_format}.
+The Godiva tutorial input file is now explained in detail.
 \begin{verbatim}
 Godiva 6 group example              # title line
 
