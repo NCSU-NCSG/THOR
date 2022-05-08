@@ -23,6 +23,26 @@ PROGRAM thor_mesh_converter
 
   !get mesh in file name
   CALL GET_COMMAND_ARGUMENT(1, mesh_infile)
+
+  !set log filename
+  mesh_outfile=TRIM(ADJUSTL(mesh_infile))
+  !find extension start
+  DO i=LEN_TRIM(mesh_outfile),1,-1
+    IF(mesh_outfile(i:i) .EQ. '.')EXIT
+  ENDDO
+  !if it has an extension, check if it's an input extension and cut it from the logname
+  temp_string=TRIM(mesh_outfile)
+  IF(i .GE. 2)THEN
+    temp_string=mesh_outfile(i:LEN_TRIM(mesh_outfile))
+    SELECTCASE(TRIM(temp_string))
+      CASE('.msh')
+        temp_string=mesh_outfile(1:i-1)
+      CASE DEFAULT
+        temp_string=TRIM(mesh_outfile)
+    ENDSELECT
+  ENDIF
+  mesh_outfile=TRIM(temp_string)//'.thrm'
+
   !get boundary conditions
   i=2
   DO
@@ -63,5 +83,5 @@ PROGRAM thor_mesh_converter
   WRITE(*,'(A)')'**********************************************************************************'
   WRITE(*,'(A)')'**********************************************************************************'
   WRITE(*,'(A)')'**************************THOR mesh converter sucessful.**************************'
-  WRITE(*,'(2A)')'--------------- Output written to ',TRIM(ADJUSTL(mesh_infile))//'_out.thrm'
+  WRITE(*,'(2A)')'--------------- Output written to ',TRIM(ADJUSTL(mesh_outfile))
 END PROGRAM thor_mesh_converter

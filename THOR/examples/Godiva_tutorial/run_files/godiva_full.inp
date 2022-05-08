@@ -20,7 +20,7 @@ ipiter                0
 print_conv            yes
 density_factor        fromfile godiva_full.dens
 execution             yes
-mesh                  ./godiva_full.msh_out.thrm
+mesh                  ./godiva_full.thrm
 source                source.dat
 flux_out              no
 xs                    ./godiva.xs

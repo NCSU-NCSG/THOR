@@ -15,6 +15,9 @@ MODULE globals
   !input mesh filename
   CHARACTER(200) :: mesh_infile
 
+  !output mesh filename
+  CHARACTER(200) :: mesh_outfile
+
   !number of vertices
   INTEGER :: num_verts
 

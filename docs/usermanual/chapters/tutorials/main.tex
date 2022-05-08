@@ -69,10 +69,10 @@ Equivalent Radius:   4.2911933629822876E+00
 **********************************************************************************
 **********************************************************************************
 **************************THOR mesh converter sucessful.**************************
---------------- Output written to godiva_octant.msh_out.thrm
+--------------- Output written to godiva_octant.thrm
 \end{verbatim}
 
-The file \verb"godiva_octant.msh_out.thrm" should result from this execution for use by THOR.
+The file \verb"godiva_octant.thrm" should result from this execution for use by THOR.
 This mesh may be compared to the provided \verb"godiva_octant_thrm.ref", which it should match if \verb"godiva_octant.msh" matches \verb"godiva_octant_msh.ref".
 Notice that the given volume for Region 5 (the Godiva eighth of a sphere as seen in \verb"godiva_octant.geo") is 330.996~cm$^3$, but the actual octant volume for the Godiva sphere is 349.653~cm$^3$.
 The ratio of the actual volume to the meshed volume is then 1.056366, which will come in handy later.
@@ -80,7 +80,7 @@ This concludes the mesh generation step for this tutorial.
 
 \subsection{Cross section data}
 
-The user should now move \verb"godiva_octant.msh_out.thrm" to the input file location
+The user should now move \verb"godiva_octant.thrm" to the input file location
 \begin{verbatim}
   <thor_dir>/THOR/examples/Godiva_tutorial/run_files/
 \end{verbatim}

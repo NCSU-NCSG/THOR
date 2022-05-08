@@ -13,7 +13,7 @@ CONTAINS
   SUBROUTINE output_thrm_file()
     INTEGER :: i
 
-    OPEN(UNIT=30,FILE=TRIM(ADJUSTL(mesh_infile))//'_out.thrm',ACTION='WRITE',STATUS='REPLACE')
+    OPEN(UNIT=30,FILE=TRIM(ADJUSTL(mesh_outfile)),ACTION='WRITE',STATUS='REPLACE')
 
     !print out base data
     WRITE(30,'(I0)')num_verts
