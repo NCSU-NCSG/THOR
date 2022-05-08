@@ -8,6 +8,8 @@
   mesh ./berp_full.thrm
   xs ./berp.xs
   density_factor fromfile berp_full.dens
+  vtk_flux_out yes
+  vtk_mat_out yes
 
   qdtype levelsym ; qdorder 4
 
