@@ -69,11 +69,7 @@ Equivalent Radius:   4.2911933629822876E+00
 \end{verbatim}
 
 The file \verb"godiva_octant.msh_out.thrm" should result from this execution for use by THOR.
-This mesh may be compared to the provided
-\begin{verbatim}
-  <thor_dir>/THOR/examples/Godiva_tutorial/run_files/godiva_octant_thrm.ref
-\end{verbatim}
-which it should match if \verb"godiva_octant.msh" matches \verb"godiva_octant_msh.ref".
+This mesh may be compared to the provided \verb"godiva_octant_thrm.ref", which it should match if \verb"godiva_octant.msh" matches \verb"godiva_octant_msh.ref".
 Notice that the given volume for Region 5 (the Godiva eighth of a sphere as seen in \verb"godiva_octant.geo") is 330.996~cm$^3$, but the actual octant volume for the Godiva sphere is 349.653~cm$^3$.
 The ratio of the actual volume to the meshed volume is then 1.056366, which will come in handy later.
 This concludes the mesh generation step for this tutorial.
@@ -100,69 +96,73 @@ For this tutorial, this density factor adjustment is provided by:
 
 \subsection{THOR input file and executing THOR}
 
-The THOR input file is
+The THOR input file is:
 \begin{verbatim}
    <thor_dir>/THOR/examples/Godiva_tutorial/run_files/godiva_octant.inp
 \end{verbatim}
 THOR uses a keyword-based input that is listed in Sect.~\ref{sec:THOR_format}.
-The Godiva tutorial input file is now explained in detail.
+The Godiva tutorial input file is verbose and some parameters are ignored as they are not relevant to the problem.
+Upon running THOR, a verbose form of the input will always be echoed, and ignored parameters will be highlighted.
 \begin{verbatim}
-Godiva 6 group example              # title line
-
-  start problem                     # beginning of problem block
-    execution = yes                 # problem is solved
-    lambda = 0                      # constant approximation (SC)
-    type = keig                     # solve an eigenvalue problem
-    keigsolver = pi ; piacc = none  # Power iterations w/o
-                                    # acceleration, note separation
-                                    # by ; to have same-line synatx
-    sweep = precomp                 # sweep path precomputed
-    page_refl = save                # reflected bnd fluxes stored
-    kconv = 1E-8                    # stopping tolerance on k-eff
-    innerconv = 1E-12              # stopping tolerance inner it
-    outerconv = 1E-7                # stopping tolerance outer it
-    maxinner = 4 ; maxouter = 5000  # max # inner/outer it
-  end problem                       # terminate the problem block
-
-  start inout                       # start input/output file block
-    mesh_file =  ../create_mesh/from_CUBIT/godiva_1_o.thrm  # mesh file
-    xs_file =  ../cross_sections/godiva.xs  # XS file
-    flux_file = godiva.flux         # plain flux output file
-    vtk = flux mat                  # print flux and mat ids to vtk
-    print_xs = yes                  # XS are echoed
-  end inout.                        # terminate this block
-
-  start cross_sections
-     ngroups = 6                    # the number of energy groups
-     upscattering = no              # upscattering is not present
-                                    # scat. XS is lower triangular
-  end cross_sections
-
-  start quadrature
-    qdtype = levelsym               # level-symmetric quadrature
-    qdorder = 4                     # order 4
-  end quadrature
-
-  start regionmap                   # the region map maps block
-     1                              # ids to materials; in this
-                                    # case the only block is
-  end regionmap                     # assigned material 1 that is
-                                    # present in XS file
-
-end file                            # the input file is terminated
-                                    # by "end file"
+type                  keig
+keigsolver            pi
+lambda                0
+inflow                no
+piacc                 errmode
+page_sweep            no
+page_refl             save
+page_iflw             all
+kconv                 1e-8
+innerconv             1e-12
+outerconv             1e-7
+maxinner              4
+maxouter              5000
+jfnk_krsze            25
+jfnk_maxkr            250
+jfnk_method           flat
+initial_guess         no
+restart_out           no
+ipiter                0
+print_conv            yes
+density_factor        fromfile godiva_octant.dens
+execution             yes
+mesh                  ./godiva_octant_thrm.ref
+source                source.dat
+flux_out              no
+xs                    ./godiva.xs
+vtk_flux_out          no
+vtk_mat_out           no
+vtk_reg_out           no
+vtk_src_out           no
+cartesian_map_out     no
+print_xs              no
+ngroups               1
+pnorder               0
+pnread                0
+upscattering          yes
+multiplying           yes
+scatt_mult_included   yes
+qdtype                levelsym
+qdorder               4
+cartesian_map         no
+point_value_locations no
+region_map            5 1
 \end{verbatim}
 
-The Godiva tutorial is solved with THOR via the command line:
+To solve the problem, the user should move \verb"godiva_octant.msh_out.thrm" to the input file location
 \begin{verbatim}
-    >> /home/<usr>/projects/THOR/THOR/thor-1.0.exe -i godiva.i
+  <thor_dir>/THOR/examples/Godiva_tutorial/run_files/
+\end{verbatim}
+After navigating to the Godiva tutorial input file location, the Godiva tutorial is solved with THOR via the command line:
+\begin{verbatim}
+  >> <thor_dir>/THOR/thor-1.0.exe godiva_octant.inp
 \end{verbatim}
 
 Completion of execution of the Godiva tutorial is indicated by the printout:
 \begin{verbatim}
 --------------------------------------------------------
-    Execution of THOR completed successfully
- --------------------------------------------------------
+   Execution of THOR completed successfully
+--------------------------------------------------------
 \end{verbatim}
 
 THOR provides the following output that is discussed in this tutorial:

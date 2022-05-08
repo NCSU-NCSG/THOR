@@ -90,6 +90,7 @@ CONTAINS
     cards(card_indx)%cname='inflow'
     cards(card_indx)%carg='no'
     cards(card_indx)%getcard => get_inflow
+    cards(card_indx)%csub='srcprob'
     !piacc card
     card_indx=5
     cards(card_indx)%cname='piacc'
@@ -111,6 +112,7 @@ CONTAINS
     cards(card_indx)%cname='page_iflw'
     cards(card_indx)%carg='all'
     cards(card_indx)%getcard => get_page_iflw
+    cards(card_indx)%csub='srcprob'
     !kconv card
     card_indx=9
     cards(card_indx)%cname='kconv'
@@ -170,7 +172,7 @@ CONTAINS
     cards(card_indx)%cname='ipiter'
     WRITE(cards(card_indx)%carg,'(I0)')ipow
     cards(card_indx)%getcard => get_ipiter
-    cards(card_indx)%csub='poweriter'
+    cards(card_indx)%csub='jfnk'
     !print_conv card
     card_indx=20
     cards(card_indx)%cname='print_conv'
