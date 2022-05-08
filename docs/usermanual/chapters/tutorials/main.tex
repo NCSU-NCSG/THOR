@@ -5,18 +5,18 @@ This tutorial demonstrates basic THOR problem creation and running concepts.
 The second tutorial is the BeRP tutorial, creating a model of the BeRP ball with 3 inches of polyethylene reflector surrounding the BeRP ball.
 This tutorial demonstrates a more advanced problem involving multiple materials and regions.
 
-Since both systems are effectively one-dimensional spherical problems, the symmetry is taken advantage of and the problems are modeled using a one/eighth model with reflective boundary conditions to be equivalent to the full spheres for the tutorial.
+Since both systems are physically equivalent to one-dimensional spherical problems, the symmetry is taken advantage of and the problems are modeled using a one/eighth model with reflective boundary conditions to be equivalent to the full spheres for the tutorial.
 In the tutorial folders, \verb"<thor_dir>/THOR/examples/Godiva_tutorial" and \verb"<thor_dir>/THOR/examples/BeRP_tutorial", versions of these tutorials with full spheres, half spheres, and quarter spheres are also included along with reference results.
 
 \section{Godiva Tutorial}
 
 Godiva is an un-shielded, pulsed, nuclear burst reactor. It is essentially a homogeneous sphere of highly enriched uranium with a diameter of $30$ cm, that was operated by inserting a piston of fissile material~\cite{Godiva1961}.
-In this tutorial the critical benchmark configuration described in Ref.~\cite{GodivaBenchmark} is considered. The geometry that is modeled by THOR is a homogeneous sphere of radius $8.7407$ cm discretized by tetrahedra similar to Fig.~\ref{fig:godiva_coarse} (with the exception that Fig.~\ref{fig:godiva_coarse} shows on-eighth of the domain).
+In this tutorial the critical benchmark configuration described in Ref.~\cite{GodivaBenchmark} is considered. The geometry that is modeled by THOR is a homogeneous sphere of radius $8.7407$ cm discretized by tetrahedra similar to Fig.~\ref{fig:godiva_coarse}.
 The energy domain is discretized with six energy groups, and cross sections are provided by~\cite{GodivaBenchmark}.
 
 \begin{figure}[th]
   \includegraphics[width=1.0\textwidth]{chapters/tutorials/figures/godiva_coarse.png}
-  \caption{Coarse mesh for Godiva problem, picture courtesy~\cite{FerrerPhD}}
+  \caption{Coarse mesh for Godiva problem}
   \label{fig:godiva_coarse}
 \end{figure}
 
@@ -27,78 +27,53 @@ The input files discussed below for the Godiva tutorial are located in:
 \end{verbatim}
 
 \subsection{Godiva Mesh}
-The workflow described here is suitable if the user has access to the Cubit mesh generator. A Cubit journal file is provided in directory:
+
+The workflow described here is suitable if the user has access to a compatible version of \href{https://gmsh.info/}{Gmsh}.
+Any version 4 Gmsh should work, but the example specifically performed here was done using Gmsh version 4.10.1.
+
+Begin by navigating to the location of the Godiva Gmsh geometry file, \verb"godiva_octant.geo", which is found in \verb"<thor_dir>/THOR/examples/Godiva_tutorial/mesh_create/".
+Opening the file in a text editor, it can be observed that the model is created by removing the negative portions of each direction from a sphere centered at the origin.
+For more details on creating original Gmsh inputs, see the Gmsh \href{https://gmsh.info/doc/texinfo/gmsh.html}{reference manual}.
+
+Open \verb"godiva_octant.geo" in Gmsh and run the ``3D'' command from the ``Mesh'' dropdown menu under ``Modules''.
+The mesh should be generated and now become visible in the GUI.
+Now, select the ``Save'' command from the same ``Mesh'' dropdown to save the generated mesh to \verb"godiva_octant.msh".
+This mesh may be compared to the provided \verb"godiva_octant_msh.ref", however they may differ if the versions differ or if optimization of the mesh is employed.
+
+The gmsh file \verb"godiva_octant.msh" is converted to THOR's native mesh format by executing the Mesh Converter with the command line:
 \begin{verbatim}
-    >> /home/<usr>/projects/THOR/THOR/examples/Godiva_tutorial
+  >> <thor_dir>/THOR/pre-processors/Mesh_Converter/Mesh_Converter.exe convert_godiva.in
+     -bc 1 0 1 0 1 0
 \end{verbatim}
-It creates the exodus file \verb"godiva.e". To verify whether Cubit is available to the user on the target computer execute the command line:
-\begin{verbatim}
-    >> which cubit
-\end{verbatim}
-Note that even if Cubit is installed on the target computer it might not be available to the user unless its path is defined in the user's search paths. To execute the journal file, the last line must be modified by replacing \verb"<path>" with:
-\begin{verbatim}
-    /home/<usr>/projects/THOR/THOR/examples/Godiva_tutorial ..
-    /create_mesh/from_cubit
-\end{verbatim}
-then execute Cubit with the command line:
-\begin{verbatim}
-    >> cubit <godiva_mesh_CUBIT.jou
-\end{verbatim}
-For users that do not have access to Cubit, the \verb"godiva.e" file is provided in the \verb"from_cubit" directory.
-The exodus file \verb"godiva.e" is converted to THOR's native mesh format by executing the THOR mesh generator using the standard input file \verb"convert_godiva.in" that is included in the \verb"from_cubit" directory with the command line:
-\begin{verbatim}
-    >> /home/<usr>/projects/THOR/pre-processors/THOR_Mesh_Generator/Thor_Mesh_Generator_MP.exe -i convert_godiva.in
-\end{verbatim}
-In this case this input file contains the following lines:
-\begin{verbatim}
-./godiva_1_o.e
-./godiva_1_o.thrm
-\end{verbatim}
-specifying the input exodus file and the THOR mesh formatted output file. The mesh conversion infers the file format of the input by the filename extension; currently \verb".e" and \verb".gmsh" for exodus and gmesh formats, respectively, are supported. The conversion is performed by typing:
-\begin{verbatim}
-    /home/<usr>/projects/THOR/pre-processors/THOR_Mesh_Generator/ ...
-    Thor_Mesh_Generator.exe -i convert_godiva.in
-\end{verbatim}
+Note that since we are modeling the fully positive octant of the sphere we are setting all of the flat negative faces to be reflective (see Section~\ref{ch:getstart:sec:preproc:subsec:meshconv} for more details).
 After successful completion of the conversion, the following printout should appear:
 \begin{verbatim}
-============================================================
+---------------------Reading in gmsh:
 
-   TTTTTTT  HH     HH  OOOOO  RRRRRR
-     TTT    HH     HH OOOOOOO RRRRRRR
-     TTT    HH     HH OO   OO RR   RR
-     TTT    HHHHHHHHH OO   OO RRRRRR
-     TTT    HHHHHHHHH OO   OO RRRR
-     TTT    HH     HH OO   OO RR RR
-     TTT    HH     HH 0000000 RR  RR
-     TTT    HH     HH  OOOOO  RR   RR
+---------------------Calculating Adjacencies:
 
-   Tetrahedral High Order Radiation Transport Code
+---------------------Outputting thrm file:
 
-   By North Carolina State University
+---------------------Calculating volumes:
 
-   Version 1.0 - Update 2020
-============================================================
+Region 5 volume:   3.3099604624050352E+02
+Region 5 equivalent Radius:   4.2911933629822876E+00
+Total System Volume:   3.3099604624050352E+02
+Equivalent Radius:   4.2911933629822876E+00
 
-============================================================
-Executing -->THOR_MESH_GENERATOR<-- application
-============================================================
-
------------------------------------- Input ------------------------------------
-Infile mesh file name: ./godiva_1_o.msh
-Output mesh file name: ./godiva_1_o.thrm
-Mesh refinement level:    0
-
-No region ID edits are provided
-No source ID edits are provided
-No boundary ID edits are provided
-
-
-============================================================
-Application -->THOR_MESH_GENERATOR<-- terminated successfully
-============================================================
+**********************************************************************************
+**********************************************************************************
+**********************************************************************************
+**************************THOR mesh converter sucessful.**************************
+--------------- Output written to godiva_octant.msh_out.thrm
 \end{verbatim}
 
-The file \verb"godiva_1_o.thrm" should result from this execution for use by THOR. This concludes the mesh generation step for this tutorial.
+The file \verb"godiva_octant.msh_out.thrm" should result from this execution for use by THOR.
+Notice that the given volume for Region 5 (the Godiva eighth of a sphere as seen in \verb"godiva_octant.geo") is 330.996~cm$^3$, but the actual octant volume for the Godiva sphere is 349.653~cm$^3$.
+The ratio of the actual volume to the meshed volume is then 1.056366, which will come in handy later.
+This concludes the mesh generation step for this tutorial.
+
+TODO: This is next.
 
 \subsection{Cross section data}
 The THOR cross section file for the Godiva benchmark is provided by:
