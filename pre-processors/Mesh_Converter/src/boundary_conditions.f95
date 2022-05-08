@@ -26,7 +26,13 @@ CONTAINS
     !loop over all tets
     adj_idx=0
     num_bcf=0
+    prog=0
+    WRITE(*,'(A)',ADVANCE='NO')'Progress:'
     DO i=1,num_tets
+      IF(MOD(i,CEILING(num_tets*1.0/(max_prog-1.0))) .EQ. 0)THEN
+        WRITE(*,'(A)',ADVANCE='NO')'*'
+        prog=prog+1
+      ENDIF
       !first face
       og_face=(/element(i,2),element(i,3),element(i,4)/)
       CALL find_adj(og_face,i,0,adj_idx)
@@ -54,6 +60,10 @@ CONTAINS
     ELSE
       CALL det_side_flatness()
     ENDIF
+    DO i=prog,max_prog
+      WRITE(*,'(A)',ADVANCE='NO')'*'
+    ENDDO
+    WRITE(*,*)
     DEALLOCATE(tbound_cond,bc_side)
   ENDSUBROUTINE adjacency_calc
 

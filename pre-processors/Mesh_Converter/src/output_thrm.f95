@@ -12,6 +12,7 @@ CONTAINS
 
   SUBROUTINE output_thrm_file()
     INTEGER :: i
+    WRITE(*,'(A)',ADVANCE='NO')'Progress:'
 
     OPEN(UNIT=30,FILE=TRIM(ADJUSTL(mesh_outfile)),ACTION='WRITE',STATUS='REPLACE')
 
@@ -33,18 +34,27 @@ CONTAINS
       WRITE(30,'(I0,A,I0,A,I0,A,I0,A,I0)')i,' ',element(i,1),' ',element(i,2),' ',element(i,3),' ' &
         ,element(i,4)
     ENDDO
-    !print out boundary condiitons
+    !print out boundary conditions
     WRITE(30,'(I0)')num_bcf
     DO i=1,num_bcf
       WRITE(30,'(I0,A,I0,A,I0)')bc_data(i,1),' ',bc_data(i,2),' ',bc_data(i,3)
     ENDDO
     !print out adjacency list
     WRITE(30,'(I0)')num_tets*4
+    prog=0
     DO i=1,num_tets*4
+      IF(MOD(i,CEILING(num_tets*4.0/(max_prog-1.0))) .EQ. 0)THEN
+        WRITE(*,'(A)',ADVANCE='NO')'*'
+        prog=prog+1
+      ENDIF
       WRITE(30,'(I0,A,I0,A,I0,A,I0)')adj_list(i,1),' ',adj_list(i,2),' ',adj_list(i,3),' ',adj_list(i,4)
     ENDDO
 
     CLOSE(30)
+    DO i=prog,max_prog
+      WRITE(*,'(A)',ADVANCE='NO')'*'
+    ENDDO
+    WRITE(*,*)
   ENDSUBROUTINE output_thrm_file
 
   SUBROUTINE calcvols()
@@ -53,12 +63,15 @@ CONTAINS
     REAL(8), ALLOCATABLE :: tetvol(:),regvol(:)
     INTEGER :: i,minreg,maxreg
 
+    WRITE(*,'(A)',ADVANCE='NO')'Progress:'
+
     minreg=MINVAL(el_tag(:))
     maxreg=MAXVAL(el_tag(:))
     ALLOCATE(tetvol(num_tets),regvol(minreg:maxreg))
     tetvol=0
     totalvol1=0
     regvol=0
+    prog=0
     !compute tet volumes and add to both total volumes and region volumes
     DO i=1,num_tets
       a(:)=vertex(element(i,1),:)
@@ -70,13 +83,21 @@ CONTAINS
         +c(3)*d(1)-c(1)*d(3)+b(1)*(-c(3)+d(3))))/6
       regvol(el_tag(i))=regvol(el_tag(i))+tetvol(i)
       totalvol1=totalvol1+tetvol(i)
+      IF(MOD(i,CEILING(num_tets*1.0/(max_prog-1.0))) .EQ. 0)THEN
+        WRITE(*,'(A)',ADVANCE='NO')'*'
+        prog=prog+1
+      ENDIF
     ENDDO
+    DO i=prog,max_prog
+      WRITE(*,'(A)',ADVANCE='NO')'*'
+    ENDDO
+    WRITE(*,*)
 
     DO i=minreg,maxreg
       WRITE(*,'(A,I0,A,ES24.16)')'Region ',i,' volume: ',regvol(i)
-      WRITE(*,'(A,I0,A,ES24.16)')'Region ',i,' equivalent Radius: ',(3.0/4.0/pi*regvol(i))**(1.0/3.0)
+      WRITE(*,'(A,I0,A,ES24.16)')'Region ',i,' equivalent radius: ',(3.0/4.0/pi*regvol(i))**(1.0/3.0)
     ENDDO
-    WRITE(*,'(A,ES24.16)')'Total System Volume: ',totalvol1
-    WRITE(*,'(A,ES24.16)')'Equivalent Radius: ',(3.0/4.0/pi*totalvol1)**(1.0/3.0)
+    WRITE(*,'(A,ES24.16)')'Total system volume: ',totalvol1
+    WRITE(*,'(A,ES24.16)')'Equivalent radius: ',(3.0/4.0/pi*totalvol1)**(1.0/3.0)
   ENDSUBROUTINE calcvols
 END MODULE output_thrm

@@ -61,27 +61,22 @@ PROGRAM thor_mesh_converter
     i=i+1
   ENDDO
 
-  WRITE(*,'(A)')'---------------------Reading in gmsh:'
-  WRITE(*,*)
+  WRITE(*,'(A)')'----------------------- Reading in gmsh:'
   CALL read_gmsh_file()
 
 
-  WRITE(*,'(A)')'---------------------Calculating Adjacencies:'
-  WRITE(*,*)
+  WRITE(*,'(A)')'----------------------- Calculating Adjacencies:'
   CALL adjacency_calc()
 
-  WRITE(*,'(A)')'---------------------Outputting thrm file:'
-  WRITE(*,*)
+  WRITE(*,'(A)')'----------------------- Outputting thrm file:'
   CALL output_thrm_file()
 
-  WRITE(*,'(A)')'---------------------Calculating volumes:'
-  WRITE(*,*)
+  WRITE(*,'(A)')'----------------------- Calculating volumes:'
   CALL calcvols()
 
-  WRITE(*,*)
-  WRITE(*,'(A)')'**********************************************************************************'
-  WRITE(*,'(A)')'**********************************************************************************'
-  WRITE(*,'(A)')'**********************************************************************************'
-  WRITE(*,'(A)')'**************************THOR mesh converter sucessful.**************************'
-  WRITE(*,'(2A)')'--------------- Output written to ',TRIM(ADJUSTL(mesh_outfile))
+  WRITE(*,'(A)')'--------------------------------------------------------------------------------'
+  WRITE(*,'(A)')'--------------------------------------------------------------------------------'
+  WRITE(*,'(A)')'--------------------------------------------------------------------------------'
+  WRITE(*,'(A)')'------------------------ THOR mesh converter successful ------------------------'
+  WRITE(*,'(2A)')'----------------------- Output written to ',TRIM(ADJUSTL(mesh_outfile))
 END PROGRAM thor_mesh_converter

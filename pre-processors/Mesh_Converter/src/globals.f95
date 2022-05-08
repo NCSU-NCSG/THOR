@@ -27,6 +27,12 @@ MODULE globals
   !number of boundary condition faces
   INTEGER :: num_bcf
 
+  !progress bar counting
+  INTEGER :: prog
+
+  !progress bar counting
+  INTEGER, PARAMETER :: max_prog=70
+
   !vertex data
   REAL(8), ALLOCATABLE :: vertex(:,:)
 

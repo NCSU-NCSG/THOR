@@ -52,24 +52,23 @@ The gmsh file \verb"godiva_octant.msh" is converted to THOR's native mesh format
 Note that since we are modeling the fully positive octant of the sphere we are setting all of the flat negative faces to be reflective (see Section~\ref{ch:getstart:sec:preproc:subsec:meshconv} for more details).
 After successful completion of the conversion, the following printout should appear:
 \begin{verbatim}
----------------------Reading in gmsh:
-
----------------------Calculating Adjacencies:
-
----------------------Outputting thrm file:
-
----------------------Calculating volumes:
-
+----------------------- Reading in gmsh:
+Progress:***********************************************************************
+----------------------- Calculating Adjacencies:
+Progress:***********************************************************************
+----------------------- Outputting thrm file:
+Progress:***********************************************************************
+----------------------- Calculating volumes:
+Progress:***********************************************************************
 Region 5 volume:   3.3099604624050352E+02
-Region 5 equivalent Radius:   4.2911933629822876E+00
-Total System Volume:   3.3099604624050352E+02
-Equivalent Radius:   4.2911933629822876E+00
-
-**********************************************************************************
-**********************************************************************************
-**********************************************************************************
-**************************THOR mesh converter sucessful.**************************
---------------- Output written to godiva_octant.thrm
+Region 5 equivalent radius:   4.2911933629822876E+00
+Total system volume:   3.3099604624050352E+02
+Equivalent radius:   4.2911933629822876E+00
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+------------------------ THOR mesh converter successful ------------------------
+----------------------- Output written to godiva_octant_msh.ref.thrm
 \end{verbatim}
 
 The file \verb"godiva_octant.thrm" should result from this execution for use by THOR.
@@ -126,7 +125,7 @@ ipiter                0
 print_conv            yes
 density_factor        fromfile godiva_octant.dens
 execution             yes
-mesh                  ./godiva_octant.msh_out.ref
+mesh                  ./godiva_octant.thrm
 source                source.dat
 flux_out              no
 xs                    ./godiva.xs
