@@ -1,43 +1,43 @@
-type                  keig                         !type of problem (eigenvalue solver)
-keigsolver            pi                           !eigenvalue solver (power iterations)
-lambda                0                            !tets spatial order (flat)
-inflow                no                           !inflow boundar (none)
-piacc                 errmode                      !acceleration method (error mode extrapolation)
-page_sweep            no                           !sweep data not stored
-page_refl             save                         !reflected bnd fluxes stored
-page_iflw             all                          !inflow data stored: ignored, not using fixedsrc
-kconv                 1e-8                         !keff convergence criteria
-innerconv             1e-12                        !inner iteration convergence criteria
-outerconv             1e-7                         !outer iteration convergence criteria
-maxinner              4                            !maximum inner iterations per outer
-maxouter              5000                         !maximum outer iterations
-jfnk_krsze            25                           !ignored, not using jfnk
-jfnk_maxkr            250                          !ignored, not using jfnk
-jfnk_method           flat                         !ignored, not using jfnk
-initial_guess         no                           !no initial guess
-restart_out           no                           !no restart output
-ipiter                0                            !ignored, not using jfnk
-print_conv            yes                          !
-density_factor        fromfile godiva_octant.dens  !
-execution             yes                          !
-mesh                  ./godiva_octant.msh_out.thrm !
-source                source.dat                   !ignored, not a fixed source problem
-flux_out              no                           !
-xs                    ./godiva.xs                  !
-vtk_flux_out          no                           !
-vtk_mat_out           no                           !
-vtk_reg_out           no                           !
-vtk_src_out           no                           !
-cartesian_map_out     no                           !
-print_xs              no                           !
-ngroups               1                            !only used with legaxy xs
-pnorder               0                            !
-pnread                0                            !only used with legaxy xs
-upscattering          yes                          !only used with legaxy xs
-multiplying           yes                          !only used with legaxy xs
-scatt_mult_included   yes                          !only used with legaxy xs
-qdtype                levelsym                     !
-qdorder               4                            !
-cartesian_map         no                           !
-point_value_locations no                           !
-region_map            5 1                          !
+type                  keig
+keigsolver            pi
+lambda                0
+inflow                no
+piacc                 errmode
+page_sweep            no
+page_refl             save
+page_iflw             all
+kconv                 1e-8
+innerconv             1e-12
+outerconv             1e-7
+maxinner              4
+maxouter              5000
+jfnk_krsze            25
+jfnk_maxkr            250
+jfnk_method           flat
+initial_guess         no
+restart_out           no
+ipiter                0
+print_conv            yes
+density_factor        fromfile godiva_octant.dens
+execution             yes
+mesh                  ./godiva_octant.msh_out.thrm
+source                source.dat
+flux_out              no
+xs                    ./godiva.xs
+vtk_flux_out          yes
+vtk_mat_out           yes
+vtk_reg_out           no
+vtk_src_out           no
+cartesian_map_out     no
+print_xs              no
+ngroups               1
+pnorder               0
+pnread                0
+upscattering          yes
+multiplying           yes
+scatt_mult_included   yes
+qdtype                levelsym
+qdorder               4
+cartesian_map         no
+point_value_locations no
+region_map            5 1

@@ -24,8 +24,8 @@ mesh                  ./godiva_full.msh_out.thrm
 source                source.dat
 flux_out              no
 xs                    ./godiva.xs
-vtk_flux_out          no
-vtk_mat_out           no
+vtk_flux_out          yes
+vtk_mat_out           yes
 vtk_reg_out           no
 vtk_src_out           no
 cartesian_map_out     no

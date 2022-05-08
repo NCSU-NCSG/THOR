@@ -6,7 +6,8 @@ The second tutorial is the BeRP tutorial, creating a model of the BeRP ball with
 This tutorial demonstrates a more advanced problem involving multiple materials and regions.
 
 Since both systems are physically equivalent to one-dimensional spherical problems, the symmetry is taken advantage of and the problems are modeled using a one/eighth model with reflective boundary conditions to be equivalent to the full spheres for the tutorial.
-In the tutorial folders, \verb"<thor_dir>/THOR/examples/Godiva_tutorial" and \verb"<thor_dir>/THOR/examples/BeRP_tutorial", versions of these tutorials with full spheres, half spheres, and quarter spheres are also included along with reference results.
+In the tutorial folders, \\
+\verb"<thor_dir>/THOR/examples/Godiva_tutorial" and \verb"<thor_dir>/THOR/examples/BeRP_tutorial", versions of these tutorials with full spheres, half spheres, and quarter spheres are also included along with reference results.
 
 \section{Godiva Tutorial}
 
@@ -31,14 +32,17 @@ The input files discussed below for the Godiva tutorial are located in:
 The workflow described here is suitable if the user has access to a compatible version of \href{https://gmsh.info/}{Gmsh}.
 Any version 4 Gmsh should work, but the example specifically performed here was done using Gmsh version 4.10.1.
 
-Begin by navigating to the location of the Godiva Gmsh geometry file, \verb"godiva_octant.geo", which is found in \verb"<thor_dir>/THOR/examples/Godiva_tutorial/mesh_create/".
-Opening the file in a text editor, it can be observed that the model is created by removing the negative portions of each direction from a sphere centered at the origin.
+Begin by navigating to the location of the Godiva Gmsh geometry files, which are found in:
+\begin{verbatim}
+  <thor_dir>/THOR/examples/Godiva_tutorial/mesh_create/
+\end{verbatim}
+Opening the file geometry file \verb"godiva_octant.geo" in a text editor, it can be observed that the model is created by removing the negative portions of each direction from a sphere centered at the origin.
 For more details on creating original Gmsh inputs, see the Gmsh \href{https://gmsh.info/doc/texinfo/gmsh.html}{reference manual}.
 
 Open \verb"godiva_octant.geo" in Gmsh and run the ``3D'' command from the ``Mesh'' dropdown menu under ``Modules''.
 The mesh should be generated and now become visible in the GUI.
 Now, select the ``Save'' command from the same ``Mesh'' dropdown to save the generated mesh to \verb"godiva_octant.msh".
-This mesh may be compared to the provided \verb"godiva_octant_msh.ref", however they may differ if the versions differ or if optimization of the mesh is employed.
+This mesh may be compared to the provided \verb"godiva_octant_msh.ref", however they may differ slightly if the versions differ or if optimization of the mesh is employed.
 
 The gmsh file \verb"godiva_octant.msh" is converted to THOR's native mesh format by executing the Mesh Converter with the command line:
 \begin{verbatim}
@@ -76,33 +80,29 @@ This concludes the mesh generation step for this tutorial.
 
 \subsection{Cross section data}
 
-The THOR cross section file for the Godiva benchmark is provided by:
+The user should now move \verb"godiva_octant.msh_out.thrm" to the input file location
 \begin{verbatim}
-    <thor_dir>/THOR/examples/Godiva_tutorial/run_files/godiva.xs
+  <thor_dir>/THOR/examples/Godiva_tutorial/run_files/
 \end{verbatim}
+and navigate there to continue the tutorial.
+
+The THOR cross section file for the Godiva benchmark is provided by \verb"godiva.xs".
 THOR uses a custom cross section format that is explained in detail in Sec.~\ref{ch:inp:sec:xsfile}.
 
 At the end of Section~\ref{ch:tuts:sec:godiva:ssec:mesh}, it was observed that there was a discrepancy in the volume of the Godiva mesh compared to the original problem.
 To preserve material mass, the cross sections must be altered by increasing them by a factor of 1.056366.
 In THOR, the user need not alter the cross sections themselves to make this adjustment.
-Instead, THOR will automatically adjust reaction and material attenuation calculations by a given density factor.
+Instead, THOR will automatically adjust reaction and material attenuation calculations by a given density factor for each region.
 By default, this factor is 1.0, which will lead to use of the original cross sections unaltered.
 However, the user may specify density factors in a density factor file, described in Section~\ref{ch:inp:sec:densfact}.
-For this tutorial, this density factor adjustment is provided by:
-\begin{verbatim}
-    <thor_dir>/THOR/examples/Godiva_tutorial/run_files/godiva_octant.dens
-\end{verbatim}
-
+For this tutorial, this density factor adjustment is provided by \verb"godiva_octant.dens"
 
 \subsection{THOR input file and executing THOR}
 
-The THOR input file is:
-\begin{verbatim}
-   <thor_dir>/THOR/examples/Godiva_tutorial/run_files/godiva_octant.inp
-\end{verbatim}
+The THOR input file is \verb"godiva_octant.inp".
 THOR uses a keyword-based input that is listed in Sect.~\ref{sec:THOR_format}.
 The Godiva tutorial input file is verbose and some parameters are ignored as they are not relevant to the problem.
-Upon running THOR, a verbose form of the input will always be echoed, and ignored parameters will be highlighted.
+Upon running THOR, a verbose form of the input will always be echoed, and ignored parameters will be highlighted as such.
 \begin{verbatim}
 type                  keig
 keigsolver            pi
@@ -126,12 +126,12 @@ ipiter                0
 print_conv            yes
 density_factor        fromfile godiva_octant.dens
 execution             yes
-mesh                  ./godiva_octant_thrm.ref
+mesh                  ./godiva_octant.msh_out.ref
 source                source.dat
 flux_out              no
 xs                    ./godiva.xs
-vtk_flux_out          no
-vtk_mat_out           no
+vtk_flux_out          yes
+vtk_mat_out           yes
 vtk_reg_out           no
 vtk_src_out           no
 cartesian_map_out     no
@@ -149,11 +149,7 @@ point_value_locations no
 region_map            5 1
 \end{verbatim}
 
-To solve the problem, the user should move \verb"godiva_octant.msh_out.thrm" to the input file location
-\begin{verbatim}
-  <thor_dir>/THOR/examples/Godiva_tutorial/run_files/
-\end{verbatim}
-After navigating to the Godiva tutorial input file location, the Godiva tutorial is solved with THOR via the command line:
+The Godiva tutorial is solved with THOR via the command line:
 \begin{verbatim}
   >> <thor_dir>/THOR/thor-1.0.exe godiva_octant.inp
 \end{verbatim}
@@ -167,30 +163,40 @@ Completion of execution of the Godiva tutorial is indicated by the printout:
 
 THOR provides the following output that is discussed in this tutorial:
 \begin{itemize}
-    \item The final estimate of the multiplication factor is printed under ``Execution Summary'', ``Final eigenvalue''. In this case the value is $0.9611$. This is not close to critical because the mesh that
-    is created does not conserve the volume of the critical sphere. When creating a tetrahedral mesh,
-    Cubit places the nodes on the sphere's surface, but that necessarily leads to the volume of the discretized geometry to be smaller than the original volume. In this case, the computational volume
-    is $2742.4\text{ cm}^3$, while the actual volume is $2767.8\text{ cm}^3$.
-    \item A summary of group-wise, region-averaged reaction rates is provided for each region identifier separately under ``Region averaged reaction rates''. The volume of each region, and group-wise fluxes, fission, absorption, and fission source rates are listed.
-    \item Two vtk formatted files, \verb"flux.vtk" contains spatial flux maps, and \verb"mat.vtk" contains the material map. These files can be opened with the paraview post-processing tool that is available \href{https://www.paraview.org/download/}{here}.
+    \item The final estimate of the multiplication factor is printed under ``Execution Summary'', ``Final eigenvalue''.
+    In this case the value is $0.935$. This is not close to critical because the mesh that
+    is created is very coarse.
+    \item A summary of group-wise, region-averaged reaction rates is provided for each region identifier separately under ``Region averaged reaction rates''.
+    The volume of each region, and group-wise fluxes, fission, absorption, and fission source rates are listed.
+    \item Two vtk formatted files, \verb"godiva_octant_flux.vtk" contains spatial flux maps, and \\
+    \verb"godiva_octant_mat.vtk" contains the material map. These files can be opened with the paraview post-processing tool that is available \href{https://www.paraview.org/download/}{here}.
 \end{itemize}
+
+A plot of the fast flux using ParaView 5.10.0 for this run is shown in Figure~\ref{fig:godiva_fast}
+\begin{figure}[th]
+  \center
+  \includegraphics[height=0.5\textwidth]{chapters/tutorials/figures/godiva_fast.png}
+  \caption{Fast flux for Godiva tutorial.}
+  \label{fig:godiva_fast}
+\end{figure}
 
 The reaction rate summary is given by:
 \begin{verbatim}
 --------------------------------------------------------
-    Region averaged reaction rates
+   Region averaged reaction rates
 --------------------------------------------------------
 
--- Region --   1 Volume=   2.742401E+03
-
+-- Region --   5 Volume=   3.309960E+02
    Group          Flux       Fission    Absorption      Fiss Src
-       1  8.424948E-01  1.399140E-01  4.946487E-02  1.399140E-01
-       2  1.573081E+00  2.333728E-01  9.509448E-02  2.333728E-01
-       3  9.814645E-01  1.379655E-01  5.968679E-02  1.379655E-01
-       4  1.631588E+00  2.215631E-01  1.006868E-01  2.215631E-01
-       5  1.198341E+00  1.915944E-01  9.089592E-02  1.915944E-01
-       6  1.792724E-01  4.652155E-02  2.413688E-02  4.652155E-02
-Total     6.406241E+00  9.709313E-01  4.199657E-01  9.709313E-01
+       1  8.317355E-01  1.381271E-01  4.883317E-02  1.381271E-01
+       2  1.549185E+00  2.298278E-01  9.364997E-02  2.298278E-01
+       3  9.627054E-01  1.353285E-01  5.854598E-02  1.353285E-01
+       4  1.585196E+00  2.152633E-01  9.782396E-02  2.152633E-01
+       5  1.137791E+00  1.819135E-01  8.630310E-02  1.819135E-01
+       6  1.682607E-01  4.366399E-02  2.265428E-02  4.366399E-02
+   Total  6.234875E+00  9.441242E-01  4.078105E-01  9.441242E-01
 \end{verbatim}
 
-The results can be improved greatly by enforcing volume conservation on the Cubit mesh. This is accomplished manually in this tutorial by changing the radius in the Cubit journal file to .
+The results can be improved greatly by increasing the refinement of the mesh.
+This can be achieved by reducing the mesh size parameter in the \verb"godiva_octant.geo" file, that parameter is \\
+\verb"MeshSize{ PointsOf{ Volume{:}; } };" which can be seen is set to 4.
