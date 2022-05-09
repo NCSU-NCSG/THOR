@@ -202,11 +202,17 @@ This can be achieved by reducing the mesh size parameter in the \verb"godiva_oct
 
 \section{Polyethylene Shielded BeRP Ball Tutorial}
 
-TODO: Fix up this beginning
+The BeRP ball is a weapons grade plutonium sphere used in detector and criticality experiments~\cite{BeRP_report}.
+The ball represents a fission neutron source that is subcritical under normal conditions.
+The sphere has a mean radius of 3.7938~cm.
+The calculated density of the sphere is 19.604 g/cm$^3$ giving the plutonium a total mass of 4,483.884 g.
 
-% Godiva is an un-shielded, pulsed, nuclear burst reactor. It is essentially a homogeneous sphere of highly enriched uranium with a diameter of $30$ cm, that was operated by inserting a piston of fissile material~\cite{Godiva1961}.
-% In this tutorial the critical benchmark configuration described in Ref.~\cite{GodivaBenchmark} is considered. The geometry that is modeled by THOR is a homogeneous sphere of radius $8.7407$ cm discretized by tetrahedra similar to Fig.~\ref{fig:godiva_coarse}.
-% The energy domain is discretized with six energy groups, and cross sections are provided by~\cite{GodivaBenchmark}.
+The BeRP ball is designed to be inserted into reflecting spherical shells.
+These shells act as both a moderating reflector that increases the induced fission rate produced in the ball, as well as a shield changing the spectrum and strength of the emitted neutrons that escape the reflector.
+The shells exist in a variety of sizes, with larger shells fitting around smaller shells to go from at least 0.5 inches to up to at least 6 inches.
+Shells also exist in a variety of materials including but not limited to high density polyethylene (HDPE) and copper.
+
+This tutorial includes the 3 inch polyethylene shield as the shell for the BeRP ball.
 
 \begin{figure}[th]
   \includegraphics[width=1.0\textwidth]{chapters/tutorials/figures/berp_coarse.png}

@@ -14,7 +14,7 @@ MODULE boundary_conditions
 CONTAINS
 
   SUBROUTINE adjacency_calc()
-    INTEGER :: i,j,og_face(3),comp_face(3),adj_idx
+    INTEGER :: i,og_face(3),adj_idx
 
     DO i=1,num_tets
       element(i,:)=orderedverts(element(i,:))
@@ -72,8 +72,8 @@ CONTAINS
     INTEGER,INTENT(IN) :: el_idx
     INTEGER,INTENT(IN) :: faceid
     INTEGER,INTENT(INOUT) :: adj_idx
-    INTEGER :: j,comp_face(3),side_id
-    LOGICAL :: match,flat
+    INTEGER :: j,comp_face(3)
+    LOGICAL :: match
 
     match=.FALSE.
     DO j=1,num_tets
@@ -133,7 +133,7 @@ CONTAINS
   ENDSUBROUTINE check_face
 
   SUBROUTINE det_side_flatness()
-    INTEGER :: i,j,el_id,vert_id,face_idx,loc_max,loc_min
+    INTEGER :: i,j,el_id,face_idx
     REAL(8) :: face_point(3,3),ext_point(3),norm_vec(3),lambda,offset
 
     !sides are assumed to be flat, and if they are not this is set to false.

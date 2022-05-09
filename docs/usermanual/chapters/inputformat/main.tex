@@ -16,7 +16,84 @@ The THOR transport solver has distinct user input formats for the following sepa
 This chapter describes the input formats of the THOR transport solver.
 
 \section{Standard Input}\label{ch:inp:sec:stdinput}
-THOR input is organized in blocks. The blocks are
+
+The following describes properties of the keyword based THOR input file:
+\begin{itemize}
+  \item Any keyword can appear in any order, but no keyword may appear multiple times.
+  \item Every keyword has a default value, and THOR will echo a verbose form of the input at the beginning of the run, including all keywords and their values for the problem, whether they are set by the user or not.
+  \item Whitespace is necessary between a parameter and the parameter values but is otherwise ignored.
+  \item It is recommended that each parameter have its own line, however multiple parameters can be on the same line separated by semicolons (;).
+  \item The user should ensure that line endings are UNIX text line endings, not Windows or Mac line endings.
+  \item Whether multiple parameters are on the same line or not, the value immediately following the parameter is assumed to be that parameter's value.
+  \item A line cannot contain more than 200 characters and most parameters must have all their values on the same line they reside, with exceptions outlined in the parameter descriptions, for some parameters that have a potentially large number of values.
+  \item Lines starting with an exclamation point, !, and blank lines will be ignored. Any data following an exclamation point on a used line will be ignored. This is equivalent to FORTRAN's comment style.
+\end{itemize}
+
+\subsection{TYPE Card}
+
+\begin{verbatim}
+  type [<keig|fsrc>]
+\end{verbatim}
+
+\begin{tabular}{|l | l | l | l|}
+\hline
+Keyword & Type & Options & Default \\ \hline
+\verb"type" & String & keig/fsrc & fsrc \\ \hline
+\multicolumn{4}{|l|}{Description: }\\
+\hline
+\end{tabular}
+
+\begin{longtable}[H]{l l l l}
+    \toprule
+    Keyword & Type & Options & Explanation\\
+    \midrule
+        &    &   & Problem type. Either eigenvalue (keig) or fixed source (fsrc) \\ \hline
+    \verb"keigsolver" & String & pi / jfnk  & Solve type for keig. Either power iteration (pi) or Jacobian-Free Newton-Krylov (jfmk) \\ \hline
+    \verb"lambda" & Integer & - & Expansion order, negative number indicates reduced set \\ \hline
+    \verb"inflow" & String  & yes / no & If fixed inflow boundary conditions are provided for fsrc problems\\ \hline
+    \verb"piacc" & String & errmode / none & Type of power iteration acceleration: none or error mode extrapolation \\ \hline
+    \verb"page_sweep" & String & yes / no & If the sweep path is saved or is paged to scratch file when not needed\\ \hline
+    \verb"page_refl" & String & page / save / inner & If significant angular fluxes are paged to/from scratch file (page), stored (save), or discarded after completing inner iterations for a given group\\ \hline
+    \verb"page_iflw" & String  & bygroup / all & If inflow information is loaded to memory completely (all) or for each group when required (bygroup)\\ \hline
+    \verb"kconv" & Real & - & Stopping criterion for eigenvalue\\ \hline
+    \verb"innerconv" & Real & - & Stopping criterion for group flux during inner iteration \\ \hline
+    \verb"outerconv" & Real & - & Stopping criterion for group flux during outer/power iteration \\ \hline
+    \verb"maxinner" & Integer & - & Maximum number of inner iterations \\ \hline
+    \verb"maxouter" & Integer & - & Maximum number of outer/power iterations \\ \hline
+    \verb"jfnk_krsze" & Integer & - & Maximum size of Krylov subspace during jfnk \\ \hline
+    \verb"jfnk_maxkr" &Integer & - & Maximum number of Krylov iterations\\ \hline
+    \verb"jfnk_method" & String & outer / flat / flat\_wds & Type of jfnk formulation, see~\cite{}\\ \hline
+    \verb"initial_guess" & String & yes / no & If an initial guess file should be read\\ \hline
+    \verb"restart_out" & String & yes / no & If a restart file should be written \\ \hline
+    \verb"ipiter" & Integer & - & Number of initial power iterations for jfnk\\ \hline
+    \verb"print_conv" & String & yes / no & If convergence monitor is written to file \verb"thor.convergence"\\ \hline
+    \verb"density_factor" & String & no / byvolume / fromfile  & Density factor options: use no density factors (no), use density factors and density factor file provides region volumes (byvolume), use density factors and density factor file provides density factors (fromfile). \\ \hline
+    \verb"execution" & String & yes / no & If yes problem is executed, if no then input is only read and checked.\\ \hline
+    \verb"mesh"&String& -& Name of the mesh file\\ \hline
+    \verb"source"&String& -& Name of the volumetric source file\\ \hline
+    \verb"flux_out"&String& -& Name of the THOR formatted output flux file\\ \hline
+    \verb"xs"&String& -& Name of the cross section file\\ \hline
+    \verb"vtk_flux_out"&String& -& Name of the vtk flux file\\ \hline
+    \verb"vtk_mat_out"&String& -& Name of the vtk material file\\ \hline
+    \verb"vtk_reg_out"&String& -& Name of the vtk region file\\ \hline
+    \verb"vtk_src_out"&String& -& Name of the vtk volumetric source file\\ \hline
+    \verb"cartesian_map_out"&&&Name of the file that the cartesian map output is written to\\ \hline
+    \verb"print_xs"&String& yes / no& If cross sections are echoed to standard output.\\ \hline
+    \verb"ngroups"&Integer& -& Number of energy groups\\ \hline
+    \verb"pnorder"&Integer& -& Spherical harmonics order used for scattering in code\\ \hline
+    \verb"pnread"&Integer& -& Spherical harmonics expansion provided in cross section file\\ \hline
+    \verb"upscattering" & String & yes / no & Read upscattering data from cross section file or ignore it \\ \hline
+    \verb"multiplying" & String & yes / no & If the cross section file contains fission information \\ \hline
+    \verb"scatt_mult_included" & String & yes /no & If the scattering data includes the $2 l + 1$ multiplier or not \\ \hline
+    \verb"qdtype" & String & levelsym / legcheb / fromfile & Quadrature type: level-symmetric, Legendre-Chebyshev, read from file \\ \hline
+    \verb"qdorder" & Integer & - & Order of the angular quadrature \\ \hline
+    \verb"cartesian_map" & Real (9 entries) & - & xmin, xmax, nx, ymin, ymax, ny, zmin, zmax, nz \\ \hline
+    \verb"point_value_locations" & Real (3 N) & - & N is the number of points, (x,y,z) coordinates of N points, x1 y1 z1 x2 y2 ...  \\ \hline
+    \verb"region_map" & Real (3 N) & - & N is the number of points, (x,y,z) coordinates of N points, x1 y1 z1 x2 y2 ...  \\
+    \bottomrule
+\end{longtable}
+
+The blocks are:
 \begin{itemize}
     \item The first line must contain a user selected name for the problem.
     \item \verb"problem": general parameters to define the problem to be solved
@@ -41,79 +118,12 @@ All keywords are listed in Table~\ref{tab:thor_solver_parameters}.
 
 \begin{table}[p]
     \centering
-    \caption{Keywords of THOR Transport Solver Application\label{tab:thor_solver_parameters_1}}
-    \begin{tabular}{l l l l}
-        \toprule
-        Keyword & Type & Options & Explanation\\
-        \midrule
-        \multicolumn{4}{l}{\textbf{Block}: problem}\\
-            type    &  string  &  keig/fsrc & Problem type. Either eigenvalue (keig) or fixed source (fsrc) \\
-            keigsolver & string & pi/jfnk  & Solve type for keig. Either power iteration (pi) or Jacobian-Free Newton-Krylov (jfmk) \\
-            lambda & integer & - & Expansion order, negative number indicates reduced set \\
-            inflow & string  & yes/no & If fixed inflow boundary conditions are provided for fsrc problems\\
-            piacc & string & errmode/none & Type of power iteration acceleration: none or error mode extrapolation \\
-            sweep & string & precomp & Must be set to precomp at this point. (Redundant keyword)\\
-            page\_sweep & string & yes/no & If the sweep path is saved or is paged to scratch file when not needed\\
-            page\_refl & string & page/save/inner & If significant angular fluxes are paged to/from scratch file (page), stored (save), or discarded after completing inner iterations for a given group\\
-            page\_iflw & string  & bygroup/all & If inflow information is loaded to memory completely (all) or for each group when required (bygroup)\\
-            kconv & Real & - & Stopping criterion for eigenvalue\\
-            innerconv & Real & - & Stopping criterion for group flux during inner iteration \\
-            outerconv & Real & - & Stopping criterion for group flux during outer/power iteration \\
-            maxinner & integer & - & Maximum number of inner iterations \\
-            maxouter & integer & - & Maximum number of outer/power iterations \\
-            jfnk\_krsze & integer & - & Maximum size of Krylov subspace during jfnk \\
-            jfnk\_maxkr &integer & - & Maximum number of Krylov iterations\\
-            jfnk\_method & string & outer/flat/flat\_wds & Type of jfnk formulation, see~\cite{}\\
-            initial\_guess & string & yes/no & If an initial guess file should be read\\
-            save\_restart & string & yes/no & If a restart file should be written \\
-            ipiter & integer & - & Number of initial power iterations for jfnk\\
-            print\_conv & string & yes/no & If convergence monitor is written to file \verb"thor.convergence"\\
-            density\_factor & string & no/byvolume/fromfile  & Density factor options: use no density factors (no), use density factors and density factor file provides region volumes (byvolume), use density factors and density factor file provides density factors (fromfile). \\
-            execution & string & yes/no & If yes problem is executed, if no then input is only read and checked.\\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
-\begin{table}[p]
-    \centering
     \caption{Keywords of THOR Transport Solver Application\label{tab:thor_solver_parameters_2}}
     \begin{tabular}{l l l l}
         \toprule
         Keyword & Type & Options & Explanation\\
         \midrule
         \multicolumn{4}{l}{\textbf{Block}: inout}\\
-        \verb"mesh_file"&string& -& Name of the mesh file\\
-        \verb"inflow_file"&string& -& Name of the boundary inflow information file\\
-        \verb"source_file"&string& -& Name of the volumetric source file\\
-        \verb"flux_file"&string& -& Name of the THOR formatted output flux file\\
-        \verb"xs_file"&string& -& Name of the cross section file\\
-        \verb"density_factor_file"&string& -& Name of the density factor file\\
-        \verb"quad_file"&string& -& Name of the angular quadrature file\\
-        \verb"vtk"&string (multiple)&flux/mat/reg/src& Which information is written to vtk formatted outputs. You can select more than one (e.g. vtk = mat reg src)\\
-        \verb"vtk_flux_file"&string& -& Name of the vtk flux file\\
-        \verb"vtk_mat_file"&string& -& Name of the vtk material file\\
-        \verb"vtk_reg_file"&string& -& Name of the vtk region file\\
-        \verb"vtk_src_file"&string& -& Name of the vtk volumetric source file\\
-        \verb"restart_file"&string& -& Name of the restart file written when save\_restart = yes\\
-        \verb"inguess_file"&string& -& Name of the initial guess file if initial\_guess = yes\\
-        \verb"cartesian_map_file"&&&Name of the file that the cartesian map output is written to\\
-        \verb"print_xs"&string& yes/no& If cross sections are echoed to standard output.\\
-        \midrule
-        \multicolumn{4}{l}{\textbf{Block}: cross\_sections}\\
-        \verb"ngroups"&integer& -& Number of energy groups\\
-        \verb"pnorder"&integer& -& Spherical harmonics order used for scattering in code\\
-         \verb"pnread"&integer& -& Spherical harmonics expansion provided in cross section file\\
-         \verb"upscattering" & string & yes/no & Read upscattering data from cross section file or ignore it \\
-         \verb"multiplying" & string & yes/no & If the cross section file contains fission information \\
-         \verb"scatt_mult_included" & string & yes/no & If the scattering data includes the $2 l + 1$ multiplier or not \\
-        \midrule
-        \multicolumn{4}{l}{\textbf{Block}: quadrature}\\
-        \verb"qdtype" & string & levelsym/legcheb/fromfile & Quadrature type: level-symmetric, Legendre-Chebyshev, read from file \\
-        \verb"qdorder" & integer & - & Order of the angular quadrature \\
-        \midrule
-        \multicolumn{4}{l}{\textbf{Block}: postprocess}\\
-        \verb"cartesian_map" & Real/integer (9 entries) & - & xmin, xmax, nx, ymin, ymax, ny, zmin, zmax, nz \\
-        \verb"point_value_locations" & Real (3 N) & - & N is the number of points, (x,y,z) coordinates of N points, x1 y1 z1 x2 y2 ...  \\
         \bottomrule
     \end{tabular}
 \end{table}
