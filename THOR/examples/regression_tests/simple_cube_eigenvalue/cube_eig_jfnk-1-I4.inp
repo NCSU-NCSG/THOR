@@ -7,7 +7,6 @@
 
   mesh cube_level1.mesh
   xs cube_eigenvalue_1g.xs
-  flux_out yes
   print_xs yes
   vtk_flux_out yes
   vtk_mat_out yes

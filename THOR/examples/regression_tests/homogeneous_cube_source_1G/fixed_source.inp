@@ -8,7 +8,6 @@
   mesh homogeneous.thrm
   xs homogeneous.xs
   source homogeneous.src
-  flux_out yes
   print_xs yes
   vtk_flux_out yes
   vtk_mat_out yes

@@ -49,7 +49,6 @@
   vtk_mat_out         yes
   vtk_reg_out         yes
   vtk_src_out         none
-  cartesian_map_out   none
   print_xs            no
 
 !reion map specification. This can be multiple lines if desired. order is index of region,

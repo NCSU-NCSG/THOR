@@ -75,7 +75,7 @@ CONTAINS
       IF(cells(i)%reg<temp_minreg) temp_minreg=cells(i)%reg
     END DO
 
-    IF(minreg .EQ. 100000_li .AND. maxreg .EQ. -1_li)THEN
+    IF(.NOT. ALLOCATED(reg2mat))THEN
       !region map was not found in input file, so assign here
       maxreg=temp_maxreg
       minreg=temp_minreg

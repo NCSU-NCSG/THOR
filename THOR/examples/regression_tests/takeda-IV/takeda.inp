@@ -7,7 +7,6 @@
 
   mesh ./takeda.thrm
   xs ./takeda.xs
-  flux_out yes
   print_xs yes
   vtk_flux_out yes
   vtk_mat_out yes

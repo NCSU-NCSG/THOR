@@ -20,6 +20,8 @@ MODULE read_inp_module
 INTEGER,PARAMETER :: MAX_CARDNAME_LEN=32
 !> The number of cards we have
 INTEGER,PARAMETER :: num_cards=43
+!> The number of cards for deprecated info
+INTEGER,PARAMETER :: num_dep_cards=5
 !> The maximum length of a line in the input file
 INTEGER,PARAMETER :: ll_max=200
 !(need to change in interface IFchanged)
@@ -202,7 +204,7 @@ CONTAINS
     !flux_out card
     card_indx=25
     cards(card_indx)%cname='flux_out'
-    cards(card_indx)%carg='no'
+    cards(card_indx)%carg=flux_filename
     cards(card_indx)%getcard => get_flux_out
     !xs card
     card_indx=26
@@ -239,66 +241,66 @@ CONTAINS
     cards(card_indx)%cname='print_xs'
     cards(card_indx)%carg='no'
     cards(card_indx)%getcard => get_print_xs
-    !ngroups card
+    !pnorder card
     card_indx=33
+    cards(card_indx)%cname='pnorder'
+    WRITE(cards(card_indx)%carg,'(I0)')scatt_ord
+    cards(card_indx)%getcard => get_pnorder
+    !qdtype card
+    card_indx=34
+    cards(card_indx)%cname='qdtype'
+    cards(card_indx)%carg='levelsym'
+    cards(card_indx)%getcard => get_qdtype
+    !qdorder card
+    card_indx=35
+    cards(card_indx)%cname='qdorder'
+    WRITE(cards(card_indx)%carg,'(I0)')quad_ord
+    cards(card_indx)%getcard => get_qdorder
+    !cartesian_map card
+    card_indx=36
+    cards(card_indx)%cname='cartesian_map'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_cartesian_map
+    !point_value_locations card
+    card_indx=37
+    cards(card_indx)%cname='point_value_locations'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_point_value_locations
+    !region_map card
+    card_indx=38
+    cards(card_indx)%cname='region_map'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_region_map
+    !ngroups card
+    card_indx=39
     cards(card_indx)%cname='ngroups'
     WRITE(cards(card_indx)%carg,'(I0)')egmax
     cards(card_indx)%getcard => get_ngroups
     cards(card_indx)%csub='legacyxs'
-    !pnorder card
-    card_indx=34
-    cards(card_indx)%cname='pnorder'
-    WRITE(cards(card_indx)%carg,'(I0)')scatt_ord
-    cards(card_indx)%getcard => get_pnorder
     !pnread card
-    card_indx=35
+    card_indx=40
     cards(card_indx)%cname='pnread'
     WRITE(cards(card_indx)%carg,'(I0)')xs_ord
     cards(card_indx)%getcard => get_pnread
     cards(card_indx)%csub='legacyxs'
     !upscattering card
-    card_indx=36
+    card_indx=41
     cards(card_indx)%cname='upscattering'
     cards(card_indx)%carg='yes'
     cards(card_indx)%getcard => get_upscattering
     cards(card_indx)%csub='legacyxs'
     !multiplying card
-    card_indx=37
+    card_indx=42
     cards(card_indx)%cname='multiplying'
     cards(card_indx)%carg='yes'
     cards(card_indx)%getcard => get_multiplying
     cards(card_indx)%csub='legacyxs'
     !scatt_mult_included card
-    card_indx=38
+    card_indx=43
     cards(card_indx)%cname='scatt_mult_included'
     cards(card_indx)%carg='yes'
     cards(card_indx)%getcard => get_scatt_mult_included
     cards(card_indx)%csub='legacyxs'
-    !qdtype card
-    card_indx=39
-    cards(card_indx)%cname='qdtype'
-    cards(card_indx)%carg='levelsym'
-    cards(card_indx)%getcard => get_qdtype
-    !qdorder card
-    card_indx=40
-    cards(card_indx)%cname='qdorder'
-    WRITE(cards(card_indx)%carg,'(I0)')quad_ord
-    cards(card_indx)%getcard => get_qdorder
-    !cartesian_map card
-    card_indx=41
-    cards(card_indx)%cname='cartesian_map'
-    cards(card_indx)%carg='no'
-    cards(card_indx)%getcard => get_cartesian_map
-    !point_value_locations card
-    card_indx=42
-    cards(card_indx)%cname='point_value_locations'
-    cards(card_indx)%carg='no'
-    cards(card_indx)%getcard => get_point_value_locations
-    !region_map card
-    card_indx=43
-    cards(card_indx)%cname='region_map'
-    cards(card_indx)%carg='no'
-    cards(card_indx)%getcard => get_region_map
     !end of input cards
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     minreg= 100000_li
@@ -435,7 +437,7 @@ CONTAINS
     ELSEIF(this_card%carg .EQ. 'inner') THEN
       page_refl=2
     ELSE
-      CALL raise_fatal_error('This is not a valid page reflective BC option -- '//TRIM(this_card%carg)//' --')
+      CALL raise_fatal_error('This is not a valid page refl -- '//TRIM(this_card%carg)//' --')
     ENDIF
   END SUBROUTINE get_page_refl
 
@@ -688,13 +690,7 @@ CONTAINS
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
 
     this_card%carg=TRIM(wwords(2))
-    IF(lowercase(this_card%carg) .EQ. 'yes') THEN
-      !do nothing, default
-      this_card%carg=source_filename
-    ELSEIF(lowercase(this_card%carg) .EQ. 'no' .OR. lowercase(this_card%carg) .EQ. 'none') THEN
-    ELSE
-      source_filename=TRIM(this_card%carg)
-    ENDIF
+    source_filename=TRIM(this_card%carg)
   END SUBROUTINE get_source
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -703,13 +699,7 @@ CONTAINS
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
 
     this_card%carg=TRIM(wwords(2))
-    IF(lowercase(this_card%carg) .EQ. 'yes') THEN
-      !do nothing, default
-      this_card%carg=flux_filename
-    ELSEIF(lowercase(this_card%carg) .EQ. 'no' .OR. lowercase(this_card%carg) .EQ. 'none') THEN
-    ELSE
-      flux_filename=TRIM(wwords(2))
-    ENDIF
+    flux_filename=TRIM(wwords(2))
   END SUBROUTINE get_flux_out
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -795,14 +785,7 @@ CONTAINS
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
 
     this_card%carg=TRIM(wwords(2))
-    IF(lowercase(this_card%carg) .EQ. 'yes') THEN
-      !do nothing, default
-      this_card%carg=cartesian_map_filename
-    ELSEIF(lowercase(this_card%carg) .EQ. 'no' .OR. lowercase(this_card%carg) .EQ. 'none') THEN
-      glob_do_cartesian_mesh = .FALSE.
-    ELSE
-      cartesian_map_filename=TRIM(this_card%carg)
-    ENDIF
+    cartesian_map_filename=TRIM(this_card%carg)
   END SUBROUTINE get_cartesian_map_out
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1157,44 +1140,46 @@ CONTAINS
     CALL printlog('*******************Echoing verbose equivalent input********************')
     CALL printlog('***********************************************************************')
     DO i=1,num_cards
-      cards(i)%carg=TRIM(ADJUSTL(cards(i)%carg))
-      !echo cards and data
-      IF(LEN_TRIM(cards(i)%carg) .LE. MAX_CARDNAME_LEN)THEN
-        WRITE(amsg,'(4A)')cards(i)%cname(1:cnamelg_max),' ',cards(i)%carg(1:strlg_max),' !'
-        CALL printlog(amsg,ADVANCING=.FALSE.)
-      ELSE
-        WRITE(amsg,'(4A)')cards(i)%cname(1:cnamelg_max),' ',TRIM(cards(i)%carg),' !'
-        CALL printlog(amsg,ADVANCING=.FALSE.)
+      IF(cards(i)%used .OR. i .LE. num_cards-num_dep_cards)THEN
+        cards(i)%carg=TRIM(ADJUSTL(cards(i)%carg))
+        !echo cards and data
+        IF(LEN_TRIM(cards(i)%carg) .LE. MAX_CARDNAME_LEN)THEN
+          WRITE(amsg,'(4A)')cards(i)%cname(1:cnamelg_max),' ',cards(i)%carg(1:strlg_max),' !'
+          CALL printlog(amsg,ADVANCING=.FALSE.)
+        ELSE
+          WRITE(amsg,'(4A)')cards(i)%cname(1:cnamelg_max),' ',TRIM(cards(i)%carg),' !'
+          CALL printlog(amsg,ADVANCING=.FALSE.)
+        ENDIF
+        !echo if card is provided
+        IF(cards(i)%used)THEN
+          CALL printlog('card provided',ADVANCING=.FALSE.)
+        ELSE
+          CALL printlog('card NOT provided (default assumed)',ADVANCING=.FALSE.)
+        ENDIF
+        !print info on ignored input cards
+        SELECT CASE(cards(i)%csub)
+          CASE('keig')
+            IF(problem .NE. 1)THEN
+              CALL printlog(': ignored, not a keig problem',ADVANCING=.FALSE.)
+            ENDIF
+          CASE('poweriter')
+            IF(eig_switch .NE. 0)THEN
+              CALL printlog(': ignored, not using power iterations',ADVANCING=.FALSE.)
+            ENDIF
+          CASE('jfnk')
+            IF(eig_switch .NE. 1)THEN
+              CALL printlog(': ignored, not using jfnk',ADVANCING=.FALSE.)
+            ENDIF
+          CASE('legacyxs')
+            CALL printlog(': only used with legaxy xs',ADVANCING=.FALSE.)
+          CASE('srcprob')
+            IF(problem .NE. 0)THEN
+              CALL printlog(': ignored, not a fixed source problem',ADVANCING=.FALSE.)
+            ENDIF
+          CASE DEFAULT
+        ENDSELECT
+        CALL printlog('')
       ENDIF
-      !echo if card is provided
-      IF(cards(i)%used)THEN
-        CALL printlog('card provided',ADVANCING=.FALSE.)
-      ELSE
-        CALL printlog('card NOT provided (default)',ADVANCING=.FALSE.)
-      ENDIF
-      !print info on ignored input cards
-      SELECT CASE(cards(i)%csub)
-        CASE('keig')
-          IF(problem .NE. 1)THEN
-            CALL printlog(': ignored, not a keig problem',ADVANCING=.FALSE.)
-          ENDIF
-        CASE('poweriter')
-          IF(eig_switch .NE. 0)THEN
-            CALL printlog(': ignored, not using power iterations',ADVANCING=.FALSE.)
-          ENDIF
-        CASE('jfnk')
-          IF(eig_switch .NE. 1)THEN
-            CALL printlog(': ignored, not using jfnk',ADVANCING=.FALSE.)
-          ENDIF
-        CASE('legacyxs')
-          CALL printlog(': only used with legaxy xs',ADVANCING=.FALSE.)
-        CASE('srcprob')
-          IF(problem .NE. 0)THEN
-            CALL printlog(': ignored, not a fixed source problem',ADVANCING=.FALSE.)
-          ENDIF
-        CASE DEFAULT
-      ENDSELECT
-      CALL printlog('')
     ENDDO
     CALL printlog('***********************************************************************')
     CALL printlog('******************Equivalent complete input finished*******************')

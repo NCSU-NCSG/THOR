@@ -25,128 +25,598 @@ The following describes properties of the keyword based THOR input file:
   \item It is recommended that each parameter have its own line, however multiple parameters can be on the same line separated by semicolons (;).
   \item The user should ensure that line endings are UNIX text line endings, not Windows or Mac line endings.
   \item Whether multiple parameters are on the same line or not, the value immediately following the parameter is assumed to be that parameter's value.
-  \item A line cannot contain more than 200 characters and most parameters must have all their values on the same line they reside, with exceptions outlined in the parameter descriptions, for some parameters that have a potentially large number of values.
+  \item A line cannot contain more than 200 characters and most parameters must have all their values on the same line they reside, with exceptions outlined in the parameter descriptions, for some parameters that have a potentially large number of values (the only exception is \verb"region_map" at this time).
   \item Lines starting with an exclamation point, !, and blank lines will be ignored. Any data following an exclamation point on a used line will be ignored. This is equivalent to FORTRAN's comment style.
+  \item The job name, \verb"<job_name>", is the input filename with extension removed if the extension is ``.in", ``.in", or ``.i"
 \end{itemize}
 
 \subsection{TYPE Card}
-
 \begin{verbatim}
-  type [<keig|fsrc>]
+  type <prob_type>
 \end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"type" & STRING & keig/fsrc & keig \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Problem type. Either eigenvalue (keig) or fixed source (fsrc)}\\
+    \hline
+  \end{tabular}
+\end{center}
 
-\begin{tabular}{|l | l | l | l|}
-\hline
-Keyword & Type & Options & Default \\ \hline
-\verb"type" & String & keig/fsrc & fsrc \\ \hline
-\multicolumn{4}{|l|}{Description: }\\
-\hline
-\end{tabular}
-
-\begin{longtable}[H]{l l l l}
-    \toprule
-    Keyword & Type & Options & Explanation\\
-    \midrule
-        &    &   & Problem type. Either eigenvalue (keig) or fixed source (fsrc) \\ \hline
-    \verb"keigsolver" & String & pi / jfnk  & Solve type for keig. Either power iteration (pi) or Jacobian-Free Newton-Krylov (jfmk) \\ \hline
-    \verb"lambda" & Integer & - & Expansion order, negative number indicates reduced set \\ \hline
-    \verb"inflow" & String  & yes / no & If fixed inflow boundary conditions are provided for fsrc problems\\ \hline
-    \verb"piacc" & String & errmode / none & Type of power iteration acceleration: none or error mode extrapolation \\ \hline
-    \verb"page_sweep" & String & yes / no & If the sweep path is saved or is paged to scratch file when not needed\\ \hline
-    \verb"page_refl" & String & page / save / inner & If significant angular fluxes are paged to/from scratch file (page), stored (save), or discarded after completing inner iterations for a given group\\ \hline
-    \verb"page_iflw" & String  & bygroup / all & If inflow information is loaded to memory completely (all) or for each group when required (bygroup)\\ \hline
-    \verb"kconv" & Real & - & Stopping criterion for eigenvalue\\ \hline
-    \verb"innerconv" & Real & - & Stopping criterion for group flux during inner iteration \\ \hline
-    \verb"outerconv" & Real & - & Stopping criterion for group flux during outer/power iteration \\ \hline
-    \verb"maxinner" & Integer & - & Maximum number of inner iterations \\ \hline
-    \verb"maxouter" & Integer & - & Maximum number of outer/power iterations \\ \hline
-    \verb"jfnk_krsze" & Integer & - & Maximum size of Krylov subspace during jfnk \\ \hline
-    \verb"jfnk_maxkr" &Integer & - & Maximum number of Krylov iterations\\ \hline
-    \verb"jfnk_method" & String & outer / flat / flat\_wds & Type of jfnk formulation, see~\cite{}\\ \hline
-    \verb"initial_guess" & String & yes / no & If an initial guess file should be read\\ \hline
-    \verb"restart_out" & String & yes / no & If a restart file should be written \\ \hline
-    \verb"ipiter" & Integer & - & Number of initial power iterations for jfnk\\ \hline
-    \verb"print_conv" & String & yes / no & If convergence monitor is written to file \verb"thor.convergence"\\ \hline
-    \verb"density_factor" & String & no / byvolume / fromfile  & Density factor options: use no density factors (no), use density factors and density factor file provides region volumes (byvolume), use density factors and density factor file provides density factors (fromfile). \\ \hline
-    \verb"execution" & String & yes / no & If yes problem is executed, if no then input is only read and checked.\\ \hline
-    \verb"mesh"&String& -& Name of the mesh file\\ \hline
-    \verb"source"&String& -& Name of the volumetric source file\\ \hline
-    \verb"flux_out"&String& -& Name of the THOR formatted output flux file\\ \hline
-    \verb"xs"&String& -& Name of the cross section file\\ \hline
-    \verb"vtk_flux_out"&String& -& Name of the vtk flux file\\ \hline
-    \verb"vtk_mat_out"&String& -& Name of the vtk material file\\ \hline
-    \verb"vtk_reg_out"&String& -& Name of the vtk region file\\ \hline
-    \verb"vtk_src_out"&String& -& Name of the vtk volumetric source file\\ \hline
-    \verb"cartesian_map_out"&&&Name of the file that the cartesian map output is written to\\ \hline
-    \verb"print_xs"&String& yes / no& If cross sections are echoed to standard output.\\ \hline
-    \verb"ngroups"&Integer& -& Number of energy groups\\ \hline
-    \verb"pnorder"&Integer& -& Spherical harmonics order used for scattering in code\\ \hline
-    \verb"pnread"&Integer& -& Spherical harmonics expansion provided in cross section file\\ \hline
-    \verb"upscattering" & String & yes / no & Read upscattering data from cross section file or ignore it \\ \hline
-    \verb"multiplying" & String & yes / no & If the cross section file contains fission information \\ \hline
-    \verb"scatt_mult_included" & String & yes /no & If the scattering data includes the $2 l + 1$ multiplier or not \\ \hline
-    \verb"qdtype" & String & levelsym / legcheb / fromfile & Quadrature type: level-symmetric, Legendre-Chebyshev, read from file \\ \hline
-    \verb"qdorder" & Integer & - & Order of the angular quadrature \\ \hline
-    \verb"cartesian_map" & Real (9 entries) & - & xmin, xmax, nx, ymin, ymax, ny, zmin, zmax, nz \\ \hline
-    \verb"point_value_locations" & Real (3 N) & - & N is the number of points, (x,y,z) coordinates of N points, x1 y1 z1 x2 y2 ...  \\ \hline
-    \verb"region_map" & Real (3 N) & - & N is the number of points, (x,y,z) coordinates of N points, x1 y1 z1 x2 y2 ...  \\
-    \bottomrule
-\end{longtable}
-
-The blocks are:
-\begin{itemize}
-    \item The first line must contain a user selected name for the problem.
-    \item \verb"problem": general parameters to define the problem to be solved
-    \item \verb"inout": Names of inputs and outputs files and toggles for specific output.
-    \item \verb"cross_sections": parameters pertaining to the cross section data.
-    \item \verb"quadrature": parameters pertaining to the angular quadrature.
-    \item \verb"postprocess": parameters pertaining to postprocessing outputs. \verb"cartesian_map" sets up an overlayed Cartesian mesh that fluxes and reactions rates are averaged over. The Cartesian mesh is defined by the minimum and maximum coordinates for each direction (x, y, z) and number of subdivisions between. \verb"point_value_locations" allows extraction of flux values at user provided points.
-    \item \verb"regionmap": mapping from region id to cross section id. Region ids are an integer assigned to to each tetrahedral element that are used to group elements into regions or blocks (see Sect.~\ref{sec:mesh_format}). Cross section ids are indices that identify sets of cross sections provided in the cross section input file (see Sect.~\ref{sec:cross_section_format}).
-\end{itemize}
-
-Blocks are delineated with \verb"start" and \verb"end" keywords like this:
+\subsection{KEIGSOLVER Card}
 \begin{verbatim}
-    start <block_name>
-       key1 = value1 ; key2 = value2
-       key3 = value3
-    end <block_name>
+  keigsolver <solver_type>
 \end{verbatim}
-Each blocks contains several keyword-value pairs. Multiply assignments can be placed on the same
-line if they are separated by \verb";".
-The keyword-value pairs can be provided in an arbitrary order.
-All keywords are listed in Table~\ref{tab:thor_solver_parameters}.
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"keigsolver" & STRING & pi/jfnk & pi \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Solve type for keig. Either power iteration (pi) or Jacobian-Free Newton-Krylov (jfnk)}\\
+    \hline
+  \end{tabular}
+\end{center}
 
-\begin{table}[p]
-    \centering
-    \caption{Keywords of THOR Transport Solver Application\label{tab:thor_solver_parameters_2}}
-    \begin{tabular}{l l l l}
-        \toprule
-        Keyword & Type & Options & Explanation\\
-        \midrule
-        \multicolumn{4}{l}{\textbf{Block}: inout}\\
-        \bottomrule
-    \end{tabular}
-\end{table}
+\subsection{LAMBDA Card}
+\begin{verbatim}
+  lambda <spatial_order>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"lambda" & INTEGER & - & 0 \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Expansion order, negative number indicates reduced set}\\
+    \hline
+  \end{tabular}
+\end{center}
 
-The \verb"regionmap" block does not contain keyword-value pairs. Instead, it maps region ids to cross section ids. We denote by
-\verb"min_reg" and \verb"max_reg" the smallest and largest region ids in the mesh file. The number of entries in the \verb"regionmap"
-field must then be \verb"num_entries" = \verb"max_reg" - \verb"min_reg" + 1. The assignment is best illustrated for an example.
-Let us assume that \verb"min_reg" = -1 and \verb"max_reg" = 2 and we want to assign
+\subsection{INFLOW Card}
+\begin{verbatim}
+  inflow <infl_spec>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"inflow" & STRING & yes/no/\verb"<filename>" & no \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: If fixed inflow boundary conditions are provided for fsrc problems. If yes, then ``finflow.dat" is assumed to be the filename. If a string other than ``yes" or ``no" is given, then that string is assumed to be the filename.}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{PIACC Card}
+\begin{verbatim}
+  piacc <acc_method>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"piacc" & STRING & errmode/none & none \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Type of power iteration acceleration: none or error mode extrapolation}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{PAGE\_SWEEP Card}
+\begin{verbatim}
+  page_sweep <page_sweep_option>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"page_sweep" & STRING & yes/no & no \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: If the sweep path is saved (no) or is paged to scratch file when not needed (yes)}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{PAGE\_REFL Card}
+\begin{verbatim}
+  page_refl <page_refl_option>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"page_refl" & STRING & page/save/inner & save \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: If significant angular fluxes are paged to/from scratch file (page), stored (save), or discarded after completing inner iterations for a given group (inner)}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{PAGE\_IFLW Card}
+\begin{verbatim}
+  page_iflw <page_iflw_option>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"page_iflw" & STRING & bygroup/all & all \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: If inflow information is loaded to memory completely (all) or for each group when required (bygroup)}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{KCONV Card}
+\begin{verbatim}
+  kconv <conv_criteria>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"kconv" & REAL & - & $10^{-4}$ \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Stopping criterion for eigenvalue}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{INNERCONV Card}
+\begin{verbatim}
+  innerconv <conv_criteria>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"innerconv" & REAL & - & $10^{-4}$ \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Stopping criterion for group flux during inner iteration}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{OUTERCONV Card}
+\begin{verbatim}
+  outerconv <conv_criteria>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"outerconv" & REAL & - & $10^{-3}$ \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Stopping criterion for group flux during outer/power iteration}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{MAXINNER Card}
+\begin{verbatim}
+  maxinner <num_iters>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"maxinner" & INTEGER & - & 10 \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Maximum number of inner iterations}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{MAXOUTER Card}
+\begin{verbatim}
+  maxouter <num_iters>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"maxouter" & INTEGER & - & 100 \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Maximum number of outer/power iterations}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{JFNK\_KRSZE Card}
+\begin{verbatim}
+  jfnk_krsze <krylov_space_size>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"jfnk_krsze" & INTEGER & - & 25 \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Maximum size of Krylov subspace during jfnk}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{JFNK\_MAXKR Card}
+\begin{verbatim}
+  jfnk_maxkr <num_iters>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"jfnk_maxkr" & INTEGER & - & 250 \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Maximum number of Krylov iterations}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{JFNK\_METHOD Card}
+\begin{verbatim}
+  jfnk_method <jfnk_method>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"jfnk_method" & STRING & outer/flat/flat\_wds & flat \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Type of jfnk formulation, see~\cite{refernce_manual} for details.}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{INITIAL\_GUESS Card}
+\begin{verbatim}
+  initial_guess <init_guess_spec>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"initial_guess" & STRING & yes/no/\verb"<filename>" & no \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: If an initial guess file should be read. If yes, then ``initial\_guess.dat" is assumed to be the filename. If a string other than ``yes" or ``no" is given, then that string is assumed to be the filename.}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{RESTART\_OUT Card}
+\begin{verbatim}
+  restart_out <restart_out_spec>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"restart_out" & STRING & yes/no/\verb"<filename>" & no \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: If a restart file should be written. If yes, then ``$<$job\_name$>$\_restart.out" is assumed to be the filename. If a string other than ``yes" or ``no" is given, then that string is assumed to be the filename.}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{IPITER Card}
+\begin{verbatim}
+  ipiter <num_iters>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"ipiter" & INTEGER & - & 0 \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Number of initial power iterations for jfnk}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{PRINT\_CONV Card}
+\begin{verbatim}
+  print_conv <print_conv_spec>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"print_conv" & STRING & yes/no & no \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: If convergence monitor is written to file. If yes, then ``$<$job\_name$>$\_conv.convergence" is the convergence filename}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{DENSITY\_FACTOR Card}
+\begin{verbatim}
+  density_factor <dens_factor> <dens_fact_filename>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.12\linewidth} | p{0.22\linewidth} | p{0.32\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"density_factor" & STRING & no/byvolume/fromfile - & no \verb"density_factor.dat"\\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Density factor options: use no density factors (no), use density factors and density factor file provides region volumes (byvolume), use density factors and density factor file provides density factors (fromfile).}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{EXECUTION Card}
+\begin{verbatim}
+  execution <exec_opt>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"execution" & STRING & yes/no & yes \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: If yes problem is executed, if no then input is only read and checked.}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{MESH Card}
+\begin{verbatim}
+  mesh <mesh_filename>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"mesh" & STRING & - & \verb"mesh.thrm" \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Name of the mesh file.}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{SOURCE Card}
+\begin{verbatim}
+  source <source_filename>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"source" & STRING & - & \verb"source.dat" \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Name of the volumetric source file for fsrc problems.}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{FLUX\_OUT Card}
+\begin{verbatim}
+  flux_out <flux_filename>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"flux_out" & STRING & - & \verb"<job_name>_flux.out" \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Name of the THOR formatted output flux file}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{XS Card}
+\begin{verbatim}
+  xs <xs_filename>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"xs" & STRING & - & \verb"xs.dat" \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Name of the cross section file}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{VTK\_FLUX\_OUT Card}
+\begin{verbatim}
+  vtk_flux_out <vtk_flux_spec>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"vtk_flux_out" & STRING & yes/no/\verb"<filename>" & no \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: If vtk flux file should be written. If yes, then ``$<$job\_name$>$\_flux.vtk" is assumed to be the filename. If a string other than ``yes" or ``no" is given, then that string is assumed to be the filename.}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{VTK\_MAT\_OUT Card}
+\begin{verbatim}
+  vtk_mat_out <vtk_mat_spec>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"vtk_mat_out" & STRING & yes/no/\verb"<filename>" & no \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: If vtk material file should be written. If yes, then ``$<$job\_name$>$\_mat.vtk" is assumed to be the filename. If a string other than ``yes" or ``no" is given, then that string is assumed to be the filename.}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{VTK\_REG\_OUT Card}
+\begin{verbatim}
+  vtk_reg_out <vtk_reg_spec>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"vtk_reg_out" & STRING & yes/no/\verb"<filename>" & no \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: If vtk region file should be written. If yes, then ``$<$job\_name$>$\_reg.vtk" is assumed to be the filename. If a string other than ``yes" or ``no" is given, then that string is assumed to be the filename.}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{VTK\_SRC\_OUT Card}
+\begin{verbatim}
+  vtk_src_out <vtk_src_spec>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"vtk_src_out" & STRING & yes/no/\verb"<filename>" & no \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: If vtk source file should be written. If yes, then ``$<$job\_name$>$\_src.vtk" is assumed to be the filename. If a string other than ``yes" or ``no" is given, then that string is assumed to be the filename.}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{CARTESIAN\_MAP\_OUT Card}
+\begin{verbatim}
+  cartesian_map_out <cartesia_map_filename>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.1\linewidth} | p{0.34\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"cartesian_map_out" & STRING & - & \verb"<job_name>\_cartesian\_map.out" \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Name of the THOR formatted Cartesian map output file}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{PRINT\_XS Card}
+\begin{verbatim}
+  print_xs <print_xs_opt>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"print_xs" & STRING & yes/no & no \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: If cross sections are echoed to standard output.}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{PNORDER Card}
+\begin{verbatim}
+  pnorder <pn_order>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"pnorder" & INTEGER & - & 0 \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Spherical harmonics order used for scattering in code.}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{QDTYPE Card}
+\begin{verbatim}
+  qdtype <quad_tp>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.1\linewidth} | p{0.34\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"qdtype" & STRING & levelsym/legcheb/\verb"<filename>" & levelsym \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Quadrature type: level-symmetric, Legendre-Chebyshev, or read from file if a filename is given (read from file not currently supported).}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{QDORDER Card}
+\begin{verbatim}
+  qdorder <quad_ord>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"qdorder" & INTEGER & - & 4 \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Order of the angular quadrature.}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{CARTESIAN\_MAP Card}
+\begin{verbatim}
+  cartesian_map <cart_map_spec>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.14\linewidth} | p{0.26\linewidth} | p{0.38\linewidth} | p{0.1\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"cartesian_map" & STRING/REAL (9 entries) & no/xmin, xmax, nx, ymin, ymax, ny, zmin, zmax, nz & no \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Sets up an overlayed Cartesian mesh that fluxes and reactions rates are averaged over. The Cartesian mesh is defined by the minimum and maximum coordinates for each direction (x, y, z) and number of subdivisions between.}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{POINT\_VALUE\_LOCATIONS Card}
+\begin{verbatim}
+  point_value_locations <points>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"point_value_locations" & STRING/REAL (3 N) & - & no \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Allows extraction of flux values at user provided points. N is the number of points, (x,y,z) coordinates of N points, x1 y1 z1 x2 y2...}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{REGION\_MAP Card}
+\begin{verbatim}
+  region_map <region_maps>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.12\linewidth} | p{0.22\linewidth} | p{0.42\linewidth} | p{0.12\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"region_map" & STRING/INTEGER & no/reg1 mat1 reg2 mat2 reg3 mat3...  & no \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Mapping from region id to cross section id. Region ids are an integer assigned to to each tetrahedral element that are used to group elements into regions or blocks (see Sect.~\ref{sec:mesh_format}). Cross section ids are indices that identify sets of cross sections provided in the cross section input file (see Sect.~\ref{sec:cross_section_format}). If no map is provided, then the mapping is assumed to be one to one, i.e. region 4 maps to cross section material 4, region 8 maps to cross section material 8, etc. The ``region\_map" card can have entries on multiple lines.}\\
+    \hline
+  \end{tabular}
+\end{center}
+
+The \verb"region_map" card is best illustrated for an example.
+Let us assume that we have regions -1,4,7,19 and we want to assign the cross section materials as follows:
 \begin{verbatim}
     -1 -> 12
-     0 -> 1
-     1 -> 1
-     2 -> 3
+     4 -> 1
+     7 -> 1
+     19 -> 3
 \end{verbatim}
-Then the \verb"regionmap" block is given by:
+Then the \verb"region_map" card is given by:
 \begin{verbatim}
-start regionmap
- 12 1 1 3
-end regionmap
+region_map -1 12 4 1 7 1 19 3
 \end{verbatim}
-Unused region ids can be accommodated by padding the entries in the regionmap field.
+or, since the \verb"region_map" can be specified on multiple lines:
+\begin{verbatim}
+region_map
+ -1 12
+  4 1
+  7 1
+  19 3
+\end{verbatim}
+
+\subsection{Legacy Data Cards}
+
+The following cards specify data for deprecated features.
+Unless legacy features are being used, this data is not necessary and will be ignored.
+\begin{center}
+  \begin{tabular}{| p{0.250\linewidth} | p{0.102\linewidth} | p{0.176\linewidth} | p{0.102\linewidth} | p{0.250\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default & Legacy Application \\
+    \hline
+    \hline
+    \verb"ngroups" & INTEGER & - & 1 &  Old XS format\\ \hline
+    \multicolumn{5}{| p{0.88\linewidth} |}{Description: Number of energy groups in cross section file.}\\
+    \hline
+    \hline
+    \verb"pnread" & INTEGER & - & 0 &  Old XS format \\ \hline
+    \multicolumn{5}{| p{0.88\linewidth} |}{Description: Spherical harmonics expansion provided in cross section file.}\\
+    \hline
+    \hline
+    \verb"upscattering" & STRING & yes/no & yes &  Old XS format \\ \hline
+    \multicolumn{5}{| p{0.88\linewidth} |}{Description: Read upscattering data from cross section file or ignore it.}\\
+    \hline
+    \hline
+    \verb"multiplying" & STRING & yes/no & yes &  Old XS format \\ \hline
+    \multicolumn{5}{| p{0.88\linewidth} |}{Description: If the cross section file contains fission information.}\\
+    \hline
+    \hline
+    \verb"scatt_mult_included" & STRING & yes/no & yes &  Old XS format \\ \hline
+    \multicolumn{5}{| p{0.88\linewidth} |}{Description: If the cross section file scattering data includes the $2 l + 1$ multiplier or not.}\\
+    \hline
+  \end{tabular}
+\end{center}
 
 \section{THOR Mesh Format}\label{ch:inp:sec:meshfile}
+
 Line 1: number of vertices
 \vspace{2mm}
 

@@ -7,7 +7,6 @@
 
   mesh base.thrm
   xs 2r2gP1.xs
-  flux_out yes
   print_xs yes
   vtk_flux_out yes
   vtk_mat_out yes

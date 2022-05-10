@@ -8,7 +8,6 @@
   mesh ./noshield.thrm
   xs ./noshield_32group.xs
   source ./noshield_32group.src
-  flux_out yes
   print_xs no
   vtk_flux_out yes
   vtk_mat_out yes
