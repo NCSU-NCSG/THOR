@@ -629,23 +629,25 @@ Line 1: number of vertices
 \noindent Line 4: unused enter 1
 \vspace{2mm}
 
-\noindent Block 1: vertex coordinates, number of lines = number of vertices; each line is as follows: vertex\_id (integer) x-coordinate (Real) y-coordinate (Real) z-coordinate (Real)
+\noindent Block 1: vertex coordinates, number of lines = number of vertices; each line is as follows: \\
+\verb"vertex_id x-coordinate y-coordinate z-coordinate"
 \vspace{2mm}
 
-\noindent Block 2: region and source id assignments, number of lines = number of elements; each line is as follows: element\_id region\_id source\_id (all integers). For setting up Monte Carlo on the tet mesh, this block can be ignored.
+\noindent Block 2: region and source id assignments, number of lines = number of elements; each line is as follows: \\
+\verb"element_id region_id source_id"\\
+For setting up Monte Carlo on the tet mesh, this block can be ignored.
 \vspace{2mm}
 
-\noindent Block 3: element descriptions, the vertex\_ids that form each element. Number of lines = number of elements; each line is as follows: element\_id vertex\_id1 vertex\_id2 vertex\_id3 vertex\_id4 (all integers).
+\noindent Block 3: element descriptions, the vertex\_ids that form each element. Number of lines = number of elements; each line is as follows: \\
+\verb"element_id vertex_id1 vertex_id2 vertex_id3 vertex_id4"
 \vspace{2mm}
 
 \noindent Next line: number of boundary face edits
 \vspace{2mm}
 
-\noindent Block 4: boundary face descriptions. All exterior faces associated with their boundary condition id, number if lines = number of boundary face edits; each line is as follows: element\_id local\_tetrahedron\_face\_id boundary\_condition\_id.
-\vspace{2mm}
-
-\noindent \textbf{Explanation}:
-local\_tetrahedron\_face\_id: natural local id of tetrahedron’s face which is the id of the vertex opposite to this face. Note: indexed 0-3.
+\noindent Block 4: boundary face descriptions. All exterior faces associated with their boundary condition id, number if lines = number of boundary face edits; each line is as follows: \\
+\verb"element_id local_tetrahedron_face_id boundary_condition_id"\\
+Explanation: local\_tetrahedron\_face\_id: natural local id of tetrahedron’s face which is the id of the vertex opposite to this face. Note: indexed 0-3.
 boundary\_condition\_id:
 value = 0: vacuum BC
 value = 1: reflective BC
@@ -655,7 +657,8 @@ value = 2: fixed inflow
 \noindent Next line: number of adjacency list entries
 \vspace{2mm}
 
-\noindent Block 5: adjacency list, number of lines = number of adjacency list entries; each line is as follows: element\_id face\_id neighbor\_id neighbor\_face\_id.
+\noindent Block 5: adjacency list, number of lines = number of adjacency list entries; each line is as follows: \\
+\verb"element_id face_id neighbor_id neighbor_face_id"\\
 Explanation: The element\_id is the current element. The neighbor across the face indexed by face\_id has the element id neighbor\_id and the its own local index for the said common face is neighbor\_face\_id.
 
 \section{THOR Cross Section Format}\label{ch:inp:sec:xsfile}
