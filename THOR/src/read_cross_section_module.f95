@@ -262,7 +262,7 @@ CONTAINS
 
     !read in energy bounds if present
     CALL get_next_line(words,nwords)
-    words(1)=TRIM(ADJUSTL(words(1)))
+    words(1)=TRIM(ADJUSTL(lowercase(words(1))))
     IF(words(1) .NE. 'id')THEN
       IF(nwords .NE. egmax)CALL raise_fatal_error('bad amount of energy data on line in xs file')
       DO g=1,egmax
@@ -277,7 +277,7 @@ CONTAINS
       DO
         !get next line
         CALL get_next_line(words,nwords)
-        words(1)=TRIM(ADJUSTL(words(1)))
+        words(1)=TRIM(ADJUSTL(lowercase(words(1))))
         IF(words(1) .EQ. 'id')THEN
           IF(nwords .LT. 2)CALL raise_fatal_error('no id number in xs file')
           READ(words(2),*)xs_mat(i)%mat_id

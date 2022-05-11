@@ -95,9 +95,9 @@ CONTAINS
           WRITE(unit_number,103) eg,max_error(eg)
         END DO
       ELSE IF(problem==1 .AND. eig_switch == 0) THEN
-        WRITE(unit_number,102) "Eigenvalue error:                                           ", k_error
-        WRITE(unit_number,102) "Maximum fission source error:                               ", f_error
-        WRITE(unit_number,102) "Maximum scalar group flux error:                            ", max_outer_error
+        WRITE(unit_number,102) "Eigenvalue error:                                          ", k_error
+        WRITE(unit_number,102) "Maximum fission source error:                              ", f_error
+        WRITE(unit_number,102) "Maximum scalar group flux error:                           ", max_outer_error
       END IF
     END IF
 
@@ -221,7 +221,8 @@ CONTAINS
         END DO
       END DO
       DO region=minreg,maxreg
-        WRITE(unit_number,501) '-- Region --',region,' Volume= ',reg_volume(region)
+        WRITE(unit_number,501) '-- Region --',region,' -- Material -- ', &
+          TRIM(xs_mat(reg2mat(region))%mat_name),' Volume = ',reg_volume(region)
         WRITE(unit_number,502) '   Group          Flux       Fission    Absorption      Fiss Src'
         DO eg=1,egmax
           WRITE(unit_number,503) eg,reac_rates(1,region,eg),reac_rates(2,region,eg),&
@@ -387,14 +388,14 @@ CONTAINS
     ! write a csv output file containing all region averaged
     ! TODO: make this more flexible, currently this is for testing only
     OPEN(unit=20, file=TRIM(jobname)//TRIM('_out.csv'), status='unknown', action='write')
-    WRITE(20, 502, ADVANCE = "NO") "Region,"
+    WRITE(20, 502, ADVANCE = "NO") "Region, Material, "
     DO eg = 1, egmax - 1
       WRITE(20, 505, ADVANCE = "NO") " flux g = ", eg, ","
     END DO
     WRITE(20, 506) " flux g = ", eg
 
     DO region=minreg,maxreg
-      WRITE(20, 509, ADVANCE = "NO") region, ","
+      WRITE(20, 509, ADVANCE = "NO") region, ", ",TRIM(xs_mat(reg2mat(region))%mat_name),','
       DO eg= 1, egmax - 1
         WRITE(20, 507, ADVANCE = "NO") reac_rates(1, region, eg), ","
       END DO
@@ -403,7 +404,7 @@ CONTAINS
     CLOSE(20)
 
 499 FORMAT(3I6,6ES18.8)
-501 FORMAT(A,I4,A,ES14.6)
+501 FORMAT(A,I4,3A,ES14.6)
 502 FORMAT(A)
 503 FORMAT(I8,4ES14.6)
 504 FORMAT(A8,4ES14.6)
@@ -411,7 +412,7 @@ CONTAINS
 506 FORMAT(A9,I3)
 507 FORMAT(ES25.16,A1)
 508 FORMAT(ES25.16)
-509 FORMAT(I3,A1)
+509 FORMAT(I3,3A)
 510 FORMAT(A,3ES14.6)
 511 FORMAT(A,I3,ES14.6)
   END SUBROUTINE wrapup

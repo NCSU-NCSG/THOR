@@ -662,40 +662,49 @@ value = 2: fixed inflow
 Explanation: The element\_id is the current element. The neighbor across the face indexed by face\_id has the element id neighbor\_id and the its own local index for the said common face is neighbor\_face\_id.
 
 \section{THOR Cross Section Format}\label{ch:inp:sec:xsfile}
+
+Lines starting with an exclamation point, !, and blank lines will be ignored.
+Any data following an exclamation point on a used line will be ignored. This is equivalent to FORTRAN's comment style.
+An example of the format is given in \verb"<thor_dir>/THOR/examples/c5g7.xs".
+The following is the order of the data as it appears in the cross section file:
 \begin{verbatim}
-Line 1: number of materials
+Line 1: THOR_XS_V1 <num_mats> <G> <L>
 
-Block 1: each entry in this block contains cross sections for a single material. Each entry contains  L *G+ 6 lines.
+Line 2: energy_group_boundary_1... energy_group_boundary_G
 
-Entry line 1: material_id
-Entry line 2: fission_spectrum_1 fission_spectrum_2 … fission_spectrum_G
-Entry line 3: energy_group_boundary_1 energy_group_boundary_3 … energy_group_boundary_G
-Entry line 4: fission_xs_1 fission_xs_2 fission_xs_3 … fission_xs_G
-Entry line 5: nu_bar_1 nu_bar_2 … nu_bar_G
-Entry line 6: total_xs_1 total_xs_2 … total_xs_G
-Entry line 7: sig_scat_{0, 1->1} sig_scat_{0, 2->1} … sig_scat_{0, G->1}
-Entry line 8: sig_scat_{0, 1->2} sig_scat_{0, 2->2} … sig_scat_{0, G->2}
+Block 1: Each entry in this block contains cross sections for a single material.
+Each block contains  (L+1)*G+5 lines. There are num_mats blocks.
 
+Entry line 1: id <material_id>  name <material_name>
+Entry line 2: fission_spectrum_1 fission_spectrum_2... fission_spectrum_G
+Entry line 3: Sigma_f_1 Sigma_f_2 Sigma_f_3... Sigma_f_G
+Entry line 4: nu_bar_1 nu_bar_2... nu_bar_G
+Entry line 5: Sigma_t_1 Sigma_t_2... Sigma_t_G
+Entry line 6: sig_scat_{0, 1->1} sig_scat_{0, 2->1}... sig_scat_{0, G->1}
+Entry line 7: sig_scat_{0, 1->2} sig_scat_{0, 2->2}... sig_scat_{0, G->2}
         :
-Entry line G + 6: sig_scat_{0, 1->G} sig_scat_{0, 2->G} … sig_scat_{0, G->G}
-Entry line G + 7: sig_scat_{1, 1->1} sig_scat_{1, 2->1} … sig_scat_{1, G->1}
-Entry line G + 8: sig_scat_{1, 1->2} sig_scat_{1, 2->2} … sig_scat_{1, G->2}
-
+Entry line G+5: sig_scat_{0, 1->G} sig_scat_{0, 2->G}... sig_scat_{0, G->G}
+Entry line G+6: sig_scat_{1, 1->1} sig_scat_{1, 2->1}... sig_scat_{1, G->1}
+Entry line G+7: sig_scat_{1, 1->2} sig_scat_{1, 2->2}... sig_scat_{1, G->2}
         :
-Entry line 2 * G + 6: sig_scat_{1, 1->G} sig_scat_{1, 2->G} … sig_scat_{1, G->G}
+Entry line 2*G+5: sig_scat_{1, 1->G} sig_scat_{1, 2->G}... sig_scat_{1, G->G}
         :
-
+Entry line L*G+6: sig_scat_{L, 1->G} sig_scat_{L, 2->G}... sig_scat_{L, G->G}
+        :
 \end{verbatim}
 
 \begin{itemize}
-\item G = total number of groups.
-\item L = scattering expansion.
-\item fission\_spectrum\_g: fraction of neutrons born in fission that appear in energy group g.
-\item energy\_group\_boundary\_g: currently unused, can be filled with 0s. Upper bound of energy group g.
-\item fission\_xs\_g: fission cross section (NOTE: not nu\_bar * fission\_xs) in group g.
-\item nu\_bar\_g: average number of neutrons released by fission caused by a neutron in energy group g.
-\item total\_xs\_g: total cross section in energy group g.
-\item sig\_scat\_{l, g’->g}: l-th Legendre polynomial moment of the scattering cross section from group g’ to g. The (2 * l + 1) factor may be included in the value of the cross section or not, THOR can handle both cases. It needs to be specified separately every time.
+\item \verb"num_mats" = Total number of cross section materials.
+\item \verb"G" = Total number of energy groups.
+\item \verb"L" = Scattering expansion order.
+\item \verb"energy_group_boundary_g": Currently unused, can be filled with 0s. Upper bound of energy group g. The assumption is that the energy structure is the same for all materials.
+\item \verb"material_id" = Index of the material. Used in identifying the material and region mapping.
+\item \verb"material_name" = Name of the material. Not used except in output for the user to keep track of materials.
+\item \verb"fission_spectrum_g": Fraction of neutrons born in fission that appear in energy group g ($\chi$).
+\item \verb"Sigma_f_g": Fission cross section in group g ($\Sigma_f$ NOT $\nu\Sigma_f$).
+\item \verb"nu_bar_g": average number of neutrons released by fission caused by a neutron in energy group g ($\nu$).
+\item \verb"Sigma_t_g": total cross section in energy group g ($\Sigma_t$).
+\item \verb"sig_scat_{l, g'->g}": l-th Legendre polynomial moment of the scattering cross section from group g’ to g ($\Sigma_{s,l,g'\rightarrow g}$). The (2 * l + 1) factor may be included in the value of the cross section or not, THOR can handle both cases. It needs to be specified separately every time.
 \end{itemize}
 
 

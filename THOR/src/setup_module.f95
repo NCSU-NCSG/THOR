@@ -259,14 +259,14 @@ CONTAINS
       CALL printlog("   Region Information  ")
       CALL printlog("--------------------------------------------------------")
       CALL printlog('')
-      CALL printlog("     Region ID   Material ID  Region Volume Density Factor")
+      CALL printlog("     Region ID   Material ID  Region Volume Density Factor  Material Name")
       DO i = minreg,maxreg
-        WRITE(amsg,104) i,reg2mat(i),reg_vol(i),dens_fact(i)
+        WRITE(amsg,104) i,reg2mat(i),reg_vol(i),dens_fact(i),'  ',TRIM(xs_mat(i)%mat_name)
         CALL printlog(amsg)
       END DO
     END IF
 
-104 FORMAT(I14,I14,3ES15.4)
+104 FORMAT(I14,I14,2ES15.4,2A)
 
   END SUBROUTINE write_reg_info
 
