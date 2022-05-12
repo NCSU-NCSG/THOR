@@ -261,7 +261,7 @@ CONTAINS
       CALL printlog('')
       CALL printlog("     Region ID   Material ID  Region Volume Density Factor  Material Name")
       DO i = minreg,maxreg
-        WRITE(amsg,104) i,reg2mat(i),reg_vol(i),dens_fact(i),'  ',TRIM(xs_mat(i)%mat_name)
+        WRITE(amsg,104) i,reg2mat(i),reg_vol(i),dens_fact(i),'  ',TRIM(xs_mat(material_ids(reg2mat(i)))%mat_name)
         CALL printlog(amsg)
       END DO
     END IF

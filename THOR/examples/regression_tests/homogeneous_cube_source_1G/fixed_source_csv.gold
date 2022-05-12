@@ -1,2 +1,2 @@
-Region, flux g =  1
-  0,   5.5359068732246042E-01
+Region, Material,  flux g =  1
+  0, mat_1,   5.5359068732246042E-01

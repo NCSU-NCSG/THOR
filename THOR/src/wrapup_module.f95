@@ -222,7 +222,7 @@ CONTAINS
       END DO
       DO region=minreg,maxreg
         WRITE(unit_number,501) '-- Region --',region,' -- Material -- ', &
-          TRIM(xs_mat(reg2mat(region))%mat_name),' Volume = ',reg_volume(region)
+          TRIM(xs_mat(material_ids(reg2mat(region)))%mat_name),' Volume = ',reg_volume(region)
         WRITE(unit_number,502) '   Group          Flux       Fission    Absorption      Fiss Src'
         DO eg=1,egmax
           WRITE(unit_number,503) eg,reac_rates(1,region,eg),reac_rates(2,region,eg),&
@@ -395,7 +395,8 @@ CONTAINS
     WRITE(20, 506) " flux g = ", eg
 
     DO region=minreg,maxreg
-      WRITE(20, 509, ADVANCE = "NO") region, ", ",TRIM(xs_mat(reg2mat(region))%mat_name),','
+      WRITE(20, 509, ADVANCE = "NO") region, ", ", &
+        TRIM(xs_mat(material_ids(reg2mat(region)))%mat_name),','
       DO eg= 1, egmax - 1
         WRITE(20, 507, ADVANCE = "NO") reac_rates(1, region, eg), ","
       END DO
