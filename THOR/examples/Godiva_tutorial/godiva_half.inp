@@ -18,7 +18,7 @@ initial_guess         no
 restart_out           no
 ipiter                0
 print_conv            yes
-density_factor        fromfile godiva_half.dens
+density_factor        godiva_half.dens
 execution             yes
 mesh                  ./godiva_half.thrm
 source                source.dat

@@ -636,28 +636,13 @@ CONTAINS
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
 
-    this_card%carg=TRIM(lowercase(wwords(2)))
-    IF(this_card%carg .EQ. 'no' .OR. this_card%carg .EQ. 'none') THEN
+    this_card%carg=TRIM(wwords(2))
+    IF(lowercase(this_card%carg) .EQ. 'no' .OR. lowercase(this_card%carg) .EQ. 'none') THEN
       dfact_opt = 0
     ELSE
-      IF(this_card%carg .EQ. 'byvolume') THEN
-        dfact_opt = 1
-      ELSEIF(this_card%carg .EQ. 'fromfile') THEN
-        dfact_opt = 2
-      ELSE
-        CALL raise_fatal_error('This is not a valid density factor option &
-          & (no/byvolume/fromfile) -- '//TRIM(this_card%carg)//' --')
-      END IF
+      dfact_opt = 99
+      dens_fact_filename=TRIM(wwords(2))
     END IF
-    wwords(3)=TRIM(wwords(3))
-    IF(dfact_opt .NE. 0)THEN
-      IF(lowercase(wwords(3)) .NE. '')THEN
-        this_card%carg=TRIM(this_card%carg)//' '//TRIM(wwords(3))
-        dens_fact_filename=TRIM(wwords(3))
-      ELSE
-        this_card%carg=TRIM(this_card%carg)//' '//TRIM(dens_fact_filename)
-      ENDIF
-    ENDIF
   END SUBROUTINE get_density_factor
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

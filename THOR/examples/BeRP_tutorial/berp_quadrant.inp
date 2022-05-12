@@ -7,7 +7,7 @@
 
   mesh ./berp_quadrant.thrm
   xs ./berp.xs
-  density_factor fromfile berp_quadrant.dens
+  density_factor berp_quadrant.dens
   vtk_flux_out yes
   vtk_mat_out yes
 

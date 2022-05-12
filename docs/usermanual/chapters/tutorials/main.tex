@@ -81,7 +81,7 @@ This concludes the mesh generation step for this tutorial.
 
 The user should now move \verb"godiva_octant.thrm" to the input file location
 \begin{verbatim}
-  <thor_dir>/THOR/examples/Godiva_tutorial/run_files/
+  <thor_dir>/THOR/examples/Godiva_tutorial/
 \end{verbatim}
 and navigate there to continue the tutorial.
 
@@ -123,7 +123,7 @@ initial_guess         no
 restart_out           no
 ipiter                0
 print_conv            yes
-density_factor        fromfile godiva_octant.dens
+density_factor        godiva_octant.dens
 execution             yes
 mesh                  ./godiva_octant.thrm
 source                source.dat
@@ -283,7 +283,7 @@ This concludes the mesh generation step for this tutorial.
 
 The user should now move \verb"berp_octant.thrm" to the input file location
 \begin{verbatim}
-  <thor_dir>/THOR/examples/BeRP_tutorial/run_files/
+  <thor_dir>/THOR/examples/BeRP_tutorial/
 \end{verbatim}
 and navigate there to continue the tutorial.
 
@@ -296,7 +296,9 @@ In THOR, the user need not alter the cross sections themselves to make this adju
 Instead, THOR will automatically adjust reaction and material attenuation calculations by a given density factor for each region.
 By default, this factor is 1.0, which will lead to use of the original cross sections unaltered.
 However, the user may specify density factors in a density factor file, described in Section~\ref{ch:inp:sec:densfact}.
-For this tutorial, this density factor adjustment is provided by \verb"berp_octant.dens"
+For this tutorial, this density factor adjustment is provided by \verb"berp_octant.dens".
+This file differs from the file in the Godiva tutorial in that it gives true region volumes instead of ratios of true to meshed volumes.
+The effect is the same, however it is often simpler to specify the density factors in this manner.
 
 \subsection{THOR input file and executing THOR}
 
@@ -314,7 +316,7 @@ Upon running THOR, a verbose form of the input will always be echoed, and ignore
 
   mesh ./berp_octant.thrm
   xs ./berp.xs
-  density_factor fromfile berp_octant.dens
+  density_factor berp_octant.dens
   vtk_flux_out yes
   vtk_mat_out yes
 

@@ -282,19 +282,43 @@ CONTAINS
 
     ! Local variables
     LOGICAL :: ex
-    INTEGER(kind=li) :: i
+    INTEGER(kind=li) :: i,tempint,ios
+    CHARACTER(100) :: line
+    REAL(8) :: tempreal
 
     ! Open and read file, then close, terminate THOR if file does not exist
 
     INQUIRE(file=dens_fact_filename,exist=ex)
-    IF(ex) THEN
-      OPEN(file=dens_fact_filename,unit=51)
-      READ(51,*) (dens_fact(i),i=minreg,maxreg)
-      CLOSE(unit=51)
-    ELSE
-      CALL raise_fatal_error("Density factors were requested but referenced file was not found.")
-      RETURN
-    END IF
+    IF(.NOT. ex)CALL raise_fatal_error("Density factors were requested but referenced file was &
+      & not found.")
+
+    !density factor type at top of the file
+    OPEN(file=dens_fact_filename,unit=51)
+    DO
+      READ(51,'(A)',IOSTAT=ios)line
+      IF(ios .NE. 0)CALL raise_fatal_error('Could not find density factor type in density &
+        & factor file')
+      line=TRIM(ADJUSTL(line))
+      IF(line .EQ. 'volumes')THEN
+        dfact_opt=1
+        dens_fact=reg_vol
+        EXIT
+      ELSEIF(line .EQ. 'dens_facts')THEN
+        dfact_opt=2
+        dens_fact=1.0
+        EXIT
+      ENDIF
+    ENDDO
+
+    !get all the factor data
+    DO i=minreg,maxreg
+      READ(51,*,IOSTAT=ios)tempint,tempreal
+      IF(ios .NE. 0)EXIT !end of file reached
+      IF(tempint .LT. minreg .OR. minreg .GT. maxreg)CALL raise_fatal_error('Density factor region &
+        & not found')
+      dens_fact(tempint)=tempreal
+    ENDDO
+    CLOSE(unit=51)
   END SUBROUTINE read_density_factors
   !------------------------------------------------------------------------------------------------------------------------!
   !------------------------------------------------------------------------------------------------------------------------!

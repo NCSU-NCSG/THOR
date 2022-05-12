@@ -18,9 +18,9 @@ initial_guess         no
 restart_out           no
 ipiter                0
 print_conv            yes
-density_factor        fromfile godiva_octant.dens
+density_factor        godiva_full.dens
 execution             yes
-mesh                  ./godiva_octant.thrm
+mesh                  ./godiva_full.thrm
 source                source.dat
 flux_out              no
 xs                    ./godiva.xs
@@ -40,4 +40,4 @@ qdtype                levelsym
 qdorder               4
 cartesian_map         no
 point_value_locations no
-region_map            5 1
+region_map            1 1

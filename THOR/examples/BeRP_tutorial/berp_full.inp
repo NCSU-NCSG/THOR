@@ -5,14 +5,14 @@
   innerconv 1E-8 ; outerconv 1E-6
   maxinner 5 ; maxouter 5000
 
-  mesh ./berp_octant.thrm
+  mesh ./berp_full.thrm
   xs ./berp.xs
-  density_factor fromfile berp_octant.dens
+  density_factor berp_full.dens
   vtk_flux_out yes
   vtk_mat_out yes
 
   qdtype levelsym ; qdorder 4
 
   region_map
-  6 1
-  7 2
+  1 1
+  2 2

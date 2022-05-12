@@ -2,7 +2,7 @@
 
 The THOR transport solver has distinct user input formats for the following separate input files:
 \begin{itemize}
-    \item Standard Input (Sec.~\ref{ch:inp:sec:stdinput}) - The primary input file to be run by THOR.
+    \item Standard Input File (Sec.~\ref{ch:inp:sec:stdinput}) - The primary input file to be run by THOR.
     All other input files will either be listed in this file, or assumed to be the default filenames as described in Section~\ref{ch:inp:sec:stdinput}.
     This is the only input file given to THOR by way of the command line.
     \item Mesh File (Sec.~\ref{ch:inp:sec:meshfile}) - File containing the physical 1st order tet mesh for the problem.
@@ -15,7 +15,7 @@ The THOR transport solver has distinct user input formats for the following sepa
 
 This chapter describes the input formats of the THOR transport solver.
 
-\section{Standard Input}\label{ch:inp:sec:stdinput}
+\section{THOR Standard Input Format}\label{ch:inp:sec:stdinput}
 
 The following describes properties of the keyword based THOR input file:
 \begin{itemize}
@@ -310,16 +310,16 @@ The following describes properties of the keyword based THOR input file:
   \end{tabular}
 \end{center}
 
-\subsection{DENSITY\_FACTOR Card}
+\subsection{DENSITY\_FACTOR Card}\label{ch:inp:sec:stdinput:ssec:densfact}
 \begin{verbatim}
-  density_factor <dens_factor> <dens_fact_filename>
+  density_factor <dens_fact_filename>
 \end{verbatim}
 \begin{center}
   \begin{tabular}{| p{0.22\linewidth} | p{0.12\linewidth} | p{0.22\linewidth} | p{0.32\linewidth} |}
     \hline
     Keyword & Type & Options & Default \\ \hline
-    \verb"density_factor" & STRING & no/byvolume/fromfile - & no \verb"density_factor.dat"\\ \hline \hline
-    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Density factor options: use no density factors (no), use density factors and density factor file provides region volumes (byvolume), use density factors and density factor file provides density factors (fromfile).}\\
+    \verb"density_factor" & STRING & no/\verb"filename" & no \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Density factor filename, or use no density factors (no).}\\
     \hline
   \end{tabular}
 \end{center}
@@ -706,3 +706,22 @@ Entry line L*G+6: sig_scat_{L, 1->G} sig_scat_{L, 2->G}... sig_scat_{L, G->G}
 \item \verb"Sigma_t_g": total cross section in energy group g ($\Sigma_t$).
 \item \verb"sig_scat_{l, g'->g}": l-th Legendre polynomial moment of the scattering cross section from group g’ to g ($\Sigma_{s,l,g'\rightarrow g}$). The (2 * l + 1) factor may be included in the value of the cross section or not, THOR can handle both cases. It needs to be specified separately every time.
 \end{itemize}
+
+\section{THOR Density Factor Format}\label{ch:inp:sec:densfact}
+
+THOR density factors are used to adjust cross sections in the transport calculation.
+The first line in the file contains the \verb"<adj_type>", specifying whether the data contained within is \verb"volumes" or \verb"dens_facts" for the data.
+If \verb"volumes" is specified, then the \verb"adjustment" values are actual volumes of the regions pre-meshing.
+The meshed volume is then divided by the exact volume and the resulting ratio is the scaling factor for the cross sections in that region in THOR.
+If \verb"dens_facts" is specified, then the \verb"adjustment" values are assumed to be the actual scaling factors for the cross sections for the specified region in THOR.
+\verb"N" here is the number of regions as found in the standard input and mesh file.
+Lines starting with an exclamation point, !, and blank lines will be ignored.
+Any data following an exclamation point on a used line will be ignored. This is equivalent to FORTRAN's comment style.
+The following describes the density factor format for THOR:
+\begin{verbatim}
+  Line 1: <adj_type>
+  Line 2: <region_number> <adjustment>
+  Line 3: <region_number> <adjustment>
+                :
+  Line N+1: <region_number> <adjustment>
+\end{verbatim}
