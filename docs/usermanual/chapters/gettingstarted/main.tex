@@ -305,3 +305,79 @@ As such, use of the THOR MESH generator is not currently recommended.
 % Successes:  15            Failures:  0
 % \end{verbatim}
 % All or at least the vast majority of tests should pass, so \verb"Failures" should be close to zero.
+
+% \section{THOR Mesh Generator}
+% This section discusses the input of THOR's mesh generator tool. The mesh generator tool provides the following capabilties:
+% \begin{itemize}
+    % \item Convert exodus~\cite{exodus_format} formatted meshes to THOR format.
+    % \item Convert gmsh~\cite{gmsh_ref} formatted meshes to THOR format.
+    % \item Convert universal file format meshes to THOR format.
+    % \item Split the elements of hexahedra and wedge (triangular prisms) meshes into tetrahedra before comverting to THOR mesh format.
+    % \item Conversion of legacy THOR mesh format to new format.
+% \end{itemize}
+
+% \subsection{Compilation and Invocation}
+% Navigate to:
+% \begin{verbatim}
+    % >> cd /home/<usr>/projects/THOR/pre-processors/THOR_Mesh_Generator/src
+% \end{verbatim}
+% and make the application:
+% \begin{verbatim}
+    % >> make
+% \end{verbatim}
+% The executable \verb"Thor_Mesh_Generator.exe" should have been created here:
+% \begin{verbatim}
+    % >> /home/<usr>/projects/THOR/pre-processors/THOR_Mesh_Generator/Thor_Mesh_Generator.exe
+% \end{verbatim}
+% The application is invoked with:
+% \begin{verbatim}
+    % >> /path/to/Thor_Mesh_Generator.exe -i standard_input
+% \end{verbatim}
+% where \verb"standard_input" is the standard input file.
+
+% \noindent\textbf{Remark:} Conversion of exodus files to gmsh files relies on using libMesh's \verb"mesh-tool"~\cite{libMeshPaper}. You must compile libMesh and set the environment variable \verb"THOR_LIBMESH_DIRECTORY".
+
+% \subsection{Format of the THOR's mesh generator standard input}
+% The standard input file of the THOR mesh generator contains the following lines:
+% \begin{verbatim}
+% input_mesh_file
+% output_mesh_file
+% region_id_file
+% source_id_file
+% boundary_id_file
+% \end{verbatim}
+% where \verb"input_mesh_file" and \verb"output_mesh_file" are required parameters, while the remaining parameters are optional.
+% If a parameter is omitted, the line should just be left blank (that means that e.g. \verb"source_id_file" will always be provided
+% on line 4 regardless of whether \verb"region_id_file" was provided).
+
+% The purpose of these files is as follows:
+% \begin{itemize}
+    % \item \verb"input_mesh_file": name of the input mesh file. Note that the file ending matters: exodus is \verb".e" and gmsh is \verb".msh", because the mesh format is inferred from it.
+    % \item \verb"output_mesh_file": name of the THOR mesh format files. Use file ending \verb".thrm".
+    % \item  \verb"region_id_file": name of file that contains instructions to reassign region (sometimes called block) ids. Formatting instructions for this file is provided in Sect.~\ref{sec:reassign_file_format}.
+    % \item  \verb"source_id_file": name of file that contains instructions to reassign source ids. Formatting instructions for this file is provided in Sect.~\ref{sec:reassign_file_format}.
+    % \item  \verb"boundary_id_file": name of file that contains instructions to reassign boundary ids. Formatting instructions for this file is provided in Sect.~\ref{sec:reassign_file_format}.
+% \end{itemize}
+
+% \subsection{Formatting instructions for regions, source, and boundary id reassignment files}\label{sec:reassign_file_format}
+% IDs are integers that are assigned to each tetrahedral element to group it into a region, a source region or assigned to boundary
+% faces to group it into a set of faces for boundary assignment.
+% The file format for id reassignment files is:
+% \begin{verbatim}
+% n
+% old_id_<1> new_id_<1>
+  % :
+  % :
+% old_id_<n> new_id_<n>
+% \end{verbatim}
+% The meaning is as follows:
+% \begin{itemize}
+    % \item \verb"n": the number of instructions in the file (i.e. the number of lines following this line).
+    % \item \verb"old_id_<j>": the j-th old id that will be replaced by \verb"new_id_<j>".
+    % \item \verb"new_id_<j>": the j-th new id that will replace \verb"old_id_<j>"
+% \end{itemize}
+% \textbf{Remarks:}
+% \begin{itemize}
+    % \item Note, each instruction needs to be on a different line.
+    % \item The boundary id characterizes the boundary condition. It must be 0, 1, or 2, where 0 is a vacuum, 1 is a reflective, and 2 is a fixed inflow boundary.
+% \end{itemize}
