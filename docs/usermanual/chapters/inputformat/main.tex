@@ -714,14 +714,10 @@ The first line in the file contains the \verb"<adj_type>", specifying whether th
 If \verb"volumes" is specified, then the \verb"adjustment" values are actual volumes of the regions pre-meshing.
 The meshed volume is then divided by the exact volume and the resulting ratio is the scaling factor for the cross sections in that region in THOR.
 If \verb"dens_facts" is specified, then the \verb"adjustment" values are assumed to be the actual scaling factors for the cross sections for the specified region in THOR.
-\verb"N" here is the number of regions as found in the standard input and mesh file.
-Lines starting with an exclamation point, !, and blank lines will be ignored.
-Any data following an exclamation point on a used line will be ignored. This is equivalent to FORTRAN's comment style.
 The following describes the density factor format for THOR:
 \begin{verbatim}
   Line 1: <adj_type>
   Line 2: <region_number> <adjustment>
   Line 3: <region_number> <adjustment>
                 :
-  Line N+1: <region_number> <adjustment>
 \end{verbatim}
