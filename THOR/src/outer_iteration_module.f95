@@ -118,6 +118,27 @@ CONTAINS
 
     END IF
 
+    IF (inguess_flag==1) THEN
+
+      CALL inguess_eig(flux,t_error,niter)
+      IF (rank .EQ. 0) THEN
+        CALL printlog('')
+      END IF
+
+      DO ii=1,niter-1
+        DO eg =1,egmax
+          DO i=1,num_cells
+            DO n=1,namom
+              DO l=1,num_moments_v
+                flux(l,n,i,eg,ii) = flux(l,n,i,eg,niter)
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
+
+    END IF
+
     ! Keep track of iterations
     IF (rank .EQ. 0) THEN
       CALL printlog('========================================================')
@@ -306,6 +327,13 @@ CONTAINS
       theta(1)=theta(2)
       theta(2)=theta(3)
       theta(3)=flux_dist_error(2)/flux_dist_error(1)
+
+      !========================================================================
+      ! write iteration results to file if desired
+      !========================================================================
+      IF(dump_flag==1) THEN
+        CALL dump_PI(flux,1.0_8)
+      END IF
 
       ! ... and copy over iterates
       DO ii=2,niter

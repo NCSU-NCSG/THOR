@@ -22,7 +22,7 @@ density_factor        godiva_octant.dens
 execution             yes
 mesh                  ./godiva_octant.thrm
 source                source.dat
-flux_out              no
+flux_out              godiva_octant_flux.out
 xs                    ./godiva.xs
 vtk_flux_out          yes
 vtk_mat_out           yes

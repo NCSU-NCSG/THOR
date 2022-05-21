@@ -22,7 +22,7 @@ density_factor        godiva_quadrant.dens
 execution             yes
 mesh                  ./godiva_quadrant.thrm
 source                source.dat
-flux_out              no
+flux_out              godiva_quadrant_flux.out
 xs                    ./godiva.xs
 vtk_flux_out          yes
 vtk_mat_out           yes

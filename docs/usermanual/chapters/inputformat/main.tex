@@ -721,3 +721,13 @@ The following describes the density factor format for THOR:
   Line 3: <region_number> <adjustment>
                 :
 \end{verbatim}
+
+\section{THOR Initial Guess Format}\label{ch:inp:sec:initguess}
+
+THOR can read in an initial guess file for the transport calculation.
+This file is expected to be in unformatted FORTRAN binary.
+Typically the user need not worry about the structure of this file, the form is identical to that of the restart output file in Section~\ref{ch:out:sec:restart}, and in fact the expectation is that the user will only use an initial guess file from that THOR generated restart data.
+
+\section{THOR Source Format}\label{ch:inp:sec:srcfile}
+
+Fixed source problems in THOR should include a file specifying an external source.
