@@ -716,10 +716,10 @@ The meshed volume is then divided by the exact volume and the resulting ratio is
 If \verb"dens_facts" is specified, then the \verb"adjustment" values are assumed to be the actual scaling factors for the cross sections for the specified region in THOR.
 The following describes the density factor format for THOR:
 \begin{verbatim}
-  Line 1: <adj_type>
-  Line 2: <region_number> <adjustment>
-  Line 3: <region_number> <adjustment>
-                :
+Line 1: <adj_type>
+Line 2: <region_number> <adjustment>
+Line 3: <region_number> <adjustment>
+              :
 \end{verbatim}
 
 \section{THOR Initial Guess Format}\label{ch:inp:sec:initguess}
@@ -731,3 +731,26 @@ Typically the user need not worry about the structure of this file, the form is 
 \section{THOR Source Format}\label{ch:inp:sec:srcfile}
 
 Fixed source problems in THOR should include a file specifying an external source.
+This file has a fixed format but lines may be commented with an exclamation point at the start of the line, or the ends of lines may be commented starting with an exclamation point.
+The order of the data for each source ID is all groups for a given source spatial/angular moment are on each line, then all spatial moments for a given angular moment are given line after line, which then repeats for each angular moment.
+This description is repeated below:
+\begin{verbatim}
+Line 1: THOR_SRC_V1 n_src_id n_ang_mom n_spat_mom
+
+Block 1: The data in this block contains the source description for a single source ID.
+Cells are assigned sources by ID in the mesh file.
+Each block contains  n_ang_mom*n_spat_mom+1 lines. There are n_src_id blocks.
+
+Entry line 1: src_id
+Entry line 2: Q_{1,1,1} Q_{1,1,2}... Q_{1,1,G}
+Entry line 3: Q_{1,2,1} Q_{1,2,2}... Q_{1,2,G}
+                  :
+Entry line n_spat_mom+1: Q_{n_spat_mom,1,1} Q_{n_spat_mom,1,2}... Q_{n_spat_mom,1,G}
+Entry line n_spat_mom+2: Q_{1,2,1} Q_{1,2,2}... Q_{1,2,G}
+                  :
+Entry line n_ang_mom*n_spat_mom+1: Q_{n_spat_mom,n_ang_mom,1}...
+                Q_{n_spat_mom,n_ang_mom,2} Q_{n_spat_mom,n_ang_mom,G}
+\end{verbatim}
+The sources given are the actual sources as they will be used in the calculation, not multipliers of the base 0th moment (indexed as 1) source.
+If higher order moment data is given than the problem that THOR is solving (i.e. if a 0th spatial order and 2nd angular problem is being solved and \verb"n_spat_mom>1"/\verb"n_ang_mom>3" source is given), then THOR will ignore the higher order source data and it wont be used.
+This feature allows for arbitrarily high order source specification that can be used in alternate versions of the same problem to determine the necessity of a certain spatial/angular expansion order without requiring the user remake the source for each calculation.
