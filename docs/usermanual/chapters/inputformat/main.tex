@@ -1,5 +1,3 @@
-\section{THOR Inputs}\label{sec:THOR_format}
-
 The THOR transport solver has distinct user input formats for the following separate input files:
 \begin{itemize}
     \item Standard Input File (Sec.~\ref{ch:inp:sec:stdinput}) - The primary input file to be run by THOR.
@@ -10,7 +8,7 @@ The THOR transport solver has distinct user input formats for the following sepa
     \item Density Factor File (Sec.~\ref{ch:inp:sec:densfact}) - File containing the density factors for each adjustment of cross sections in each region.
     \item Initial Guess File (Sec.~\ref{ch:inp:sec:initguess}) - File containing the initial guess for the problem.
     \item Source File (Sec.~\ref{ch:inp:sec:srcfile}) - File containing the source for a fixed source problem.
-    \item Inflow File (Sec.~\ref{ch:inp:sec:inflow}) - File containing the boundary condition inflow data for a fixed source problem.
+    %\item Inflow File (Sec.~\ref{ch:inp:sec:inflow}) - File containing the boundary condition inflow data for a fixed source problem.
 \end{itemize}
 
 This chapter describes the input formats of the THOR transport solver.
@@ -520,7 +518,7 @@ The following describes properties of the keyword based THOR input file:
   \end{tabular}
 \end{center}
 
-\subsection{CARTESIAN\_MAP Card}
+\subsection{CARTESIAN\_MAP Card}\label{ch:inp:sec:inp:ssec:cartmap}
 \begin{verbatim}
   cartesian_map <cart_map_spec>
 \end{verbatim}
@@ -754,3 +752,6 @@ Entry line n_ang_mom*n_spat_mom+1: Q_{n_spat_mom,n_ang_mom,1}...
 The sources given are the actual sources as they will be used in the calculation, not multipliers of the base 0th moment (indexed as 1) source.
 If higher order moment data is given than the problem that THOR is solving (i.e. if a 0th spatial order and 2nd angular problem is being solved and \verb"n_spat_mom>1"/\verb"n_ang_mom>3" source is given), then THOR will ignore the higher order source data and it wont be used.
 This feature allows for arbitrarily high order source specification that can be used in alternate versions of the same problem to determine the necessity of a certain spatial/angular expansion order without requiring the user remake the source for each calculation.
+
+%\section{Inflow Format}\label{ch:inp:sec:inflow}
+
