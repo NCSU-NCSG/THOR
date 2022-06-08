@@ -4,6 +4,8 @@ The THOR transport solver has distinct output formats for the following separate
       The filename for the log file is the filename of the input file with the extension \verb".log" appended.
       If the input files has the \verb".inp", \verb".in", or \verb".i" extension, then that extension will be removed before the \verb".log" extension is added.
       i.e. for the input file \verb"thisfile.in", the log file will be titled \verb"thisfile.log".
+    \item CSV output file (Sec.~\ref{ch:out:sec:csv}) - A csv output file that contains group-wise spatially averaged flux by region.
+    \item Convergence file (Sec.~\ref{ch:out:sec:conv}) - A file containing a record of the convergence of the calculation without calculation time information for direct comparison to other runs.
     \item Restart file (Sec.~\ref{ch:out:sec:restart}) - A binary file containing an initial guess to restart the calculation if it is interrupted or if stronger convergence is later desired.
     \item Flux file (Sec.~\ref{ch:out:sec:flux}) - A file containing the final flux distribution.
     \item VTK flux file (Sec.~\ref{ch:out:sec:vtk}) - A vtk file containing the final flux distribution.
@@ -12,6 +14,26 @@ The THOR transport solver has distinct output formats for the following separate
     \item VTK source file (Sec.~\ref{ch:out:sec:vtk}) - A vtk file containing the external source information for fixed source problems.
     \item Cartesian map file (Sec.~\ref{ch:out:sec:cart}) - A file containing the flux and reaction rate results from the overlaid Cartesian map specified by the user.
 \end{itemize}
+
+\section{THOR CSV Output}\label{ch:out:sec:csv}
+
+THOR will always output a final CSV file containing group-wise flux data spatially averaged by region.
+Here \verb"numregs" is the number of spatial regions in the problem.
+The format is as follows:
+\begin{verbatim}
+Line 1: column labels
+Line 2: reg_1_idx reg_1_matid reg_1_flux_1 reg_1_flux_2... reg_1_flux_G
+Line 3: reg_2_idx reg_2_matid reg_2_flux_1 reg_2_flux_2... reg_2_flux_G
+                    :
+Line numregs+1: reg_numregs_idx reg_numregs_matid reg_numregs_flux_1
+                  reg_numregs_flux_2... reg_numregs_flux_G
+\end{verbatim}
+
+\section{THOR Convergence Output}\label{ch:out:sec:conv}
+
+THOR can output a record of the problem convergence without calculation time information.
+This file's purpose is to do direct comparison with other runs of the problem and is typically used by developers to guarantee conservation of convergence rates to code changes.
+All data contained in this file is also in the log file, but with the addition of calculation time.
 
 \section{THOR Restart Output}\label{ch:out:sec:restart}
 

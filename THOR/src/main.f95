@@ -49,7 +49,7 @@ PROGRAM ahot_c_ug
 
   ! Declare temporary variables
 
-  INTEGER(kind=li) :: alloc_stat,converge_unit
+  INTEGER(kind=li) :: alloc_stat
 
   !######### MPI variables
   INTEGER :: mpi_err, num_p
@@ -139,11 +139,7 @@ PROGRAM ahot_c_ug
 
   IF(print_conv.EQ.1 .AND. rank .EQ. 0) THEN
     INQUIRE(file = converge_filename, exist = existence)
-    converge_unit=21
-    OPEN(unit = converge_unit, file = converge_filename, status = "REPLACE", action = "WRITE")
-    WRITE(converge_unit,'(A)') '========================================================'
-    WRITE(converge_unit,'(A)') '   Begin outer iterations.'
-    WRITE(converge_unit,'(A)') '========================================================'
+    OPEN(unit = 21, file = converge_filename, status = "REPLACE", action = "WRITE")
   END IF
 
 
@@ -163,7 +159,10 @@ PROGRAM ahot_c_ug
   ! Call wrapup to finish up post-processing and output results
   !***********************************************************************
 
-  IF(print_conv.EQ.1) CLOSE(unit=21)
+
+  IF(print_conv.EQ.1 .AND. rank .EQ. 0) THEN
+    CLOSE(unit=21)
+  END IF
 
   IF (do_timing .EQ. 1) parallel_timing(4,1) = MPI_WTIME()
   CALL wrapup(flux = flux,keff = keffective, unit_number = stdout_unit, suffix = "", is_final = .TRUE.)
