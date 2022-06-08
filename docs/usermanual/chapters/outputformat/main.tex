@@ -34,6 +34,7 @@ Line numregs+1: reg_numregs_idx reg_numregs_matid reg_numregs_flux_1
 THOR can output a record of the problem convergence without calculation time information.
 This file's purpose is to do direct comparison with other runs of the problem and is typically used by developers to guarantee conservation of convergence rates to code changes.
 All data contained in this file is also in the log file, but with the addition of calculation time.
+The format is column based where each batch of inner iterations prints out the resulting error followed by blocks at the end of each outer iteration printing out error and keff with column headers describing what each value is.
 
 \section{THOR Restart Output}\label{ch:out:sec:restart}
 
