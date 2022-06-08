@@ -1,6 +1,6 @@
-THOR currently includes two tutorials to guide new users through the process of creating a mesh with Gmsh, using the Mesh Converter to make it a THOR mesh, and running THOR using that mesh.
-The first tutorial is the Godiva tutorial, creating a model of the bare Godiva critical experiment sphere, meshing it, and running it with THOR.
-This tutorial demonstrates basic THOR problem creation and running concepts.
+\ac{THOR} currently includes two tutorials to guide new users through the process of creating a mesh with Gmsh, using the Mesh Converter to make it a \ac{THOR} mesh, and running \ac{THOR} using that mesh.
+The first tutorial is the Godiva tutorial, creating a model of the bare Godiva critical experiment sphere, meshing it, and running it with \ac{THOR}.
+This tutorial demonstrates basic \ac{THOR} problem creation and running concepts.
 
 The second tutorial is the BeRP tutorial, creating a model of the BeRP ball with 3 inches of polyethylene reflector surrounding the BeRP ball.
 This tutorial demonstrates a more advanced problem involving multiple materials and regions.
@@ -12,7 +12,7 @@ In the tutorial folders, \\
 \section{Godiva Tutorial}
 
 Godiva is an un-shielded, pulsed, nuclear burst reactor. It is essentially a homogeneous sphere of highly enriched uranium with a diameter of $30$ cm, that was operated by inserting a piston of fissile material~\cite{Godiva1961}.
-In this tutorial the critical benchmark configuration described in Ref.~\cite{GodivaBenchmark} is considered. The geometry that is modeled by THOR is a homogeneous sphere of radius $8.7407$ cm discretized by tetrahedra similar to Fig.~\ref{fig:godiva_coarse}.
+In this tutorial the critical benchmark configuration described in Ref.~\cite{GodivaBenchmark} is considered. The geometry that is modeled by \ac{THOR} is a homogeneous sphere of radius $8.7407$ cm discretized by tetrahedra similar to Fig.~\ref{fig:godiva_coarse}.
 The energy domain is discretized with six energy groups, and cross sections are provided by~\cite{GodivaBenchmark}.
 
 \begin{figure}[th]
@@ -21,7 +21,7 @@ The energy domain is discretized with six energy groups, and cross sections are 
   \label{fig:godiva_coarse}
 \end{figure}
 
-This tutorial first explains how a tetrahedral mesh is created for the Godiva problem, then the cross sections data input is discussed, and finally the standard input to THOR is covered.
+This tutorial first explains how a tetrahedral mesh is created for the Godiva problem, then the cross sections data input is discussed, and finally the standard input to \ac{THOR} is covered.
 The input files discussed below for the Godiva tutorial are located in:
 \begin{verbatim}
     >> <thor_dir>/THOR/examples/Godiva_tutorial
@@ -37,14 +37,14 @@ Begin by navigating to the location of the Godiva Gmsh geometry files, which are
   <thor_dir>/THOR/examples/Godiva_tutorial/mesh_create/
 \end{verbatim}
 Opening the file geometry file \verb"godiva_octant.geo" in a text editor, it can be observed that the model is created by removing the negative portions of each direction from a sphere centered at the origin.
-For more details on creating original Gmsh inputs, see the Gmsh \href{https://gmsh.info/doc/texinfo/gmsh.html}{reference manual}.
+For more details on creating original Gmsh inputs, see the \href{https://gmsh.info/doc/texinfo/gmsh.html}{Gmsh reference manual}.
 
 Open \verb"godiva_octant.geo" in Gmsh and run the ``3D'' command from the ``Mesh'' dropdown menu under ``Modules''.
-The mesh should be generated and now become visible in the GUI.
+The mesh should be generated and now become visible in the \ac{GUI}.
 Now, select the ``Save'' command from the same ``Mesh'' dropdown to save the generated mesh to \verb"godiva_octant.msh".
 This mesh may be compared to the provided \verb"godiva_octant_msh.ref", however they may differ slightly if the versions differ or if optimization of the mesh is employed.
 
-The gmsh file \verb"godiva_octant.msh" is converted to THOR's native mesh format by executing the Mesh Converter with the command line:
+The gmsh file \verb"godiva_octant.msh" is converted to \ac{THOR}'s native mesh format by executing the Mesh Converter with the command line:
 \begin{verbatim}
   >> <thor_dir>/THOR/pre-processors/Mesh_Converter/Mesh_Converter.exe convert_godiva.msh
      -bc 1 0 1 0 1 0
@@ -85,23 +85,23 @@ The user should now move \verb"godiva_octant.thrm" to the input file location
 \end{verbatim}
 and navigate there to continue the tutorial.
 
-The THOR cross section file for the Godiva benchmark is provided by \verb"godiva.xs".
-THOR uses a custom cross section format that is explained in detail in Sec.~\ref{ch:inp:sec:xsfile}.
+The \ac{THOR} cross section file for the Godiva benchmark is provided by \verb"godiva.xs".
+\ac{THOR} uses a custom cross section format that is explained in detail in Section~\ref{ch:inp:sec:xsfile}.
 
 At the end of Section~\ref{ch:tuts:sec:godiva:ssec:mesh}, it was observed that there was a discrepancy in the volume of the Godiva mesh compared to the original problem.
 To preserve material mass, the cross sections must be altered by increasing them by a factor of 1.056366.
-In THOR, the user need not alter the cross sections themselves to make this adjustment.
-Instead, THOR will automatically adjust reaction and material attenuation calculations by a given density factor for each region.
+In \ac{THOR}, the user need not alter the cross sections themselves to make this adjustment.
+Instead, \ac{THOR} will automatically adjust reaction and material attenuation calculations by a given density factor for each region.
 By default, this factor is 1.0, which will lead to use of the original cross sections unaltered.
 However, the user may specify density factors in a density factor file, described in Section~\ref{ch:inp:sec:densfact}.
 For this tutorial, this density factor adjustment is provided by \verb"godiva_octant.dens"
 
 \subsection{THOR input file and executing THOR}
 
-The THOR input file is \verb"godiva_octant.inp".
-THOR uses a keyword-based input that is listed in Sect.~\ref{sec:THOR_format}.
+The \ac{THOR} input file is \verb"godiva_octant.inp".
+\ac{THOR} uses a keyword-based input that is listed in Section~\ref{ch:inp:sec:stdinput}.
 The Godiva tutorial input file is verbose and some parameters are ignored as they are not relevant to the problem.
-Upon running THOR, a verbose form of the input will always be echoed, and ignored parameters will be highlighted as such.
+Upon running \ac{THOR}, a verbose form of the input will always be echoed, and ignored parameters will be highlighted as such.
 \begin{verbatim}
 type                  keig
 keigsolver            pi
@@ -148,7 +148,7 @@ point_value_locations no
 region_map            5 1
 \end{verbatim}
 
-The Godiva tutorial is solved with THOR via the command line:
+The Godiva tutorial is solved with \ac{THOR} via the command line:
 \begin{verbatim}
   >> <thor_dir>/THOR/thor-1.0.exe godiva_octant.inp
 \end{verbatim}
@@ -160,7 +160,7 @@ Completion of execution of the Godiva tutorial is indicated by the printout:
 --------------------------------------------------------
 \end{verbatim}
 
-THOR provides the following output that is discussed in this tutorial:
+\ac{THOR} provides the following output that is discussed in this tutorial:
 \begin{itemize}
     \item The final estimate of the multiplication factor is printed under ``Execution Summary'', ``Final eigenvalue''.
     In this case the value is $0.935$. This is not close to critical because the mesh that
@@ -168,7 +168,7 @@ THOR provides the following output that is discussed in this tutorial:
     \item A summary of group-wise, region-averaged reaction rates is provided for each region identifier separately under ``Region averaged reaction rates''.
     The volume of each region, and group-wise fluxes, fission, absorption, and fission source rates are listed.
     \item Two vtk formatted files, \verb"godiva_octant_flux.vtk" contains spatial flux maps, and \\
-    \verb"godiva_octant_mat.vtk" contains the material map. These files can be opened with the paraview post-processing tool that is available \href{https://www.paraview.org/download/}{here}.
+    \verb"godiva_octant_mat.vtk" contains the material map. These files can be opened with the \href{https://www.paraview.org/download/}{ParaView} post-processing tool.
 \end{itemize}
 
 A plot of the fast flux using ParaView 5.10.0 for this run is shown in Figure~\ref{fig:godiva_fast}.
@@ -210,7 +210,7 @@ The calculated density of the sphere is 19.604 g/cm$^3$ giving the plutonium a t
 The BeRP ball is designed to be inserted into reflecting spherical shells.
 These shells act as both a moderating reflector that increases the induced fission rate produced in the ball, as well as a shield changing the spectrum and strength of the emitted neutrons that escape the reflector.
 The shells exist in a variety of sizes, with larger shells fitting around smaller shells to go from at least 0.5 inches to up to at least 6 inches.
-Shells also exist in a variety of materials including but not limited to high density polyethylene (HDPE) and copper.
+Shells also exist in a variety of materials including but not limited to \ac{HDPE} and copper.
 
 This tutorial includes the 3 inch polyethylene shield as the shell for the BeRP ball.
 
@@ -236,14 +236,14 @@ Begin by navigating to the location of the BeRP Gmsh geometry files, which are f
   <thor_dir>/THOR/examples/BeRP_tutorial/mesh_create/
 \end{verbatim}
 Opening the file geometry file \verb"berp_octant.geo" in a text editor, it can be observed that the model is created by removing the negative portions of each direction from a sphere centered at the origin surrounded by another sphere centered at the origin.
-For more details on creating original Gmsh inputs, see the Gmsh \href{https://gmsh.info/doc/texinfo/gmsh.html}{reference manual}.
+For more details on creating original Gmsh inputs, see the \href{https://gmsh.info/doc/texinfo/gmsh.html}{Gmsh reference manual}.
 
 Open \verb"berp_octant.geo" in Gmsh and run the ``3D'' command from the ``Mesh'' dropdown menu under ``Modules''.
-The mesh should be generated and now become visible in the GUI.
+The mesh should be generated and now become visible in the \ac{GUI}.
 Now, select the ``Save'' command from the same ``Mesh'' dropdown to save the generated mesh to \verb"berp_octant.msh".
 This mesh may be compared to the provided \verb"berp_octant_msh.ref", however they may differ slightly if the versions differ or if optimization of the mesh is employed.
 
-The gmsh file \verb"berp_octant.msh" is converted to THOR's native mesh format by executing the Mesh Converter with the command line:
+The gmsh file \verb"berp_octant.msh" is converted to \ac{THOR}'s native mesh format by executing the Mesh Converter with the command line:
 \begin{verbatim}
   >> <thor_dir>/THOR/pre-processors/Mesh_Converter/Mesh_Converter.exe berp_octant.msh
      -bc 1 0 1 0 1 0
@@ -272,7 +272,7 @@ Equivalent radius:   5.4824287000562011E+00
 ----------------------- Output written to berp_octant.thrm
 \end{verbatim}
 
-The file \verb"berp_octant.thrm" should result from this execution for use by THOR.
+The file \verb"berp_octant.thrm" should result from this execution for use by \ac{THOR}.
 This mesh may be compared to the provided \verb"berp_octant_thrm.ref", which it should match if \verb"berp_octant.msh" matches \verb"berp_octant_msh.ref".
 Notice that the given volume for Region 6 (the BeRP eighth of a sphere as seen in \verb"berp_octant.geo") is 26.511~cm$^3$, but the actual octant volume for the BeRP ball is 28.591~cm$^3$.
 Similarly, the given volume for Region 7 (the Poly shield eighth of a sphere as seen in \verb"berp_octant.geo") is 663.740~cm$^3$, but the actual octant volume for the Poly shield is 749.965~cm$^3$.
@@ -287,13 +287,13 @@ The user should now move \verb"berp_octant.thrm" to the input file location
 \end{verbatim}
 and navigate there to continue the tutorial.
 
-The THOR cross section file for the BeRP benchmark is provided by \verb"berp.xs".
-THOR uses a custom cross section format that is explained in detail in Sec.~\ref{ch:inp:sec:xsfile}.
+The \ac{THOR} cross section file for the BeRP benchmark is provided by \verb"berp.xs".
+\ac{THOR} uses a custom cross section format that is explained in detail in Section~\ref{ch:inp:sec:xsfile}.
 
 At the end of Section~\ref{ch:tuts:sec:berp:ssec:mesh}, it was observed that there was a discrepancy in the volume of the BeRP mesh compared to the original problem.
 To preserve material mass, the cross sections must be altered by increasing them by a factor of 1.078425 in the BeRP ball and 1.129907 in the polyethylene.
-In THOR, the user need not alter the cross sections themselves to make this adjustment.
-Instead, THOR will automatically adjust reaction and material attenuation calculations by a given density factor for each region.
+In \ac{THOR}, the user need not alter the cross sections themselves to make this adjustment.
+Instead, \ac{THOR} will automatically adjust reaction and material attenuation calculations by a given density factor for each region.
 By default, this factor is 1.0, which will lead to use of the original cross sections unaltered.
 However, the user may specify density factors in a density factor file, described in Section~\ref{ch:inp:sec:densfact}.
 For this tutorial, this density factor adjustment is provided by \verb"berp_octant.dens".
@@ -302,10 +302,10 @@ The effect is the same, however it is often simpler to specify the density facto
 
 \subsection{THOR input file and executing THOR}
 
-The THOR input file is \verb"berp_octant.inp".
-THOR uses a keyword-based input that is listed in Sect.~\ref{sec:THOR_format}.
+The \ac{THOR} input file is \verb"berp_octant.inp".
+\ac{THOR} uses a keyword-based input that is listed in Section~\ref{ch:inp:sec:stdinput}.
 The BeRP tutorial input file is not verbose and all parameters given are used, though not all are necessary since many are the same as the default values.
-Upon running THOR, a verbose form of the input will always be echoed, and ignored parameters will be highlighted as such.
+Upon running \ac{THOR}, a verbose form of the input will always be echoed, and ignored parameters will be highlighted as such.
 \begin{verbatim}
   print_conv yes
   lambda 0
@@ -327,7 +327,7 @@ Upon running THOR, a verbose form of the input will always be echoed, and ignore
   7 2
 \end{verbatim}
 
-The BeRP tutorial is solved with THOR via the command line:
+The BeRP tutorial is solved with \ac{THOR} via the command line:
 \begin{verbatim}
   >> <thor_dir>/THOR/thor-1.0.exe berp_octant.inp
 \end{verbatim}
@@ -339,14 +339,14 @@ Completion of execution of the BeRP tutorial is indicated by the printout:
 --------------------------------------------------------
 \end{verbatim}
 
-THOR provides the following output that is discussed in this tutorial:
+\ac{THOR} provides the following output that is discussed in this tutorial:
 \begin{itemize}
     \item The final estimate of the multiplication factor is printed under ``Execution Summary'', ``Final eigenvalue''.
     In this case the value is $1.08$.
     \item A summary of group-wise, region-averaged reaction rates is provided for each region identifier separately under ``Region averaged reaction rates''.
     The volume of each region, and group-wise fluxes, fission, absorption, and fission source rates are listed.
     \item Two vtk formatted files, \verb"berp_octant_flux.vtk" contains spatial flux maps, and \\
-    \verb"berp_octant_mat.vtk" contains the material map. These files can be opened with the paraview post-processing tool that is available \href{https://www.paraview.org/download/}{here}.
+    \verb"berp_octant_mat.vtk" contains the material map. These files can be opened with the \href{https://www.paraview.org/download/}{ParaView} post-processing tool.
 \end{itemize}
 
 A plot of the thermal flux using ParaView 5.10.0 for this run is shown in Figure~\ref{fig:berp_thermal}.

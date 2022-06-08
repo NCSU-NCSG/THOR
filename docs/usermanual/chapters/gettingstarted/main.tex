@@ -1,32 +1,38 @@
 \section{Obtaining THOR}
 
-This section describes how to obtain THOR.
+This section describes how to obtain \ac{THOR}.
 Please contact the code owner~\href{mailto:yyazmy@ncsu.edu}{Yousry Azmy} to be added to the project's membership.
 
-Once a user has been added to the projects membership, they can navigate to their desired installation directory and clone THOR from the NCSU GitHub repository using the following command:
+Once a user has been added to the projects membership, they can navigate to their desired installation directory and clone \ac{THOR} from the \ac{NCSU} GitHub repository using the following command:
 \begin{verbatim}
   >> git clone https://github.ncsu.edu/NCSU-Rad-Transport/THOR.git
 \end{verbatim}
-Alternatively, a user who will communicate frequently with THOR's github repository can link their computer's ssh keys with their GitHub account and clone THOR directly by issuing the follwoing command:
+Alternatively, a user who will communicate frequently with \ac{THOR}'s GitHub repository can link their computer's ssh keys with their GitHub account and clone \ac{THOR} directly by issuing the following command:
 \begin{verbatim}
   >> git clone git@github.ncsu.edu:NCSU-Rad-Transport/THOR.git
 \end{verbatim}
 
-\section{Obtaining lapack dependencies}
-THOR depends on certain lapack routines. These are provided with THOR as a submodule. The lapack submodule can be initialized by:
+\section{Obtaining LAPACK dependencies}
+
+\ac{THOR} depends on certain \href{http://www.netlib.org/lapack/}{\ac{LAPACK}} routines.
+These are provided with \ac{THOR} as a sub-module.
+The \ac{LAPACK} submodule can be initialized by:
 \begin{verbatim}
     >> git submodule update --init
 \end{verbatim}
-The lapack submodule is not expected to change at all. However, if it does, the THOR repository keeps track of the associated version of the lapack repository, so the user may run:
+The \ac{LAPACK} submodule is not expected to change at all.
+However, if it does, the \ac{THOR} repository keeps track of the associated version of the \ac{LAPACK} repository, so the user may run:
 \begin{verbatim}
     >> git submodule update
 \end{verbatim}
-to obtain the latest lapack submodule. If as expected lapack hasn't changed an empty line will be displayed.
+to obtain the latest \ac{LAPACK} submodule.
+If as expected \ac{LAPACK} hasn't changed an empty line will be displayed.
 
 \section{Compiling THOR}
-This section describes how to compile THOR and its dependencies.
-The first step is to compile the lapack dependency.
-To this end, navigate to the installation scripts using (where \verb"<thor_dir>" is the directory THOR was cloned into):
+
+This section describes how to compile \ac{THOR} and its dependencies.
+The first step is to compile the \ac{LAPACK} dependency.
+To this end, navigate to the installation scripts using (where \verb"<thor_dir>" is the directory \ac{THOR} was cloned into):
 \begin{verbatim}
     >> cd <thor_dir>/contrib/scripts
 \end{verbatim}
@@ -43,7 +49,7 @@ For example, on Idaho National Laboratory's Sawtooth HPCthe compiler is set in \
 \begin{verbatim}
     >> module load mvapich2/2.3.3-gcc-8.4.0".
 \end{verbatim}
-A successful lapack build will conclude the scrolled output on the screen with a table of the form:
+A successful \ac{LAPACK} build will conclude the scrolled output on the screen with a table of the form:
 \begin{verbatim}
                         -->   LAPACK TESTING SUMMARY  <--
                 Processing LAPACK Testing output found in the TESTING directory
@@ -56,7 +62,7 @@ COMPLEX16               749588          1       (0.000%)        1       (0.000%)
 
 --> ALL PRECISIONS      4084078         1       (0.000%)        1       (0.000%)
 \end{verbatim}
-The lapack build may conclude with:
+The \ac{LAPACK} build may conclude with:
 \begin{verbatim}
 make[2]: Leaving directory '<thor_dir>/contrib/lapack/TESTING/EIG'
 NEP: Testing Nonsymmetric Eigenvalue Problem routines
@@ -65,11 +71,11 @@ make[1]: *** [Makefile:464: znep.out] Error 139
 make[1]: Leaving directory '<thor_dir>/contrib/lapack/TESTING'
 make: *** [Makefile:43: lapack_testing] Error 2
 \end{verbatim}
-These errors indicate that the system did not have enough memory allocated to lapack to complete the entirety of the testing suite.
-This is typically not a concern and if these are the sole errors the user is free to continue on to the next step.
-The correctness of THOR and the lapack linkage can later be verified with the regression tests if the user so desires.
+These errors indicate that the system did not have enough memory allocated to \ac{LAPACK} to complete the entirety of the testing suite.
+This is typically not a concern and if these are the sole errors, the user is free to continue on to the next step.
+The correctness of \ac{THOR} and the \ac{LAPACK} linkage can later be verified with the regression tests if the user so desires.
 
-Now, THOR can be compiled. Navigate to the cloned THOR folder, and then to the source folder within it:
+Now, \ac{THOR} can be compiled. Navigate to the cloned \ac{THOR} folder, and then to the source folder within it:
 \begin{verbatim}
     >> cd \verb"<thor_dir>"/THOR/src
 \end{verbatim}
@@ -78,11 +84,11 @@ Then type:
 \begin{verbatim}
     >> make
 \end{verbatim}
-Successful compilation of THOR will conclude with the line:
+Successful compilation of \ac{THOR} will conclude with the line:
 \begin{verbatim}
     mv ./thor-1.0.exe ../
 \end{verbatim}
-The THOR executable (named in the above line) can be found here:
+The \ac{THOR} executable (named in the above line) can be found here:
 \begin{verbatim}
     >> ls <thor_dir>/THOR/
 \end{verbatim}
@@ -92,6 +98,7 @@ that should produce:
 \end{verbatim}
 
 \section{Running THOR for the first time}
+
 Navigate to the \verb"hello_world" directory:
 \begin{verbatim}
     >> cd <thor_dir>/THOR/hello_world
@@ -107,12 +114,12 @@ It should show the following files:
 \end{verbatim}
 These files have the following significance:
 \begin{itemize}
-    \item \verb"hello_world.in" is a sample input file to THOR. This file is used to execute THOR.
-    \item \verb"hello_world.thrm" is the corresponding mesh file that is referenced within \verb"hello_world.in". At this point, it is only important that it is present and has the proper THOR mesh format. Creation of THOR mesh files is covered later in this manual.
+    \item \verb"hello_world.in" is a sample input file to \ac{THOR}. This file is used to execute \ac{THOR}.
+    \item \verb"hello_world.thrm" is the corresponding mesh file that is referenced within \verb"hello_world.in". At this point, it is only important that it is present and has the proper \ac{THOR} mesh format. Creation of \ac{THOR} mesh files is covered later in this manual.
     \item \verb"hello_world.xs" is the corresponding cross section file, also referenced within \verb"hello_world.in", and again at this point, it is only important that it is present.
-    \item \verb"hello_world.o" is the corresponding output file created by redirecting THOR's standard output. This file can be used to compare THOR's printed output with what it should be upon correct termination of this run.
+    \item \verb"hello_world.o" is the corresponding output file created by redirecting \ac{THOR}'s standard output. This file can be used to compare \ac{THOR}'s printed output with what it should be upon correct termination of this run.
 \end{itemize}
-THOR is invoked with the executable name and the standard input file that is specified as the first and only command line argument passed to THOR.
+\ac{THOR} is invoked with the executable name and the standard input file that is specified as the first and only command line argument passed to \ac{THOR}.
 \begin{verbatim}
     >> ../thor-1.0.exe hello_world.in
 \end{verbatim}
@@ -132,7 +139,7 @@ Several files should have been created:
     \item \verb"intermediate_output_odd.dat"
 \end{itemize}
 The significance of these files will be discussed later.
-THOR's standard output should start with a banner and conclude with:
+\ac{THOR}'s standard output should start with a banner and conclude with:
 \begin{verbatim}
 --------------------------------------------------------
    Region averaged reaction rates
@@ -151,7 +158,7 @@ THOR's standard output should start with a banner and conclude with:
 
 \subsection{Running THOR Regression Tests}
 
-If THOR appears to be running properly, it is recommended that the user run THOR's regression tests after making THOR.
+If \ac{THOR} appears to be running properly, it is recommended that the user run \ac{THOR}'s regression tests after making \ac{THOR}.
 To do this, navigate to the regression tests directory:
 \begin{verbatim}
     >> cd <thor_dir>/THOR/examples/regression_tests
@@ -165,16 +172,16 @@ These tests will take some time.
 For 24 threads, these tests take about 2 to 3 hours.
 As such, it is recommended that this testing be performed overnight.
 It should also be noted that two of the inputs, \verb"homogeneous_cube_keig_1G/keig_jfnk.inp" and \verb"takeda-IV/takeda_jfnk.inp", use JFNK in problems with opposing reflective boundary conditions.
-THOR currently does not support the running of such problems in parallel.
+\ac{THOR} currently does not support the running of such problems in parallel.
 As such the user should manually rerun those problems after the testing script completes unless the user originally specified \verb"<n>"=1.
 
 \section{Pre/post Processors}
 
 \subsection{Mesh Converter}\label{ch:getstart:sec:preproc:subsec:meshconv}
 
-The mesh converter is the current recommended pre-processessing utility for THOR meshes.
-This converter takes a version 4 Gmsh file (tested with version 4.1) and converts it to the THOR mesh input file described in Section~\ref{ch:inp:sec:meshfile}.
-There are plans to extend this converter to intake other versions of Gmsh and exodus and even perhaps add other output formats in addition to the current THOR mesh output.
+The mesh converter is the current recommended pre-processessing utility for \ac{THOR} meshes.
+This converter takes a version 4 \href{https://gmsh.info/}{Gmsh} file (tested with version 4.1) and converts it to the \ac{THOR} mesh input file described in Section~\ref{ch:inp:sec:meshfile}.
+There are plans to extend this converter to intake other versions of Gmsh and exodus and even perhaps add other output formats in addition to the current \ac{THOR} mesh output.
 As of the publishing of this manual, Gmsh version 4.1 is the most recent release Gmsh mesh file format.
 
 To compile the Mesh Converter, navigate to the source folder:
@@ -189,7 +196,7 @@ A successful compilation of the Mesh Converter will conclude with the line:
 \begin{verbatim}
   >> mv ./Mesh_Converter.exe ../
 \end{verbatim}
-The Mesh Converter does not have any software requirements that are not also required by THOR.
+The Mesh Converter does not have any software requirements that are not also required by \ac{THOR}.
 
 To run the Mesh Converter, simply invoke the mesh converter binary and follow it immediately with the Gmsh input file (where \verb"<gmsh_file>" is the name of the Gmsh file):
 \begin{verbatim}
@@ -214,12 +221,12 @@ This check is ignored if all boundary conditions are reflective.
 
 \subsection{THOR\_MESH\_Generator}
 
-THOR MESH generator is an older pre-processor that converts \textit{exodus} and \textit{gmsh} (the legacy version 2) mesh formats to THOR's native mesh format.
+THOR\_MESH\_Generator is an older pre-processor that converts \textit{exodus} and \textit{gmsh} (the legacy version 2) mesh formats to \ac{THOR}'s native mesh format.
 It is currently undergoing maintenance and will likely have important capabilities simply added to the Mesh Converter after which it may be removed.
-As such, use of the THOR MESH generator is not currently recommended.
+As such, use of the THOR\_MESH\_Generator is not currently recommended.
 
 % TODO: Update THOR MESH generator or add capabilities to the Mesh Converter
-% THOR mesh generator is an older pre-processor that converts \textit{exodus} and \textit{gmsh} (the legacy version 2) mesh formats to THOR's native mesh format.
+% \ac{THOR} mesh generator is an older pre-processor that converts \textit{exodus} and \textit{gmsh} (the legacy version 2) mesh formats to \ac{THOR}'s native mesh format.
 % It also permits uniform refinement of meshes provided in exodus files. Conversion from \textit{exodus} format and uniform refinement uses the
 % \textit{libmesh}~\cite{libMeshPaper} \textit{meshtool}. Therefore,
 % \textit{libmesh} has to be set up first. To this end, navigate to the \verb"scripts" directory:
@@ -307,13 +314,13 @@ As such, use of the THOR MESH generator is not currently recommended.
 % All or at least the vast majority of tests should pass, so \verb"Failures" should be close to zero.
 
 % \section{THOR Mesh Generator}
-% This section discusses the input of THOR's mesh generator tool. The mesh generator tool provides the following capabilties:
+% This section discusses the input of \ac{THOR}'s mesh generator tool. The mesh generator tool provides the following capabilties:
 % \begin{itemize}
-    % \item Convert exodus~\cite{exodus_format} formatted meshes to THOR format.
-    % \item Convert gmsh~\cite{gmsh_ref} formatted meshes to THOR format.
-    % \item Convert universal file format meshes to THOR format.
-    % \item Split the elements of hexahedra and wedge (triangular prisms) meshes into tetrahedra before comverting to THOR mesh format.
-    % \item Conversion of legacy THOR mesh format to new format.
+    % \item Convert exodus~\cite{exodus_format} formatted meshes to \ac{THOR} format.
+    % \item Convert gmsh~\cite{gmsh_ref} formatted meshes to \ac{THOR} format.
+    % \item Convert universal file format meshes to \ac{THOR} format.
+    % \item Split the elements of hexahedra and wedge (triangular prisms) meshes into tetrahedra before comverting to \ac{THOR} mesh format.
+    % \item Conversion of legacy \ac{THOR} mesh format to new format.
 % \end{itemize}
 
 % \subsection{Compilation and Invocation}
@@ -338,7 +345,7 @@ As such, use of the THOR MESH generator is not currently recommended.
 % \noindent\textbf{Remark:} Conversion of exodus files to gmsh files relies on using libMesh's \verb"mesh-tool"~\cite{libMeshPaper}. You must compile libMesh and set the environment variable \verb"THOR_LIBMESH_DIRECTORY".
 
 % \subsection{Format of the THOR's mesh generator standard input}
-% The standard input file of the THOR mesh generator contains the following lines:
+% The standard input file of the \ac{THOR} mesh generator contains the following lines:
 % \begin{verbatim}
 % input_mesh_file
 % output_mesh_file
@@ -353,10 +360,10 @@ As such, use of the THOR MESH generator is not currently recommended.
 % The purpose of these files is as follows:
 % \begin{itemize}
     % \item \verb"input_mesh_file": name of the input mesh file. Note that the file ending matters: exodus is \verb".e" and gmsh is \verb".msh", because the mesh format is inferred from it.
-    % \item \verb"output_mesh_file": name of the THOR mesh format files. Use file ending \verb".thrm".
-    % \item  \verb"region_id_file": name of file that contains instructions to reassign region (sometimes called block) ids. Formatting instructions for this file is provided in Sect.~\ref{sec:reassign_file_format}.
-    % \item  \verb"source_id_file": name of file that contains instructions to reassign source ids. Formatting instructions for this file is provided in Sect.~\ref{sec:reassign_file_format}.
-    % \item  \verb"boundary_id_file": name of file that contains instructions to reassign boundary ids. Formatting instructions for this file is provided in Sect.~\ref{sec:reassign_file_format}.
+    % \item \verb"output_mesh_file": name of the \ac{THOR} mesh format files. Use file ending \verb".thrm".
+    % \item  \verb"region_id_file": name of file that contains instructions to reassign region (sometimes called block) ids. Formatting instructions for this file is provided in Section~\ref{sec:reassign_file_format}.
+    % \item  \verb"source_id_file": name of file that contains instructions to reassign source ids. Formatting instructions for this file is provided in Section~\ref{sec:reassign_file_format}.
+    % \item  \verb"boundary_id_file": name of file that contains instructions to reassign boundary ids. Formatting instructions for this file is provided in Section~\ref{sec:reassign_file_format}.
 % \end{itemize}
 
 % \subsection{Formatting instructions for regions, source, and boundary id reassignment files}\label{sec:reassign_file_format}

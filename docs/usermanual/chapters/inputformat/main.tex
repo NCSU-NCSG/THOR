@@ -1,24 +1,24 @@
-The THOR transport solver has distinct user input formats for the following separate input files:
+The \ac{THOR} transport solver has distinct user input formats for the following separate input files:
 \begin{itemize}
-    \item Standard Input File (Sec.~\ref{ch:inp:sec:stdinput}) - The primary input file to be run by THOR.
+    \item Standard Input File (Section~\ref{ch:inp:sec:stdinput}) - The primary input file to be run by THOR.
     All other input files will either be listed in this file, or assumed to be the default filenames as described in Section~\ref{ch:inp:sec:stdinput}.
-    This is the only input file given to THOR by way of the command line.
-    \item Mesh File (Sec.~\ref{ch:inp:sec:meshfile}) - File containing the physical 1st order tet mesh for the problem.
-    \item Cross Section File (Sec.~\ref{ch:inp:sec:xsfile}) - File containing cross sections for the problem.
-    \item Density Factor File (Sec.~\ref{ch:inp:sec:densfact}) - File containing the density factors for each adjustment of cross sections in each region.
-    \item Initial Guess File (Sec.~\ref{ch:inp:sec:initguess}) - File containing the initial guess for the problem.
-    \item Source File (Sec.~\ref{ch:inp:sec:srcfile}) - File containing the source for a fixed source problem.
-    %\item Inflow File (Sec.~\ref{ch:inp:sec:inflow}) - File containing the boundary condition inflow data for a fixed source problem.
+    This is the only input file given to \ac{THOR} by way of the command line.
+    \item Mesh File (Section~\ref{ch:inp:sec:meshfile}) - File containing the physical 1st order tet mesh for the problem.
+    \item Cross Section File (Section~\ref{ch:inp:sec:xsfile}) - File containing cross sections for the problem.
+    \item Density Factor File (Section~\ref{ch:inp:sec:densfact}) - File containing the density factors for each adjustment of cross sections in each region.
+    \item Initial Guess File (Section~\ref{ch:inp:sec:initguess}) - File containing the initial guess for the problem.
+    \item Source File (Section~\ref{ch:inp:sec:srcfile}) - File containing the source for a fixed source problem.
+    %\item Inflow File (Section~\ref{ch:inp:sec:inflow}) - File containing the boundary condition inflow data for a fixed source problem.
 \end{itemize}
 
-This chapter describes the input formats of the THOR transport solver.
+This chapter describes the input formats of the \ac{THOR} transport solver.
 
 \section{THOR Standard Input Format}\label{ch:inp:sec:stdinput}
 
-The following describes properties of the keyword based THOR input file:
+The following describes properties of the keyword based \ac{THOR} input file:
 \begin{itemize}
   \item Any keyword can appear in any order, but no keyword may appear multiple times.
-  \item Every keyword has a default value, and THOR will echo a verbose form of the input at the beginning of the run, including all keywords and their values for the problem, whether they are set by the user or not.
+  \item Every keyword has a default value, and \ac{THOR} will echo a verbose form of the input at the beginning of the run, including all keywords and their values for the problem, whether they are set by the user or not.
   \item Whitespace is necessary between a parameter and the parameter values but is otherwise ignored.
   \item It is recommended that each parameter have its own line, however multiple parameters can be on the same line separated by semicolons (;).
   \item The user should ensure that line endings are UNIX text line endings, not Windows or Mac line endings.
@@ -247,7 +247,7 @@ The following describes properties of the keyword based THOR input file:
     \hline
     Keyword & Type & Options & Default \\ \hline
     \verb"jfnk_method" & STRING & outer/flat/flat\_wds & flat \\ \hline \hline
-    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Type of jfnk formulation, see~\cite{refernce_manual} for details.}\\
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Type of jfnk formulation, see~\cite{reference_manual} for details.}\\
     \hline
   \end{tabular}
 \end{center}
@@ -373,7 +373,7 @@ The following describes properties of the keyword based THOR input file:
     \hline
     Keyword & Type & Options & Default \\ \hline
     \verb"flux_out" & STRING & - & \verb"<job_name>_flux.out" \\ \hline \hline
-    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Name of the THOR formatted output flux file}\\
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Name of the \ac{THOR} formatted output flux file}\\
     \hline
   \end{tabular}
 \end{center}
@@ -457,7 +457,7 @@ The following describes properties of the keyword based THOR input file:
     \hline
     Keyword & Type & Options & Default \\ \hline
     \verb"cartesian_map_out" & STRING & - & \verb"<job_name>\_cartesian\_map.out" \\ \hline \hline
-    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Name of the THOR formatted Cartesian map output file}\\
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Name of the \ac{THOR} formatted Cartesian map output file}\\
     \hline
   \end{tabular}
 \end{center}
@@ -555,7 +555,7 @@ The following describes properties of the keyword based THOR input file:
     \hline
     Keyword & Type & Options & Default \\ \hline
     \verb"region_map" & STRING/INTEGER & no/reg1 mat1 reg2 mat2 reg3 mat3...  & no \\ \hline \hline
-    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Mapping from region id to cross section id. Region ids are an integer assigned to to each tetrahedral element that are used to group elements into regions or blocks (see Sect.~\ref{sec:mesh_format}). Cross section ids are indices that identify sets of cross sections provided in the cross section input file (see Sect.~\ref{sec:cross_section_format}). If no map is provided, then the mapping is assumed to be one to one, i.e. region 4 maps to cross section material 4, region 8 maps to cross section material 8, etc. The ``region\_map" card can have entries on multiple lines.}\\
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Mapping from region id to cross section id. Region ids are an integer assigned to to each tetrahedral element that are used to group elements into regions or blocks (see Section~\ref{ch:inp:sec:meshfile}). Cross section ids are indices that identify sets of cross sections provided in the cross section input file (see Section~\ref{ch:inp:sec:xsfile}). If no map is provided, then the mapping is assumed to be one to one, i.e. region 4 maps to cross section material 4, region 8 maps to cross section material 8, etc. The ``region\_map" card can have entries on multiple lines.}\\
     \hline
   \end{tabular}
 \end{center}
@@ -702,17 +702,17 @@ Entry line L*G+6: sig_scat_{L, 1->G} sig_scat_{L, 2->G}... sig_scat_{L, G->G}
 \item \verb"Sigma_f_g": Fission cross section in group g ($\Sigma_f$ NOT $\nu\Sigma_f$).
 \item \verb"nu_bar_g": average number of neutrons released by fission caused by a neutron in energy group g ($\nu$).
 \item \verb"Sigma_t_g": total cross section in energy group g ($\Sigma_t$).
-\item \verb"sig_scat_{l, g'->g}": l-th Legendre polynomial moment of the scattering cross section from group g’ to g ($\Sigma_{s,l,g'\rightarrow g}$). The (2 * l + 1) factor may be included in the value of the cross section or not, THOR can handle both cases. It needs to be specified separately every time.
+\item \verb"sig_scat_{l, g'->g}": l-th Legendre polynomial moment of the scattering cross section from group g’ to g ($\Sigma_{s,l,g'\rightarrow g}$). The (2 * l + 1) factor may be included in the value of the cross section or not, \ac{THOR} can handle both cases. It needs to be specified separately every time.
 \end{itemize}
 
 \section{THOR Density Factor Format}\label{ch:inp:sec:densfact}
 
-THOR density factors are used to adjust cross sections in the transport calculation.
+\ac{THOR} density factors are used to adjust cross sections in the transport calculation.
 The first line in the file contains the \verb"<adj_type>", specifying whether the data contained within is \verb"volumes" or \verb"dens_facts" for the data.
 If \verb"volumes" is specified, then the \verb"adjustment" values are actual volumes of the regions pre-meshing.
-The meshed volume is then divided by the exact volume and the resulting ratio is the scaling factor for the cross sections in that region in THOR.
-If \verb"dens_facts" is specified, then the \verb"adjustment" values are assumed to be the actual scaling factors for the cross sections for the specified region in THOR.
-The following describes the density factor format for THOR:
+The meshed volume is then divided by the exact volume and the resulting ratio is the scaling factor for the cross sections in that region in \ac{THOR}.
+If \verb"dens_facts" is specified, then the \verb"adjustment" values are assumed to be the actual scaling factors for the cross sections for the specified region in \ac{THOR}.
+The following describes the density factor format for \ac{THOR}:
 \begin{verbatim}
 Line 1: <adj_type>
 Line 2: <region_number> <adjustment>
@@ -722,13 +722,13 @@ Line 3: <region_number> <adjustment>
 
 \section{THOR Initial Guess Format}\label{ch:inp:sec:initguess}
 
-THOR can read in an initial guess file for the transport calculation.
+\ac{THOR} can read in an initial guess file for the transport calculation.
 This file is expected to be in unformatted FORTRAN binary.
-Typically the user need not worry about the structure of this file, the form is identical to that of the restart output file in Section~\ref{ch:out:sec:restart}, and in fact the expectation is that the user will only use an initial guess file from that THOR generated restart data.
+Typically the user need not worry about the structure of this file, the form is identical to that of the restart output file in Section~\ref{ch:out:sec:restart}, and in fact the expectation is that the user will only use an initial guess file from that \ac{THOR} generated restart data.
 
 \section{THOR Source Format}\label{ch:inp:sec:srcfile}
 
-Fixed source problems in THOR should include a file specifying an external source.
+Fixed source problems in \ac{THOR} should include a file specifying an external source.
 This file has a fixed format but lines may be commented with an exclamation point at the start of the line, or the ends of lines may be commented starting with an exclamation point.
 The order of the data for each source ID is all groups for a given source spatial/angular moment are on each line, then all spatial moments for a given angular moment are given line after line, which then repeats for each angular moment.
 This description is repeated below:
@@ -750,7 +750,7 @@ Entry line n_ang_mom*n_spat_mom+1: Q_{n_spat_mom,n_ang_mom,1}...
                 Q_{n_spat_mom,n_ang_mom,2} Q_{n_spat_mom,n_ang_mom,G}
 \end{verbatim}
 The sources given are the actual sources as they will be used in the calculation, not multipliers of the base 0th moment (indexed as 1) source.
-If higher order moment data is given than the problem that THOR is solving (i.e. if a 0th spatial order and 2nd angular problem is being solved and \verb"n_spat_mom>1"/\verb"n_ang_mom>3" source is given), then THOR will ignore the higher order source data and it wont be used.
+If higher order moment data is given than the problem that \ac{THOR} is solving (i.e. if a 0th spatial order and 2nd angular problem is being solved and \verb"n_spat_mom>1"/\verb"n_ang_mom>3" source is given), then \ac{THOR} will ignore the higher order source data and it wont be used.
 This feature allows for arbitrarily high order source specification that can be used in alternate versions of the same problem to determine the necessity of a certain spatial/angular expansion order without requiring the user remake the source for each calculation.
 
 %\section{Inflow Format}\label{ch:inp:sec:inflow}
