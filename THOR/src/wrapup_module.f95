@@ -255,7 +255,6 @@ CONTAINS
       cartesian_map = zero
 
       ! computation of the averaged reaction rates (only energy integrated!)
-      ! TODO: might want to consider a flag for providing group fluxes/reac_rates?
       DO eg = 1, egmax
         DO i = 1, num_cells
           mat_indx=material_ids(reg2mat(cells(i)%reg))
@@ -385,8 +384,7 @@ CONTAINS
 
 
 
-    ! write a csv output file containing all region averaged
-    ! TODO: make this more flexible, currently this is for testing only
+    ! write a csv output file containing all region averaged information
     OPEN(unit=20, file=TRIM(jobname)//TRIM('_out.csv'), status='unknown', action='write')
     WRITE(20, 502, ADVANCE = "NO") "Region, Material, "
     DO eg = 1, egmax - 1

@@ -34,8 +34,10 @@ INTEGER :: local_unit
 TYPE :: cardType
   !character name of the card
   CHARACTER(MAX_CARDNAME_LEN) :: cname
-  !logical to tell IFcard has already appeared
+  !logical to tell if card has already appeared
   LOGICAL :: used=.FALSE.
+  !logical to tell if card relates to problem
+  LOGICAL :: rel=.TRUE.
   !readin procedure, unique for each card
   PROCEDURE(prototype_wordarg),POINTER :: getcard => NULL()
   !card argument
@@ -1109,7 +1111,7 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE echo_equiv_inp
-    INTEGER :: i,strlg_max,cnamelg_max
+    INTEGER :: i,strlg_max,cnamelg_max,n_warns
 
     strlg_max=0
     cnamelg_max=0
@@ -1120,12 +1122,38 @@ CONTAINS
       cnamelg_max=MAX(cnamelg_max,LEN_TRIM(cards(i)%cname))
     ENDDO
     strlg_max=MIN(strlg_max,MAX_CARDNAME_LEN)
+    !determine which cards are relevant
+    DO i=1,num_cards
+      SELECT CASE(cards(i)%csub)
+        CASE('keig')
+          IF(problem .NE. 1)THEN
+            cards(i)%rel=.FALSE.
+          ENDIF
+        CASE('poweriter')
+          IF(eig_switch .NE. 0)THEN
+            cards(i)%rel=.FALSE.
+          ENDIF
+        CASE('jfnk')
+          IF(eig_switch .NE. 1)THEN
+            cards(i)%rel=.FALSE.
+          ENDIF
+        CASE('legacyxs')
+          cards(i)%rel=.FALSE.
+        CASE('srcprob')
+          IF(problem .NE. 0)THEN
+            cards(i)%rel=.FALSE.
+          ENDIF
+        CASE DEFAULT
+      ENDSELECT
+    ENDDO
+    n_warns=0
     CALL printlog('')
     CALL printlog('***********************************************************************')
     CALL printlog('*******************Echoing verbose equivalent input********************')
     CALL printlog('***********************************************************************')
     DO i=1,num_cards
-      IF(cards(i)%used .OR. i .LE. num_cards-num_dep_cards)THEN
+      !only print cards if given or if they are relevant
+      IF(cards(i)%used .OR. cards(i)%rel)THEN
         cards(i)%carg=TRIM(ADJUSTL(cards(i)%carg))
         !echo cards and data
         IF(LEN_TRIM(cards(i)%carg) .LE. MAX_CARDNAME_LEN)THEN
@@ -1141,25 +1169,29 @@ CONTAINS
         ELSE
           CALL printlog('card NOT provided (default assumed)',ADVANCING=.FALSE.)
         ENDIF
-        !print info on ignored input cards
+        !print ignoring info
         SELECT CASE(cards(i)%csub)
           CASE('keig')
             IF(problem .NE. 1)THEN
               CALL printlog(': ignored, not a keig problem',ADVANCING=.FALSE.)
+              n_warns=n_warns+1
             ENDIF
           CASE('poweriter')
             IF(eig_switch .NE. 0)THEN
               CALL printlog(': ignored, not using power iterations',ADVANCING=.FALSE.)
+              n_warns=n_warns+1
             ENDIF
           CASE('jfnk')
             IF(eig_switch .NE. 1)THEN
               CALL printlog(': ignored, not using jfnk',ADVANCING=.FALSE.)
+              n_warns=n_warns+1
             ENDIF
           CASE('legacyxs')
-            CALL printlog(': only used with legaxy xs',ADVANCING=.FALSE.)
+            CALL printlog(': WARNING, parameter ONLY used with legaxy xs',ADVANCING=.FALSE.)
           CASE('srcprob')
             IF(problem .NE. 0)THEN
               CALL printlog(': ignored, not a fixed source problem',ADVANCING=.FALSE.)
+              n_warns=n_warns+1
             ENDIF
           CASE DEFAULT
         ENDSELECT
@@ -1169,6 +1201,16 @@ CONTAINS
     CALL printlog('***********************************************************************')
     CALL printlog('******************Equivalent complete input finished*******************')
     CALL printlog('***********************************************************************')
+    !warn about unused parameters
+    WRITE(amsg,'(A,I0,A)')'User provided ',n_warns,' unused parameters!'
+    IF(n_warns .GT. 0)CALL raise_warning(amsg)
+    !warn about default region map
+    DO i=1,num_cards
+      IF(cards(i)%cname .EQ. 'region_map')THEN
+        IF(.NOT. cards(i)%used .OR. cards(i)%carg .EQ. 'no')CALL raise_warning('REGION MAP&
+          & NOT PROVIDED! USING DEFAULT REGION MAPPING, i.e. REGION 1 -> MAT 1, REGION 2 -> MAT 2...')
+      ENDIF
+    ENDDO
   ENDSUBROUTINE echo_equiv_inp
 
 END MODULE read_inp_module
