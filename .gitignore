@@ -65,3 +65,6 @@ contrib/libs/
 pre-processors/THOR_Mesh_Generator/test/convert_old_to_new_THOR/takeda.thrm
 pre-processors/THOR_Mesh_Generator/test/homogeneous_domain/homogeneous.thrm
 pre-processors/THOR_Mesh_Generator/test/homogeneous_domain/homogeneous_from_exodus.thrm
+
+#workspace
+workspace/

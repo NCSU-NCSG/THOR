@@ -14,7 +14,7 @@ MODULE boundary_conditions
 CONTAINS
 
   SUBROUTINE adjacency_calc()
-    INTEGER :: i,j,og_face(3),comp_face(3),adj_idx
+    INTEGER :: i,og_face(3),adj_idx
 
     DO i=1,num_tets
       element(i,:)=orderedverts(element(i,:))
@@ -26,7 +26,13 @@ CONTAINS
     !loop over all tets
     adj_idx=0
     num_bcf=0
+    prog=0
+    WRITE(*,'(A)',ADVANCE='NO')'Progress:'
     DO i=1,num_tets
+      IF(MOD(i,CEILING(num_tets*1.0/(max_prog-1.0))) .EQ. 0)THEN
+        WRITE(*,'(A)',ADVANCE='NO')'*'
+        prog=prog+1
+      ENDIF
       !first face
       og_face=(/element(i,2),element(i,3),element(i,4)/)
       CALL find_adj(og_face,i,0,adj_idx)
@@ -54,6 +60,10 @@ CONTAINS
     ELSE
       CALL det_side_flatness()
     ENDIF
+    DO i=prog,max_prog
+      WRITE(*,'(A)',ADVANCE='NO')'*'
+    ENDDO
+    WRITE(*,*)
     DEALLOCATE(tbound_cond,bc_side)
   ENDSUBROUTINE adjacency_calc
 
@@ -62,8 +72,8 @@ CONTAINS
     INTEGER,INTENT(IN) :: el_idx
     INTEGER,INTENT(IN) :: faceid
     INTEGER,INTENT(INOUT) :: adj_idx
-    INTEGER :: j,comp_face(3),side_id
-    LOGICAL :: match,flat
+    INTEGER :: j,comp_face(3)
+    LOGICAL :: match
 
     match=.FALSE.
     DO j=1,num_tets
@@ -123,7 +133,7 @@ CONTAINS
   ENDSUBROUTINE check_face
 
   SUBROUTINE det_side_flatness()
-    INTEGER :: i,j,el_id,vert_id,face_idx,loc_max,loc_min
+    INTEGER :: i,j,el_id,face_idx
     REAL(8) :: face_point(3,3),ext_point(3),norm_vec(3),lambda,offset
 
     !sides are assumed to be flat, and if they are not this is set to false.

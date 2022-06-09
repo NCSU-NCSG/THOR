@@ -20,6 +20,8 @@ MODULE read_inp_module
 INTEGER,PARAMETER :: MAX_CARDNAME_LEN=32
 !> The number of cards we have
 INTEGER,PARAMETER :: num_cards=43
+!> The number of cards for deprecated info
+INTEGER,PARAMETER :: num_dep_cards=5
 !> The maximum length of a line in the input file
 INTEGER,PARAMETER :: ll_max=200
 !(need to change in interface IFchanged)
@@ -32,8 +34,10 @@ INTEGER :: local_unit
 TYPE :: cardType
   !character name of the card
   CHARACTER(MAX_CARDNAME_LEN) :: cname
-  !logical to tell IFcard has already appeared
+  !logical to tell if card has already appeared
   LOGICAL :: used=.FALSE.
+  !logical to tell if card relates to problem
+  LOGICAL :: rel=.TRUE.
   !readin procedure, unique for each card
   PROCEDURE(prototype_wordarg),POINTER :: getcard => NULL()
   !card argument
@@ -69,11 +73,11 @@ CONTAINS
     !number of cards param as well
     cards(:)%carg=''
     cards(:)%csub=''
-    !type card
+    !problem_type card
     card_indx=1
-    cards(card_indx)%cname='type'
+    cards(card_indx)%cname='problem_type'
     cards(card_indx)%carg='keig'
-    cards(card_indx)%getcard => get_type
+    cards(card_indx)%getcard => get_problem_type
     !keigsolver card
     card_indx=2
     cards(card_indx)%cname='keigsolver'
@@ -90,6 +94,7 @@ CONTAINS
     cards(card_indx)%cname='inflow'
     cards(card_indx)%carg='no'
     cards(card_indx)%getcard => get_inflow
+    cards(card_indx)%csub='srcprob'
     !piacc card
     card_indx=5
     cards(card_indx)%cname='piacc'
@@ -111,6 +116,7 @@ CONTAINS
     cards(card_indx)%cname='page_iflw'
     cards(card_indx)%carg='all'
     cards(card_indx)%getcard => get_page_iflw
+    cards(card_indx)%csub='srcprob'
     !kconv card
     card_indx=9
     cards(card_indx)%cname='kconv'
@@ -170,7 +176,7 @@ CONTAINS
     cards(card_indx)%cname='ipiter'
     WRITE(cards(card_indx)%carg,'(I0)')ipow
     cards(card_indx)%getcard => get_ipiter
-    cards(card_indx)%csub='poweriter'
+    cards(card_indx)%csub='jfnk'
     !print_conv card
     card_indx=20
     cards(card_indx)%cname='print_conv'
@@ -200,7 +206,7 @@ CONTAINS
     !flux_out card
     card_indx=25
     cards(card_indx)%cname='flux_out'
-    cards(card_indx)%carg='no'
+    cards(card_indx)%carg=flux_filename
     cards(card_indx)%getcard => get_flux_out
     !xs card
     card_indx=26
@@ -237,66 +243,66 @@ CONTAINS
     cards(card_indx)%cname='print_xs'
     cards(card_indx)%carg='no'
     cards(card_indx)%getcard => get_print_xs
-    !ngroups card
+    !pnorder card
     card_indx=33
+    cards(card_indx)%cname='pnorder'
+    WRITE(cards(card_indx)%carg,'(I0)')scatt_ord
+    cards(card_indx)%getcard => get_pnorder
+    !qdtype card
+    card_indx=34
+    cards(card_indx)%cname='qdtype'
+    cards(card_indx)%carg='levelsym'
+    cards(card_indx)%getcard => get_qdtype
+    !qdorder card
+    card_indx=35
+    cards(card_indx)%cname='qdorder'
+    WRITE(cards(card_indx)%carg,'(I0)')quad_ord
+    cards(card_indx)%getcard => get_qdorder
+    !cartesian_map card
+    card_indx=36
+    cards(card_indx)%cname='cartesian_map'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_cartesian_map
+    !point_value_locations card
+    card_indx=37
+    cards(card_indx)%cname='point_value_locations'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_point_value_locations
+    !region_map card
+    card_indx=38
+    cards(card_indx)%cname='region_map'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_region_map
+    !ngroups card
+    card_indx=39
     cards(card_indx)%cname='ngroups'
     WRITE(cards(card_indx)%carg,'(I0)')egmax
     cards(card_indx)%getcard => get_ngroups
     cards(card_indx)%csub='legacyxs'
-    !pnorder card
-    card_indx=34
-    cards(card_indx)%cname='pnorder'
-    WRITE(cards(card_indx)%carg,'(I0)')scatt_ord
-    cards(card_indx)%getcard => get_pnorder
     !pnread card
-    card_indx=35
+    card_indx=40
     cards(card_indx)%cname='pnread'
     WRITE(cards(card_indx)%carg,'(I0)')xs_ord
     cards(card_indx)%getcard => get_pnread
     cards(card_indx)%csub='legacyxs'
     !upscattering card
-    card_indx=36
+    card_indx=41
     cards(card_indx)%cname='upscattering'
     cards(card_indx)%carg='yes'
     cards(card_indx)%getcard => get_upscattering
     cards(card_indx)%csub='legacyxs'
     !multiplying card
-    card_indx=37
+    card_indx=42
     cards(card_indx)%cname='multiplying'
     cards(card_indx)%carg='yes'
     cards(card_indx)%getcard => get_multiplying
     cards(card_indx)%csub='legacyxs'
     !scatt_mult_included card
-    card_indx=38
+    card_indx=43
     cards(card_indx)%cname='scatt_mult_included'
     cards(card_indx)%carg='yes'
     cards(card_indx)%getcard => get_scatt_mult_included
     cards(card_indx)%csub='legacyxs'
-    !qdtype card
-    card_indx=39
-    cards(card_indx)%cname='qdtype'
-    cards(card_indx)%carg='levelsym'
-    cards(card_indx)%getcard => get_qdtype
-    !qdorder card
-    card_indx=40
-    cards(card_indx)%cname='qdorder'
-    WRITE(cards(card_indx)%carg,'(I0)')quad_ord
-    cards(card_indx)%getcard => get_qdorder
-    !cartesian_map card
-    card_indx=41
-    cards(card_indx)%cname='cartesian_map'
-    cards(card_indx)%carg='no'
-    cards(card_indx)%getcard => get_cartesian_map
-    !point_value_locations card
-    card_indx=42
-    cards(card_indx)%cname='point_value_locations'
-    cards(card_indx)%carg='no'
-    cards(card_indx)%getcard => get_point_value_locations
-    !region_map card
-    card_indx=43
-    cards(card_indx)%cname='region_map'
-    cards(card_indx)%carg='no'
-    cards(card_indx)%getcard => get_region_map
     !end of input cards
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     minreg= 100000_li
@@ -331,7 +337,7 @@ CONTAINS
   END SUBROUTINE inputfile_read
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_type(this_card,wwords)
+  SUBROUTINE get_problem_type(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
 
@@ -343,7 +349,7 @@ CONTAINS
     ELSE
       CALL raise_fatal_error('This is not a valid problem type -- '//TRIM(this_card%carg)//' --')
     ENDIF
-  END SUBROUTINE get_type
+  END SUBROUTINE get_problem_type
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_keigsolver(this_card,wwords)
@@ -433,7 +439,7 @@ CONTAINS
     ELSEIF(this_card%carg .EQ. 'inner') THEN
       page_refl=2
     ELSE
-      CALL raise_fatal_error('This is not a valid page reflective BC option -- '//TRIM(this_card%carg)//' --')
+      CALL raise_fatal_error('This is not a valid page refl -- '//TRIM(this_card%carg)//' --')
     ENDIF
   END SUBROUTINE get_page_refl
 
@@ -632,28 +638,13 @@ CONTAINS
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
 
-    this_card%carg=TRIM(lowercase(wwords(2)))
-    IF(this_card%carg .EQ. 'no' .OR. this_card%carg .EQ. 'none') THEN
+    this_card%carg=TRIM(wwords(2))
+    IF(lowercase(this_card%carg) .EQ. 'no' .OR. lowercase(this_card%carg) .EQ. 'none') THEN
       dfact_opt = 0
     ELSE
-      IF(this_card%carg .EQ. 'byvolume') THEN
-        dfact_opt = 1
-      ELSEIF(this_card%carg .EQ. 'fromfile') THEN
-        dfact_opt = 2
-      ELSE
-        CALL raise_fatal_error('This is not a valid density factor option &
-          & (no/byvolume/fromfile) -- '//TRIM(this_card%carg)//' --')
-      END IF
+      dfact_opt = 99
+      dens_fact_filename=TRIM(wwords(2))
     END IF
-    wwords(3)=TRIM(wwords(3))
-    IF(dfact_opt .NE. 0)THEN
-      IF(lowercase(wwords(3)) .NE. '')THEN
-        this_card%carg=TRIM(this_card%carg)//' '//TRIM(wwords(3))
-        dens_fact_filename=TRIM(wwords(3))
-      ELSE
-        this_card%carg=TRIM(this_card%carg)//' '//TRIM(dens_fact_filename)
-      ENDIF
-    ENDIF
   END SUBROUTINE get_density_factor
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -686,13 +677,7 @@ CONTAINS
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
 
     this_card%carg=TRIM(wwords(2))
-    IF(lowercase(this_card%carg) .EQ. 'yes') THEN
-      !do nothing, default
-      this_card%carg=source_filename
-    ELSEIF(lowercase(this_card%carg) .EQ. 'no' .OR. lowercase(this_card%carg) .EQ. 'none') THEN
-    ELSE
-      source_filename=TRIM(this_card%carg)
-    ENDIF
+    source_filename=TRIM(this_card%carg)
   END SUBROUTINE get_source
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -701,13 +686,7 @@ CONTAINS
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
 
     this_card%carg=TRIM(wwords(2))
-    IF(lowercase(this_card%carg) .EQ. 'yes') THEN
-      !do nothing, default
-      this_card%carg=flux_filename
-    ELSEIF(lowercase(this_card%carg) .EQ. 'no' .OR. lowercase(this_card%carg) .EQ. 'none') THEN
-    ELSE
-      flux_filename=TRIM(wwords(2))
-    ENDIF
+    flux_filename=TRIM(wwords(2))
   END SUBROUTINE get_flux_out
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -793,14 +772,7 @@ CONTAINS
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
 
     this_card%carg=TRIM(wwords(2))
-    IF(lowercase(this_card%carg) .EQ. 'yes') THEN
-      !do nothing, default
-      this_card%carg=cartesian_map_filename
-    ELSEIF(lowercase(this_card%carg) .EQ. 'no' .OR. lowercase(this_card%carg) .EQ. 'none') THEN
-      glob_do_cartesian_mesh = .FALSE.
-    ELSE
-      cartesian_map_filename=TRIM(this_card%carg)
-    ENDIF
+    cartesian_map_filename=TRIM(this_card%carg)
   END SUBROUTINE get_cartesian_map_out
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -915,6 +887,8 @@ CONTAINS
     ELSE
       quad_tpe=3
       quad_file=TRIM(this_card%carg)
+      CALL raise_fatal_error('Quadrature file given. THOR does not currently support user provided &
+        & user provied quadrature files -- '//TRIM(this_card%carg)//' --')
     END IF
   END SUBROUTINE get_qdtype
 
@@ -1137,7 +1111,7 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE echo_equiv_inp
-    INTEGER :: i,strlg_max,cnamelg_max
+    INTEGER :: i,strlg_max,cnamelg_max,n_warns
 
     strlg_max=0
     cnamelg_max=0
@@ -1148,53 +1122,95 @@ CONTAINS
       cnamelg_max=MAX(cnamelg_max,LEN_TRIM(cards(i)%cname))
     ENDDO
     strlg_max=MIN(strlg_max,MAX_CARDNAME_LEN)
+    !determine which cards are relevant
+    DO i=1,num_cards
+      SELECT CASE(cards(i)%csub)
+        CASE('keig')
+          IF(problem .NE. 1)THEN
+            cards(i)%rel=.FALSE.
+          ENDIF
+        CASE('poweriter')
+          IF(eig_switch .NE. 0)THEN
+            cards(i)%rel=.FALSE.
+          ENDIF
+        CASE('jfnk')
+          IF(eig_switch .NE. 1)THEN
+            cards(i)%rel=.FALSE.
+          ENDIF
+        CASE('legacyxs')
+          cards(i)%rel=.FALSE.
+        CASE('srcprob')
+          IF(problem .NE. 0)THEN
+            cards(i)%rel=.FALSE.
+          ENDIF
+        CASE DEFAULT
+      ENDSELECT
+    ENDDO
+    n_warns=0
     CALL printlog('')
     CALL printlog('***********************************************************************')
     CALL printlog('*******************Echoing verbose equivalent input********************')
     CALL printlog('***********************************************************************')
     DO i=1,num_cards
-      cards(i)%carg=TRIM(ADJUSTL(cards(i)%carg))
-      !echo cards and data
-      IF(LEN_TRIM(cards(i)%carg) .LE. MAX_CARDNAME_LEN)THEN
-        WRITE(amsg,'(4A)')cards(i)%cname(1:cnamelg_max),' ',cards(i)%carg(1:strlg_max),' !'
-        CALL printlog(amsg,ADVANCING=.FALSE.)
-      ELSE
-        WRITE(amsg,'(4A)')cards(i)%cname(1:cnamelg_max),' ',TRIM(cards(i)%carg),' !'
-        CALL printlog(amsg,ADVANCING=.FALSE.)
+      !only print cards if given or if they are relevant
+      IF(cards(i)%used .OR. cards(i)%rel)THEN
+        cards(i)%carg=TRIM(ADJUSTL(cards(i)%carg))
+        !echo cards and data
+        IF(LEN_TRIM(cards(i)%carg) .LE. MAX_CARDNAME_LEN)THEN
+          WRITE(amsg,'(4A)')cards(i)%cname(1:cnamelg_max),' ',cards(i)%carg(1:strlg_max),' !'
+          CALL printlog(amsg,ADVANCING=.FALSE.)
+        ELSE
+          WRITE(amsg,'(4A)')cards(i)%cname(1:cnamelg_max),' ',TRIM(cards(i)%carg),' !'
+          CALL printlog(amsg,ADVANCING=.FALSE.)
+        ENDIF
+        !echo if card is provided
+        IF(cards(i)%used)THEN
+          CALL printlog('card provided',ADVANCING=.FALSE.)
+        ELSE
+          CALL printlog('card NOT provided (default assumed)',ADVANCING=.FALSE.)
+        ENDIF
+        !print ignoring info
+        SELECT CASE(cards(i)%csub)
+          CASE('keig')
+            IF(problem .NE. 1)THEN
+              CALL printlog(': ignored, not a keig problem',ADVANCING=.FALSE.)
+              n_warns=n_warns+1
+            ENDIF
+          CASE('poweriter')
+            IF(eig_switch .NE. 0)THEN
+              CALL printlog(': ignored, not using power iterations',ADVANCING=.FALSE.)
+              n_warns=n_warns+1
+            ENDIF
+          CASE('jfnk')
+            IF(eig_switch .NE. 1)THEN
+              CALL printlog(': ignored, not using jfnk',ADVANCING=.FALSE.)
+              n_warns=n_warns+1
+            ENDIF
+          CASE('legacyxs')
+            CALL printlog(': WARNING, parameter ONLY used with legaxy xs',ADVANCING=.FALSE.)
+          CASE('srcprob')
+            IF(problem .NE. 0)THEN
+              CALL printlog(': ignored, not a fixed source problem',ADVANCING=.FALSE.)
+              n_warns=n_warns+1
+            ENDIF
+          CASE DEFAULT
+        ENDSELECT
+        CALL printlog('')
       ENDIF
-      !echo if card is provided
-      IF(cards(i)%used)THEN
-        CALL printlog('card provided',ADVANCING=.FALSE.)
-      ELSE
-        CALL printlog('card NOT provided (default)',ADVANCING=.FALSE.)
-      ENDIF
-      !print info on ignored input cards
-      SELECT CASE(cards(i)%csub)
-        CASE('keig')
-          IF(problem .NE. 1)THEN
-            CALL printlog(': ignored, not a keig problem',ADVANCING=.FALSE.)
-          ENDIF
-        CASE('poweriter')
-          IF(eig_switch .NE. 0)THEN
-            CALL printlog(': ignored, not using power iterations',ADVANCING=.FALSE.)
-          ENDIF
-        CASE('jfnk')
-          IF(eig_switch .NE. 1)THEN
-            CALL printlog(': ignored, not using jfnk',ADVANCING=.FALSE.)
-          ENDIF
-        CASE('legacyxs')
-          CALL printlog(': only used with legaxy xs',ADVANCING=.FALSE.)
-        CASE('srcprob')
-          IF(problem .NE. 0)THEN
-            CALL printlog(': ignored, not a fixed source problem',ADVANCING=.FALSE.)
-          ENDIF
-        CASE DEFAULT
-      ENDSELECT
-      CALL printlog('')
     ENDDO
     CALL printlog('***********************************************************************')
     CALL printlog('******************Equivalent complete input finished*******************')
     CALL printlog('***********************************************************************')
+    !warn about unused parameters
+    WRITE(amsg,'(A,I0,A)')'User provided ',n_warns,' unused parameters!'
+    IF(n_warns .GT. 0)CALL raise_warning(amsg)
+    !warn about default region map
+    DO i=1,num_cards
+      IF(cards(i)%cname .EQ. 'region_map')THEN
+        IF(.NOT. cards(i)%used .OR. cards(i)%carg .EQ. 'no')CALL raise_warning('REGION MAP&
+          & NOT PROVIDED! USING DEFAULT REGION MAPPING, i.e. REGION 1 -> MAT 1, REGION 2 -> MAT 2...')
+      ENDIF
+    ENDDO
   ENDSUBROUTINE echo_equiv_inp
 
 END MODULE read_inp_module

@@ -1,6 +1,6 @@
   execution yes ; print_conv yes
   lambda 0
-  type keig
+  problem_type keig
   keigsolver jfnk
   jfnk_method flat
   page_refl save
@@ -9,7 +9,6 @@
 
   mesh keig_homogeneous.thrm
   xs keig_homogeneous.xs
-  flux_out yes
   print_xs yes
   vtk_flux_out yes
   vtk_mat_out yes

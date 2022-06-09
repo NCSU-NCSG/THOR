@@ -1,6 +1,6 @@
   execution yes ; print_conv yes
   lambda 0
-  type fsrc ;
+  problem_type fsrc ;
   page_refl save
   innerconv 1E-12 ; outerconv 1E-7
   maxinner 2 ; maxouter 500
@@ -8,7 +8,6 @@
   mesh homogeneous.thrm
   xs homogeneous.xs
   source homogeneous.src
-  flux_out yes
   print_xs yes
   vtk_flux_out yes
   vtk_mat_out yes

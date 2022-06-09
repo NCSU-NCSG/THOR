@@ -126,7 +126,7 @@ CONTAINS
   END SUBROUTINE src_read_legacy_v0
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE src_read_current
+  SUBROUTINE src_read_current()
     INTEGER :: nwords,given_ang,given_space,alloc_stat,m,i,j,g
     CHARACTER(10000) :: words(1000)
 

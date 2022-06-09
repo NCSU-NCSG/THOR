@@ -1,6 +1,6 @@
   execution yes ; print_conv yes
   lambda 0
-  type fsrc ; piacc errmode
+  problem_type fsrc ; piacc errmode
   page_refl save
   innerconv 1E-12 ; outerconv 1E-8
   maxinner 5 ; maxouter 500000
@@ -8,7 +8,6 @@
   mesh ./noshield.thrm
   xs ./noshield_2group.xs
   source ./noshield_2group.src
-  flux_out yes
   print_xs no
   vtk_flux_out yes
   vtk_mat_out yes

@@ -1,13 +1,12 @@
   execution yes ; print_conv yes
   lambda -1
-  type keig ;
+  problem_type keig ;
   page_refl save
   innerconv 1E-12 ; outerconv 1E-7
   maxinner 4 ; maxouter 500
 
   mesh keig_homogeneous.thrm
   xs keig_homogeneous.xs
-  flux_out yes
   print_xs yes
   vtk_flux_out yes
   vtk_mat_out yes

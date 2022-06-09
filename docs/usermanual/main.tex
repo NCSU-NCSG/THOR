@@ -50,17 +50,17 @@
 \newcommand{\subtitle}{}
 \newcommand{\shortTitle}{THOR User's Manual}
 \author[1]{Nicholas Herring}
-\author[1]{Yousry Azmy}
-\author[2]{Sebastian Schunert}
-\author[3]{Raffi Yessayan}
+\author[2]{Raffi Yessayan}
+\author[3]{Sebastian Schunert}
 \author[4]{Rodolfo Ferrer}
+\author[1]{Yousry Azmy}
 
 \affil[1]{North Carolina State University}
-\affil[2]{Idaho National Laboratory}
-\affil[3]{Los Alamos National Laboratory}
+\affil[2]{Los Alamos National Laboratory}
+\affil[3]{Idaho National Laboratory}
 \affil[4]{Studsvik Scandpower}
 
-\newcommand{\publicationDate}{03/16/2022}
+\newcommand{\publicationDate}{06/09/2022}
 
 
 %customize hyperref
@@ -88,14 +88,14 @@
 \fancyfoot{}
 \fancyhead[LO,RE]{\includegraphics[width=1.15in]{template/NCSU_logo.png}}
 \fancyhead[RO,LE]{\color{white}\shortTitle}
-\fancyfoot[LE,RO]{\textcolor{NCSURed}{NCSU} Radiation Transport Group}
+\fancyfoot[LE,RO]{\textcolor{NCSURed}{NCSU} Nuclear Computational Science Group}
 \fancyfoot[CO,CE]{\thepage}
 
 \fancypagestyle{plain}
 {
 \fancyhead[LO,RE]{\includegraphics[width=1.15in]{template/NCSU_logo.png}}
 \fancyhead[RO,LE]{\color{NCSURed}\shortTitle}
-\fancyfoot[LE,RO]{\textcolor{NCSURed}{NCSU} Radiation Transport Group}
+\fancyfoot[LE,RO]{\textcolor{NCSURed}{NCSU} Nuclear Computational Science Group}
 \fancyfoot[CO,CE]{\thepage}
 }
 
@@ -174,7 +174,8 @@ contents={%
 \pagenumbering{arabic}
 \pagestyle{fancy}
 
-The purpose of the User Manual is to provide the novice user with the necessary instructions to install, compile, and execute the Tetrahedral-grid High Order Radiation (THOR) transport code.
+The purpose of the User Manual is to provide the novice user with the necessary instructions to install, compile, and execute the \ac{THOR}.
+Additionally, this manual contains two tutorials to guide the user in using THOR, as well as a description of input and output files that \ac{THOR} can interact with or create.
 
 \chapter{System Requirements}
 
@@ -184,13 +185,17 @@ The purpose of the User Manual is to provide the novice user with the necessary 
 
 \input{chapters/gettingstarted/main.tex}
 
-\chapter{Godiva Tutorial}
+\chapter{Tutorials}\label{ch:tutorials}
 
-\input{chapters/godivatutorial/main.tex}
+\input{chapters/tutorials/main.tex}
 
 \chapter{Input Format}
 
 \input{chapters/inputformat/main.tex}
+
+\chapter{Output Format}
+
+\input{chapters/outputformat/main.tex}
 
 
 \bibliographystyle{plain}

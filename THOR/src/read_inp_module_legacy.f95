@@ -50,7 +50,6 @@ CONTAINS
           CYCLE
         END IF
         read_str = ADJUSTL(read_str)
-        !TODO: Force upper || lower case
 
         !Ignore comments
         IF (TRIM(read_str) .EQ. '---') CYCLE

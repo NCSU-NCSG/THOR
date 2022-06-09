@@ -1,6 +1,6 @@
   execution yes ; print_conv yes
   lambda 0
-  type fsrc ; piacc errmode
+  problem_type fsrc ; piacc errmode
   page_refl save
   innerconv 1E-12 ; outerconv 1E-5
   maxinner 2 ; maxouter 500
@@ -8,7 +8,6 @@
   mesh two_region_cube_fine.thrm
   xs two_group_upscattering.xs
   source two_region_cube.src
-  flux_out yes
   print_xs yes
   vtk_flux_out yes
   vtk_mat_out yes

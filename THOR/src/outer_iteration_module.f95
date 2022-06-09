@@ -118,11 +118,37 @@ CONTAINS
 
     END IF
 
+    IF (inguess_flag==1) THEN
+
+      CALL inguess_eig(flux,t_error,niter)
+      IF (rank .EQ. 0) THEN
+        CALL printlog('')
+      END IF
+
+      DO ii=1,niter-1
+        DO eg =1,egmax
+          DO i=1,num_cells
+            DO n=1,namom
+              DO l=1,num_moments_v
+                flux(l,n,i,eg,ii) = flux(l,n,i,eg,niter)
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
+
+    END IF
+
     ! Keep track of iterations
     IF (rank .EQ. 0) THEN
-      CALL printlog('========================================================')
+      CALL printlog('=================================================================')
       CALL printlog('   Begin outer iterations.')
-      CALL printlog('========================================================')
+      CALL printlog('=================================================================')
+    END IF
+    IF(print_conv.EQ.1 .AND. rank .EQ. 0) THEN
+      WRITE(21,'(A)') '====================================================='
+      WRITE(21,'(A)') '   Begin outer iterations.'
+      WRITE(21,'(A)') '====================================================='
     END IF
 
     ! Set error mode extrapolation parameters
@@ -177,6 +203,14 @@ CONTAINS
       END DO
       IF(MAXVAL(flux(:,:,:,:,niter)) .GE. 1.0E+30)CALL raise_fatal_error('Flux exceeded 1.0E+30, &
         & fixed source problem appears to be supercritical and cannot be solved.')
+
+      ! write convergence monitor
+      IF (rank .EQ. 0) THEN
+        CALL printlog('   grp   itn  max-err-flx         time')
+        IF(print_conv.EQ.1) THEN
+          WRITE(21,'(A)')'   grp   itn  max-err-flx'
+        END IF
+      END IF
 
       DO eg=1, egmax
 
@@ -307,6 +341,13 @@ CONTAINS
       theta(2)=theta(3)
       theta(3)=flux_dist_error(2)/flux_dist_error(1)
 
+      !========================================================================
+      ! write iteration results to file if desired
+      !========================================================================
+      IF(dump_flag==1) THEN
+        CALL dump_PI(flux,1.0_8)
+      END IF
+
       ! ... and copy over iterates
       DO ii=2,niter
         DO eg=1, egmax
@@ -322,24 +363,24 @@ CONTAINS
 
       CALL CPU_TIME(te)
       IF (rank .EQ. 0) THEN
-        CALL printlog('---------------------------------------------------------------')
-        CALL printlog('---itn i-itn   max error   max error      extrap        time---')
-        WRITE(amsg,104) outer,tot_nInners, max_outer_error, MAXVAL(max_error),extra_flag,te-ts,' %% '
+        CALL printlog('-----------------------------------------------------------------')
+        CALL printlog('---itn i-itn  max-out-err   max-in-err      extrap        time---')
+        WRITE(amsg,104) outer,tot_nInners, max_outer_error, MAXVAL(max_error),extra_flag,te-ts,' %%'
         CALL printlog(amsg)
-        CALL printlog('---------------------------------------------------------------')
+        CALL printlog('-----------------------------------------------------------------')
         flush(stdout_unit)
         flush(log_unit)
       END IF
       IF(print_conv.EQ.1 .AND. rank .EQ. 0) THEN
-        WRITE(21,103) '---------------------------------------------------'
-        WRITE(21,103) '---itn i-itn   max error   max error      extrap---'
-        WRITE(21,102) outer,tot_nInners, max_outer_error, MAXVAL(max_error),extra_flag,' %% '
-        WRITE(21,103) '---------------------------------------------------'
+        WRITE(21,103) '-----------------------------------------------------'
+        WRITE(21,103) '---itn i-itn  max-out-err   max-in-err      extrap---'
+        WRITE(21,102) outer,tot_nInners, max_outer_error, MAXVAL(max_error),extra_flag,' %%'
+        WRITE(21,103) '-----------------------------------------------------'
         flush(21)
       END IF
 103   FORMAT(A)
-102   FORMAT(2I6,2ES12.4,I12,A)
-104   FORMAT(2I6,2ES12.4,I12,ES12.4,A)
+102   FORMAT(2I6,2ES13.4,I12,A)
+104   FORMAT(2I6,2ES13.4,I12,ES12.4,A)
 
       ! Convergence check
 
@@ -360,9 +401,14 @@ CONTAINS
     outer=outer-1
 
     IF (rank .EQ. 0) THEN
-      CALL printlog('========================================================')
+      CALL printlog('=================================================================')
       CALL printlog('   End outer iterations.')
-      CALL printlog('========================================================')
+      CALL printlog('=================================================================')
+    END IF
+    IF(print_conv.EQ.1 .AND. rank .EQ. 0) THEN
+      WRITE(21,'(A)') '====================================================='
+      WRITE(21,'(A)') '   End outer iterations.'
+      WRITE(21,'(A)') '====================================================='
     END IF
     ! Close reflected flux file if page_ref .eq. 1
 
@@ -570,9 +616,14 @@ CONTAINS
 
     ! Keep track of iterations
     IF (rank .EQ. 0) THEN
-      CALL printlog('========================================================')
+      CALL printlog('========================================================================================================')
       CALL printlog('   Begin outer iterations.')
-      CALL printlog('========================================================')
+      CALL printlog('========================================================================================================')
+    END IF
+    IF(print_conv.EQ.1 .AND. rank .EQ. 0) THEN
+      WRITE(21,'(A)') '============================================================================================'
+      WRITE(21,'(A)') '   Begin outer iterations.'
+      WRITE(21,'(A)') '============================================================================================'
     END IF
 
     ! Set error mode extrapolation parameters
@@ -634,6 +685,14 @@ CONTAINS
       ! Compute upscattering
       !=========================================================================
       CALL compute_upscattering(flux, src)
+
+      ! write convergence monitor
+      IF (rank .EQ. 0) THEN
+        CALL printlog('   grp   itn  max-err-flx         time')
+        IF(print_conv.EQ.1) THEN
+          WRITE(21,'(A)')'   grp   itn  max-err-flx'
+        END IF
+      END IF
 
       !=========================================================================
       !Begin Group sweep
@@ -860,24 +919,24 @@ CONTAINS
       ! write information for outer iteration
       !========================================================================
       IF (rank .EQ. 0) THEN
-        CALL printlog('---------------------------------------------------------------------------------------------------')
-        CALL printlog('---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap        time---')
-        WRITE(amsg,102) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,te-ts,' %% '
+        CALL printlog('--------------------------------------------------------------------------------------------------------')
+        CALL printlog('---itn i-itn         keff     err-keff     err-fiss      err-flx       Sp-Rad      extrap        time---')
+        WRITE(amsg,102) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,te-ts,' %%'
         CALL printlog(amsg)
-        CALL printlog('---------------------------------------------------------------------------------------------------')
+        CALL printlog('--------------------------------------------------------------------------------------------------------')
         flush(stdout_unit)
         flush(log_unit)
         IF(print_conv.EQ.1) THEN
-          WRITE(21,101) '---------------------------------------------------------------------------------------'
-          WRITE(21,101) '---itn i-itn        keff    err-keff    err-fiss     err-flx      Sp Rad      extrap---'
-          WRITE(21,105) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,' %% '
-          WRITE(21,101) '---------------------------------------------------------------------------------------'
+          WRITE(21,101) '--------------------------------------------------------------------------------------------'
+          WRITE(21,101) '---itn i-itn         keff     err-keff     err-fiss      err-flx       Sp-Rad      extrap---'
+          WRITE(21,105) outer,tot_nInners ,keff_new, keff_error,fiss_error,flux_error,theta(3),extra_flag,' %%'
+          WRITE(21,101) '--------------------------------------------------------------------------------------------'
           flush(21)
         END IF
       END IF
 101   FORMAT(A)
-102   FORMAT(2I6,5ES12.4,I12,ES12.4,A)
-105   FORMAT(2I6,5ES12.4,I12,A)
+102   FORMAT(2I6,5ES13.4,I12,ES12.4,A)
+105   FORMAT(2I6,5ES13.4,I12,A)
 
       !========================================================================
       ! write iteration results to file if desired
@@ -939,9 +998,14 @@ CONTAINS
     keff=keff_old
 
     IF (rank .EQ. 0) THEN
-      CALL printlog('========================================================')
+      CALL printlog('========================================================================================================')
       CALL printlog('   End outer iterations.')
-      CALL printlog('========================================================')
+      CALL printlog('========================================================================================================')
+    END IF
+    IF(print_conv.EQ.1 .AND. rank .EQ. 0) THEN
+      WRITE(21,'(A)') '============================================================================================'
+      WRITE(21,'(A)') '   End outer iterations.'
+      WRITE(21,'(A)') '============================================================================================'
     END IF
 
     ! Close reflected flux file if page_ref .eq. 1

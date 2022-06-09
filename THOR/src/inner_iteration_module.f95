@@ -88,10 +88,6 @@ CONTAINS
     self_scatter = zero
     sc_flux_old  = zero
 
-    ! write header for convergence monitor
-    IF (rank .EQ. 0) THEN
-      IF(prnt)CALL printlog('   grp  itn       error        time')
-    END IF
     ! Begin inner iteration
 
     DO inner=1, max_inner
@@ -172,16 +168,16 @@ CONTAINS
       ! write convergence monitor
       IF (rank .EQ. 0) THEN
         IF(prnt) THEN
-          WRITE(amsg,101) eg,inner,max_error(eg),te-ts,' % '
+          WRITE(amsg,101) eg,inner,max_error(eg),te-ts,' %'
           CALL printlog(amsg)
           flush(6)
         END IF
         IF(prnt .AND. print_conv.EQ.1) THEN
-          WRITE(21,102) eg,inner,max_error(eg),' % '
+          WRITE(21,102) eg,inner,max_error(eg),' %'
           flush(21)
         END IF
-101     FORMAT (1X,2I5,2ES12.4,A)
-102     FORMAT (1X,2I5,ES12.4,A)
+101     FORMAT (2I6,2ES13.4,A)
+102     FORMAT (2I6,ES13.4,A)
       END IF
     END DO
 

@@ -13,10 +13,10 @@ diff -q ./demonstrate_cartesian_map/cube_cartesian_map.gold      ./demonstrate_c
 diff -q ./demonstrate_cartesian_map/cube_eig_pi_convergence.gold ./demonstrate_cartesian_map/cube_eig_pi_conv.convergence
 diff -q ./demonstrate_cartesian_map/cube_eig_pi_csv.gold         ./demonstrate_cartesian_map/cube_eig_pi_out.csv
 
-diff -q ./Godiva_tutorial/godiva_c_convergence.gold ./Godiva_tutorial/godiva_c_conv.convergence
-diff -q ./Godiva_tutorial/godiva_c_csv.gold         ./Godiva_tutorial/godiva_c_out.csv
-diff -q ./Godiva_tutorial/godiva_o_convergence.gold ./Godiva_tutorial/godiva_o_conv.convergence
-diff -q ./Godiva_tutorial/godiva_o_csv.gold         ./Godiva_tutorial/godiva_o_out.csv
+diff -q ./godiva/godiva_c_convergence.gold ./godiva/godiva_c_conv.convergence
+diff -q ./godiva/godiva_c_csv.gold         ./godiva/godiva_c_out.csv
+diff -q ./godiva/godiva_o_convergence.gold ./godiva/godiva_o_conv.convergence
+diff -q ./godiva/godiva_o_csv.gold         ./godiva/godiva_o_out.csv
 
 diff -q ./homogeneous_cube_keig_1G/keig_jfnk_convergence.gold ./homogeneous_cube_keig_1G/keig_jfnk_conv.convergence
 diff -q ./homogeneous_cube_keig_1G/keig_jfnk_csv.gold         ./homogeneous_cube_keig_1G/keig_jfnk_out.csv

@@ -1,5 +1,12 @@
 #!/bin/bash
 
+numprocs=$1
+
+re='^[0-9]+$'
+if ! [[ $numprocs =~ $re ]] ; then
+   numprocs=1
+fi
+
 codeexec="../../../thor-1.0.exe"
 
 for folder in */ ; do
@@ -7,7 +14,7 @@ for folder in */ ; do
   pwd
   for file in *.inp ; do
     echo $file
-    mpiexec -np 24 $codeexec $file
+    mpiexec -np $numprocs $codeexec $file
   done
   cd ../
 done

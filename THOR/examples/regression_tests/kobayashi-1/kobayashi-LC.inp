@@ -1,6 +1,6 @@
   execution yes ; print_conv yes
   lambda -1
-  type fsrc;
+  problem_type fsrc;
   page_refl save
   innerconv 1E-7 ; outerconv 1E-6
   maxinner 2; maxouter 5000
@@ -8,7 +8,6 @@
   mesh kobayashi-1-0.thrm
   xs kobayashi.xs
   source kobayashi-LC.src
-  flux_out yes
   print_xs yes
   vtk_flux_out yes
   vtk_mat_out yes

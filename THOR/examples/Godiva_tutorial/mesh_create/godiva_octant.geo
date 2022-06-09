@@ -12,7 +12,7 @@
 
 SetFactory("OpenCASCADE");
 
-// Godiva is just a sphere of diameter 8.7407, also make a boxes to remove left half and bottom
+// Godiva is just a sphere of diameter 8.7407, also make a boxes to remove left half, bottom, and back
 Sphere(1) = {0,0,0,8.7407};
 Box(2) = {-10,-10,-10, 10,20,20};
 Box(3) = {0,-10,-10, 10,20,10};
