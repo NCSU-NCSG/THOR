@@ -103,7 +103,7 @@ The \ac{THOR} input file is \verb"godiva_octant.inp".
 The Godiva tutorial input file is verbose and some parameters are ignored as they are not relevant to the problem.
 Upon running \ac{THOR}, a verbose form of the input will always be echoed, and ignored parameters will be highlighted as such.
 \begin{verbatim}
-type                  keig
+problem_type          keig
 keigsolver            pi
 lambda                0
 inflow                no
@@ -309,7 +309,7 @@ Upon running \ac{THOR}, a verbose form of the input will always be echoed, and i
 \begin{verbatim}
   print_conv yes
   lambda 0
-  type keig ; keigsolver pi ; piacc errmode
+  problem_type keig ; keigsolver pi ; piacc errmode
   page_refl save
   innerconv 1E-8 ; outerconv 1E-6
   maxinner 5 ; maxouter 5000

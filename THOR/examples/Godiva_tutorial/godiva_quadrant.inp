@@ -1,4 +1,4 @@
-type                  keig
+problem_type          keig
 keigsolver            pi
 lambda                0
 inflow                no

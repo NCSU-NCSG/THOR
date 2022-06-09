@@ -71,11 +71,11 @@ CONTAINS
     !number of cards param as well
     cards(:)%carg=''
     cards(:)%csub=''
-    !type card
+    !problem_type card
     card_indx=1
-    cards(card_indx)%cname='type'
+    cards(card_indx)%cname='problem_type'
     cards(card_indx)%carg='keig'
-    cards(card_indx)%getcard => get_type
+    cards(card_indx)%getcard => get_problem_type
     !keigsolver card
     card_indx=2
     cards(card_indx)%cname='keigsolver'
@@ -335,7 +335,7 @@ CONTAINS
   END SUBROUTINE inputfile_read
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_type(this_card,wwords)
+  SUBROUTINE get_problem_type(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
 
@@ -347,7 +347,7 @@ CONTAINS
     ELSE
       CALL raise_fatal_error('This is not a valid problem type -- '//TRIM(this_card%carg)//' --')
     ENDIF
-  END SUBROUTINE get_type
+  END SUBROUTINE get_problem_type
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_keigsolver(this_card,wwords)

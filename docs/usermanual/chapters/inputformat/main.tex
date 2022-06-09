@@ -28,15 +28,15 @@ The following describes properties of the keyword based \ac{THOR} input file:
   \item The job name, \verb"<job_name>", is the input filename with extension removed if the extension is ``.in", ``.in", or ``.i"
 \end{itemize}
 
-\subsection{TYPE Card}
+\subsection{PROBLEM_TYPE Card}
 \begin{verbatim}
-  type <prob_type>
+  problem_type <prob_type>
 \end{verbatim}
 \begin{center}
   \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
     \hline
     Keyword & Type & Options & Default \\ \hline
-    \verb"type" & STRING & keig/fsrc & keig \\ \hline \hline
+    \verb"problem_type" & STRING & keig/fsrc & keig \\ \hline \hline
     \multicolumn{4}{| p{0.88\linewidth} |}{Description: Problem type. Either eigenvalue (keig) or fixed source (fsrc)}\\
     \hline
   \end{tabular}
@@ -51,7 +51,7 @@ The following describes properties of the keyword based \ac{THOR} input file:
     \hline
     Keyword & Type & Options & Default \\ \hline
     \verb"keigsolver" & STRING & pi/jfnk & pi \\ \hline \hline
-    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Solve type for keig. Either power iteration (pi) or Jacobian-Free Newton-Krylov (jfnk)}\\
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Solver type for keig. Either power iteration (pi) or Jacobian-Free Newton-Krylov (jfnk)}\\
     \hline
   \end{tabular}
 \end{center}

@@ -1,6 +1,6 @@
   execution yes ; print_conv yes
   lambda -1
-  type keig ; keigsolver pi ; piacc errmode
+  problem_type keig ; keigsolver pi ; piacc errmode
   page_refl save
   kconv 1E-4; innerconv 1E-12 ; outerconv 1E-7
   maxinner 2 ; maxouter 500

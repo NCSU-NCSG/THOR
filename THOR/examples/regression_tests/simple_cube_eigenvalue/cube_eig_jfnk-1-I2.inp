@@ -1,6 +1,6 @@
   execution yes ; print_conv yes
   lambda 0
-  type keig ; keigsolver jfnk ; jfnk_method outer
+  problem_type keig ; keigsolver jfnk ; jfnk_method outer
   page_refl save
   kconv 1E-8; innerconv 1E-12 ; outerconv 1E-7
   maxinner 2 ; maxouter 5000

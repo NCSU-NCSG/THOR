@@ -11,7 +11,7 @@
 !Almost all parameters have a default that can be found in the User Manual.
 
 !solver specifications
-  type                keig
+  problem_type        keig
   keigsolver          pi
   lambda              0
   kconv               1E-8
