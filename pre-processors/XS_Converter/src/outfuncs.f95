@@ -12,6 +12,8 @@ CONTAINS
     SELECTCASE(outformat)
       CASE('thor')
         CALL out_thor()
+      CASE('mcnp')
+        CALL out_mcnp()
       CASE DEFAULT
         STOP 'bad output format'
     ENDSELECT
@@ -54,4 +56,9 @@ CONTAINS
       ENDDO
     ENDDO
   ENDSUBROUTINE out_thor
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  SUBROUTINE out_mcnp()
+    STOP 'out_mcnp not yet complete'
+  ENDSUBROUTINE out_mcnp
 END MODULE outfuncs

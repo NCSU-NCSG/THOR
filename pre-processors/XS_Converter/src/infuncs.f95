@@ -34,7 +34,6 @@ CONTAINS
         WRITE(*,'(A)')'Output cross sections format? Available formats below:'
         WRITE(*,'(A)')'THOR'
         WRITE(*,'(A)')'MCNP'
-        WRITE(*,'(A)')'MPACT'
         WRITE(*,'(A)',ADVANCE='NO')'> '
         READ(*,*)outformat
     END IF
@@ -82,6 +81,9 @@ CONTAINS
                 EXIT
             ENDSELECT
           ENDIF
+        CASE('THOR_XS_V1')
+          informat='thor_v1'
+          EXIT
         CASE DEFAULT
       ENDSELECT
       IF(ios .NE. 0)STOP 'No valid format identifier found'
@@ -94,6 +96,8 @@ CONTAINS
         CALL read_serp_v1()
       CASE('serp_gen_v2')
         CALL read_serp_v2()
+      CASE('thor_v1')
+        CALL read_thor_v1()
       CASE  DEFAULT
         WRITE(*,'(3A)')'ERROR: ',TRIM(informat),' not a known input xs format.'
         STOP 'Fatal error'
@@ -111,7 +115,7 @@ CONTAINS
   SUBROUTINE read_serp_v2()
     CHARACTER(1000) :: tchar1
     INTEGER :: ios,nwords,m,g
-    CHARACTER(100) :: words(200)
+    CHARACTER(100) :: words(2000)
 
     numgroups=0
     nummats=0
@@ -129,6 +133,7 @@ CONTAINS
           CALL parse(tchar1,"=",words,nwords)
           READ(words(2),*)numgroups
           ALLOCATE(eg_struc(numgroups+1))
+          eg_struc=0.0
         ENDIF
       ENDIF
       !get the energy group structure
@@ -183,7 +188,7 @@ CONTAINS
     REAL(8) :: xsvec(numgroups)
     CHARACTER(20000) :: tchar1
     INTEGER :: nwords,g
-    CHARACTER(100) :: words(200)
+    CHARACTER(100) :: words(2000)
 
     !get the xs data
     CALL find_line(xsID)
@@ -204,7 +209,7 @@ CONTAINS
     REAL(8) :: xsvec(numgroups,numgroups)
     CHARACTER(20000) :: tchar1
     INTEGER :: nwords,g,gp
-    CHARACTER(100) :: words(200)
+    CHARACTER(100) :: words(2000)
 
     !get the xs data
     CALL find_line(xsID)
@@ -220,6 +225,97 @@ CONTAINS
       ENDDO
     ENDDO
   ENDSUBROUTINE getserpv2scatdata
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  SUBROUTINE read_thor_v1()
+    INTEGER :: nwords,g,m,gp,l
+    CHARACTER(100) :: words(2000)
+    DO
+      CALL get_thor_line(words,nwords)
+      words(1)=TRIM(ADJUSTL(words(1)))
+      IF(words(1) .EQ. 'THOR_XS_V1')THEN
+        EXIT
+      ENDIF
+    ENDDO
+    READ(words(2),*)nummats
+    READ(words(3),*)numgroups
+    READ(words(4),*)levelanis
+
+    ALLOCATE(chi(nummats,numgroups),sigmaf(nummats,numgroups),nuf(nummats,numgroups))
+    ALLOCATE(sigmat(nummats,numgroups),sigmas(nummats,levelanis+1,numgroups,numgroups))
+    ALLOCATE(eg_struc(numgroups))
+    eg_struc=0.0
+
+    CALL get_thor_line(words,nwords)
+    words(1)=TRIM(ADJUSTL(lowercase(words(1))))
+    IF(words(1) .NE. 'id')THEN
+      DO g=1,numgroups
+        READ(words(g),*)eg_struc(g)
+      ENDDO
+    ENDIF
+    REWIND(22)
+    !get all material datas
+    DO m=1,nummats
+      DO
+        !get next line
+        CALL get_thor_line(words,nwords)
+        words(1)=TRIM(ADJUSTL(lowercase(words(1))))
+        IF(words(1) .EQ. 'id')THEN
+          !read in the fission spectrum
+          CALL get_thor_line(words,nwords)
+          DO g=1,numgroups
+            READ(words(g),*)chi(m,g)
+          ENDDO
+          !read in SigmaF
+          CALL get_thor_line(words,nwords)
+          DO g=1,numgroups
+            READ(words(g),*)sigmaf(m,g)
+          ENDDO
+          !read in nu
+          CALL get_thor_line(words,nwords)
+          DO g=1,numgroups
+            READ(words(g),*)nuf(m,g)
+          ENDDO
+          !read in total/transport xs
+          CALL get_thor_line(words,nwords)
+          DO g=1,numgroups
+            READ(words(g),*)sigmat(m,g)
+          ENDDO
+          !read in scattering xs format gp->g
+          DO l=1,levelanis+1
+            DO g=1,numgroups
+              CALL get_thor_line(words,nwords)
+              DO gp=1,numgroups
+                READ(words(gp),*)sigmas(m,l,g,gp)
+              ENDDO
+            ENDDO
+          ENDDO
+          EXIT
+        ENDIF
+      ENDDO
+    ENDDO
+  ENDSUBROUTINE read_thor_v1
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  SUBROUTINE get_thor_line(words,nwords)
+    INTEGER,INTENT(OUT) :: nwords
+    CHARACTER(100),INTENT(OUT) :: words(2000)
+    CHARACTER(20000) :: tchar1
+    INTEGER :: ios
+    DO
+      READ(22,'(A10000)',IOSTAT=ios)tchar1
+      IF( ios .NE. 0)STOP 'end of xs file was reached before all data/materials were found'
+      tchar1=TRIM(ADJUSTL(tchar1))
+      !finding uncommented line that isn't empty
+      IF(tchar1(1:1) .NE. '!' .AND. tchar1 .NE. '')THEN
+        !ignore commented portions of line
+        CALL parse(tchar1,'!',words,nwords)
+        tchar1=TRIM(ADJUSTL(words(1)))
+        CALL parse(tchar1,' ',words,nwords)
+        EXIT
+      ENDIF
+    ENDDO
+  ENDSUBROUTINE get_thor_line
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE find_line(linechar)
