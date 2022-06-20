@@ -2,7 +2,7 @@
 #Compile Options
 #-----------------------------------------------------------------------------------
 FC := gfortran
-EXE := Mesh_Converter
+EXE := XS_Converter
 EXT := .exe
 
 all:			TYPE :=
@@ -18,16 +18,21 @@ catch:    OPT := -O0 -g -Wall -W -Wsurprising -Werror
 coverage: OPT := -O0 -g --coverage
 
 #-----------------------------------------------------------------------------------
+#Directory Paths
+#-----------------------------------------------------------------------------------
+CONTRIB := ../../../contrib
+
+#-----------------------------------------------------------------------------------
 #Add source files as necessary
 #If the files are not compiled using the generic rules, add commands under their
 #rule declaration. Add these items to FILTER
 #-----------------------------------------------------------------------------------
 SRC := \
-				main.f95 	      	\
-				globals.f95        					\
-				output_thrm.f95      					\
-				boundary_conditions.f95      					\
-				read_gmsh.f95
+				main.f95 \
+				globals.f95 \
+        precision.f95 \
+				outfuncs.f95 \
+				infuncs.f95
 
 OBJ := $(SRC:.f95=.o)
 MOD := $(OBJ:.o=.mod)
@@ -37,12 +42,19 @@ FILTER := \
 OBJ_FILTER := $(FILTER:.f95=.o)
 MOD_FILTER := $(FILTER:.f95=.mod)
 
+#h5 datafiles inclusion
+LIB=usr/lib/x86_64-linux-gnu/hdf5/serial
+INC=usr/include/hdf5/serial
+
 #-----------------------------------------------------------------------------------
-#Complex external dependencies. Each of these requires a custom build rule.
-#Intended for dependencies with their own makefiles or other build system
+#Add simple compile contrib files
 #-----------------------------------------------------------------------------------
-COMP_DEP := \
-#Phony targets for cleaning and building
+CONT_SRC := \
+            $(CONTRIB)/stringmod/stringmod.f95
+
+CONT_OBJ := $(patsubst %.f95,%.o,$(notdir $(CONT_SRC)))
+
+CONT_MOD := $(CONT_OBJ:.o=.mod)
 
 #-----------------------------------------------------------------------------------
 #Phony targets for cleaning and building
@@ -75,32 +87,33 @@ reset: clean
 #Generics for source files
 #-----------------------------------------------------------------------------------
 $(filter-out $(OBJ_FILTER), $(OBJ)): %.o:	%.f95
-	$(FC) -c $(OPT) $<
+	$(FC) -c $(OPT) $< -I/$(INC) -L/$(LIB) -lhdf5_fortran -lhdf5
 
 $(filter-out $(MOD_FILTER), $(MOD)):	%.mod:	%.f95
-	$(FC) -c $(OPT) $<
+	$(FC) -c $(OPT) $< -I/$(INC) -L/$(LIB) -lhdf5_fortran -lhdf5
 
 $(EXE): $(OBJ) $(CONT_OBJ) $(LIB_OBJ)
-	$(FC) -o $@$(TYPE)$(EXT) $(OPT) $(OBJ) $(CONT_OBJ) $(LIB_OBJ)
+	$(FC) -o $@$(TYPE)$(EXT) $(OPT) $(OBJ) $(CONT_OBJ) $(LIB_OBJ) -I/$(INC) -L/$(LIB) -lhdf5_fortran -lhdf5
 	mv ./$(EXE)$(TYPE)$(EXT) ../
 
 #-----------------------------------------------------------------------------------
 #Generics for contrib files
 #-----------------------------------------------------------------------------------
 $(CONT_OBJ): %.o: $(filter %.f95, $(CONT_SRC))
-	$(FC) -c $(OPT) $^
+	$(FC) -c $(OPT) $^ -I/$(INC) -L/$(LIB) -lhdf5_fortran -lhdf5
 
 $(CONT_MOD):	%.mod:	$(filter %.f95, $(CONT_SRC))
-	$(FC) -c $(OPT) $^
+	$(FC) -c $(OPT) $^ -I/$(INC) -L/$(LIB) -lhdf5_fortran -lhdf5
 
 #-----------------------------------------------------------------------------------
 #Generics for lib files
 #-----------------------------------------------------------------------------------
 $(LIB_OBJ):	%.o: $(filter %.f95, $(LIB_SRC))
-	$(FC) -c $(OPT) $^
+	$(FC) -c $(OPT) $^ -I/$(INC) -L/$(LIB) -lhdf5_fortran -lhdf5
 
 $(LIB_MOD): %.mod:	$(filter %.f95, $(LIB_SRC))
-	$(FC) -c $(OPT) $^
+	$(FC) -c $(OPT) $^ -I/$(INC) -L/$(LIB) -lhdf5_fortran -lhdf5
+
 
 #-----------------------------------------------------------------------------------
 #Rules for entries in COMP_DEP. Don't forget to add them to make clean / reset
@@ -110,10 +123,8 @@ $(LIB_MOD): %.mod:	$(filter %.f95, $(LIB_SRC))
 #Dependency List
 #Use [gfortran -M -cpp *.f95] repeatedly until clean compile to update rules below
 #-----------------------------------------------------------------------------------
-boundary_conditions.o boundary_conditions.mod: boundary_conditions.f95 \
- globals.mod
-globals.o globals.mod: globals.f95
-main.o: main.f95 globals.mod read_gmsh.mod output_thrm.mod \
- boundary_conditions.mod
-output_thrm.o output_thrm.mod: output_thrm.f95 globals.mod
-read_gmsh.o read_gmsh.mod: read_gmsh.f95 globals.mod
+globals.o globals.mod: globals.f95 precision.mod
+infuncs.o infuncs.mod: infuncs.f95 globals.mod stringmod.mod
+main.o: main.f95 globals.mod infuncs.mod outfuncs.mod
+outfuncs.o outfuncs.mod: outfuncs.f95 globals.mod
+precision.o precision.mod: precision.f95
