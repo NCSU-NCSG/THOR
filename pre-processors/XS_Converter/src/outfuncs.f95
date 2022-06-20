@@ -1,6 +1,7 @@
 !output functions
 MODULE outfuncs
   USE globals
+  USE HDF5
   IMPLICIT NONE
   PRIVATE
   PUBLIC :: outputxs
@@ -14,11 +15,11 @@ CONTAINS
         CALL out_thor()
       CASE('mcnp')
         CALL out_mcnp()
+      CASE('openmc')
+        CALL out_openmc()
       CASE DEFAULT
         STOP 'bad output format'
     ENDSELECT
-    !close the output file
-    CLOSE(32)
   ENDSUBROUTINE outputxs
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -55,10 +56,31 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
+    !close the output file
+    CLOSE(32)
   ENDSUBROUTINE out_thor
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE out_mcnp()
     STOP 'out_mcnp not yet complete'
   ENDSUBROUTINE out_mcnp
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  SUBROUTINE out_openmc()
+    INTEGER(4) :: err1
+    INTEGER(8) :: h5fileid
+    xsout=TRIM(ADJUSTL(xsout))//'.hdf5'
+
+    h5fileid=32
+
+    !initialize hdf5
+    CALL h5open_f(err1)
+    IF(err1 .NE. 0)STOP 'error opening output file'
+
+    !create h5 file
+    CALL h5fcreate_f(xsout,H5F_ACC_TRUNC_F,h5fileid,err1)
+    IF(err1 .NE. 0)STOP 'error opening output file'
+
+    STOP 'out_openmc not yet complete'
+  ENDSUBROUTINE out_openmc
 END MODULE outfuncs

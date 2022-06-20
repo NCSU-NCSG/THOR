@@ -42,6 +42,10 @@ FILTER := \
 OBJ_FILTER := $(FILTER:.f95=.o)
 MOD_FILTER := $(FILTER:.f95=.mod)
 
+#h5 datafiles inclusion
+LIB=usr/lib/x86_64-linux-gnu/hdf5/serial
+INC=usr/include/hdf5/serial
+
 #-----------------------------------------------------------------------------------
 #Add simple compile contrib files
 #-----------------------------------------------------------------------------------
@@ -83,32 +87,33 @@ reset: clean
 #Generics for source files
 #-----------------------------------------------------------------------------------
 $(filter-out $(OBJ_FILTER), $(OBJ)): %.o:	%.f95
-	$(FC) -c $(OPT) $<
+	$(FC) -c $(OPT) $< -I/$(INC) -L/$(LIB) -lhdf5_fortran -lhdf5
 
 $(filter-out $(MOD_FILTER), $(MOD)):	%.mod:	%.f95
-	$(FC) -c $(OPT) $<
+	$(FC) -c $(OPT) $< -I/$(INC) -L/$(LIB) -lhdf5_fortran -lhdf5
 
 $(EXE): $(OBJ) $(CONT_OBJ) $(LIB_OBJ)
-	$(FC) -o $@$(TYPE)$(EXT) $(OPT) $(OBJ) $(CONT_OBJ) $(LIB_OBJ)
+	$(FC) -o $@$(TYPE)$(EXT) $(OPT) $(OBJ) $(CONT_OBJ) $(LIB_OBJ) -I/$(INC) -L/$(LIB) -lhdf5_fortran -lhdf5
 	mv ./$(EXE)$(TYPE)$(EXT) ../
 
 #-----------------------------------------------------------------------------------
 #Generics for contrib files
 #-----------------------------------------------------------------------------------
 $(CONT_OBJ): %.o: $(filter %.f95, $(CONT_SRC))
-	$(FC) -c $(OPT) $^
+	$(FC) -c $(OPT) $^ -I/$(INC) -L/$(LIB) -lhdf5_fortran -lhdf5
 
 $(CONT_MOD):	%.mod:	$(filter %.f95, $(CONT_SRC))
-	$(FC) -c $(OPT) $^
+	$(FC) -c $(OPT) $^ -I/$(INC) -L/$(LIB) -lhdf5_fortran -lhdf5
 
 #-----------------------------------------------------------------------------------
 #Generics for lib files
 #-----------------------------------------------------------------------------------
 $(LIB_OBJ):	%.o: $(filter %.f95, $(LIB_SRC))
-	$(FC) -c $(OPT) $^
+	$(FC) -c $(OPT) $^ -I/$(INC) -L/$(LIB) -lhdf5_fortran -lhdf5
 
 $(LIB_MOD): %.mod:	$(filter %.f95, $(LIB_SRC))
-	$(FC) -c $(OPT) $^
+	$(FC) -c $(OPT) $^ -I/$(INC) -L/$(LIB) -lhdf5_fortran -lhdf5
+
 
 #-----------------------------------------------------------------------------------
 #Rules for entries in COMP_DEP. Don't forget to add them to make clean / reset

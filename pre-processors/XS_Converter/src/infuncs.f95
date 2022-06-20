@@ -33,7 +33,7 @@ CONTAINS
     ELSE
         WRITE(*,'(A)')'Output cross sections format? Available formats below:'
         WRITE(*,'(A)')'THOR'
-        WRITE(*,'(A)')'MCNP'
+        WRITE(*,'(A)')'OpenMC'
         WRITE(*,'(A)',ADVANCE='NO')'> '
         READ(*,*)outformat
     END IF
@@ -114,7 +114,7 @@ CONTAINS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE read_serp_v2()
     CHARACTER(1000) :: tchar1
-    INTEGER :: ios,nwords,m,g
+    INTEGER :: ios,nwords,m
     CHARACTER(100) :: words(2000)
 
     numgroups=0
