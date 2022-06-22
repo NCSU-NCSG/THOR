@@ -13,7 +13,8 @@ PROGRAM thor_xs_converter
   WRITE(*,'(A)')'Reading in xs data'
   !read in xs file
   CALL readxs()
-  WRITE(*,'(A)')'Outputting xs data'
+  IF(outformat .EQ. 'openmc')xsout=TRIM(xsout)//'.py'
+  WRITE(*,'(2A)')'Outputting xs data to: ',TRIM(xsout)
   !output xs file
   CALL outputxs()
 

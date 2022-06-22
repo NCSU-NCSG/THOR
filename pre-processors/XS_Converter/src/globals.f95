@@ -17,7 +17,7 @@ MODULE globals
   !energy group structure
   REAL(8),ALLOCATABLE :: eg_struc(:)
   !cross section variables
-  REAL(8),ALLOCATABLE :: chi(:,:),sigmaf(:,:),nuf(:,:),sigmat(:,:),sigmas(:,:,:,:)
+  REAL(8),ALLOCATABLE :: chi(:,:),sigmaf(:,:),nuf(:,:),sigmat(:,:),sigmas(:,:,:,:),sigmaa(:,:)
 CONTAINS
 
 END MODULE globals
