@@ -152,7 +152,7 @@ CONTAINS
     WRITE(32,'(A)')"#The following creates the settings and sets the energy mode to multi-group:"
     WRITE(32,'(A)')"settings_file = openmc.Settings()"
     WRITE(32,'(A)')"settings_file.energy_mode = 'multi-group'"
-    WRITE(32,'(A)')"#The user should complete the OpenMC input below by specifying geometry, tallies, settings, etc."
+    WRITE(32,'(A)')"#The user should complete the OpenMC input below by specifying geometry, settings, etc."
   ENDSUBROUTINE out_openmc
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

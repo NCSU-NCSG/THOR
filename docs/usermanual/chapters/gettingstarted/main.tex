@@ -258,12 +258,13 @@ Currently, the THOR \ac{XS} converter only supports the following input/output f
   \item Output formats:
     \begin{itemize}
       \item \verb"THOR" - THOR \ac{XS} format described in Section~\ref{ch:inp:sec:xsfile}
+      \item \verb"OpenMC" - Creates an initial \href{https://www.python.org/}{Python} script for running with \href{https://docs.openmc.org/en/stable/}{OpenMC}.
+        This script only contains the commands to create and use the cross sections so the user must either add it to an existing OpenMC script, or create one with this initial baseline by adding geometry, settings, etc.
     \end{itemize}
 \end{itemize}
 There are also plans to add the following formats for input/output as well:
 \begin{itemize}
-  \item OpenMC
-  \item MPACT
+  \item MPACT/VERA - Export controls allowing.
   \item MCNP - Export controls allowing.
 \end{itemize}
 
