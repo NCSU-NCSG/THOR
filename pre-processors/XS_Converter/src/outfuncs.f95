@@ -68,7 +68,6 @@ CONTAINS
   SUBROUTINE out_openmc()
     INTEGER :: ios,g,m,gp,l
     CHARACTER(64) :: tchar1
-    xsout=TRIM(xsout)//'.py'
     !open xsout file
     OPEN(UNIT=32,FILE=xsout,STATUS='REPLACE',ACTION='WRITE',IOSTAT=ios,IOMSG=tchar1)
     IF(ios .NE. 0)THEN
@@ -86,12 +85,15 @@ CONTAINS
     WRITE(32,'(A)')'###################################-Beginning of Cross Sections-####################################'
     WRITE(32,'(A)')'####################################################################################################'
     WRITE(32,'(A)')'#Group structure:'
-    WRITE(32,'(A,ES15.8)',ADVANCE='NO')'groups = openmc.mgxs.EnergyGroups(',0.0D0
-    DO g=numgroups,1,-1
-      IF(MOD(g,6) .EQ. 0)WRITE(32,'(A)')'                                  '
-      WRITE(32,'(A,ES15.8)',ADVANCE='NO')',',eg_struc(g)
+    WRITE(32,'(A,ES15.8)',ADVANCE='NO')'groups = openmc.mgxs.EnergyGroups([',0.0D0
+    DO g=0,numgroups-1
+      IF(MOD(g+1,6) .EQ. 0)THEN
+        WRITE(32,'(A)')''
+        WRITE(32,'(A)',ADVANCE='NO')'                          '
+      ENDIF
+      WRITE(32,'(A,ES15.8)',ADVANCE='NO')',',eg_struc(numgroups-g)
     ENDDO
-    WRITE(32,'(A)')')'
+    WRITE(32,'(A)')'])'
     DO m=1,nummats
       WRITE(32,'(A,I0,A)')'#Data for Material ',m,':'
       WRITE(32,'(A,I0,A,I0,A)')"mat",m,"_xsdat = openmc.XSdata('mat_",m,"', groups)"
@@ -164,7 +166,10 @@ CONTAINS
 
     WRITE(32,'(A,I0,3A,ES15.8)',ADVANCE='NO')'mat',matnum,'_xsdat.set_',TRIM(ADJUSTL(xstype)),'([',xsarr(1)
     DO g=2,numgroups
-      IF(MOD(g,6) .EQ. 0)WRITE(32,'(A)')'                                  '
+      IF(MOD(g,6) .EQ. 0)THEN
+        WRITE(32,'(A)')''
+        WRITE(32,'(A)',ADVANCE='NO')'                          '
+      ENDIF
       WRITE(32,'(A,ES15.8)',ADVANCE='NO')',',xsarr(g)
     ENDDO
     WRITE(32,'(A)')'], temperature=294.)'
