@@ -152,6 +152,7 @@ CONTAINS
 
     ALLOCATE(chi(nummats,numgroups),sigmaf(nummats,numgroups),nuf(nummats,numgroups))
     ALLOCATE(sigmat(nummats,numgroups),sigmas(nummats,levelanis+1,numgroups,numgroups))
+    ALLOCATE(sigmaa(nummats,numgroups))
 
     m=0
     DO
@@ -162,6 +163,8 @@ CONTAINS
 
         !total xs comes first
         CALL getserpv2xsdata('INF_TOT',sigmat(m,:))
+        !then absorption xs
+        CALL getserpv2xsdata('INF_ABS',sigmaa(m,:))
         !then fission xs
         CALL getserpv2xsdata('INF_FISS',sigmaf(m,:))
         !then nuf
@@ -243,7 +246,7 @@ CONTAINS
 
     ALLOCATE(chi(nummats,numgroups),sigmaf(nummats,numgroups),nuf(nummats,numgroups))
     ALLOCATE(sigmat(nummats,numgroups),sigmas(nummats,levelanis+1,numgroups,numgroups))
-    ALLOCATE(eg_struc(numgroups))
+    ALLOCATE(eg_struc(numgroups),sigmaa(nummats,numgroups))
     eg_struc=0.0
 
     CALL get_thor_line(words,nwords)
@@ -252,9 +255,14 @@ CONTAINS
       DO g=1,numgroups
         READ(words(g),*)eg_struc(g)
       ENDDO
+    ELSE
+      !generate logarithmically even groups
+      DO m=1,numgroups
+        eg_struc(m)=10**(8.0+(m-1.0)*(-14.0D0)/(numgroups-1))
+      ENDDO
     ENDIF
     REWIND(22)
-    !get all material datas
+    !get all materials data
     DO m=1,nummats
       DO
         !get next line
@@ -294,6 +302,8 @@ CONTAINS
         ENDIF
       ENDDO
     ENDDO
+
+    CALL comp_sig_a()
   ENDSUBROUTINE read_thor_v1
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -328,4 +338,18 @@ CONTAINS
     ENDDO
     BACKSPACE(22)
   ENDSUBROUTINE find_line
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  SUBROUTINE comp_sig_a()
+    INTEGER :: m,g,gp
+
+    sigmaa=sigmat
+    DO m=1,nummats
+      DO g=1,numgroups
+        DO gp=1,numgroups
+          sigmaa(m,gp)=sigmaa(m,gp)-sigmas(m,1,g,gp)
+        ENDDO
+      ENDDO
+    ENDDO
+  ENDSUBROUTINE comp_sig_a
 END MODULE infuncs
