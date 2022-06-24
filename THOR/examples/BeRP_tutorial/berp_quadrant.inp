@@ -1,18 +1,20 @@
   print_conv yes
   lambda 0
-  problem_type keig ; keigsolver pi ; piacc errmode
+  problem_type fsrc ; piacc errmode
   page_refl save
   innerconv 1E-8 ; outerconv 1E-6
   maxinner 5 ; maxouter 5000
 
   mesh ./berp_quadrant.thrm
   xs ./berp.xs
+  source ./berp.src
   density_factor berp_quadrant.dens
   vtk_flux_out yes
   vtk_mat_out yes
+  vtk_src_out yes
 
   qdtype levelsym ; qdorder 4
 
   region_map
-  5 1
-  6 2
+  1 1
+  2 2
