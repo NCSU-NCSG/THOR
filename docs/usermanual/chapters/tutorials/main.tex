@@ -4,6 +4,7 @@ This tutorial demonstrates basic \ac{THOR} problem creation and running concepts
 
 The second tutorial is the BeRP tutorial, creating a model of the BeRP ball with 3 inches of polyethylene reflector surrounding the BeRP ball.
 This tutorial demonstrates a more advanced problem involving multiple materials and regions.
+Additionally this is a fixed source problem used to demonstrate the fixed source capabilities of the THOR transport solver.
 
 Since both systems are physically equivalent to one-dimensional spherical problems, the symmetry is taken advantage of and the problems are modeled using a one/eighth model with reflective boundary conditions to be equivalent to the full spheres for the tutorial.
 In the tutorial folders, \\
@@ -185,7 +186,7 @@ The reaction rate summary is given by:
    Region averaged reaction rates
 --------------------------------------------------------
 
--- Region --   5 Volume=   3.309960E+02
+-- Region --   5 -- Material -- mat_1 Volume =   3.309960E+02
    Group          Flux       Fission    Absorption      Fiss Src
        1  8.317355E-01  1.381271E-01  4.883317E-02  1.381271E-01
        2  1.549185E+00  2.298278E-01  9.364997E-02  2.298278E-01
@@ -220,7 +221,7 @@ This tutorial includes the 3 inch polyethylene shield as the shell for the BeRP 
   \label{fig:berp_coarse}
 \end{figure}
 
-This tutorial first explains how a tetrahedral mesh is created for the BeRP ball surrounded by a poly shield, then the cross sections data input is discussed, and finally the standard input to THOR is covered.
+This tutorial first explains how a tetrahedral mesh is created for the BeRP ball surrounded by a poly shield, then the cross sections data input is discussed, the source specification is discussed, and finally the standard input to THOR is covered.
 The input files discussed below for the BeRP tutorial are located in:
 \begin{verbatim}
     >> <thor_dir>/THOR/examples/BeRP_tutorial
@@ -259,10 +260,10 @@ Progress:***********************************************************************
 Progress:***********************************************************************
 ----------------------- Calculating volumes:
 Progress:***********************************************************************
-Region 6 volume:   2.6511347836966994E+01
-Region 6 equivalent radius:   1.8497558414045954E+00
-Region 7 volume:   6.6374040817476271E+02
-Region 7 equivalent radius:   5.4113202652319341E+00
+Region 1 volume:   2.6511347836966994E+01
+Region 1 equivalent radius:   1.8497558414045954E+00
+Region 2 volume:   6.6374040817476271E+02
+Region 2 equivalent radius:   5.4113202652319341E+00
 Total system volume:   6.9025175601172975E+02
 Equivalent radius:   5.4824287000562011E+00
 --------------------------------------------------------------------------------
@@ -298,7 +299,14 @@ By default, this factor is 1.0, which will lead to use of the original cross sec
 However, the user may specify density factors in a density factor file, described in Section~\ref{ch:inp:sec:densfact}.
 For this tutorial, this density factor adjustment is provided by \verb"berp_octant.dens".
 This file differs from the file in the Godiva tutorial in that it gives true region volumes instead of ratios of true to meshed volumes.
-The effect is the same, however it is often simpler to specify the density factors in this manner.
+The effect is the same, however it is often simpler to specify the density factors in this manner since the density file will then need not be changed as the mesh is refined.
+
+\subsection{Source specification}
+
+The \ac{THOR} source file for the BeRP benchmark is provided by \verb"berp.src".
+\ac{THOR} uses a custom source format that is explained in detail in Section~\ref{ch:inp:sec:srcfile}.
+Notice that mapping for source regions is not done (unlike cross section mapping), so the sources must be assigned to the proper source region in the source file compared to the THOR mesh.
+For this problem that simply means source region 1 must be assigned all of the spontaneous fission source since the mesh converter automatically assigns each cell matching region and source IDs, which for the BeRP spehere is region 1 as seen in \verb"berp_octant.geo".
 
 \subsection{THOR input file and executing THOR}
 
@@ -309,22 +317,24 @@ Upon running \ac{THOR}, a verbose form of the input will always be echoed, and i
 \begin{verbatim}
   print_conv yes
   lambda 0
-  problem_type keig ; keigsolver pi ; piacc errmode
+  problem_type fsrc ; piacc errmode
   page_refl save
   innerconv 1E-8 ; outerconv 1E-6
   maxinner 5 ; maxouter 5000
 
   mesh ./berp_octant.thrm
   xs ./berp.xs
+  source ./berp.src
   density_factor berp_octant.dens
   vtk_flux_out yes
   vtk_mat_out yes
+  vtk_src_out yes
 
   qdtype levelsym ; qdorder 4
 
   region_map
-  6 1
-  7 2
+  1 1
+  2 2
 \end{verbatim}
 
 The BeRP tutorial is solved with \ac{THOR} via the command line:
@@ -341,12 +351,11 @@ Completion of execution of the BeRP tutorial is indicated by the printout:
 
 \ac{THOR} provides the following output that is discussed in this tutorial:
 \begin{itemize}
-    \item The final estimate of the multiplication factor is printed under ``Execution Summary'', ``Final eigenvalue''.
-    In this case the value is $1.08$.
     \item A summary of group-wise, region-averaged reaction rates is provided for each region identifier separately under ``Region averaged reaction rates''.
     The volume of each region, and group-wise fluxes, fission, absorption, and fission source rates are listed.
-    \item Two vtk formatted files, \verb"berp_octant_flux.vtk" contains spatial flux maps, and \\
-    \verb"berp_octant_mat.vtk" contains the material map. These files can be opened with the \href{https://www.paraview.org/download/}{ParaView} post-processing tool.
+    \item Three vtk formatted files, \verb"berp_octant_flux.vtk" contains spatial flux maps, \\
+    \verb"berp_octant_mat.vtk" contains the material map, and \verb"berp_octant_src.vtk" contains the specified external source.
+    These files can be opened with the \href{https://www.paraview.org/download/}{ParaView} post-processing tool.
 \end{itemize}
 
 A plot of the thermal flux using ParaView 5.10.0 for this run is shown in Figure~\ref{fig:berp_thermal}.
@@ -363,17 +372,17 @@ The reaction rate summary is given by:
    Region averaged reaction rates
 --------------------------------------------------------
 
--- Region --   6 Volume=   2.651135E+01
+-- Region --   1 -- Material -- plutonium Volume =   2.651135E+01
    Group          Flux       Fission    Absorption      Fiss Src
-       1  4.796767E+00  4.145841E-01  4.913242E-01  1.322154E+00
-       2  1.094419E-02  3.641023E-03  1.236176E-01  1.054076E-02
-   Total  4.807711E+00  4.182251E-01  6.149418E-01  1.332695E+00
+       1  5.196490E+00  4.707251E-01  1.136720E+00  1.472595E+00
+       2  1.081906E-04  2.850034E-03  4.192962E-03  8.191729E-03
+   Total  5.196598E+00  4.735752E-01  1.140913E+00  1.480786E+00
 
--- Region --   7 Volume=   6.637404E+02
+-- Region --   2 -- Material -- poly Volume =   6.637404E+02
    Group          Flux       Fission    Absorption      Fiss Src
-       1  3.984566E-01  0.000000E+00  1.461140E-04  0.000000E+00
-       2  3.051344E-01  0.000000E+00  6.844744E-03  0.000000E+00
-   Total  7.035909E-01  0.000000E+00  6.990858E-03  0.000000E+00
+       1  3.435603E-01  0.000000E+00  1.993624E-02  0.000000E+00
+       2  8.079340E-03  0.000000E+00  1.166605E-03  0.000000E+00
+   Total  3.516397E-01  0.000000E+00  2.110285E-02  0.000000E+00
 \end{verbatim}
 
 The results can be improved by increasing the refinement of the mesh.
