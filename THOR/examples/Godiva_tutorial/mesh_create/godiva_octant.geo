@@ -12,7 +12,7 @@
 
 SetFactory("OpenCASCADE");
 
-// Godiva is just a sphere of diameter 8.7407, also make a boxes to remove left half, bottom, and back
+// Godiva is just a sphere of radius 8.7407, also make a boxes to remove left half, bottom, and back
 Sphere(1) = {0,0,0,8.7407};
 Box(2) = {-10,-10,-10, 10,20,20};
 Box(3) = {0,-10,-10, 10,20,10};
@@ -23,4 +23,4 @@ Box(4) = {0,-10,0, 10,10,10};
 BooleanDifference(5) = { Volume{1}; Delete; }{ Volume{2:4}; Delete; };
 
 // Assign a mesh size to all the points of all the volumes:
-MeshSize{ PointsOf{ Volume{:}; } } = 4;
+MeshSize{ PointsOf{ Volume{:}; } } = 0.1;
