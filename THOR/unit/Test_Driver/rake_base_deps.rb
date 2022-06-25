@@ -22,7 +22,7 @@ module RakeBaseDeps
     if flag.size == 0 or flag == "./"
       flag = ""
     else
-      flag = '"-I' + flag + '"' 
+      flag = '"-I' + flag + '"'
     end
     return flag
   end
@@ -52,7 +52,7 @@ module RakeBaseDeps
   module_function :copy_mod_to_build_dir
 
   def coverage?(basename)
-    if $coverage_fruit_f90 
+    if $coverage_fruit_f90
       if basename == "fruit\." or basename == "fruit_util\."
         return true
       end
@@ -90,7 +90,7 @@ module RakeBaseDeps
     # generated files must be built last
     if OBJ.include?('fruit_basket_gen.' + $ext_obj)
       file 'fruit_basket_gen.' + $ext_obj =>  OBJ - ['fruit_basket_gen.' + $ext_obj,
-                                                     'fruit_driver_gen.' + $ext_obj, 
+                                                     'fruit_driver_gen.' + $ext_obj,
                                                      'fruit_driver_mpi_gen.' + $ext_obj, ]
       file 'fruit_driver_gen.'     + $ext_obj =>  'fruit_basket_gen.' + $ext_obj
       file 'fruit_driver_mpi_gen.' + $ext_obj =>  'fruit_basket_gen.' + $ext_obj
@@ -125,7 +125,7 @@ module RakeBaseDeps
       if $gcov
         $for_coverage.push(basename + "gcda")
       end
-      
+
       #for ifort
       if $prof_genx
         $for_coverage.push(basename + "dyn")
@@ -174,8 +174,8 @@ module RakeBaseDeps
           flag = flag + " " + $prof_genx
         end
 
-        sh "#{$compiler} #{$option} #{$option_obj} " + 
-           "#{name} #{source} #{flag} " + 
+        sh "#{$compiler} #{$option} #{$option_obj} " +
+           "#{name} #{source} #{flag} " +
            "#{FruitProcessor.new.inc_flag($inc_dirs)}"
 
         copy_mod_to_build_dir(FileList["*.mod"])
@@ -184,7 +184,7 @@ module RakeBaseDeps
   end
 
   if $source_dirs
-    puts "======\ndependencies given by " + Pathname(__FILE__).basename.to_s + ":" if $show_info 
+    puts "======\ndependencies given by " + Pathname(__FILE__).basename.to_s + ":" if $show_info
     puts "directries " + $source_dirs.to_s if $show_info
     $source_dirs.each{|dir|
 
@@ -199,7 +199,7 @@ module RakeBaseDeps
           basename   = Pathname.new(ff).basename(fxx).to_s
           basename_o = basename + $ext_obj
 
-          puts basename_o.to_s + " => " + source_fxx if $show_info 
+          puts basename_o.to_s + " => " + source_fxx if $show_info
 
           file basename_o => source_fxx do |t|
             Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
@@ -214,8 +214,8 @@ module RakeBaseDeps
               flag = flag + " " + $prof_genx
             end
 
-            sh "#{$compiler} #{$option} #{$option_obj} " + 
-               "#{name} #{source} #{flag} " + 
+            sh "#{$compiler} #{$option} #{$option_obj} " +
+               "#{name} #{source} #{flag} " +
                "#{FruitProcessor.new.inc_flag($inc_dirs)}"
 
             copy_mod_to_build_dir(FileList["*.mod"])
@@ -223,7 +223,7 @@ module RakeBaseDeps
         end
       }
     }
-    puts "======" if $show_info 
+    puts "======" if $show_info
   end
 
   #`where ...` works on windows vista, 7 and 8. Not works on Windows XP.
@@ -251,7 +251,7 @@ module RakeBaseDeps
       if flag.size == 0 or flag == "./"
         flag = ""
       else
-        flag = '"-I' + flag + '"' 
+        flag = '"-I' + flag + '"'
       end
 
 if $gcov

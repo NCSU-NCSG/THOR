@@ -1,5 +1,6 @@
 !input functions
 MODULE infuncs
+  USE HDF5
   USE globals
   USE stringmod
   IMPLICIT NONE
@@ -50,6 +51,7 @@ CONTAINS
     CHARACTER(100) :: words(200)
 
     !open xsin file
+    xsin=TRIM(ADJUSTL(xsin))
     OPEN(UNIT=22,FILE=xsin,STATUS='OLD',ACTION='READ',IOSTAT=ios,IOMSG=tchar1)
     IF(ios .NE. 0)THEN
         WRITE(*,'(A)')tchar1
@@ -59,6 +61,10 @@ CONTAINS
     !find the input format
     informat=''
     DO
+      IF(xsin(LEN_TRIM(xsin)-2:LEN_TRIM(xsin)) .EQ. ".h5")THEN
+        informat='openmc'
+        EXIT
+      ENDIF
       READ(22,*,IOSTAT=ios)tchar1
       SELECTCASE(tchar1)
         CASE('VERSION')
@@ -98,6 +104,8 @@ CONTAINS
         CALL read_serp_v2()
       CASE('thor_v1')
         CALL read_thor_v1()
+      CASE('openmc')
+        CALL read_openmc()
       CASE  DEFAULT
         WRITE(*,'(3A)')'ERROR: ',TRIM(informat),' not a known input xs format.'
         STOP 'Fatal error'
@@ -305,6 +313,170 @@ CONTAINS
 
     CALL comp_sig_a()
   ENDSUBROUTINE read_thor_v1
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  SUBROUTINE read_openmc()
+    INTEGER :: err1,m
+    INTEGER(HID_T) :: file_id,group_id,dataset_id,dataspace_id,temp_hid1(3),temp_hid2(3)
+    CHARACTER(1) :: rootname
+    CHARACTER(64) :: main_group,cell_group
+
+    CALL h5open_f(err1)
+    IF (err1 .LT. 0) THEN
+      STOP " *** Error initializing HDF5 routines"
+    ENDIF
+
+    CALL h5fopen_f(xsin, H5F_ACC_RDONLY_F, file_id, err1)
+    IF (err1 .LT. 0) THEN
+      STOP " *** Error opening HDF5 file"
+    ENDIF
+
+    !determine number of materials
+    CALL h5gn_members_f(file_id,'/cell/',nummats,err1)
+    IF (err1 .LT. 0) THEN
+      STOP " *** Error reading in cell numbers"
+    ELSEIF(nummats .LE. 0)THEN
+      STOP ' *** Error less that 1 cells found'
+    ENDIF
+
+    !determine number of energy groups
+    CALL h5dopen_f(file_id,'/cell/1/total/average',dataset_id,err1)
+    IF (err1 .LT. 0) THEN
+      STOP " *** Error opening HDF5 dataset"
+    ENDIF
+    CALL h5dget_space_f(dataset_id,dataspace_id,err1)
+    IF (err1 .LT. 0) THEN
+      STOP " *** Error opening HDF5 dataspace"
+    ENDIF
+    CALL h5sget_simple_extent_ndims_f(dataspace_id,m,err1)
+    IF (err1 .LT. 0) THEN
+      STOP " *** Error opening getting level of anisotropy 1"
+    ENDIF
+    CALL h5sget_simple_extent_dims_f(dataspace_id,temp_hid1,temp_hid2,err1)
+    IF (err1 .LT. 0) THEN
+      STOP " *** Error getting number of energy groups"
+    ENDIF
+    numgroups=temp_hid1(1)
+
+    !determine level of anisotropy
+    CALL h5dopen_f(file_id,'/cell/1/scatter matrix/average',dataset_id,err1)
+    IF (err1 .LT. 0) THEN
+      STOP " *** Error opening HDF5 dataset"
+    ENDIF
+    CALL h5dget_space_f(dataset_id,dataspace_id,err1)
+    IF (err1 .LT. 0) THEN
+      STOP " *** Error opening getting HDF5 dataspace"
+    ENDIF
+    CALL h5sget_simple_extent_ndims_f(dataspace_id,m,err1)
+    IF (err1 .LT. 0) THEN
+      STOP " *** Error opening getting level of anisotropy"
+    ENDIF
+    IF(m .EQ. 2)THEN
+      levelanis=0
+    ELSEIF(m .EQ. 3)THEN
+      CALL h5sget_simple_extent_dims_f(dataspace_id,temp_hid1,temp_hid2,err1)
+      IF (err1 .LT. 0) THEN
+        STOP " *** Error getting number of energy groups"
+      ENDIF
+      levelanis=temp_hid1(1)-1
+    ELSE
+      STOP 'bad number of anisotropy determinants, only use legendre orders!'
+    ENDIF
+
+    ALLOCATE(chi(nummats,numgroups),sigmaf(nummats,numgroups),nuf(nummats,numgroups))
+    ALLOCATE(sigmat(nummats,numgroups),sigmas(nummats,levelanis+1,numgroups,numgroups))
+    ALLOCATE(eg_struc(numgroups),sigmaa(nummats,numgroups))
+    eg_struc=0.0
+
+    !generate logarithmically even groups
+    DO m=1,numgroups
+      eg_struc(m)=10**(8.0+(m-1.0)*(-14.0D0)/(numgroups-1))
+    ENDDO
+
+    DO m=1,nummats
+      WRITE(cell_group,'(A,I0,A)')'/cell/',m,'/chi/average'
+      CALL readin_omc_xs(file_id,TRIM(cell_group),chi(m,:))
+      WRITE(cell_group,'(A,I0,A)')'/cell/',m,'/fission/average'
+      CALL readin_omc_xs(file_id,TRIM(cell_group),sigmaf(m,:))
+      WRITE(cell_group,'(A,I0,A)')'/cell/',m,'/nu-fission/average'
+      CALL readin_omc_xs(file_id,TRIM(cell_group),nuf(m,:))
+      IF(MINVAL(sigmaf(m,:)) .GT. 0.0D0)nuf(m,:)=nuf(m,:)/sigmaf(m,:)
+      WRITE(cell_group,'(A,I0,A)')'/cell/',m,'/total/average'
+      CALL readin_omc_xs(file_id,TRIM(cell_group),sigmat(m,:))
+      WRITE(cell_group,'(A,I0,A)')'/cell/',m,'/scatter matrix/average'
+      CALL readin_omc_smat(file_id,TRIM(cell_group),sigmas(m,:,:,:))
+    ENDDO
+
+    CALL comp_sig_a()
+  ENDSUBROUTINE read_openmc
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  SUBROUTINE readin_omc_xs(file_id,group_char,xs_arr)
+    INTEGER(HID_T),INTENT(IN) :: file_id
+    CHARACTER(*),INTENT(IN) :: group_char
+    REAL(8),INTENT(OUT) :: xs_arr(:)
+    INTEGER(HID_T) :: dataset_id,datatype_id,dataspace_id
+    INTEGER(HSIZE_T) :: dims(1)
+    INTEGER :: err1
+
+    CALL h5dopen_f(file_id,group_char,dataset_id,err1)
+    IF (err1 .LT. 0) THEN
+      STOP " *** Error opening HDF5 dataset"
+    ENDIF
+    CALL h5dget_space_f(dataset_id,dataspace_id,err1)
+    IF (err1 .LT. 0) THEN
+      STOP " *** Error opening HDF5 dataspace"
+    ENDIF
+    CALL h5dget_type_f(dataset_id,datatype_id,err1)
+    IF (err1 .LT. 0) THEN
+      STOP " *** Error opening HDF5 dataspace"
+    ENDIF
+
+    xs_arr=0.0
+    dims=numgroups
+    CALL h5dread_f(dataset_id,datatype_id,xs_arr,dims,err1)
+    IF (err1 .LT. 0) THEN
+      STOP " *** Error opening HDF5 data"
+    ENDIF
+  ENDSUBROUTINE readin_omc_xs
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  SUBROUTINE readin_omc_smat(file_id,group_char,scat_arr)
+    INTEGER(HID_T),INTENT(IN) :: file_id
+    CHARACTER(*),INTENT(IN) :: group_char
+    REAL(8),INTENT(OUT) :: scat_arr(:,:,:)
+    INTEGER(HID_T) :: dataset_id,datatype_id,dataspace_id
+    INTEGER(HSIZE_T) :: dims(3)
+    INTEGER :: err1,l
+
+    CALL h5dopen_f(file_id,group_char,dataset_id,err1)
+    IF (err1 .LT. 0) THEN
+      STOP " *** Error opening HDF5 dataset"
+    ENDIF
+    CALL h5dget_space_f(dataset_id,dataspace_id,err1)
+    IF (err1 .LT. 0) THEN
+      STOP " *** Error opening HDF5 dataspace"
+    ENDIF
+    CALL h5dget_type_f(dataset_id,datatype_id,err1)
+    IF (err1 .LT. 0) THEN
+      STOP " *** Error opening HDF5 dataspace"
+    ENDIF
+
+    scat_arr=0.0
+    dims=numgroups
+    IF(levelanis .EQ. 0)THEN
+      CALL h5dread_f(dataset_id,datatype_id,scat_arr(1,:,:),dims(1:2),err1)
+      IF (err1 .LT. 0) THEN
+        STOP " *** Error opening HDF5 data"
+      ENDIF
+    ELSE
+      dims(1)=levelanis+1
+      CALL h5dread_f(dataset_id,datatype_id,scat_arr,dims,err1)
+      IF (err1 .LT. 0) THEN
+        STOP " *** Error opening HDF5 data"
+      ENDIF
+    ENDIF
+  ENDSUBROUTINE readin_omc_smat
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_thor_line(words,nwords)

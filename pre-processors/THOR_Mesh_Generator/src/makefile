@@ -27,28 +27,28 @@ LIB     := ../../../lib
 #rule declaration. Add these items to FILTER
 #-----------------------------------------------------------------------------------
 SRC := \
-				mesh_converter.f95 	      	\
-				globals.f95        					\
-				thor_mesh.f95      					\
-				unv.f95      					\
-				boundary_conditions.f95      					\
-				gmesh.f95
+				mesh_converter.f90 	      	\
+				globals.f90        					\
+				thor_mesh.f90      					\
+				unv.f90      					\
+				boundary_conditions.f90      					\
+				gmesh.f90
 
-OBJ := $(SRC:.f95=.o)
+OBJ := $(SRC:.f90=.o)
 MOD := $(OBJ:.o=.mod)
 
 FILTER := \
 
-OBJ_FILTER := $(FILTER:.f95=.o)
-MOD_FILTER := $(FILTER:.f95=.mod)
+OBJ_FILTER := $(FILTER:.f90=.o)
+MOD_FILTER := $(FILTER:.f90=.mod)
 
 #-----------------------------------------------------------------------------------
 #Add simple compile contrib files
 #-----------------------------------------------------------------------------------
 CONT_SRC :=\
-						$(CONTRIB)/tet_mesh_tet_neighbors/tet_mesh_tet_neighbors.f95
+						$(CONTRIB)/tet_mesh_tet_neighbors/tet_mesh_tet_neighbors.f90
 
-CONT_OBJ := $(patsubst %.f95,%.o,$(notdir $(CONT_SRC)))
+CONT_OBJ := $(patsubst %.f90,%.o,$(notdir $(CONT_SRC)))
 
 CONT_MOD := $(CONT_OBJ:.o=.mod)
 
@@ -56,9 +56,9 @@ CONT_MOD := $(CONT_OBJ:.o=.mod)
 #Add lib files
 #-----------------------------------------------------------------------------------
 LIB_SRC := \
-						$(LIB)/integer_array_tools/integer_array_tools.f95
+						$(LIB)/integer_array_tools/integer_array_tools.f90
 
-LIB_OBJ := $(patsubst %.f95,%.o,$(notdir $(LIB_SRC)))
+LIB_OBJ := $(patsubst %.f90,%.o,$(notdir $(LIB_SRC)))
 
 LIB_MOD := $(LIB_OBJ:.o=.mod)
 
@@ -97,10 +97,10 @@ reset: clean
 #-----------------------------------------------------------------------------------
 #Generics for source files
 #-----------------------------------------------------------------------------------
-$(filter-out $(OBJ_FILTER), $(OBJ)): %.o:	%.f95
+$(filter-out $(OBJ_FILTER), $(OBJ)): %.o:	%.f90
 	$(FC) -c $(OPT) $<
 
-$(filter-out $(MOD_FILTER), $(MOD)):	%.mod:	%.f95
+$(filter-out $(MOD_FILTER), $(MOD)):	%.mod:	%.f90
 	$(FC) -c $(OPT) $<
 
 $(EXE): $(OBJ) $(CONT_OBJ) $(LIB_OBJ)
@@ -110,19 +110,19 @@ $(EXE): $(OBJ) $(CONT_OBJ) $(LIB_OBJ)
 #-----------------------------------------------------------------------------------
 #Generics for contrib files
 #-----------------------------------------------------------------------------------
-$(CONT_OBJ): %.o: $(filter %.f95, $(CONT_SRC))
+$(CONT_OBJ): %.o: $(filter %.f90, $(CONT_SRC))
 	$(FC) -c $(OPT) $^
 
-$(CONT_MOD):	%.mod:	$(filter %.f95, $(CONT_SRC))
+$(CONT_MOD):	%.mod:	$(filter %.f90, $(CONT_SRC))
 	$(FC) -c $(OPT) $^
 
 #-----------------------------------------------------------------------------------
 #Generics for lib files
 #-----------------------------------------------------------------------------------
-$(LIB_OBJ):	%.o: $(filter %.f95, $(LIB_SRC))
+$(LIB_OBJ):	%.o: $(filter %.f90, $(LIB_SRC))
 	$(FC) -c $(OPT) $^
 
-$(LIB_MOD): %.mod:	$(filter %.f95, $(LIB_SRC))
+$(LIB_MOD): %.mod:	$(filter %.f90, $(LIB_SRC))
 	$(FC) -c $(OPT) $^
 
 #-----------------------------------------------------------------------------------
@@ -131,19 +131,19 @@ $(LIB_MOD): %.mod:	$(filter %.f95, $(LIB_SRC))
 
 #-----------------------------------------------------------------------------------
 #Dependency List
-#Use [gfortran -M -cpp *.f95] repeatedly until clean compile to update rules below
+#Use [gfortran -M -cpp *.f90] repeatedly until clean compile to update rules below
 #-----------------------------------------------------------------------------------
-boundary_conditions.o boundary_conditions.mod: boundary_conditions.f95
+boundary_conditions.o boundary_conditions.mod: boundary_conditions.f90
 
-globals.o globals.mod: globals.f95 integer_array_tools.mod \
+globals.o globals.mod: globals.f90 integer_array_tools.mod \
  tet_mesh_tet_neighbors.mod
 
-gmesh.o gmesh.mod: gmesh.f95 globals.mod
+gmesh.o gmesh.mod: gmesh.f90 globals.mod
 
-mesh_converter.o: mesh_converter.f95 globals.mod gmesh.mod unv.mod \
+mesh_converter.o: mesh_converter.f90 globals.mod gmesh.mod unv.mod \
  thor_mesh.mod integer_array_tools.mod
 
-thor_mesh.o thor_mesh.mod: thor_mesh.f95 globals.mod \
+thor_mesh.o thor_mesh.mod: thor_mesh.f90 globals.mod \
  tet_mesh_tet_neighbors.mod
 
-unv.o unv.mod: unv.f95 globals.mod boundary_conditions.mod
+unv.o unv.mod: unv.f90 globals.mod boundary_conditions.mod
