@@ -33,7 +33,7 @@ module RakeBase
   #          "-Wuninitialized -O -g -Wno-unused-parameter -cpp"
   #$ext_obj = "o"
   #$dosish_path = false
-  # # With " -std=f95",
+  # # With " -std=f90",
   # # subroutines whose name is longer than 31 characters cause error.
 
 

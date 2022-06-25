@@ -23,19 +23,19 @@ coverage: OPT := -O0 -g --coverage
 #rule declaration. Add these items to FILTER
 #-----------------------------------------------------------------------------------
 SRC := \
-				main.f95 	      	\
-				globals.f95        					\
-				output_thrm.f95      					\
-				boundary_conditions.f95      					\
-				read_gmsh.f95
+				main.f90 	      	\
+				globals.f90        					\
+				output_thrm.f90      					\
+				boundary_conditions.f90      					\
+				read_gmsh.f90
 
-OBJ := $(SRC:.f95=.o)
+OBJ := $(SRC:.f90=.o)
 MOD := $(OBJ:.o=.mod)
 
 FILTER := \
 
-OBJ_FILTER := $(FILTER:.f95=.o)
-MOD_FILTER := $(FILTER:.f95=.mod)
+OBJ_FILTER := $(FILTER:.f90=.o)
+MOD_FILTER := $(FILTER:.f90=.mod)
 
 #-----------------------------------------------------------------------------------
 #Complex external dependencies. Each of these requires a custom build rule.
@@ -74,10 +74,10 @@ reset: clean
 #-----------------------------------------------------------------------------------
 #Generics for source files
 #-----------------------------------------------------------------------------------
-$(filter-out $(OBJ_FILTER), $(OBJ)): %.o:	%.f95
+$(filter-out $(OBJ_FILTER), $(OBJ)): %.o:	%.f90
 	$(FC) -c $(OPT) $<
 
-$(filter-out $(MOD_FILTER), $(MOD)):	%.mod:	%.f95
+$(filter-out $(MOD_FILTER), $(MOD)):	%.mod:	%.f90
 	$(FC) -c $(OPT) $<
 
 $(EXE): $(OBJ) $(CONT_OBJ) $(LIB_OBJ)
@@ -87,19 +87,19 @@ $(EXE): $(OBJ) $(CONT_OBJ) $(LIB_OBJ)
 #-----------------------------------------------------------------------------------
 #Generics for contrib files
 #-----------------------------------------------------------------------------------
-$(CONT_OBJ): %.o: $(filter %.f95, $(CONT_SRC))
+$(CONT_OBJ): %.o: $(filter %.f90, $(CONT_SRC))
 	$(FC) -c $(OPT) $^
 
-$(CONT_MOD):	%.mod:	$(filter %.f95, $(CONT_SRC))
+$(CONT_MOD):	%.mod:	$(filter %.f90, $(CONT_SRC))
 	$(FC) -c $(OPT) $^
 
 #-----------------------------------------------------------------------------------
 #Generics for lib files
 #-----------------------------------------------------------------------------------
-$(LIB_OBJ):	%.o: $(filter %.f95, $(LIB_SRC))
+$(LIB_OBJ):	%.o: $(filter %.f90, $(LIB_SRC))
 	$(FC) -c $(OPT) $^
 
-$(LIB_MOD): %.mod:	$(filter %.f95, $(LIB_SRC))
+$(LIB_MOD): %.mod:	$(filter %.f90, $(LIB_SRC))
 	$(FC) -c $(OPT) $^
 
 #-----------------------------------------------------------------------------------
@@ -108,12 +108,12 @@ $(LIB_MOD): %.mod:	$(filter %.f95, $(LIB_SRC))
 
 #-----------------------------------------------------------------------------------
 #Dependency List
-#Use [gfortran -M -cpp *.f95] repeatedly until clean compile to update rules below
+#Use [gfortran -M -cpp *.f90] repeatedly until clean compile to update rules below
 #-----------------------------------------------------------------------------------
-boundary_conditions.o boundary_conditions.mod: boundary_conditions.f95 \
+boundary_conditions.o boundary_conditions.mod: boundary_conditions.f90 \
  globals.mod
-globals.o globals.mod: globals.f95
-main.o: main.f95 globals.mod read_gmsh.mod output_thrm.mod \
+globals.o globals.mod: globals.f90
+main.o: main.f90 globals.mod read_gmsh.mod output_thrm.mod \
  boundary_conditions.mod
-output_thrm.o output_thrm.mod: output_thrm.f95 globals.mod
-read_gmsh.o read_gmsh.mod: read_gmsh.f95 globals.mod
+output_thrm.o output_thrm.mod: output_thrm.f90 globals.mod
+read_gmsh.o read_gmsh.mod: read_gmsh.f90 globals.mod
