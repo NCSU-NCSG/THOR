@@ -20,6 +20,7 @@ The \ac{LAPACK} submodule can be initialized by:
 \begin{verbatim}
     >> git submodule update --init
 \end{verbatim}
+This will also add the OpenXSConverter submodule described in Section~\ref{ch:getstart:sec:preproc:subsec:xsconv}.
 The \ac{LAPACK} submodule is not expected to change at all.
 However, if it does, the \ac{THOR} repository keeps track of the associated version of the \ac{LAPACK} repository, so the user may run:
 \begin{verbatim}
@@ -219,36 +220,37 @@ It should be noted that if reflective boundary conditions are specified, then th
 If the user tries to assign reflective boundary conditions to a direction with a non-flat boundary, then the converter utility will throw an error and terminate.
 This check is ignored if all boundary conditions are reflective.
 
-\subsection{Cross Section Converter}\label{ch:getstart:sec:preproc:subsec:xsconv}
+\subsection{OpenXSConverter}\label{ch:getstart:sec:preproc:subsec:xsconv}
 
-The \ac{XS} converter is the current recommended pre-processessing utility for \ac{THOR} cross sections.
+The OpenXSConverter is the current recommended pre-processessing utility for \ac{THOR} cross sections.
 This converter takes one of several different input \ac{XS} formats and converts them to one of several different output \ac{XS} formats.
 
-The \ac{XS} converter DOES have software requirements that are not also required by \ac{THOR}, namely the HDF5 developer's tools.
-If the user wishes to acquire HDF5 in order to install and use the \ac{XS} converter, they may do so with the command (for deb package managers):
+The OpenXSConverter DOES have software requirements that are not also required by \ac{THOR}, namely the HDF5 developer's tools.
+If the user wishes to acquire HDF5 in order to install and use OpenXSConverter, they may do so with the command (for deb package managers):
 \begin{verbatim}
   >> sudo apt install libhdf5-dev
 \end{verbatim}
-To compile the \ac{XS} converter, navigate to the source folder:
+To compile OpenXSConverter, navigate to the source folder (assuming it has been added through \\
+\verb"git submodule update --init"):
 \begin{verbatim}
-  >> cd <thor_dir>/pre-processors/XS_Converter/src
+  >> cd <thor_dir>/pre-processors/OpenXSConverter/src
 \end{verbatim}
-and then make the converter by typing:
+and then make OpenXSConverter by typing:
 \begin{verbatim}
   >> make
 \end{verbatim}
-A successful compilation of the \ac{XS} converter will conclude with the line:
+A successful compilation of OpenXSConverter will conclude with the line:
 \begin{verbatim}
-  >> mv ./XS_Converter.exe ../
+  >> mv ./OpenXSConverter.exe ../
 \end{verbatim}
 
-To run the \ac{XS} converter, simply invoke the \ac{XS} converter binary and follow it immediately with the XS input file followed by the XS output format (where \verb"<xs_in>" is the name of the XS input file and \verb"<out_form>" is the output format):
+To run OpenXSConverter, simply invoke the OpenXSConverter binary and follow it immediately with the XS input file followed by the XS output format (where \verb"<xs_in>" is the name of the XS input file and \verb"<out_form>" is the output format):
 \begin{verbatim}
-  >> <path_to_XS_Converter>/XS_Converter.exe <xs_in> <out_form>
+  >> <path_to_XS_Converter>/OpenXSConverter.exe <xs_in> <out_form>
 \end{verbatim}
 The output file will be titled \verb"<xs_in>_<out_form>.out" unless the output is for an HDF5 format (such as OpenMC cross sections), in which case it will be of the form \verb"<xs_in>_<out_form>.out.h5".
 
-Currently, the THOR \ac{XS} converter only supports the following input/output formats:
+Currently, OpenXSConverter only supports the following input/output formats:
 \begin{itemize}
   \item Input formats:
     \begin{itemize}
