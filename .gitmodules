@@ -1,3 +1,6 @@
 [submodule "contrib/lapack"]
 	path = contrib/lapack
 	url = https://github.com/reference-lapack/lapack
+[submodule "pre-processors/OpenXSConverter"]
+	path = pre-processors/OpenXSConverter
+	url = https://github.com/nfherrin/OpenXSConverter.git
