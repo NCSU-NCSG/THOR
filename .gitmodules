@@ -4,3 +4,6 @@
 [submodule "pre-processors/OpenXSConverter"]
 	path = pre-processors/OpenXSConverter
 	url = https://github.com/nfherrin/OpenXSConverter.git
+[submodule "pre-processors/OpenMeshConverter"]
+	path = pre-processors/OpenMeshConverter
+	url = https://github.com/nfherrin/OpenMeshConverter.git

@@ -1,4 +1,4 @@
-\ac{THOR} currently includes two tutorials to guide new users through the process of creating a mesh with Gmsh, using the Mesh Converter to make it a \ac{THOR} mesh, and running \ac{THOR} using that mesh.
+\ac{THOR} currently includes two tutorials to guide new users through the process of creating a mesh with Gmsh, using OpenMeshConverter to make it a \ac{THOR} mesh, and running \ac{THOR} using that mesh.
 The first tutorial is the Godiva tutorial, creating a model of the bare Godiva critical experiment sphere, meshing it, and running it with \ac{THOR}.
 This tutorial demonstrates basic \ac{THOR} problem creation and running concepts.
 
@@ -45,10 +45,10 @@ The mesh should be generated and now become visible in the \ac{GUI}.
 Now, select the ``Save'' command from the same ``Mesh'' dropdown to save the generated mesh to \verb"godiva_octant.msh".
 This mesh may be compared to the provided \verb"godiva_octant_msh.ref", however they may differ slightly if the versions differ or if optimization of the mesh is employed.
 
-The gmsh file \verb"godiva_octant.msh" is converted to \ac{THOR}'s native mesh format by executing the Mesh Converter with the command line:
+The gmsh file \verb"godiva_octant.msh" is converted to \ac{THOR}'s native mesh format by executing OpenMeshConverter with the command line:
 \begin{verbatim}
-  >> <thor_dir>/THOR/pre-processors/Mesh_Converter/Mesh_Converter.exe convert_godiva.msh
-     -bc 1 0 1 0 1 0
+  >> <thor_dir>/THOR/pre-processors/OpenMeshConverter/OpenMeshConverter.exe
+      convert_godiva.msh -bc 1 0 1 0 1 0
 \end{verbatim}
 Note that since we are modeling the fully positive octant of the sphere we are setting all of the flat negative faces to be reflective (see Section~\ref{ch:getstart:sec:preproc:subsec:meshconv} for more details).
 After successful completion of the conversion, the following printout should appear:
@@ -68,7 +68,7 @@ Equivalent radius:   4.2911933629822876E+00
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
------------------------- THOR mesh converter successful ------------------------
+------------------------- OpenMeshConverter successful -------------------------
 ----------------------- Output written to godiva_octant.thrm
 \end{verbatim}
 
@@ -244,10 +244,10 @@ The mesh should be generated and now become visible in the \ac{GUI}.
 Now, select the ``Save'' command from the same ``Mesh'' dropdown to save the generated mesh to \verb"berp_octant.msh".
 This mesh may be compared to the provided \verb"berp_octant_msh.ref", however they may differ slightly if the versions differ or if optimization of the mesh is employed.
 
-The gmsh file \verb"berp_octant.msh" is converted to \ac{THOR}'s native mesh format by executing the Mesh Converter with the command line:
+The gmsh file \verb"berp_octant.msh" is converted to \ac{THOR}'s native mesh format by executing OpenMeshConverter with the command line:
 \begin{verbatim}
-  >> <thor_dir>/THOR/pre-processors/Mesh_Converter/Mesh_Converter.exe berp_octant.msh
-     -bc 1 0 1 0 1 0
+  >> <thor_dir>/THOR/pre-processors/OpenMeshConverter/OpenMeshConverter.exe
+      berp_octant.msh -bc 1 0 1 0 1 0
 \end{verbatim}
 Note that since we are modeling the fully positive octant of the sphere we are setting all of the flat negative faces to be reflective (see Section~\ref{ch:getstart:sec:preproc:subsec:meshconv} for more details).
 After successful completion of the conversion, the following printout should appear:
@@ -269,7 +269,7 @@ Equivalent radius:   5.4824287000562011E+00
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
------------------------- THOR mesh converter successful ------------------------
+------------------------- OpenMeshConverter successful -------------------------
 ----------------------- Output written to berp_octant.thrm
 \end{verbatim}
 
@@ -306,7 +306,7 @@ The effect is the same, however it is often simpler to specify the density facto
 The \ac{THOR} source file for the BeRP benchmark is provided by \verb"berp.src".
 \ac{THOR} uses a custom source format that is explained in detail in Section~\ref{ch:inp:sec:srcfile}.
 Notice that mapping for source regions is not done (unlike cross section mapping), so the sources must be assigned to the proper source region in the source file compared to the THOR mesh.
-For this problem that simply means source region 1 must be assigned all of the spontaneous fission source since the mesh converter automatically assigns each cell matching region and source IDs, which for the BeRP spehere is region 1 as seen in \verb"berp_octant.geo".
+For this problem that simply means source region 1 must be assigned all of the spontaneous fission source since OpenMeshConverter automatically assigns each cell matching region and source IDs, which for the BeRP spehere is region 1 as seen in \verb"berp_octant.geo".
 
 \subsection{THOR input file and executing THOR}
 

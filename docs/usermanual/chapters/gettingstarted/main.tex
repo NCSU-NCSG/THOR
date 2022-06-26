@@ -20,6 +20,7 @@ The \ac{LAPACK} submodule can be initialized by:
 \begin{verbatim}
     >> git submodule update --init
 \end{verbatim}
+This will also add the OpenXSConverter and OpenMeshConverter submodules described in Sections~\ref{ch:getstart:sec:preproc:subsec:xsconv} and~\ref{ch:getstart:sec:preproc:subsec:meshconv}.
 The \ac{LAPACK} submodule is not expected to change at all.
 However, if it does, the \ac{THOR} repository keeps track of the associated version of the \ac{LAPACK} repository, so the user may run:
 \begin{verbatim}
@@ -171,84 +172,86 @@ Here \verb"<n>" is the number of processors to use (default 1).
 These tests will take some time.
 For 24 threads, these tests take about 2 to 3 hours.
 As such, it is recommended that this testing be performed overnight.
-It should also be noted that two of the inputs, \verb"homogeneous_cube_keig_1G/keig_jfnk.inp" and \verb"takeda-IV/takeda_jfnk.inp", use JFNK in problems with opposing reflective boundary conditions.
+It should also be noted that two of the inputs, \verb"homogeneous_cube_keig_1G/keig_jfnk.inp" and \\
+\verb"takeda-IV/takeda_jfnk.inp", use JFNK in problems with opposing reflective boundary conditions.
 \ac{THOR} currently does not support the running of such problems in parallel.
 As such the user should manually rerun those problems after the testing script completes unless the user originally specified \verb"<n>"=1.
 
 \section{Pre/post Processors}
 
-\subsection{Mesh Converter}\label{ch:getstart:sec:preproc:subsec:meshconv}
+\subsection{OpenMeshConverter}\label{ch:getstart:sec:preproc:subsec:meshconv}
 
-The mesh converter is the current recommended pre-processessing utility for \ac{THOR} meshes.
+OpenMeshConverter is the current recommended pre-processessing utility for \ac{THOR} meshes.
 This converter takes a version 4 \href{https://gmsh.info/}{Gmsh} file (tested with version 4.1) and converts it to the \ac{THOR} mesh input file described in Section~\ref{ch:inp:sec:meshfile}.
 There are plans to extend this converter to intake other versions of Gmsh and exodus and even perhaps add other output formats in addition to the current \ac{THOR} mesh output.
 As of the publishing of this manual, Gmsh version 4.1 is the most recent release Gmsh mesh file format.
 
-To compile the Mesh Converter, navigate to the source folder:
+To compile OpenMeshConverter, navigate to the source folder:
 \begin{verbatim}
-  >> cd <thor_dir>/pre-processors/Mesh_Converter/src
+  >> cd <thor_dir>/pre-processors/OpenMeshConverter/src
 \end{verbatim}
-and then make the converter by typing:
+and then make OpenMeshConverter by typing:
 \begin{verbatim}
   >> make
 \end{verbatim}
-A successful compilation of the Mesh Converter will conclude with the line:
+A successful compilation of OpenMeshConverter will conclude with the line:
 \begin{verbatim}
-  >> mv ./Mesh_Converter.exe ../
+  >> mv ./OpenMeshConverter.exe ../
 \end{verbatim}
-The Mesh Converter does not have any software requirements that are not also required by \ac{THOR}.
+OpenMeshConverter does not have any software requirements that are not also required by \ac{THOR}.
 
-To run the Mesh Converter, simply invoke the mesh converter binary and follow it immediately with the Gmsh input file (where \verb"<gmsh_file>" is the name of the Gmsh file):
+To run OpenMeshConverter, simply invoke the OpenMeshConverter binary and follow it immediately with the Gmsh input file (where \verb"<gmsh_file>" is the name of the Gmsh file):
 \begin{verbatim}
-  >> <path_to_Mesh_Converter>/Mesh_Converter.exe <gmsh_file>
+  >> <path_to_OpenMeshConverter>/OpenMeshConverter.exe <gmsh_file>
 \end{verbatim}
 The output file will be titled \verb"<gmsh_file>_out.thrm".
 This output will set all boundary conditions to vacuum.
-If the user desires to set boundary conditions to reflective or incoming flux boundary conditions, then boundary conditions can be specified on the command line when invoking the Mesh Converter by using the \verb"-bc" indicator.
+If the user desires to set boundary conditions to reflective or incoming flux boundary conditions, then boundary conditions can be specified on the command line when invoking OpenMeshConverter by using the \verb"-bc" indicator.
 If the \verb"-bc" indicator is called, then the next six entries will be assumed to be the boundary conditions (integer values) on each of the six primary directions.
 The order for the boundary conditions specified in this manner are as follows:
 \begin{verbatim}
  -x +x -y +y -z +z
 \end{verbatim}
 0 is the integer value for vacuum boundary conditions, 1 is the integer value for reflective boundary conditions, and 2 is the integer value for incident flux boundary conditions.
-i.e. The following use of the Mesh Converter will convert the Gmsh file and assign reflective boundary conditions to the $-x$, $-y$, and $+y$ boundary faces, and all other boundary conditions will be set to vacuum.
+i.e. The following use of OpenMeshConverter will convert the Gmsh file and assign reflective boundary conditions to the $-x$, $-y$, and $+y$ boundary faces, and all other boundary conditions will be set to vacuum.
 \begin{verbatim}
-  >> <path_to_Mesh_Converter>/Mesh_Converter.exe <gmsh_file> -bc 1 0 1 1 0 0
+  >> <path_to_OpenMeshConverter>/OpenMeshConverter.exe <gmsh_file> -bc 1 0 1 1 0 0
 \end{verbatim}
 It should be noted that if reflective boundary conditions are specified, then the reflective boundaries must all reside on flat boundary surfaces.
-If the user tries to assign reflective boundary conditions to a direction with a non-flat boundary, then the converter utility will throw an error and terminate.
+If the user tries to assign reflective boundary conditions to a direction with a non-flat boundary, then the OpenMeshConverter utility will throw an error and terminate.
 This check is ignored if all boundary conditions are reflective.
 
-\subsection{Cross Section Converter}\label{ch:getstart:sec:preproc:subsec:xsconv}
+\subsection{OpenXSConverter}\label{ch:getstart:sec:preproc:subsec:xsconv}
 
-The \ac{XS} converter is the current recommended pre-processessing utility for \ac{THOR} cross sections.
+The OpenXSConverter is the current recommended pre-processessing utility for \ac{THOR} cross sections.
 This converter takes one of several different input \ac{XS} formats and converts them to one of several different output \ac{XS} formats.
 
-The \ac{XS} converter DOES have software requirements that are not also required by \ac{THOR}, namely the HDF5 developer's tools.
-If the user wishes to acquire HDF5 in order to install and use the \ac{XS} converter, they may do so with the command (for deb package managers):
+The OpenXSConverter DOES have software requirements that are not also required by \ac{THOR}, namely the HDF5 developer's tools.
+If the user wishes to acquire HDF5 in order to install and use OpenXSConverter, they may do so with the command (for deb package managers):
 \begin{verbatim}
   >> sudo apt install libhdf5-dev
 \end{verbatim}
-To compile the \ac{XS} converter, navigate to the source folder:
+To compile OpenXSConverter, navigate to the source folder (assuming it has been added through \\
+\verb"git submodule update --init"):
 \begin{verbatim}
-  >> cd <thor_dir>/pre-processors/XS_Converter/src
+  >> cd <thor_dir>/pre-processors/OpenXSConverter/src
 \end{verbatim}
-and then make the converter by typing:
+and then make OpenXSConverter by typing:
 \begin{verbatim}
   >> make
 \end{verbatim}
-A successful compilation of the \ac{XS} converter will conclude with the line:
+A successful compilation of OpenXSConverter will conclude with the line:
 \begin{verbatim}
-  >> mv ./XS_Converter.exe ../
+  >> mv ./OpenXSConverter.exe ../
 \end{verbatim}
 
-To run the \ac{XS} converter, simply invoke the \ac{XS} converter binary and follow it immediately with the XS input file followed by the XS output format (where \verb"<xs_in>" is the name of the XS input file and \verb"<out_form>" is the output format):
+To run OpenXSConverter, simply invoke the OpenXSConverter binary and follow it immediately with the XS input file followed by the XS output format (where \verb"<xs_in>" is the name of the XS input file and \verb"<out_form>" is the output format):
 \begin{verbatim}
-  >> <path_to_XS_Converter>/XS_Converter.exe <xs_in> <out_form>
+  >> <path_to_OpenXSConverterr>/OpenXSConverter.exe <xs_in> <out_form>
 \end{verbatim}
 The output file will be titled \verb"<xs_in>_<out_form>.out" unless the output is for an HDF5 format (such as OpenMC cross sections), in which case it will be of the form \verb"<xs_in>_<out_form>.out.h5".
 
-Currently, the THOR \ac{XS} converter only supports the following input/output formats:
+Currently, OpenXSConverter only supports the following input/output formats:
 \begin{itemize}
   \item Input formats:
     \begin{itemize}
@@ -272,10 +275,10 @@ There are also plans to add the following formats for input/output as well:
 \subsection{THOR\_MESH\_Generator}
 
 THOR\_MESH\_Generator is an older pre-processor that converts \textit{exodus} and \textit{gmsh} (the legacy version 2) mesh formats to \ac{THOR}'s native mesh format.
-It is currently undergoing maintenance and will likely have important capabilities simply added to the Mesh Converter after which it may be removed.
+It is currently undergoing maintenance and will likely have important capabilities simply added to OpenMeshConverter after which it may be removed.
 As such, use of the THOR\_MESH\_Generator is not currently recommended.
 
-% TODO: Update THOR MESH generator or add capabilities to the Mesh Converter
+% TODO: Update THOR MESH generator or add capabilities to the OpenMeshConverter
 % \ac{THOR} mesh generator is an older pre-processor that converts \textit{exodus} and \textit{gmsh} (the legacy version 2) mesh formats to \ac{THOR}'s native mesh format.
 % It also permits uniform refinement of meshes provided in exodus files. Conversion from \textit{exodus} format and uniform refinement uses the
 % \textit{libmesh}~\cite{libMeshPaper} \textit{meshtool}. Therefore,
