@@ -36,6 +36,7 @@ PROGRAM ahot_c_ug
   USE setup_module
   USE execution_module
   USE wrapup_module
+  USE adjoint_module
 
   IMPLICIT NONE
 
@@ -124,10 +125,10 @@ PROGRAM ahot_c_ug
   IF (do_timing .EQ. 1) parallel_timing(2,1) = MPI_WTIME()
   CALL setup
   IF (do_timing .EQ. 1) parallel_timing(2,2) = MPI_WTIME()
+
   !***********************************************************************
   ! Allocate scalar flux
   !***********************************************************************
-
   ALLOCATE(flux(num_moments_v,namom,num_cells,egmax,niter),stat=alloc_stat)
   IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
   flux = zero
@@ -147,6 +148,7 @@ PROGRAM ahot_c_ug
   !***********************************************************************
   ! Call execution to perform the actual computation
   !***********************************************************************
+  IF(adjoint_opt)CALL transpose_xs()
   IF (do_timing .EQ. 1) parallel_timing(3,1) = MPI_WTIME()
   IF (problem==0) THEN
     CALL execute_ext(flux)
@@ -154,6 +156,7 @@ PROGRAM ahot_c_ug
     CALL execute_eig(flux,keffective)
   END IF
   IF (do_timing .EQ. 1) parallel_timing(3,2) = MPI_WTIME()
+  IF(adjoint_opt)CALL transpose_xs()
   !***********************************************************************
   ! Call wrapup to finish up post-processing and output results
   !***********************************************************************
