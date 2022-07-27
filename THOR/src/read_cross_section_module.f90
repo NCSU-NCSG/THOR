@@ -144,7 +144,7 @@ CONTAINS
 
     DO m=1,num_mat
       ALLOCATE(xs_mat(m)%chi(egmax),xs_mat(m)%sigma_f(egmax),xs_mat(m)%nu(egmax), &
-        xs_mat(m)%sigma_t(egmax),xs_mat(m)%tsigs(egmax), &
+        xs_mat(m)%sigma_t(egmax),xs_mat(m)%tsigs(egmax),xs_mat(m)%nusig_f(egmax), &
         xs_mat(m)%sigma_scat(xs_ord+1,egmax,egmax),stat=alloc_stat)
       IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
       !set everything to 0
@@ -153,6 +153,7 @@ CONTAINS
       xs_mat(m)%nu(:)=0
       xs_mat(m)%sigma_t(:)=0
       xs_mat(m)%tsigs(:)=0
+      xs_mat(m)%nusig_f(:)=0
       xs_mat(m)%sigma_scat(:,:,:)=0
     ENDDO
     xs_mat(:)%mat_id=0
@@ -207,6 +208,7 @@ CONTAINS
           END DO
         END DO
       END IF
+      xs_mat(m)%nusig_f(:)=xs_mat(m)%nu(:)*xs_mat(m)%sigma_f(:)
     END DO
   END SUBROUTINE xs_read_legacy_v0
 
@@ -241,7 +243,7 @@ CONTAINS
 
     DO i=1,num_mat
       ALLOCATE(xs_mat(i)%chi(egmax),xs_mat(i)%sigma_f(egmax),xs_mat(i)%nu(egmax), &
-        xs_mat(i)%sigma_t(egmax),xs_mat(i)%tsigs(egmax), &
+        xs_mat(i)%sigma_t(egmax),xs_mat(i)%tsigs(egmax),xs_mat(i)%nusig_f(egmax), &
         xs_mat(i)%sigma_scat(xs_ord+1,egmax,egmax),stat=alloc_stat)
       IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
       !set everything to 0
@@ -250,6 +252,7 @@ CONTAINS
       xs_mat(i)%nu(:)=0
       xs_mat(i)%sigma_t(:)=0
       xs_mat(i)%tsigs(:)=0
+      xs_mat(i)%nusig_f(:)=0
       xs_mat(i)%sigma_scat(:,:,:)=0
     ENDDO
     xs_mat(:)%mat_id=0
@@ -339,6 +342,7 @@ CONTAINS
           EXIT
         ENDIF
       ENDDO
+      xs_mat(i)%nusig_f(:)=xs_mat(i)%nu(:)*xs_mat(i)%sigma_f(:)
     ENDDO
   END SUBROUTINE xs_read_current
 

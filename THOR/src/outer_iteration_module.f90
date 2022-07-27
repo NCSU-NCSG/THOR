@@ -185,8 +185,7 @@ CONTAINS
           DO eg=1, egmax
             DO l=1, num_moments_v
               fiss_src(l,i)=fiss_src(l,i)                                        +&
-                    xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg) *&
-                    dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
+                    xs_mat(mat_indx)%nusig_f(eg)*dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
             END DO
           END DO
         ENDIF
@@ -542,9 +541,8 @@ CONTAINS
       IF(xs_mat(mat_indx)%fissile)THEN
         DO eg=1, egmax
           DO l=1, num_moments_v
-            fiss_src(l,i,1)=fiss_src(l,i,1)                                         +&
-                  xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg)* &
-                  dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
+            fiss_src(l,i,1)=fiss_src(l,i,1)+&
+                  xs_mat(mat_indx)%nusig_f(eg)*dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
           END DO
         END DO
       ENDIF
@@ -604,9 +602,8 @@ CONTAINS
         IF(xs_mat(mat_indx)%fissile)THEN
           DO eg=1, egmax
             DO l=1, num_moments_v
-              fiss_src(l,i,1)=fiss_src(l,i,1)                                       +&
-                    xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg) *&
-                    dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
+              fiss_src(l,i,1)=fiss_src(l,i,1)+&
+                    xs_mat(mat_indx)%nusig_f(eg)*dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
             END DO
           END DO
         ENDIF
@@ -837,8 +834,7 @@ CONTAINS
           DO eg=1, egmax
             DO l=1, num_moments_v
               fiss_src(l,i,2)=fiss_src(l,i,2)                                        +&
-                    xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg) *&
-                    dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
+                    xs_mat(mat_indx)%nusig_f(eg)*dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
             END DO
           END DO
         ENDIF
