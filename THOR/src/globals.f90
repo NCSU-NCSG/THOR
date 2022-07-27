@@ -192,6 +192,9 @@ MODULE globals
   !log variables
   INTEGER, PARAMETER :: log_unit=9999
 
+  !adjoint option setting
+  LOGICAL :: adjoint_opt=.FALSE.
+
 CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

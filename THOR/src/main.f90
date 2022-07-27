@@ -136,7 +136,6 @@ PROGRAM ahot_c_ug
   !***********************************************************************
   ! Do some preliminary stuff
   !***********************************************************************
-
   IF(print_conv.EQ.1 .AND. rank .EQ. 0) THEN
     INQUIRE(file = converge_filename, exist = existence)
     OPEN(unit = 21, file = converge_filename, status = "REPLACE", action = "WRITE")
