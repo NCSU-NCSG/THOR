@@ -44,6 +44,5 @@ CONTAINS
       xs_mat(m)%nusig_f(:)=temp_mat(1,:)
     ENDDO
     DEALLOCATE(temp_mat)
-    !stop 'transpose_xs not complete'
   ENDSUBROUTINE transpose_xs
 END MODULE adjoint_module
