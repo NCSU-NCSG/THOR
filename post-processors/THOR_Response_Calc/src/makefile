@@ -92,7 +92,7 @@ $(EXE): $(OBJ)
 #Dependency List
 #Use [gfortran -M -cpp *.f90] repeatedly until clean compile to update rules below
 #-----------------------------------------------------------------------------------
-globals.mod globals.o: globals.f90
+globals.mod globals.o: globals.f90 precisions.mod
 infuncs.mod infuncs.o: infuncs.f90 globals.mod string_module.mod
 main.o: main.f90 globals.mod infuncs.mod outfuncs.mod resp_mod.mod
 outfuncs.mod outfuncs.o: outfuncs.f90 globals.mod
