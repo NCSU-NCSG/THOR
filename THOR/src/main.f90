@@ -148,7 +148,10 @@ PROGRAM ahot_c_ug
   !***********************************************************************
   ! Call execution to perform the actual computation
   !***********************************************************************
-  IF(adjoint_opt)CALL transpose_xs()
+  IF(adjoint_opt)THEN
+    CALL transpose_xs()
+    most_thermal=1
+  ENDIF
   IF (do_timing .EQ. 1) parallel_timing(3,1) = MPI_WTIME()
   IF (problem==0) THEN
     CALL execute_ext(flux)
