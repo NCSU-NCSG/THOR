@@ -53,9 +53,11 @@ CONTAINS
       READ(in_unit,*,IOSTAT=t_int)t_char,response_type
       IF(t_int .NE. 0)STOP 'not found'
       IF(t_char .EQ. 'response_type')THEN
-        IF(response_type .NE. 'cell_wise')THEN
-          STOP 'only cell_wise supported for now'
-        ENDIF
+        SELECT CASE(response_type)
+          CASE('cell_wise','region_wise')
+          CASE DEFAULT
+            STOP 'only cell_wise, region_wise, or mat_wise supported for now'
+        ENDSELECT
         EXIT
       ENDIF
     ENDDO
@@ -66,7 +68,12 @@ CONTAINS
       READ(in_unit,*,IOSTAT=t_int)t_char,t_char2
       IF(t_int .NE. 0)STOP 'not found'
       IF(t_char .EQ. 'response_func')THEN
-        CALL read_in_map(t_char2)
+        SELECT CASE(response_type)
+          CASE('cell_wise')
+            CALL read_in_map_cell(t_char2)
+          CASE('region_wise')
+            CALL read_in_map_reg(t_char2)
+        ENDSELECT
         EXIT
       ENDIF
     ENDDO
@@ -111,7 +118,7 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !read in the cell based response map function
-  SUBROUTINE read_in_map(filename)
+  SUBROUTINE read_in_map_cell(filename)
     CHARACTER(*),INTENT(IN) :: filename
     INTEGER(ki4) :: num_resp_cells,in_unit=23,t_int,i
     CHARACTER(64) :: t_char
@@ -134,7 +141,66 @@ CONTAINS
     ENDDO
 
     CLOSE(in_unit)
-  ENDSUBROUTINE read_in_map
+  ENDSUBROUTINE read_in_map_cell
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !read in the region based response map function
+  SUBROUTINE read_in_map_reg(filename)
+    CHARACTER(*),INTENT(IN) :: filename
+    INTEGER(ki4) :: in_unit=23,in_unit2=24,t_int,i,regs(num_cells),num_regions
+    CHARACTER(200) :: t_char,mesh_file
+    REAL(kr8),ALLOCATABLE :: reg_resp(:,:)
+
+    OPEN(UNIT=in_unit, FILE=filename, STATUS='OLD', ACTION = "READ", IOSTAT=t_int, IOMSG=t_char)
+    IF(t_int .NE. 0)THEN
+      WRITE(*,'(A)')t_char
+      STOP 'file error'
+    ENDIF
+
+    READ(in_unit,'(A)')mesh_file
+
+    OPEN(UNIT=in_unit2, FILE=mesh_file, STATUS='OLD', ACTION = "READ", IOSTAT=t_int, IOMSG=t_char)
+    IF(t_int .NE. 0)THEN
+      WRITE(*,'(A)')t_char
+      STOP 'file error'
+    ENDIF
+    regs=0
+    READ(in_unit2,*)num_regions
+    READ(in_unit2,*)t_char
+    READ(in_unit2,*)t_char
+    READ(in_unit2,*)t_char
+    !get past the vertices
+    DO i=1,num_regions
+      READ(in_unit2,*)t_char
+    ENDDO
+    !read in the regions
+    DO i=1,num_cells
+      READ(in_unit2,*)t_char,regs(i),t_char
+    ENDDO
+
+    CLOSE(in_unit2)
+
+    READ(in_unit,*)t_char,num_regions
+    ALLOCATE(reg_resp(num_regions,num_groups))
+
+    !read in the response function based on regions
+    reg_resp=0.0D0
+    DO i=1,num_regions
+      READ(in_unit,*)t_int
+      BACKSPACE(in_unit)
+      READ(in_unit,*)t_char,reg_resp(t_int,:)
+    ENDDO
+
+    CLOSE(in_unit)
+
+    !now actually assign the cell based response function
+    resp_func=0
+    DO i=1,num_cells
+      resp_func(i,:)=reg_resp(regs(i),:)
+    ENDDO
+
+    DEALLOCATE(reg_resp)
+  ENDSUBROUTINE read_in_map_reg
 END MODULE infuncs
 
 
