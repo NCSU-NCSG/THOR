@@ -56,6 +56,20 @@ The following describes properties of the keyword based \ac{THOR} input file:
   \end{tabular}
 \end{center}
 
+\subsection{ADJOINT Card}
+\begin{verbatim}
+  adjoint <adjoint_option>
+\end{verbatim}
+\begin{center}
+  \begin{tabular}{| p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} | p{0.22\linewidth} |}
+    \hline
+    Keyword & Type & Options & Default \\ \hline
+    \verb"adjoint" & STRING & yes/no & no \\ \hline \hline
+    \multicolumn{4}{| p{0.88\linewidth} |}{Description: Option to run an adjoint problem. User does not need to make any changes to their cross sections but does need to make sure the source is the desired response function. NOT supported for JFNK.}\\
+    \hline
+  \end{tabular}
+\end{center}
+
 \subsection{LAMBDA Card}
 \begin{verbatim}
   lambda <spatial_order>
