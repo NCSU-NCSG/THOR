@@ -149,6 +149,7 @@ PROGRAM ahot_c_ug
   ! Call execution to perform the actual computation
   !***********************************************************************
   IF(adjoint_opt)THEN
+    IF(eig_switch .EQ. 1)STOP 'jfnk not supported for adjoint solutions'
     CALL transpose_xs()
     most_thermal=1
   ENDIF
