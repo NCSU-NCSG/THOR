@@ -1,3 +1,3 @@
-flux_file multigroup_source_flux.out
+flux_file multigroup_source_flux.in
 response_type region_wise
 response_func forward_map.txt

@@ -32,7 +32,7 @@ CONTAINS
 
     OPEN(UNIT=in_unit, FILE=response_inp, STATUS='OLD', ACTION = "READ", IOSTAT=t_int, IOMSG=t_char)
     IF(t_int .NE. 0)THEN
-      WRITE(*,'(A)')t_char
+      WRITE(*,'(A)')TRIM(t_char)
       STOP 'file error'
     ENDIF
 
@@ -91,7 +91,7 @@ CONTAINS
 
     OPEN(UNIT=in_unit, FILE=filename, STATUS='OLD', ACTION = "READ", IOSTAT=t_int, IOMSG=t_char)
     IF(t_int .NE. 0)THEN
-      WRITE(*,'(A)')t_char
+      WRITE(*,'(A)')TRIM(t_char)
       STOP 'file error'
     ENDIF
 
@@ -125,7 +125,7 @@ CONTAINS
 
     OPEN(UNIT=in_unit, FILE=filename, STATUS='OLD', ACTION = "READ", IOSTAT=t_int, IOMSG=t_char)
     IF(t_int .NE. 0)THEN
-      WRITE(*,'(A)')t_char
+      WRITE(*,'(A)')TRIM(t_char)
       STOP 'file error'
     ENDIF
 
@@ -153,7 +153,7 @@ CONTAINS
 
     OPEN(UNIT=in_unit, FILE=filename, STATUS='OLD', ACTION = "READ", IOSTAT=t_int, IOMSG=t_char)
     IF(t_int .NE. 0)THEN
-      WRITE(*,'(A)')t_char
+      WRITE(*,'(A)')TRIM(t_char)
       STOP 'file error'
     ENDIF
 
@@ -161,7 +161,7 @@ CONTAINS
 
     OPEN(UNIT=in_unit2, FILE=mesh_file, STATUS='OLD', ACTION = "READ", IOSTAT=t_int, IOMSG=t_char)
     IF(t_int .NE. 0)THEN
-      WRITE(*,'(A)')t_char
+      WRITE(*,'(A)')TRIM(t_char)
       STOP 'file error'
     ENDIF
     regs=0
