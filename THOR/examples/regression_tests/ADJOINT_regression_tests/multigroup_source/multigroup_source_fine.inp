@@ -1,0 +1,26 @@
+  execution yes ; print_conv yes
+  lambda 0
+  problem_type fsrc ; piacc errmode
+  page_refl save
+  innerconv 1E-12 ; outerconv 1E-5
+  maxinner 2 ; maxouter 500
+
+  adjoint yes
+
+  mesh ../../multigroup_source/two_region_cube_fine.thrm
+  xs ../../multigroup_source/two_group_upscattering.xs
+  source ../../multigroup_source/two_region_cube.src
+  print_xs yes
+  vtk_flux_out yes
+  vtk_mat_out yes
+  vtk_reg_out yes
+  restart_out yes
+  vtk_src_out yes
+
+  ngroups 2 ; upscattering yes ;
+  multiplying no
+
+  qdtype levelsym ; qdorder 2
+
+  region_map 1 1
+  2 1

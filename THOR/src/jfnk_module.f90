@@ -659,8 +659,7 @@ CONTAINS
       mat_indx=material_ids(reg2mat(cells(i)%reg))
       DO eg = 1, egmax
         DO l = 1, num_moments_v
-          tfsrc(l,i) = tfsrc(l,i) + xs_mat(mat_indx)%nu(eg) &
-            *xs_mat(mat_indx)%sigma_f(eg)* &
+          tfsrc(l,i) = tfsrc(l,i) + xs_mat(mat_indx)%nusig_f(eg)* &
                 dens_fact(cells(i)%reg)*flx(l,1,i,eg,flag)
         END DO
       END DO
@@ -847,7 +846,7 @@ CONTAINS
       mat_indx=material_ids(reg2mat(cells(i)%reg))
       DO eg = 1, egmax
         tfissions = tfissions+ &
-              xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg)* &
+              xs_mat(mat_indx)%nusig_f(eg)* &
               cells(i)%volume*dens_fact(cells(i)%reg)*flux(1,1,i,eg,flag)
       END DO
     END DO
@@ -1356,7 +1355,7 @@ CONTAINS
       mat_indx=material_ids(reg2mat(cells(i)%reg))
       DO eg = 1, egmax
         DO l = 1, num_moments_v
-          fiss_src(l,i) =fiss_src(l,i)+xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg) *&
+          fiss_src(l,i) =fiss_src(l,i)+xs_mat(mat_indx)%nusig_f(eg) *&
                 dens_fact(cells(i)%reg)*flx(l,1,i,eg,1)
         END DO
       END DO

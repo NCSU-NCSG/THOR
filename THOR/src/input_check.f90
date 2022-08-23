@@ -227,7 +227,7 @@ CONTAINS
           sigs(g)=sigs(g)+xs_mat(m)%sigma_scat(1,gp,g)
         END DO
         WRITE(amsg,104) g,xs_mat(m)%sigma_t(g),xs_mat(m)%sigma_f(g), &
-              sigs(g),xs_mat(m)%sigma_f(g)*xs_mat(m)%nu(g),&
+              sigs(g),xs_mat(m)%nusig_f(g),&
               xs_mat(m)%chi(g)
         CALL printlog(amsg)
       END DO

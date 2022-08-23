@@ -47,6 +47,70 @@
 \usepackage{booktabs}
 \usepackage{titlesec}
 
+%custom commands
+\newcommand{\complex}{\mathbb{C}}
+\newcommand{\cn}{\complex^n}
+\newcommand{\cm}{\complex^m}
+\newcommand{\cnn}{\complex^{n\times n}}
+\newcommand{\cnm}{\complex^{n\times m}}
+\newcommand{\cmn}{\complex^{m\times n}}
+\newcommand{\cmm}{\complex^{m\times m}}
+\newcommand{\real}{\mathbb{R}}
+\newcommand{\rn}{\real^n}
+\newcommand{\rnn}{\real^{n\times n}}
+\newcommand*\widefbox[1]{\fbox{\hspace{2em}#1\hspace{2em}}}
+\DeclareMathOperator{\rank}{\mathrm{rank}}
+\newcommand\va{\mathbf{a}}
+\newcommand\vb{\mathbf{b}}
+\newcommand\vc{\mathbf{c}}
+\newcommand\vd{\boldsymbol{d}}
+\newcommand\vf{\mathbf{f}}
+\newcommand\vk{\mathbf{k}}
+\newcommand\vn{\boldsymbol{n}}
+\newcommand\vx{\boldsymbol{x}}
+\newcommand\vJ{\boldsymbol{J}}
+\newcommand\vs{\vec{s}}
+\newcommand\vy{\mathbf{y}}
+\newcommand\vq{\mathbf{q}}
+\newcommand\vr{\vec{r}}
+\newcommand\vz{\mathbf{z}}
+\newcommand\vchi{\boldsymbol{\chi}}
+\newcommand\vzero{\mathbf{0}}
+\newcommand\ma{\mathbf{A}}
+\newcommand\mb{\mathbf{B}}
+\newcommand\md{\mathbf{D}}
+\newcommand\me{\mathbf{E}}
+\newcommand\mf{\mathbf{F}}
+\newcommand\mh{\mathbf{H}}
+\newcommand\mi{\mathbf{I}}
+\newcommand\ml{\mathbf{L}}
+\newcommand\mm{\mathbf{M}}
+\newcommand\mP{\mathbf{P}}
+\newcommand\mU{\mathbf{U}}
+\newcommand\mV{\mathbf{V}}
+\newcommand\mq{\mathbf{Q}}
+\newcommand\ms{\mathbf{S}}
+\newcommand\mx{\mathbf{X}}
+\newcommand\mz{\mathbf{Z}}
+\newcommand\vnab{\boldsymbol{\nabla}}
+\newcommand\vecomega{\hat{\Omega}}
+\newcommand\nn{\hat{n}}
+\newcommand\msig{\mathbf{\Sigma}}
+\newcommand\myatop[2]{\left({{#1}\atop#2}\right)}
+\newcommand\parta{\noindent\textbf{a)}}
+\newcommand\partgt[1]{\vspace{5mm}\noindent\textbf{#1)}}
+\newcommand\dt{\frac{\partial}{\partial t}}
+\newcommand\fluxt{\psi(\vx,\vecomega,E,t)}
+\newcommand\fluxtp{\psi(\vec{x},\vecomega',E',t)}
+\newcommand\flux{\psi(\vx,\vecomega,E)}
+\newcommand\fluxp{\psi(\vx,\vecomega',E')}
+\newcommand\transstream{\vecomega\cdot\boldsymbol{\nabla}}
+\newcommand\Sigt{\Sigma_t(\vx,E)}
+\newcommand\Sigsp{\Sigma_s(\vx,\vecomega'\cdot\vecomega,E'\rightarrow E)}
+\newcommand\NuSigfpp{\nu_p\Sigma_f(\vec{x},E')}
+\newcommand\NuSigfp{\nu\Sigma_f(\vx,E')}
+\newcommand\deriv[2]{\frac{d #1}{d #2}}
+
 \title{THOR Theory Manual}
 \newcommand{\subtitle}{}
 \newcommand{\shortTitle}{THOR Theory Manual}
@@ -183,6 +247,9 @@ contents={%
 
 \input{chapters/theory/main.tex}
 
+\chapter{Adjoint}
+
+\input{chapters/adjoint/main.tex}
 
 \bibliographystyle{plain}
 \bibliography{biblio}

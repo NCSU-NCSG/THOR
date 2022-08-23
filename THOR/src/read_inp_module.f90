@@ -19,7 +19,7 @@ MODULE read_inp_module
 !> The maximum length of a cardname
 INTEGER,PARAMETER :: MAX_CARDNAME_LEN=32
 !> The number of cards we have
-INTEGER,PARAMETER :: num_cards=43
+INTEGER,PARAMETER :: num_cards=44
 !> The number of cards for deprecated info
 INTEGER,PARAMETER :: num_dep_cards=5
 !> The maximum length of a line in the input file
@@ -303,6 +303,11 @@ CONTAINS
     cards(card_indx)%carg='yes'
     cards(card_indx)%getcard => get_scatt_mult_included
     cards(card_indx)%csub='legacyxs'
+    !adjoint option card
+    card_indx=44
+    cards(card_indx)%cname='adjoint'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_adjoint
     !end of input cards
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     minreg= 100000_li
@@ -1060,6 +1065,21 @@ CONTAINS
       ENDDO
     ENDIF
   END SUBROUTINE get_region_map
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  SUBROUTINE get_adjoint(this_card,wwords)
+    CLASS(cardType),INTENT(INOUT) :: this_card
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    IF(this_card%carg .EQ. 'yes') THEN
+      adjoint_opt=.TRUE.
+    ELSEIF(this_card%carg .EQ. 'no') THEN
+      adjoint_opt=.FALSE.
+    ELSE
+      CALL raise_fatal_error('This is not a valid adjoint option -- '//TRIM(this_card%carg)//' --')
+    ENDIF
+  END SUBROUTINE get_adjoint
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   INTEGER(kind=li) FUNCTION string_to_int(string, msg, min_int)

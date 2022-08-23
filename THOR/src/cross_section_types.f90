@@ -26,6 +26,8 @@ MODULE cross_section_types
     REAL(kind=d_t), DIMENSION(:), ALLOCATABLE :: sigma_f
     !fission production nu
     REAL(kind=d_t), DIMENSION(:), ALLOCATABLE :: nu
+    !fission production cross section nuSigmaF
+    REAL(kind=d_t), DIMENSION(:), ALLOCATABLE :: nusig_f
     !total or transport cross section sigma_t
     REAL(kind=d_t), DIMENSION(:), ALLOCATABLE :: sigma_t
     !total scattering cross section for reaction rates

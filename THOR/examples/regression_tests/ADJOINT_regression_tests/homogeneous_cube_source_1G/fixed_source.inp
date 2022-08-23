@@ -1,0 +1,25 @@
+  execution yes ; print_conv yes
+  lambda 0
+  problem_type fsrc ;
+  page_refl save
+  innerconv 1E-12 ; outerconv 1E-7
+  maxinner 2 ; maxouter 500
+
+  adjoint yes
+
+  mesh ../../homogeneous_cube_source_1G/homogeneous.thrm
+  xs ../../homogeneous_cube_source_1G/homogeneous.xs
+  source ../../homogeneous_cube_source_1G/homogeneous.src
+  print_xs yes
+  vtk_flux_out yes
+  vtk_mat_out yes
+  vtk_reg_out yes
+  restart_out yes
+  vtk_src_out yes
+
+  ngroups 1 ; upscattering no ;
+  multiplying no
+
+  qdtype levelsym ; qdorder 4
+
+  region_map 0 1

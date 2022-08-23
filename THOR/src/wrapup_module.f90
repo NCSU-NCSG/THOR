@@ -199,7 +199,7 @@ CONTAINS
                 - xs_mat(mat_indx)%tsigs(eg) )         * &
                 flux(1,1,i,eg,niter)
           reac_rates(4,cells(i)%reg,eg)=reac_rates(4,cells(i)%reg,eg)  + cells(i)%volume *  &
-                xs_mat(mat_indx)%nu(eg)*xs_mat(mat_indx)%sigma_f(eg)* &
+                xs_mat(mat_indx)%nusig_f(eg)* &
                 flux(1,1,i,eg,niter)
 
         END DO
@@ -307,7 +307,7 @@ CONTAINS
             ! 6. fission source rate
             cartesian_map(6, ix, iy, iz) = cartesian_map(6, ix, iy, iz) + &
                   cells(i)%volume * flux(1, 1, i, eg, niter) * &
-                  xs_mat(mat_indx)%nu(eg) * xs_mat(mat_indx)%sigma_f(eg) / &
+                  xs_mat(mat_indx)%nusig_f(eg) / &
                   cartesian_vol
           END IF
         END DO

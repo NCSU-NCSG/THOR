@@ -27,6 +27,7 @@ LIB     := ../../lib
 #rule declaration. Add these items to FILTER
 #-----------------------------------------------------------------------------------
 SRC :=  \
+        adjoint_module.f90				    		\
         ahotc_matrix_module.f90						\
         angle_types.f90										\
         cell_splitting_module.f90					\
@@ -64,7 +65,7 @@ SRC :=  \
         transport_kernel_module_sc.f90		\
         types.f90													\
         vector_types.f90									\
-        wrapup_module.f90									\
+        wrapup_module.f90
 
 
 OBJ := $(SRC:.f90=.o)
@@ -247,7 +248,7 @@ main.o: main.f90  types.mod parameter_types.mod \
   filename_types.mod vector_types.mod cross_section_types.mod \
   geometry_types.mod angle_types.mod multindex_types.mod \
   globals.mod error_module.mod setup_module.mod \
-  execution_module.mod wrapup_module.mod  \
+  execution_module.mod wrapup_module.mod adjoint_module.mod  \
   globals.mod
 
 multindex_types.o multindex_types.mod: multindex_types.f90 types.mod \
@@ -326,6 +327,9 @@ sweep_module.o sweep_module.mod: sweep_module.f90  \
   multindex_types.mod globals.mod cell_splitting_module.mod
 
 error_module.o error_module.mod: error_module.f90 \
+  globals.mod
+
+adjoint_module.o adjoint_module.mod: adjoint_module.f90 \
   globals.mod
 
 transport_kernel_module_cce.o transport_kernel_module_cce.mod: \

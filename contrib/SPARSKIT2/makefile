@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------
-#                     S P A R S K I T  makefile 
+#                     S P A R S K I T  makefile
 #-----------------------------------------------------------------------
 #
 # There are three types of source files in SPARSKIT:
@@ -20,18 +20,18 @@
 # Last Updated:  May 9, 1994.
 
 SHELL = /bin/sh
-F77 = gfortran 
-# F77 = f77 
-# AR = ar rcv 
-AR = ar -rcv 
-# OPT = -c 
+F77 = gfortran -fallow-argument-mismatch
+# F77 = f77
+# AR = ar rcv
+AR = ar -rcv
+# OPT = -c
 # OPT = -c -static -64 -mips4 -O3 -r10000
 OPT = -c -O
 
 # Cray options
 #F77 = cf77
 #AR = bld rv
-#OPT = -c -Wf"-dp" 
+#OPT = -c -Wf"-dp"
 
 #
 # library objects
@@ -81,21 +81,21 @@ DIRS =	.			\
 	UNSUPP/MATEXP		\
 	UNSUPP/PLOTS
 
-lib libskit.a: $(OBJ) 
-	 $(AR) libskit.a  $(OBJ) 
+lib libskit.a: $(OBJ)
+	 $(AR) libskit.a  $(OBJ)
 ##	 ranlib libskit.a
 
 # do not ranlib on some architectures
 
-clean: 
+clean:
 	@for dir in $(DIRS) ;\
           do \
           echo cleaning $$dir ;\
           (cd $$dir; rm -f *~ *.o *.ex .,* fort.* ftn?? *.mat *.pic *.ps *.trace core) ;\
           done
 
-tarit: 
-	(cd ..; tar cvf - SPARSKIT2 | gzip -c > SPARSKIT2.tar.gz) 
+tarit:
+	(cd ..; tar cvf - SPARSKIT2 | gzip -c > SPARSKIT2.tar.gz)
 
 all: $(OBJ) $(OBJ2) libskit.a
 
@@ -125,7 +125,7 @@ MATGEN/FEM/elmtlib2.o: MATGEN/FEM/elmtlib2.f
 	(cd MATGEN/FEM ; $(F77)  $(OPT) elmtlib2.f)
 MATGEN/FEM/femgen.o: MATGEN/FEM/femgen.f
 	(cd MATGEN/FEM ; $(F77)  $(OPT) femgen.f)
-MATGEN/FEM/functns2.o : MATGEN/FEM/functns2.f 
+MATGEN/FEM/functns2.o : MATGEN/FEM/functns2.f
 	(cd MATGEN/FEM ; $(F77)  $(OPT) functns2.f)
 MATGEN/FEM/meshes.o: MATGEN/FEM/meshes.f
 	(cd MATGEN/FEM ; $(F77)  $(OPT) meshes.f)
@@ -145,9 +145,9 @@ UNSUPP/MATEXP/exppro.o: UNSUPP/MATEXP/exppro.f
 	(cd UNSUPP/MATEXP ; $(F77)  $(OPT) exppro.f)
 UNSUPP/MATEXP/phipro.o: UNSUPP/MATEXP/phipro.f
 	(cd UNSUPP/MATEXP ; $(F77)  $(OPT) phipro.f)
-UNSUPP/PLOTS/psgrd.o : UNSUPP/PLOTS/psgrd.f 
+UNSUPP/PLOTS/psgrd.o : UNSUPP/PLOTS/psgrd.f
 	(cd UNSUPP/PLOTS ; $(F77) $(OPT) psgrd.f)
-UNSUPP/PLOTS/texgrid1.o : UNSUPP/PLOTS/texgrid1.f 
+UNSUPP/PLOTS/texgrid1.o : UNSUPP/PLOTS/texgrid1.f
 	(cd UNSUPP/PLOTS ; $(F77) $(OPT) texgrid1.f)
-UNSUPP/PLOTS/texplt1.o : UNSUPP/PLOTS/texplt1.f 
+UNSUPP/PLOTS/texplt1.o : UNSUPP/PLOTS/texplt1.f
 	(cd UNSUPP/PLOTS ; $(F77) $(OPT) texplt1.f)
