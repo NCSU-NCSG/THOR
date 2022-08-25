@@ -160,7 +160,10 @@ PROGRAM ahot_c_ug
     CALL execute_eig(flux,keffective)
   END IF
   IF (do_timing .EQ. 1) parallel_timing(3,2) = MPI_WTIME()
-  IF(adjoint_opt)CALL transpose_xs()
+  IF(adjoint_opt)THEN
+    CALL transpose_xs()
+    CALL reverse_odd_mom(flux)
+  ENDIF
   !***********************************************************************
   ! Call wrapup to finish up post-processing and output results
   !***********************************************************************

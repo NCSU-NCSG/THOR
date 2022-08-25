@@ -7,7 +7,7 @@ MODULE adjoint_module
   IMPLICIT NONE
   PRIVATE
   !
-  PUBLIC :: transpose_xs
+  PUBLIC :: transpose_xs, reverse_odd_mom
 
 CONTAINS
 
@@ -45,4 +45,19 @@ CONTAINS
     ENDDO
     DEALLOCATE(temp_mat)
   ENDSUBROUTINE transpose_xs
+
+  !**********************************************************************
+  !
+  ! Reverses odd flux moments
+  !
+  !**********************************************************************
+  SUBROUTINE reverse_odd_mom(flux)
+    REAL(8),INTENT(INOUT) :: flux(num_moments_v,namom,num_cells,egmax,niter)
+    INTEGER :: i
+
+    !reverse odd flux moments (they are indexed with the even indeces since it's indexed from 1)
+    DO i=2,num_moments_v,2
+      flux(i,:,:,:,:)=-flux(i,:,:,:,:)
+    ENDDO
+  ENDSUBROUTINE reverse_odd_mom
 END MODULE adjoint_module
