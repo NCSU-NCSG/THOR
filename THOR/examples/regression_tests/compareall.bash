@@ -18,8 +18,6 @@ diff -q ./godiva/godiva_c_csv.gold         ./godiva/godiva_c_out.csv
 diff -q ./godiva/godiva_o_convergence.gold ./godiva/godiva_o_conv.convergence
 diff -q ./godiva/godiva_o_csv.gold         ./godiva/godiva_o_out.csv
 
-diff -q ./homogeneous_cube_keig_1G/keig_jfnk_convergence.gold ./homogeneous_cube_keig_1G/keig_jfnk_conv.convergence
-diff -q ./homogeneous_cube_keig_1G/keig_jfnk_csv.gold         ./homogeneous_cube_keig_1G/keig_jfnk_out.csv
 diff -q ./homogeneous_cube_keig_1G/keig_lc_convergence.gold   ./homogeneous_cube_keig_1G/keig_lc_conv.convergence
 diff -q ./homogeneous_cube_keig_1G/keig_lc_csv.gold           ./homogeneous_cube_keig_1G/keig_lc_out.csv
 diff -q ./homogeneous_cube_keig_1G/keig_sc_convergence.gold   ./homogeneous_cube_keig_1G/keig_sc_conv.convergence
@@ -53,19 +51,11 @@ diff -q ./noshield_snap_32group/noshield_32group_csv.gold         ./noshield_sna
 diff -q ./power_iterations/godiva_PI_S4_convergence.gold ./power_iterations/godiva_PI_S4_conv.convergence
 diff -q ./power_iterations/godiva_PI_S4_csv.gold         ./power_iterations/godiva_PI_S4_out.csv
 
-diff -q ./simple_cube_eigenvalue/cube_eig_jfnk-1-I2_convergence.gold ./simple_cube_eigenvalue/cube_eig_jfnk-1-I2_conv.convergence
-diff -q ./simple_cube_eigenvalue/cube_eig_jfnk-1-I2_csv.gold         ./simple_cube_eigenvalue/cube_eig_jfnk-1-I2_out.csv
-diff -q ./simple_cube_eigenvalue/cube_eig_jfnk-1-I4_convergence.gold ./simple_cube_eigenvalue/cube_eig_jfnk-1-I4_conv.convergence
-diff -q ./simple_cube_eigenvalue/cube_eig_jfnk-1-I4_csv.gold         ./simple_cube_eigenvalue/cube_eig_jfnk-1-I4_out.csv
-diff -q ./simple_cube_eigenvalue/cube_eig_jfnk-2_convergence.gold    ./simple_cube_eigenvalue/cube_eig_jfnk-2_conv.convergence
-diff -q ./simple_cube_eigenvalue/cube_eig_jfnk-2_csv.gold            ./simple_cube_eigenvalue/cube_eig_jfnk-2_out.csv
 diff -q ./simple_cube_eigenvalue/cube_eig_pi_convergence.gold        ./simple_cube_eigenvalue/cube_eig_pi_conv.convergence
 diff -q ./simple_cube_eigenvalue/cube_eig_pi_csv.gold                ./simple_cube_eigenvalue/cube_eig_pi_out.csv
 
 diff -q ./takeda-IV/takeda_convergence.gold      ./takeda-IV/takeda_conv.convergence
 diff -q ./takeda-IV/takeda_csv.gold              ./takeda-IV/takeda_out.csv
-diff -q ./takeda-IV/takeda_jfnk_convergence.gold ./takeda-IV/takeda_jfnk_conv.convergence
-diff -q ./takeda-IV/takeda_jfnk_csv.gold         ./takeda-IV/takeda_jfnk_out.csv
 
 diff -q ./two_region_two_group_P1_keig/2r2gP1_LC_convergence.gold ./two_region_two_group_P1_keig/2r2gP1_LC_conv.convergence
 diff -q ./two_region_two_group_P1_keig/2r2gP1_LC_csv.gold         ./two_region_two_group_P1_keig/2r2gP1_LC_out.csv

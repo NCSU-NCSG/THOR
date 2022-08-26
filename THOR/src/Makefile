@@ -11,7 +11,7 @@ catch:    TYPE := _Catch
 coverage: TYPE := _Coverage
 
 all:      OPT := -O3
-debug:    OPT := -O0 -g -fbacktrace -ffpe-trap=zero,overflow,underflow
+debug:    OPT := -O0 -g -fbacktrace -ffpe-trap=zero,overflow,underflow -fcheck=all
 catch:    OPT := -O0 -g -Wall -W -Wsurprising -Werror
 coverage: OPT := -O0 -g --coverage
 
