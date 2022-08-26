@@ -149,16 +149,14 @@ CONTAINS
     ENDDO
 
     DO m=1,num_src_mat
-      CALL get_next_line(words,nwords)
-      READ(words(1),*)ext_src(m)%src_id
+      READ(local_unit,*)ext_src(m)%src_id
       !loop over source data for the given amount
       DO i=1,given_ang
         DO j=1,given_space
-          CALL get_next_line(words,nwords)
           IF(i .LE. namom .AND. j .LE. num_moments_v)THEN
-            DO g=1,egmax
-              READ(words(g),*)ext_src(m)%mom(j,i,g)
-            ENDDO
+            READ(local_unit,*)ext_src(m)%mom(j,i,:)
+          ELSE
+            READ(local_unit,*)
           ENDIF
         ENDDO
       ENDDO
