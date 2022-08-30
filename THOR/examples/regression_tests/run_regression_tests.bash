@@ -9,6 +9,8 @@ fi
 
 codeexec="../../../thor-1.0.exe"
 
+bash ./rmresults.bash
+
 for folder in */ ; do
   cd $folder
   pwd
@@ -18,3 +20,5 @@ for folder in */ ; do
   done
   cd ../
 done
+
+python3 compare_results.py

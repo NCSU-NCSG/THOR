@@ -4,14 +4,14 @@ comp_list_file = open("reg_tests_comp_list.txt","r")
 j = 0
 for lline in comp_list_file:
     comp_files=lline.split()
+    print('Comparing: ',comp_files[0],' and ',comp_files[1])
     f1 = open(comp_files[0])
     f2 = open(comp_files[1])
-    print('Comparing: ',comp_files[0],' and ',comp_files[1])
     i = 0
     for line1 in f1:
         i += 1
         for line2 in f2:
-            # matching line1 from both files
+            # matching line from both files
             if line1 != line2:
                 line1=line1.replace(',',' ')
                 line1=line1.replace("'",' ')
@@ -21,8 +21,7 @@ for lline in comp_list_file:
                 line2split=line2.split(' ')
                 for ii in range(len(line1split)):
                     if line1split[ii] != line2split[ii]:
-                        if abs(float(line1split[ii])-float(line2split[ii])) >= 1.0e-8:
-                            if abs((float(line1split[ii])-float(line2split[ii]))/float(line1split[ii])) >= 1.0e-6:
+                        if abs((float(line1split[ii])-float(line2split[ii]))/float(line1split[ii])) >= 1.0e-10:
                                 j += 1
                                 print("-----------------------------------DIFFERENCE FOUND!-----------------------------------")
                                 print("\tFile 1:", line1, end='')
