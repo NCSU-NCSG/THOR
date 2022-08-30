@@ -28,7 +28,7 @@
   page_refl           save
 
 !geometry specifications
-  mesh                ../../simple_cube_eigenvalue/cube_level1.mesh
+  mesh                cube_level1.mesh
   density_factor      none
 
 !angular quadrature specifications
@@ -36,7 +36,7 @@
   qdorder             12
 
 !cross section specifications
-  xs                  ../../simple_cube_eigenvalue/cube_eigenvalue_1g.xs
+  xs                  cube_eigenvalue_1g.xs
   pnorder             0
   upscattering        yes
   multiplying         yes

@@ -1,5 +1,5 @@
   execution yes ; print_conv yes
-  lambda -1
+  lambda 0
   problem_type keig ;
   page_refl save
   innerconv 1E-12 ; outerconv 1E-7
@@ -7,8 +7,8 @@
 
   adjoint yes
 
-  mesh ../../homogeneous_cube_keig_1G/keig_homogeneous.thrm
-  xs ../../homogeneous_cube_keig_1G/keig_homogeneous.xs
+  mesh keig_homogeneous.thrm
+  xs keig_homogeneous.xs
   print_xs yes
   vtk_flux_out yes
   vtk_mat_out yes

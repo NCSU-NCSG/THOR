@@ -7,8 +7,8 @@
 
   adjoint yes
 
-  mesh ../../power_iterations/godiva.mesh
-  xs ../../power_iterations/godiva.xs
+  mesh godiva.mesh
+  xs godiva.xs
   print_xs yes
   vtk_flux_out yes
   vtk_mat_out yes

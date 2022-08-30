@@ -1,5 +1,5 @@
   execution yes ; print_conv yes
-  lambda -1
+  lambda 0
   problem_type fsrc;
   page_refl save
   innerconv 1E-7 ; outerconv 1E-6
@@ -7,9 +7,9 @@
 
   adjoint yes
 
-  mesh ../../kobayashi-1/kobayashi-1-0.thrm
-  xs ../../kobayashi-1/kobayashi.xs
-  source ../../kobayashi-1/kobayashi-LC.src
+  mesh kobayashi-1-0.thrm
+  xs kobayashi.xs
+  source kobayashi-SC.src
   print_xs yes
   vtk_flux_out yes
   vtk_mat_out yes

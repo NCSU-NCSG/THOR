@@ -7,9 +7,9 @@
 
   adjoint yes
 
-  mesh ../../noshield_snap_32group/noshield.thrm
-  xs ../../noshield_snap_32group/noshield_32group.xs
-  source ../../noshield_snap_32group/noshield_32group.src
+  mesh noshield.thrm
+  xs noshield_2group.xs
+  source noshield_2group.src
   print_xs no
   vtk_flux_out yes
   vtk_mat_out yes
@@ -17,13 +17,12 @@
   restart_out yes
   vtk_src_out yes
 
-  ngroups 32 ; upscattering yes ;
+  ngroups 2 ; upscattering yes ;
   multiplying yes
 
-  qdtype levelsym ; qdorder 2
+  qdtype levelsym ; qdorder 4
 
-  region_map
-  1 1
+  region_map 1 1
   2 2
   3 3
   4 4

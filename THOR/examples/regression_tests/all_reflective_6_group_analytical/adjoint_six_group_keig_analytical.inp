@@ -8,8 +8,8 @@
   adjoint yes
 
 
-  mesh ../../all_reflective_6_group_analytical/brick_tet_mesh.thrm
-  xs   ../../all_reflective_6_group_analytical/six_group.xs
+  mesh brick_tet_mesh.thrm
+  xs   six_group.xs
   print_xs yes
   vtk_flux_out yes
   vtk_mat_out yes

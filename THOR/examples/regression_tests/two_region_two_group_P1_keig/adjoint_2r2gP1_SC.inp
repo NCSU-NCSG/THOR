@@ -7,8 +7,8 @@
 
   adjoint yes
 
-  mesh ../../two_region_two_group_P1_keig/base.thrm
-  xs ../../two_region_two_group_P1_keig/2r2gP1.xs
+  mesh base.thrm
+  xs 2r2gP1.xs
   print_xs yes
   vtk_flux_out yes
   vtk_mat_out yes

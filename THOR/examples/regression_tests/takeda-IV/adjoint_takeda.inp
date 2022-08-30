@@ -7,8 +7,8 @@
 
   adjoint yes
 
-  mesh ../../takeda-IV/takeda.thrm
-  xs ../../takeda-IV/takeda.xs
+  mesh takeda.thrm
+  xs takeda.xs
   print_xs yes
   vtk_flux_out yes
   vtk_mat_out yes

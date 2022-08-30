@@ -7,9 +7,9 @@
 
   adjoint yes
 
-  mesh ../../kobayashi-3/kobayashi-3-0.thrm
-  xs ../../kobayashi-3/kobayashi.xs
-  source ../../kobayashi-3/kobayashi-LC.src
+  mesh kobayashi-3-0.thrm
+  xs kobayashi.xs
+  source kobayashi-LC.src
   print_xs yes
   vtk_flux_out yes
   vtk_mat_out yes
