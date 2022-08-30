@@ -1,0 +1,31 @@
+  execution yes ; print_conv yes
+  lambda -1
+  problem_type fsrc;
+  page_refl save
+  innerconv 1E-7 ; outerconv 1E-6
+  maxinner 4 ; maxouter 200
+
+  adjoint yes
+
+  mesh kobayashi-3-0.thrm
+  xs kobayashi.xs
+  source kobayashi-LC.src
+  print_xs yes
+  vtk_flux_out yes
+  vtk_mat_out yes
+  vtk_reg_out yes
+  restart_out yes
+  vtk_src_out yes
+
+  ngroups 1
+  upscattering no
+  multiplying no
+
+  qdtype levelsym
+  qdorder 8
+
+  point_value_locations 5 55 5 15 55 5 25 55 5 35 55 5 45 55 5 55 55 5;
+
+  region_map 1 1
+  2 2
+  3 1

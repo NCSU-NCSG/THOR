@@ -1,0 +1,23 @@
+  execution yes ; print_conv yes
+  lambda 0
+  problem_type keig ; keigsolver pi ; piacc none
+  page_refl save
+  kconv 1E-4; innerconv 1E-12 ; outerconv 1E-7
+  maxinner 2 ; maxouter 500
+
+  adjoint yes
+
+  mesh godiva.mesh
+  xs godiva.xs
+  print_xs yes
+  vtk_flux_out yes
+  vtk_mat_out yes
+  vtk_reg_out yes
+  restart_out yes
+
+  ngroups 6 ; upscattering no
+
+  qdtype levelsym ; qdorder 4
+
+  region_map
+  1 1

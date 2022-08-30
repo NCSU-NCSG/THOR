@@ -1,0 +1,32 @@
+  execution yes ; print_conv yes
+  lambda 0
+  problem_type fsrc ; piacc errmode
+  page_refl save
+  innerconv 1E-12 ; outerconv 1E-8
+  maxinner 5 ; maxouter 500000
+
+  adjoint yes
+
+  mesh noshield.thrm
+  xs noshield_32group.xs
+  source noshield_32group.src
+  print_xs no
+  vtk_flux_out yes
+  vtk_mat_out yes
+  vtk_reg_out yes
+  restart_out yes
+  vtk_src_out yes
+
+  ngroups 32 ; upscattering yes ;
+  multiplying yes
+
+  qdtype levelsym ; qdorder 2
+
+  region_map
+  1 1
+  2 2
+  3 3
+  4 4
+  5 5
+  6 6
+  7 7

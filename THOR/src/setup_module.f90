@@ -447,9 +447,14 @@ CONTAINS
       oct = MOD(k,8)+1
       q = CEILING(k/8.0)
 
-      index = indexOf(oct, octants_to_sweep)
-      IF (index > 8_li .or. index < 1) CALL raise_fatal_error( "Sweep order index out of bounds")
-      octant = ordering(ordered_octants_to_sweep(index))
+!This commented portion is the way of doing it from before (it was supposed to be an improvement)
+!but led to some inconsistencies in the Kobayashi cases as well as others
+!      index = indexOf(oct, octants_to_sweep)
+!      IF (index > 8_li .or. index < 1) CALL raise_fatal_error( "Sweep order index out of bounds")
+!      octant = ordering(ordered_octants_to_sweep(index))
+
+      !FIX ME - Octant ordering is lost here
+      octant = oct !ordering(oct)
 
       IF(octant == 1)THEN
         omega%x1=quadrature(q)%mu%x1

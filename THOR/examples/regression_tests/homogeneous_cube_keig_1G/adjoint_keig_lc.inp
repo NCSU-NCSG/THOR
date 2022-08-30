@@ -1,0 +1,23 @@
+  execution yes ; print_conv yes
+  lambda -1
+  problem_type keig ;
+  page_refl save
+  innerconv 1E-12 ; outerconv 1E-7
+  maxinner 4 ; maxouter 500
+
+  adjoint yes
+
+  mesh keig_homogeneous.thrm
+  xs keig_homogeneous.xs
+  print_xs yes
+  vtk_flux_out yes
+  vtk_mat_out yes
+  vtk_reg_out yes
+  restart_out yes
+
+  ngroups 1 ; upscattering no
+  multiplying yes
+
+  qdtype levelsym ; qdorder 2
+
+  region_map 0 1

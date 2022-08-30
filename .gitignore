@@ -7,9 +7,6 @@
 *.out
 pre-processors/THOR_Mesh_Generator/src/Thor_Mesh_Generator
 
-#Output Files
-*.flux
-
 #Documentation Src Files
 **/html
 **/latex
@@ -68,3 +65,19 @@ pre-processors/THOR_Mesh_Generator/test/homogeneous_domain/homogeneous_from_exod
 
 #workspace
 workspace/
+
+#regression test outputs
+THOR/examples/regression_tests/**/*.csv
+THOR/examples/regression_tests/**/*.dat
+THOR/examples/regression_tests/**/*.flux
+THOR/examples/regression_tests/**/*.fluxeven
+THOR/examples/regression_tests/**/*.fluxodd
+THOR/examples/regression_tests/**/*.log
+THOR/examples/regression_tests/**/*.vtk
+THOR/examples/regression_tests/**/*.vtkeven
+THOR/examples/regression_tests/**/*.vtkodd
+THOR/examples/regression_tests/**/*.pg
+THOR/examples/regression_tests/**/*.convergence
+THOR/examples/regression_tests/**/*.out
+THOR/examples/regression_tests/**/*.outeven
+THOR/examples/regression_tests/**/*.outodd
