@@ -166,16 +166,12 @@ To do this, navigate to the regression tests directory:
 \end{verbatim}
 and run the script to run all regression tests
 \begin{verbatim}
-    >> bash ./runall.bash <n>
+    >> bash ./run_regression_tests.bash <n>
 \end{verbatim}
 Here \verb"<n>" is the number of processors to use (default 1).
 These tests will take some time.
+Note that for proper comparisons, these tests will require the user have \href{https://www.python.org/downloads/}{Python 3} installed on their system.
 For 24 threads, these tests take about 2 to 3 hours.
-As such, it is recommended that this testing be performed overnight.
-It should also be noted that two of the inputs, \verb"homogeneous_cube_keig_1G/keig_jfnk.inp" and \\
-\verb"takeda-IV/takeda_jfnk.inp", use JFNK in problems with opposing reflective boundary conditions.
-\ac{THOR} currently does not support the running of such problems in parallel.
-As such the user should manually rerun those problems after the testing script completes unless the user originally specified \verb"<n>"=1.
 
 \section{Pre/post Processors}
 
