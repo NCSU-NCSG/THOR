@@ -120,9 +120,14 @@ CONTAINS
       IF (k .EQ. 0) EXIT
       oct = MOD(k, 8) + 1
       q = CEILING(k / 8.0)
-      indx = indexOf(oct, octants_to_sweep)
-      IF (indx > 8_li .or. indx < 1) CALL raise_fatal_error( "Sweep order index out of bounds")
-      octant = ordering(ordered_octants_to_sweep(indx))
+
+!This commented portion is the way of doing it from before (it was supposed to be an improvement)
+!but led to some inconsistencies in the Kobayashi cases as well as others
+!      indx = indexOf(oct, octants_to_sweep)
+!      IF (indx > 8_li .or. indx < 1) CALL raise_fatal_error( "Sweep order index out of bounds")
+!      octant = ordering(ordered_octants_to_sweep(indx))
+
+      octant= oct !ordering(oct)
       IF(octant == 1)THEN
         omega%x1=quadrature(q)%mu%x1
         omega%x2=quadrature(q)%mu%x2

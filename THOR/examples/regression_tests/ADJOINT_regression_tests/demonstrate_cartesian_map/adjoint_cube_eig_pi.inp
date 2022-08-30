@@ -9,7 +9,7 @@
 
   mesh ../../demonstrate_cartesian_map/cube_level1.mesh
   xs ../../demonstrate_cartesian_map/cube_eigenvalue_1g.xs
-  cartesian_map_out cube_cartesian_map.dat
+  cartesian_map_out adjoint_cube_cartesian_map.dat
   print_xs yes
   vtk_flux_out yes
   vtk_mat_out yes

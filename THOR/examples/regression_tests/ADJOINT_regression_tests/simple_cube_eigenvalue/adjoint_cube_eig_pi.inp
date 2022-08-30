@@ -45,7 +45,7 @@
 !output specifications
   restart_out         none
   print_conv          yes
-  flux_out            cube_eig_pi.flux
+  flux_out            adjoint_cube_eig_pi.flux
   vtk_flux_out        yes
   vtk_mat_out         yes
   vtk_reg_out         yes
