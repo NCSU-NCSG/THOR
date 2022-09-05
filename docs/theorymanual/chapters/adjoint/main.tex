@@ -1,27 +1,27 @@
 % !TEX root = ../../../main.tex
 \section{Adjoint Basics}
 
-The forward neutron transport equation is:
-\[
+The forward steady state neutron transport equation with an external source (implicitly not super-critical by lack of time dependence) is:
+\begin{equation}
     \mm\psi=Q,\hspace{5mm}\vr\in V,\, \vecomega\in 4\pi,\, 0<E<\infty
-\]
+\end{equation}
 with boundary conditions
-\[
+\begin{equation}
     \psi=\psi^b,\hspace{5mm}\vr\in \partial V,\, \vecomega\cdot\nn<0,\, 0<E<\infty
-\]
+\end{equation}
 Where $\mm=\ms-\mf$ and:
-\begin{multline}
-    \ms\psi=\vecomega\cdot\nabla\psi(\vr,\vecomega,E)+\Sigma_t(\vr,E)\psi(\vr,\vecomega,E)\\
+\begin{equation}
+    \ms\psi=\vecomega\cdot\nabla\psi(\vr,\vecomega,E)+\Sigma_t(\vr,E)\psi(\vr,\vecomega,E)
     -\int_0^\infty\int_{4\pi}\Sigma_s(\vr,E'\rightarrow E,\vecomega'\cdot\vecomega)\psi(\vr,\vecomega',E')\,d\vecomega'\,dE'
-\end{multline}
-\[
+\end{equation}
+\begin{equation}
     \mf\psi=\frac{\chi(\vr,E)}{4\pi}\int_0^\infty\int_{4\pi}\nu\Sigma_f(\vr,E')\psi(\vr,\vecomega',E')\,d\vecomega'\,dE'
-\]
+\end{equation}
 
 We now define an inner product of two functions as:
-\[
+\begin{equation}
     (f,g)=\int_0^\infty\int_{4\pi}\int_Vf(\vr,\vecomega,E)g(\vr,\vecomega,E)\,dV\,d\vecomega\,dE
-\]
+\end{equation}
 So then
 \begin{multline}
     (f,\mm g)=\int_0^\infty\int_{4\pi}\int_Vf(\vr,\vecomega,E)\bigg[\vecomega\cdot\nabla g(\vr,\vecomega,E)+\Sigma_t(\vr,E)g(\vr,\vecomega,E)\\
@@ -31,7 +31,7 @@ So then
 
 Using the divergence theorem and some algebraic manipulation we can get:
 \begin{multline}
-    (f,\mm g)=\int_0^\infty\int_{4\pi}\int_V\bigg[-\vecomega\cdot\nabla f(\vr,\vecomega,E)+\Sigma_t(\vr,E)f(\vr,\vecomega,E)\\
+    (f,\mm g)=\int_0^\infty\int_{4\pi}\int_V\bigg[-\vecomega\cdot\nabla f(\vr,\vecomega,E)+\Sigma_t(\vr,E)f(\vr,\vecomega,E)
     -\int_0^\infty\int_{4\pi}\Sigma_s(\vr,E\rightarrow E',\vecomega\cdot\vecomega')f(\vr,\vecomega',E')\,d\vecomega'\,dE'\\
     -\frac{\nu\Sigma_f(\vr,E)}{4\pi}\int_0^\infty\int_{4\pi}\chi(\vr,E')f(\vr,\vecomega,E)\,d\vecomega'\,dE'\bigg]g(\vr,\vecomega',E')\,dV\,d\vecomega\,dE\\
     +\int_0^\infty\int_{4\pi}\int_{\partial V}(\vecomega\cdot\nn) f(\vr,\vecomega,E)g(\vr,\vecomega,E)\,dS\,d\vecomega\,dE
@@ -39,7 +39,7 @@ Using the divergence theorem and some algebraic manipulation we can get:
 
 Then if we define the adjoint operator, $\mm^*$, as:
 \begin{multline}
-    \mm^*\psi=-\vecomega\cdot\nabla\psi(\vr,\vecomega,E)+\Sigma_t(\vr,E)\psi(\vr,\vecomega,E)\\
+    \mm^*\psi=-\vecomega\cdot\nabla\psi(\vr,\vecomega,E)+\Sigma_t(\vr,E)\psi(\vr,\vecomega,E)
     -\int_0^\infty\int_{4\pi}\Sigma_s(\vr,E\rightarrow E',\vecomega\cdot\vecomega')\psi(\vr,\vecomega',E')\,d\vecomega'\,dE'\\
     -\frac{\nu\Sigma_f(\vr,E)}{4\pi}\int_0^\infty\int_{4\pi}\chi(\vr,E')\psi(\vr,\vecomega',E')\,d\vecomega'\,dE'
 \end{multline}
@@ -57,13 +57,13 @@ Then it can be observed that:
 \end{multline}
 
 So if we carefully define the adjoint problem as:
-\[
+\begin{equation}
     \mm^*\psi^*=Q^*,\hspace{5mm}\vr\in V,\, \vecomega\in 4\pi,\, 0<E<\infty
-\]
+\end{equation}
 with boundary conditions
-\[
+\begin{equation}
     \psi^*={\psi^*}^b,\hspace{5mm}\vr\in \partial V,\, \vecomega\cdot\nn>0,\, 0<E<\infty
-\]
+\end{equation}
 
 Then recalling the forward transport problem, we can get:
 \begin{multline}
@@ -72,22 +72,22 @@ Then recalling the forward transport problem, we can get:
 \end{multline}
 
 $Q^*$ is often referred to as a ``response'' function.
-Indeed, if we consider some detector region $V_d$ with response cross section $\Sigma_d(E)$, then if we setup our forward and adjoint problems as:
-\[
-\mm\psi=Q;\hspace{10mm}\psi^b=0;\hspace{10mm}\mm^*\psi^*=Q^*=\zeta_d(\vr)\Sigma_d(E);\hspace{10mm}{\psi^*}^b=0
-\]
+Indeed, if we consider some detector region $V_d$ with response cross section $\Sigma_d(\vr,E)$, then if we setup our forward and adjoint problems as:
+\begin{equation}
+\mm\psi=Q;\hspace{10mm}\psi^b=0;\hspace{10mm}\mm^*\psi^*=Q^*=\zeta_d(\vr)\Sigma_d(\vr,E);\hspace{10mm}{\psi^*}^b=0
+\end{equation}
 Where
-\[
+\begin{equation}
     \zeta_d(\vr)=
         \begin{cases}
             1 & \vr\in V_d\\
             0 & \vr\not\in V_d
         \end{cases}
-\]
+\end{equation}
 So we can see then that the detector response $R$ can be expressed as:
-\[
+\begin{equation}
     R=(\psi,\zeta_d\Sigma_d)=(\psi,Q^*)=(Q,\psi^*)
-\]
+\end{equation}
 So we can see that the adjoint flux describes the importance of the source in the detector response.
 
 Various choices of response functions and adjoint boundary conditions can lead to various physical interpretations.
@@ -98,23 +98,23 @@ These interpretations are for basic physical choices of response functions and a
 If the choices are more complex, then the intuitive interpretations for the meaning of the adjoint flux can break down.
 
 Similarly, for $k-$eigenvalue problems:
-\[
+\begin{equation}
     \ms\psi=\frac{1}{k}\mf\psi;\hspace{10mm}\psi^b=0
-\]
+\end{equation}
 Then the adjoint problem is defined:
-\[
+\begin{equation}
     \ms^*\psi^*=\frac{1}{k^*}\mf^*\psi^*;\hspace{10mm}{\psi^*}^b=0
-\]
+\end{equation}
 Where $\ms^*$ and $\mf^*$ are intuitively defined based on the separation of $\mm$ into $\ms$ and $-\mf$, so that in the same way $\mm^*$ is separated into $\ms^*$ and $-\mf^*$ (this can formally be derived as well if so desired).
 So that:
-\[
+\begin{equation}
     (\psi^*,\ms\psi)=(\ms^*\psi^*,\psi)=\left(\psi^*,\frac{1}{k}\mf\psi\right)=\left(\frac{1}{k^*}\mf^*\psi^*,\psi\right)
-\]
+\end{equation}
 And it can be shown that $k^*=k$, which is to say the eigenvalue is self adjoint.
 
 The adjoint equation and these relations then serve as the basis for perturbation theory.
 
-\section{THOR Adjoint}
+\section{\ac{THOR} Adjoint}
 
 With the basics of the adjoint equation stated, we can now investigate methods of calculating the adjoint using traditional transport methods.
 Notice that for the case with vacuum or reflective boundary conditions, nothing need be changed between the transport and adjoint equations except that the transport operator be transposed.
@@ -124,28 +124,28 @@ The one caveat with the solution change is that the angles are reversed for the 
 As such, the flux computed from a transposed adjoint problem needs an additional correction to become the true adjoint solution.
 This correction involves assigning flux to the opposite angle than the one it was previously in.
 Consider the multigroup transposed transport equation (not adjoint):
-\[
+\begin{equation}
 M^T\psi^\dagger=Q
-\]
+\end{equation}
 Then $M^T$ is equal to the adjoint operator, but with traditional boundary conditions.
 To account for this we make the change:
-\[
+\begin{equation}
 \psi^\dagger(\vecomega)=\psi^*(-\vecomega)
-\]
+\end{equation}
 Note that these observations only hold for a symmetric quadrature where for any quadrature angle $\vecomega_m$, $\vecomega_n=-\vecomega_m$ also exists on the quadrature set.
 
 The primary impact this has is on angular moments of the flux.
 The 0th moment, or scalar flux, does not change since:
-\[
+\begin{equation}
 \sum_m\psi^*(\vecomega_m)=\sum_m\psi^*(-\vecomega_m)
-\]
+\end{equation}
 In fact, all even moments will not change since an even basis function maintains the property $b_{even}(\vecomega)=b_{even}(-\vecomega)$.
 So it can be seen that for even moments, we get:
-\[
+\begin{equation}
 \sum_m b_{even}(\vecomega)\psi^*(\vecomega_m)=\sum_m b_{even}(-\vecomega)\psi^*(\vecomega_m)=\sum_m b_{even}(\vecomega)\psi^*(-\vecomega_m)
-\]
+\end{equation}
 However, odd moments will become negative since the odd basis functions have the property $b_{odd}(\vecomega)=-b_{odd}(-\vecomega)$.
 So it can be seen that for odd moments, we get:
-\[
+\begin{equation}
 \sum_m b_{odd}(\vecomega)\psi^*(\vecomega_m)=-\sum_m b_{odd}(-\vecomega)\psi^*(\vecomega_m)=-\sum_m b_{odd}(\vecomega)\psi^*(-\vecomega_m)
-\]
+\end{equation}
