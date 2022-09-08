@@ -20,7 +20,7 @@
 # Last Updated:  May 9, 1994.
 
 SHELL = /bin/sh
-F77 = gfortran -Wno-argument-mismatch
+F77 = gfortran -std=legacy
 # F77 = f77
 # AR = ar rcv
 AR = ar -rcv
