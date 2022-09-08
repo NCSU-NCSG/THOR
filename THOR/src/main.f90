@@ -114,7 +114,7 @@ PROGRAM ahot_c_ug
     CALL printlog('')
     CALL printlog("   By R.M. Ferrer, Y.Y. Azmy, S. Schunert, R.A. Yessayan, and N.F. Herring")
     CALL printlog('')
-    CALL printlog("   Version 1.0 BETA - Update 05/10/2012")
+    CALL printlog("   Version 1.0.0 - Update 09/07/2022")
     CALL printlog("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     CALL printlog('')
   END IF
