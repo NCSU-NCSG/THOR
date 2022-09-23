@@ -19,7 +19,7 @@ MODULE read_inp_module
 !> The maximum length of a cardname
 INTEGER,PARAMETER :: MAX_CARDNAME_LEN=32
 !> The number of cards we have
-INTEGER,PARAMETER :: num_cards=44
+INTEGER,PARAMETER :: num_cards=45
 !> The number of cards for deprecated info
 INTEGER,PARAMETER :: num_dep_cards=5
 !> The maximum length of a line in the input file
@@ -308,6 +308,11 @@ CONTAINS
     cards(card_indx)%cname='adjoint'
     cards(card_indx)%carg='no'
     cards(card_indx)%getcard => get_adjoint
+    !adjoint option card
+    card_indx=45
+    cards(card_indx)%cname='nonu'
+    cards(card_indx)%carg='no'
+    cards(card_indx)%getcard => get_nonu
     !end of input cards
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     minreg= 100000_li
@@ -1080,6 +1085,21 @@ CONTAINS
       CALL raise_fatal_error('This is not a valid adjoint option -- '//TRIM(this_card%carg)//' --')
     ENDIF
   END SUBROUTINE get_adjoint
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  SUBROUTINE get_nonu(this_card,wwords)
+    CLASS(cardType),INTENT(INOUT) :: this_card
+    CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
+
+    this_card%carg=TRIM(lowercase(wwords(2)))
+    IF(this_card%carg .EQ. 'yes') THEN
+      nonu=.TRUE.
+    ELSEIF(this_card%carg .EQ. 'no') THEN
+      nonu=.FALSE.
+    ELSE
+      CALL raise_fatal_error('This is not a valid nonu option -- '//TRIM(this_card%carg)//' --')
+    ENDIF
+  END SUBROUTINE get_nonu
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   INTEGER(kind=li) FUNCTION string_to_int(string, msg, min_int)
