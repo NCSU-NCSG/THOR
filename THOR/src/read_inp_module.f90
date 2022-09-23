@@ -313,6 +313,7 @@ CONTAINS
     cards(card_indx)%cname='nonu'
     cards(card_indx)%carg='no'
     cards(card_indx)%getcard => get_nonu
+    cards(card_indx)%csub='srcprob'
     !end of input cards
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     minreg= 100000_li
@@ -1007,7 +1008,7 @@ CONTAINS
   SUBROUTINE get_region_map(this_card,wwords)
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
-    CHARACTER(100000) :: regmap
+    CHARACTER(65000) :: regmap
     CHARACTER(200) :: line
     CHARACTER(MAX_CARDNAME_LEN) :: words(200)
     INTEGER :: rank,mpi_err,local_unit,i,l,lr,nwords,ios

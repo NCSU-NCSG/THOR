@@ -2011,8 +2011,9 @@ CONTAINS
     CHARACTER(100) :: buffer, fname
     LOGICAL :: done
     INTEGER :: i, rank,mpi_err,ios,nwords
-    CHARACTER(100000) :: regmap
-    CHARACTER(10) :: words(25000)
+    CHARACTER(50000) :: regmap
+    CHARACTER(10), ALLOCATABLE :: words(:)
+    ALLOCATE(words(25000))
     !get rank
     CALL GET_COMMAND_ARGUMENT(1,fname)
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
@@ -2059,6 +2060,8 @@ CONTAINS
       READ(regmap,*) (reg2mat(i),i=minreg,maxreg)
     ENDIF
 
+    DEALLOCATE(words)
+
   END SUBROUTINE legacy_v0_read
 
   SUBROUTINE legacy_v0_read_regionmap_field(regmap)
@@ -2067,7 +2070,7 @@ CONTAINS
 
     ! Arguments
 
-    CHARACTER(100000) :: regmap
+    CHARACTER(50000) :: regmap
 
     ! local variables
 
@@ -2157,11 +2160,14 @@ CONTAINS
     ! local variables
     INTEGER :: nwords, i, l, j, nwwords, nwwwords
     CHARACTER(1000) :: buffer, fname, msg
-    CHARACTER(1000) :: words(100), wwords(2), wwwords(100)
+    CHARACTER(1000) :: wwords(2)
+    CHARACTER(1000),ALLOCATABLE :: words(:), wwwords(:)
     INTEGER :: rank, mpi_err, localunit, minint
     CALL GET_COMMAND_ARGUMENT(1,fname)
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, mpi_err)
     localunit = rank+100
+
+    ALLOCATE(words(100),wwwords(100))
 
     minint=1
     ! read loop over inout block
@@ -2243,6 +2249,8 @@ CONTAINS
     END DO
 
 101 FORMAT(A1000)
+
+    DEALLOCATE(words,wwwords)
 
   END SUBROUTINE legacy_v0_read_postprocess_field
 

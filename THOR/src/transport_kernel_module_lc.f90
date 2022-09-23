@@ -62,7 +62,7 @@ CONTAINS
     REAL(kind=d_t), DIMENSION(2) :: af
     REAL(kind=d_t), DIMENSION(3) :: a_temp, a
     REAL(kind=d_t), DIMENSION(2,2) :: bf
-    REAL(kind=d_t), DIMENSION(3,2) :: JFup, JFdown, JF, Jsf
+    REAL(kind=d_t), DIMENSION(3,2) :: JFup, JFdown=0.0D0, JF, Jsf
     REAL(kind=d_t), DIMENSION(2,3) :: JFup_inv, JF_inv
     REAL(kind=d_t), DIMENSION(3,3) :: Jup, Jup_inv, Js, Js_inv, b
     REAL(kind=d_t), DIMENSION(num_moments_v) :: q_expansion
@@ -88,6 +88,16 @@ CONTAINS
     REAL(kind=d_t)  :: face_angular(0:3,num_moments_v)
     REAL(kind=d_t)  :: subcell_source_moments(subcells,num_moments_v)
     REAL(kind=d_t)  :: y(num_moments_v)
+
+    R0down%x1=0
+    R0down%x2=0
+    R0down%x3=0
+    R0up%x1=0
+    R0up%x2=0
+    R0up%x3=0
+    R0F%x1=0
+    R0F%x2=0
+    R0F%x3=0
 
     ! Initialize
 
@@ -842,7 +852,7 @@ CONTAINS
     ! Define variables
 
     INTEGER(kind=li) :: f
-    INTEGER(kind=li) :: l, q, i1F, i2F
+    INTEGER(kind=li) :: l, q, i1F=0, i2F=0
     REAL(kind=d_t), DIMENSION(num_moments_f), INTENT(in) :: &
           face_angular_mom
     REAL(kind=d_t), DIMENSION(num_moments_v), INTENT(out) :: &

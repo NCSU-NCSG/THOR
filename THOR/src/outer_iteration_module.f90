@@ -81,7 +81,7 @@ CONTAINS
 
     REAL(kind=d_t)   :: theta(3),thet
     INTEGER(kind=li) :: extra_flag
-    REAL(kind=d_t)   :: a,b,flux_dist_error(2)
+    REAL(kind=d_t)   :: a,b,flux_dist_error(2)=0.0D0
 
     ! Prepare array reflected_flux
     rs=MAX(1_li,rside_cells)
@@ -177,31 +177,34 @@ CONTAINS
       ! ... and upscattering ...
       CALL compute_upscattering(flux, src)
 
-      ! ... and fission.
-      fiss_src(:,:)=0.0
-      DO i=1, num_cells
-        mat_indx=material_ids(reg2mat(cells(i)%reg))
-        IF(xs_mat(mat_indx)%fissile)THEN
-          DO eg=1, egmax
-            DO l=1, num_moments_v
-              fiss_src(l,i)=fiss_src(l,i)                                        +&
-                    xs_mat(mat_indx)%nusig_f(eg)*dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
+      IF(.NOT. nonu)THEN
+        ! ... and fission.
+        fiss_src(:,:)=0.0
+        DO i=1, num_cells
+          mat_indx=material_ids(reg2mat(cells(i)%reg))
+          IF(xs_mat(mat_indx)%fissile)THEN
+            DO eg=1, egmax
+              DO l=1, num_moments_v
+                fiss_src(l,i)=fiss_src(l,i)                                        +&
+                      xs_mat(mat_indx)%nusig_f(eg)*dens_fact(cells(i)%reg)*flux(l,1,i,eg,niter)
+              END DO
             END DO
-          END DO
-        ENDIF
-      END DO
-      DO i=1,num_cells
-        mat_indx=material_ids(reg2mat(cells(i)%reg))
-        IF(xs_mat(mat_indx)%fissile)THEN
-          DO eg=1,egmax
-            DO l=1,num_moments_v
-              src(l,1,i,eg)  =src(l,1,i,eg)+xs_mat(mat_indx)%chi(eg)*fiss_src(l,i)
+          ENDIF
+        END DO
+        DO i=1,num_cells
+          mat_indx=material_ids(reg2mat(cells(i)%reg))
+          IF(xs_mat(mat_indx)%fissile)THEN
+            DO eg=1,egmax
+              DO l=1,num_moments_v
+                src(l,1,i,eg)  =src(l,1,i,eg)+xs_mat(mat_indx)%chi(eg)*fiss_src(l,i)
+              END DO
             END DO
-          END DO
-        ENDIF
-      END DO
-      IF(MAXVAL(flux(:,:,:,:,niter)) .GE. 1.0E+30)CALL raise_fatal_error('Flux exceeded 1.0E+30, &
-        & fixed source problem appears to be supercritical and cannot be solved.')
+          ENDIF
+        END DO
+        IF(MAXVAL(flux(:,:,:,:,niter)) .GE. 1.0E+30)CALL raise_fatal_error('Flux exceeded 1.0E+30, &
+          & fixed source problem appears to be supercritical and cannot be solved. &
+          & Consider turning off fission (nonu option) or running an eigenvalue problem instead.')
+      ENDIF
 
       ! write convergence monitor
       IF (rank .EQ. 0) THEN
@@ -445,7 +448,7 @@ CONTAINS
     INTEGER(kind=li)               :: alloc_stat, eg, i, l, &
           ii, n
     REAL(kind=d_t)                 :: fiss_den_old, fiss_den_new,       &
-          keff_error, keff_old, keff_new, fiss_error, fiss_dist_error(2),&
+          keff_error, keff_old, keff_new, fiss_error, fiss_dist_error(2)=0.0D0,&
           flux_error,ts,te
     REAL(kind=d_t)                 :: t_error
     LOGICAL                        :: existence
@@ -495,7 +498,7 @@ CONTAINS
     !
     !---------------------------------------------------------------------------
     INTEGER (kind=li) :: p = 0_li
-    INTEGER (kind=li) :: power_iter_count = 0_li, cheby_pi=5_li, cheby_pi_rem,mat_indx
+    INTEGER (kind=li) :: power_iter_count = 0_li, cheby_pi=5_li, cheby_pi_rem=1,mat_indx
     REAL(kind=d_t)    :: alpha = zero, beta = zero, gamma = zero
     REAL(kind=d_t)    :: chebychev_error = zero, entry_error = zero
     REAL(kind=d_t)    :: entry_theta = zero, theor_err = zero

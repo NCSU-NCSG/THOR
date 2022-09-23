@@ -93,7 +93,7 @@ CONTAINS
 
     ! Temporary variables
 
-    INTEGER(kind=li) :: tpe, mate,giflx, parallel_i
+    INTEGER(kind=li) :: tpe, mate=1,giflx, parallel_i
 
     INTEGER ::rank,mpi_err, num_p, optimal_tasks
 
@@ -350,7 +350,7 @@ CONTAINS
     INTEGER(kind=li) :: i,j, CASE
     REAL(kind=d_t) :: sigmat
     TYPE(vector) :: n0, n1, n2, n3
-    INTEGER(kind=li) :: soct,sq,mat_indx
+    INTEGER(kind=li) :: soct=1,sq=1,mat_indx
 
     INTEGER ::rank,mpi_err, num_p
     CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_p, mpi_err)

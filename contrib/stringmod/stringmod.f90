@@ -357,11 +357,11 @@ end function uppercase
 
 !**********************************************************************
 
-function lowercase(str) result(lcstr)
+pure function lowercase(str) result(lcstr)
 
 ! convert string to lower case
 
-character (len=*):: str
+character (len=*),INTENT(IN):: str
 character (len=len_trim(str)):: lcstr
 
 ilen=len_trim(str)
@@ -386,7 +386,6 @@ do i=1,ilen
     lcstr(i:i)=str(i:i)
   end if
 end do
-return
 
 end function lowercase
 

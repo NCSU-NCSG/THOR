@@ -215,8 +215,10 @@ CONTAINS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !currently supports max of 1000 groups
   SUBROUTINE xs_read_current()
-    CHARACTER(10000) :: words(1000)
+    CHARACTER(10000), ALLOCATABLE :: words(:)
     INTEGER :: nwords,i,g,alloc_stat,gp,j
+
+    ALLOCATE(words(1000))
 
     num_mat=0
     egmax=0
@@ -344,12 +346,13 @@ CONTAINS
       ENDDO
       xs_mat(i)%nusig_f(:)=xs_mat(i)%nu(:)*xs_mat(i)%sigma_f(:)
     ENDDO
+    DEALLOCATE(words)
   END SUBROUTINE xs_read_current
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_next_line(words,nwords)
     INTEGER,INTENT(OUT) :: nwords
-    CHARACTER(10000),INTENT(OUT) :: words(1000)
+    CHARACTER(10000),INTENT(OUT) :: words(:)
     CHARACTER(10000) :: line
     INTEGER :: ios
     DO
@@ -365,7 +368,7 @@ CONTAINS
         EXIT
       ENDIF
     ENDDO
-  ENDSUBROUTINE
+  ENDSUBROUTINE get_next_line
 
 
 END MODULE read_cross_section_module
