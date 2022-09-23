@@ -58,12 +58,12 @@ CONTAINS
 
     ! Define temporary variables
 
-    INTEGER(kind=li) :: alloc_stat, ii, l, f, adjcnt_cell
+    INTEGER(kind=li) :: ii, l, f, adjcnt_cell
     REAL(kind=d_t) :: det_Jup, det_Js, e
     REAL(kind=d_t), DIMENSION(2) :: af
     REAL(kind=d_t), DIMENSION(3) :: a_temp, a
     REAL(kind=d_t), DIMENSION(2,2) :: bf
-    REAL(kind=d_t), DIMENSION(3,2) :: JFup, JFdown, JF, Jsf
+    REAL(kind=d_t), DIMENSION(3,2) :: JFup, JFdown=0.0D0, JF, Jsf
     REAL(kind=d_t), DIMENSION(2,3) :: JFup_inv, JF_inv
     REAL(kind=d_t), DIMENSION(3,3) :: Jup, Jup_inv, Js, Js_inv, b
     REAL(kind=d_t), DIMENSION(num_moments_v) :: q_expansion
@@ -77,6 +77,16 @@ CONTAINS
           face_angular, projected_flux
     TYPE(vector) :: R0down, R0up, R0F, v0, v1, v2, v3
     TYPE(vector), DIMENSION(0:3) :: v
+
+    R0down%x1=0.0D0
+    R0down%x2=0.0D0
+    R0down%x3=0.0D0
+    R0up%x1=0.0D0
+    R0up%x2=0.0D0
+    R0up%x3=0.0D0
+    R0F%x1=0.0D0
+    R0F%x2=0.0D0
+    R0F%x3=0.0D0
 
     ! Allocate variables
 
@@ -98,16 +108,24 @@ CONTAINS
           face_cell_temp(num_moments_v),&
           face_angular(0:3,num_moments_v),&
           subcell_source_moments(subcells,num_moments_v),&
-          y(num_moments_v),&
-          stat=alloc_stat);area=0.0_d_t;volume=0.0_d_t;&
-          subcell_upstream_moments=0.0_d_t;incoming_flux=0.0_d_t;&
-          transformed_flux=0.0_d_t;transformed_moments=0.0_d_t;&
-          cell_source=0.0_d_t;subcell_source=0.0_d_t;&
-          outgoing_moments=0.0_d_t;projected_temp=0.0_d_t;&
-          proj_moments=0.0_d_t;projected_moments=0.0_d_t;&
-          face_angular_mom=0.0_d_t;face_angular=0.0_d_t;&
-          face_cell_temp=0.0_d_t;subcell_source_moments=0.0_d_t;y=0.0_d_t
-    IF(alloc_stat /= 0) CALL raise_fatal_error('*** Not enough memory ***')
+          y(num_moments_v))
+    area=0.0_d_t
+    volume=0.0_d_t
+    subcell_upstream_moments=0.0_d_t
+    incoming_flux=0.0_d_t
+    transformed_flux=0.0_d_t
+    transformed_moments=0.0_d_t
+    cell_source=0.0_d_t
+    subcell_source=0.0_d_t
+    outgoing_moments=0.0_d_t
+    projected_temp=0.0_d_t
+    proj_moments=0.0_d_t
+    projected_moments=0.0_d_t
+    face_angular_mom=0.0_d_t
+    face_angular=0.0_d_t
+    face_cell_temp=0.0_d_t
+    subcell_source_moments=0.0_d_t
+    y=0.0_d_t
 
     ! Compute optical thickness
 
@@ -746,7 +764,7 @@ CONTAINS
 
     ! Define variables
 
-    INTEGER(kind=li) ::  alloc_stat, l, q, i1, i2, i3, m11, m12, m13, &
+    INTEGER(kind=li) ::  l, q, i1, i2, i3, m11, m12, m13, &
           m21, m22, m23, m31, m32, m33, g1, g2, g3, g3p
     REAL(kind=d_t) :: e1, e2, e3, e4, e5, e6, fact, af1temp, af2temp, &
           a1temp, a2temp, a3temp
@@ -769,9 +787,8 @@ CONTAINS
 
     ALLOCATE(FF(num_moments_f,num_moments_f),&
           FV(num_moments_f,num_moments_v),F(num_moments_v,num_moments_f),&
-          V(num_moments_v,num_moments_v),stat=alloc_stat);&
+          V(num_moments_v,num_moments_v));&
           FF=0.0_d_t;FV=0.0_d_t;F=0.0_d_t;V=0.0_d_t
-    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ! Pre-compute optimisers
 
@@ -975,7 +992,7 @@ CONTAINS
     ! Define variables
 
     INTEGER(kind=li), INTENT(in) :: f
-    INTEGER(kind=li) :: alloc_stat, l, q, i1F, i2F
+    INTEGER(kind=li) :: alloc_stat, l, q, i1F=0, i2F=0
     REAL(kind=d_t), DIMENSION(num_moments_f), INTENT(in) :: &
           face_angular_mom
     REAL(kind=d_t), DIMENSION(num_moments_v), INTENT(out) :: &

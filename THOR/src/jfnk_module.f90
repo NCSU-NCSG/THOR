@@ -87,7 +87,7 @@ CONTAINS
 
     ! local variables
 
-    INTEGER(kind=li) :: alloc_stat
+    INTEGER(kind=li) :: alloc_stat=0
 
     ! set method, krest and kit
 
@@ -465,7 +465,7 @@ CONTAINS
 
     ! Local variables
 
-    INTEGER(kind=li) :: eg,i,l,alloc_stat,n,indx,zero,one,two,three
+    INTEGER(kind=li) :: eg,i,l,n,indx,zero,one,two,three
     REAL(kind=d_t)   :: f1,f2
 
     ! Source: src is a general source used for all methods
@@ -482,16 +482,14 @@ CONTAINS
 
       ! initialize reflected_flux
 
-      ALLOCATE(reflected_flux(num_moments_f,grs,8,nangle,egmax),stat=alloc_stat)
-      IF(alloc_stat /=0) CALL raise_fatal_error("*** Not enough memory ***")
+      ALLOCATE(reflected_flux(num_moments_f,grs,8,nangle,egmax))
       reflected_flux = 0.0_d_t
 
     ELSE IF(method==2 .OR. method==3) THEN
 
       ! initialize reflected_flux
 
-      ALLOCATE(reflected_flux(num_moments_f,grs,8,nangle,1),stat=alloc_stat)
-      IF(alloc_stat /=0) CALL raise_fatal_error("*** Not enough memory ***")
+      ALLOCATE(reflected_flux(num_moments_f,grs,8,nangle,1))
       reflected_flux = 0.0_d_t
 
       ! initialize source

@@ -169,7 +169,7 @@ CONTAINS
     REAL(kind=d_t) :: plegendre
 
     INTEGER(kind=li) :: i, j, ll
-    REAL(kind=d_t) :: fact, oldfact, pll, pmm, pmmp1, omx2, prod
+    REAL(kind=d_t) :: fact=0.0D0, oldfact=0.0D0, pll=0.0D0, pmm=0.0D0, pmmp1=0.0D0, omx2=0.0D0, prod=0.0D0
 
     REAL(kind=d_t), PARAMETER :: PI = 3.141592653589793_d_t
 
@@ -187,20 +187,20 @@ CONTAINS
       END DO
     END IF
 
-    pmm = sqrt((2.0_d_t * m + 1.0_d_t) * pmm / (4.0_d_t * PI));
+    pmm = sqrt((2.0_d_t * m + 1.0_d_t) * pmm / (4.0_d_t * PI))
     IF (m == 1) pmm = -pmm
 
     IF (l == m) THEN
       plegendre = pmm
     ELSE
-      pmmp1 = x * sqrt(2.0_d_t * m + 3.0_d_t) * pmm;
+      pmmp1 = x * sqrt(2.0_d_t * m + 3.0_d_t) * pmm
       IF (l == m + 1) THEN
         plegendre = pmmp1
       ELSE
-        oldfact=sqrt(2.0_d_t * m + 3.0_d_t);
+        oldfact=sqrt(2.0_d_t * m + 3.0_d_t)
         DO ll = m + 2, l
-          fact = sqrt((4.0_d_t * ll * ll - 1.0_d_t)/(ll * ll - m * m));
-          pll = (x * pmmp1 - pmm / oldfact) * fact;
+          fact = sqrt((4.0_d_t * ll * ll - 1.0_d_t)/(ll * ll - m * m))
+          pll = (x * pmmp1 - pmm / oldfact) * fact
           oldfact = fact
           pmm = pmmp1
           pmmp1 = pll
@@ -209,7 +209,7 @@ CONTAINS
       END IF
     END IF
 
-    prod = 1.0_d_t;
+    prod = 1.0_d_t
     DO j = l - m + 1, l + m
       prod = prod * j
     END DO

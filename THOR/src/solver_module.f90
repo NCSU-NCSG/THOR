@@ -56,10 +56,8 @@ CONTAINS
           U(num_moments_v,num_moments_v),&
           Mf(num_moments_f,num_moments_f),&
           Lf(num_moments_f,num_moments_f),&
-          Uf(num_moments_f,num_moments_f),&
-          stat=alloc_stat);M=zero;&
+          Uf(num_moments_f,num_moments_f));M=zero;&
           LL=zero;U=zero;Mf=zero;Lf=zero;Uf=zero;
-    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
 
     ALLOCATE(Ysh(nangle,8,namom),stat=alloc_stat)
@@ -119,10 +117,8 @@ CONTAINS
           U(num_moments_v,num_moments_v),&
           Mf(num_moments_f,num_moments_f),&
           Lf(num_moments_f,num_moments_f),&
-          Uf(num_moments_f,num_moments_f),&
-          stat=alloc_stat);M=zero;&
+          Uf(num_moments_f,num_moments_f));M=zero;&
           LL=zero;U=zero;Mf=zero;Lf=zero;Uf=zero;
-    IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
 
     ALLOCATE(Ysh(nangle,8,namom),stat=alloc_stat)
     IF(alloc_stat /=0) CALL raise_fatal_error("*** Not enough memory ***")

@@ -127,8 +127,10 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE src_read_current()
-    INTEGER :: nwords,given_ang,given_space,alloc_stat,m,i,j,g
-    CHARACTER(10000) :: words(1000)
+    INTEGER :: nwords,given_ang,given_space,alloc_stat,m,i,j
+    CHARACTER(10000), ALLOCATABLE :: words(:)
+
+    ALLOCATE(words(1000))
 
     CALL get_next_line(words,nwords)
 
@@ -162,12 +164,14 @@ CONTAINS
       ENDDO
     ENDDO
 
+    DEALLOCATE(words)
+
   END SUBROUTINE src_read_current
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE get_next_line(words,nwords)
     INTEGER,INTENT(OUT) :: nwords
-    CHARACTER(10000),INTENT(OUT) :: words(1000)
+    CHARACTER(10000),INTENT(OUT) :: words(:)
     CHARACTER(10000) :: line
     INTEGER :: ios
     DO

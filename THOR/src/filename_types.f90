@@ -5,7 +5,7 @@ MODULE filename_types
 
   IMPLICIT NONE
 
-  INTEGER, PARAMETER :: length = 80
+  INTEGER, PARAMETER :: length = 100
   CHARACTER(length) jobname, source_filename, finflow_filename, &
         cross_section_filename, mesh_filename, flux_filename,    &
         vtk_flux_filename,quad_file,dump_file,inguess_file,      &

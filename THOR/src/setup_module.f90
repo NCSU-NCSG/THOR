@@ -425,8 +425,7 @@ CONTAINS
 
     ! Define temporary variables
 
-    INTEGER(kind=li) :: q, oct, octant,&
-                        i, k, index
+    INTEGER(kind=li) :: q, oct, octant, i, k
     TYPE(vector) :: omega
 
     ! Temporary variables
