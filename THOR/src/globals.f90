@@ -195,6 +195,9 @@ MODULE globals
   !adjoint option setting
   LOGICAL :: adjoint_opt=.FALSE.
 
+  !logical to determine if the fixed source problem will have fission
+  LOGICAL :: nonu=.FALSE.
+
 CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
