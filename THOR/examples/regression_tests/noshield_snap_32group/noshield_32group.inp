@@ -14,6 +14,7 @@
   vtk_reg_out yes
   restart_out yes
   vtk_src_out yes
+  nonu yes
 
   ngroups 32 ; upscattering yes ;
   multiplying yes
