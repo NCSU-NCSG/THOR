@@ -27,8 +27,8 @@ CONTAINS
   !read in the input file
   SUBROUTINE read_input_file(response_inp)
     CHARACTER(*),INTENT(IN) :: response_inp
-    CHARACTER(64) :: t_char,t_char2
-    INTEGER(ki4) :: in_unit=22,t_int
+    CHARACTER(200) :: t_char,t_char2
+    INTEGER(ki4) :: in_unit=22,t_int,num_flux_files,i
 
     OPEN(UNIT=in_unit, FILE=response_inp, STATUS='OLD', ACTION = "READ", IOSTAT=t_int, IOMSG=t_char)
     IF(t_int .NE. 0)THEN
@@ -39,10 +39,22 @@ CONTAINS
     !get the flux data
     REWIND(in_unit)
     DO
-      READ(in_unit,*,IOSTAT=t_int)t_char,t_char2
-      IF(t_int .NE. 0)STOP 'not found'
-      IF(t_char .EQ. 'flux_file')THEN
-        CALL read_in_flux(t_char2)
+      READ(in_unit,*,IOSTAT=t_int)t_char
+      IF(t_int .NE. 0)STOP 'flux_files not found'
+      IF(t_char .EQ. 'flux_files')THEN
+        BACKSPACE(in_unit)
+        READ(in_unit,*)t_char,t_char2
+        READ(t_char2,*)num_flux_files
+        IF(num_flux_files .LT. 1)STOP 'need at least one flux file'
+        !get the problem size data, groups and number of cells as well as the volumes
+        READ(in_unit,'(A)')t_char2
+        CALL get_vols(t_char2)
+        BACKSPACE(in_unit)
+        !read in all the flux data and sum it up
+        DO i=1,num_flux_files
+          READ(in_unit,'(A)')t_char2
+          CALL read_in_flux(t_char2)
+        ENDDO
         EXIT
       ENDIF
     ENDDO
@@ -50,9 +62,11 @@ CONTAINS
     !get the response type
     REWIND(in_unit)
     DO
-      READ(in_unit,*,IOSTAT=t_int)t_char,response_type
-      IF(t_int .NE. 0)STOP 'not found'
+      READ(in_unit,*,IOSTAT=t_int)t_char
+      IF(t_int .NE. 0)STOP 'response_type not found'
       IF(t_char .EQ. 'response_type')THEN
+        BACKSPACE(in_unit)
+        READ(in_unit,*)t_char,response_type
         SELECT CASE(response_type)
           CASE('cell_wise','region_wise')
           CASE DEFAULT
@@ -65,9 +79,11 @@ CONTAINS
     !get the response function
     REWIND(in_unit)
     DO
-      READ(in_unit,*,IOSTAT=t_int)t_char,t_char2
-      IF(t_int .NE. 0)STOP 'not found'
+      READ(in_unit,*,IOSTAT=t_int)t_char
+      IF(t_int .NE. 0)STOP 'response_func not found'
       IF(t_char .EQ. 'response_func')THEN
+        BACKSPACE(in_unit)
+        READ(in_unit,*)t_char,t_char2
         SELECT CASE(response_type)
           CASE('cell_wise')
             CALL read_in_map_cell(t_char2)
@@ -83,7 +99,7 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !read in the flux data
-  SUBROUTINE read_in_flux(filename)
+  SUBROUTINE get_vols(filename)
     CHARACTER(*),INTENT(IN) :: filename
     CHARACTER(100000) :: t_char
     INTEGER(ki4) :: in_unit=23,t_int,nwords,i
@@ -105,13 +121,41 @@ CONTAINS
     num_groups=nwords-1
 
     ALLOCATE(flux(num_cells,num_groups),volume(num_cells),resp_func(num_cells,num_groups))
+    flux=0.0D0
 
     REWIND(in_unit)
 
     READ(in_unit,*)nwords
     DO i=1,num_cells
-      READ(in_unit,*)volume(i),flux(i,:)
+      READ(in_unit,*)volume(i)
     ENDDO
+
+    CLOSE(in_unit)
+  ENDSUBROUTINE get_vols
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !read in the flux data
+  SUBROUTINE read_in_flux(filename)
+    CHARACTER(*),INTENT(IN) :: filename
+    CHARACTER(100000) :: t_char
+    INTEGER(ki4) :: in_unit=23,t_int,i
+    REAL(kr8),ALLOCATABLE :: tline_arr(:)
+
+    OPEN(UNIT=in_unit, FILE=filename, STATUS='OLD', ACTION = "READ", IOSTAT=t_int, IOMSG=t_char)
+    IF(t_int .NE. 0)THEN
+      WRITE(*,'(A)')TRIM(t_char)
+      STOP 'file error'
+    ENDIF
+
+    ALLOCATE(tline_arr(num_groups))
+
+    READ(in_unit,*)t_char
+    DO i=1,num_cells
+      READ(in_unit,*)t_char,tline_arr(:)
+      flux(i,:)=flux(i,:)+tline_arr
+    ENDDO
+
+    DEALLOCATE(tline_arr)
 
     CLOSE(in_unit)
   ENDSUBROUTINE read_in_flux
