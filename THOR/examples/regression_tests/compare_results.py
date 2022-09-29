@@ -22,6 +22,7 @@ for lline in comp_list_file:
                 for ii in range(len(line1split)):
                     if line1split[ii] != line2split[ii]:
                         if abs((float(line1split[ii])-float(line2split[ii]))/float(line1split[ii])) >= 1.0e-10:
+                            if abs((float(line1split[ii])-float(line2split[ii]))) >= 1.0e-17:
                                 j += 1
                                 print("-----------------------------------DIFFERENCE FOUND!-----------------------------------")
                                 print("\tFile 1:", line1, end='')

@@ -386,6 +386,7 @@ CONTAINS
 
     ! write a csv output file containing all region averaged information
     OPEN(unit=20, file=TRIM(jobname)//TRIM('_out.csv'), status='unknown', action='write')
+    IF(problem == 1)WRITE(20,'(A,F20.16)')'k-eff Eigenvalue: ',keff
     WRITE(20, 502, ADVANCE = "NO") "Region, Material, "
     DO eg = 1, egmax - 1
       WRITE(20, 505, ADVANCE = "NO") " flux g = ", eg, ","
