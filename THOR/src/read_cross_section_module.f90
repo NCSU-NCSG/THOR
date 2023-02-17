@@ -269,7 +269,7 @@ CONTAINS
     CALL get_next_line(words,nwords)
     words(1)=TRIM(ADJUSTL(lowercase(words(1))))
     IF(words(1) .NE. 'id')THEN
-      IF(nwords .NE. egmax)CALL raise_fatal_error('bad amount of energy data on line in xs file')
+      IF(nwords .NE. egmax .AND. nwords .NE. egmax+1)CALL raise_fatal_error('bad amount of energy data on line in xs file')
       DO g=1,egmax
         READ(words(g),*)eg_bounds(g)
       ENDDO
