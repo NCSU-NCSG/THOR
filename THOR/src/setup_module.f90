@@ -843,8 +843,8 @@ CONTAINS
       d2 = SQRT( (x1)**2 + (x2-one)**2 + (x3)**2 )
       d3 = SQRT( (x1)**2 + (x2)**2 + (x3-one)**2 )
       IF(d1 > tol .AND. d2 > tol .AND. d3 > tol) THEN
-        CALL raise_fatal_error('Reflective boundary conditions on boundary face #, cell # ' &
-          //TRIM(STR(c))//', '//TRIM(STR(f))//' located on a non-permissible boundary face.')
+        CALL raise_fatal_error('Reflective boundary conditions on boundary face # '// TRIM(STR(f)) //', cell # ' &
+          //TRIM(STR(c))//' located on a non-permissible boundary face.')
       END IF
     END DO
 
