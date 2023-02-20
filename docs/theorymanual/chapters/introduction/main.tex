@@ -1,4 +1,4 @@
-The purpose of this Theory Manual is to present a brief but complete review of the theory underlying the \ac{THOR}.
+The purpose of this Theory Manual is to present a brief but complete review of the theory underlying the \ac{THOR} transport code.
 
 The \ac{THOR} transport code embodies the implementation in modern Fortran of a solver for the steady state, multigroup, \ac{SN} approximation of the transport equation in three-dimensional geometry.
 The spatial discretization is accomplished via the \ac{AHOT-C}~\cite{Azmy1992} on tetrahedral cells~\cite{Ferrer2012}.
@@ -20,30 +20,30 @@ The \ac{THOR} transport code originated from the work presented in~\cite{FerrerP
 
 \ac{THOR} is designed to solve the steady-state, multigroup, \ac{SN} approximation of the transport equation for neutral particles, namely neutrons and photons, in three-dimensional configurations.
 The underlying spatial discretization method is based on the method of Short Characteristics applied to tetrahedral cells comprising an unstructured mesh.
-The method of Short Characteristics computes the outgoing angular flux from a single cell, and the flux distribution over the cell’s volume using the incoming angular flux to that cell and the source distribution over the cell’s volume.
+The method of Short Characteristics computes the outgoing angular flux from a single cell, and the flux distribution over the cell's volume using the incoming angular flux to that cell and the source distribution over the cell's volume.
 The incoming flux is determined from global boundary conditions or from the outgoing flux in adjacent, upwind cells sharing the subject faces with the solved cell thus leading to the standard mesh sweep algorithm.
 The source distribution includes contributions from the fixed (external) source, if specified in the problem configuration, as well as secondary-particles produced in scattering collisions, and from fission in the case of neutrons, leading to the inner/outer iteration strategy typical in neutron transport codes.
 The combination of mesh sweeps and inner/outer iterations, plus power iterations in criticality (eigenvalue calculations) enables solving practically any well-posed neutronics or photonics problem.
 
-In deterministic transport codes, typically a single cell ‘type’ is used to approximately represent a given problem geometry and the characteristics relations are imposed exactly within each cell.
+In deterministic transport codes, typically a single cell `type' is used to approximately represent a given problem geometry and the characteristics relations are imposed exactly within each cell.
 Under the \ac{SN} approximation, and within the scope of a single inner iteration, the mesh sweep is performed one angle at a time.
-For each angle, the Short Characteristics formalism is applied to cells with known incoming angular flux in a sequential order along the downwind direction of the specific angle, feeding outgoing fluxes into neighboring cells until all cells in the mesh are “solved”.
-The kernel operation over which the method’s formalism is constructed utilizes a projection of the face- and volume-moments of the angular flux and source (fixed and secondary) in a cell onto some polynomial space suitable for the applicable cell-type.
+For each angle, the Short Characteristics formalism is applied to cells with known incoming angular flux in a sequential order along the downwind direction of the specific angle, feeding outgoing fluxes into neighboring cells until all cells in the mesh are ``solved''.
+The kernel operation over which the method's formalism is constructed utilizes a projection of the face- and volume-moments of the angular flux and source (fixed and secondary) in a cell onto some polynomial space suitable for the applicable cell-type.
 This is in contrast to the method of Long Characteristics, typically referred to simply as the \ac{MOC}, where the entire problem configuration is traversed along selected tracks along which particle attenuation and production are accumulated.
 
 The reduction of the problem geometry into repeating-type, even if not identical-shape/dimensions, computational cells of a particular geometry makes it possible to treat each cell/angle pair semi-analytically.
-The “analytical” aspect follows from the application of the integral form of the transport equation over the cell’s volume, while the “semi” aspect follows from the stated projection of the angular flux and source distributions.
-Solution of the transport equation’s integral form using characteristics is a standard staple in introductory transport theory coursework and textbooks~\cite{Lewis1993}.
+The ``analytical'' aspect follows from the application of the integral form of the transport equation over the cell's volume, while the ``semi'' aspect follows from the stated projection of the angular flux and source distributions.
+Solution of the transport equation's integral form using characteristics is a standard staple in introductory transport theory coursework and textbooks~\cite{Lewis1993}.
 In the context of the method of Short Characteristics, the resulting kernel operation is comprised of evaluating the outgoing angular flux moments using the characteristics relationships on the projection basis.
-This is followed by enforcing the balance over the cell of each spatial moment in the employed basis using the known incoming and just-computed outgoing angular flux moments and moments of the know source moments, to compute the cell-moments of the angular flux~\cite{Sanchez1982}.
+This is followed by enforcing the balance over the cell of each spatial moment in the employed basis using the known incoming and just-computed outgoing angular flux moments and moments of the known source moments, to compute the cell-moments of the angular flux~\cite{Sanchez1982}.
 
 The polynomial order of the expansion basis utilized by the method of Short Characteristics, $p$, influences the solution accuracy.
-However, a more influential factor affecting the accuracy of the method’s solution is regularity of the exact solution, noting that for all known applications of the transport equation in neutronics and photonics either the exact solution or its first derivative is discontinuous in the spatial variable depending on the global boundary condition’s continuity at the incoming “corners”.
+However, a more influential factor affecting the accuracy of the method's solution is regularity of the exact solution, noting that for all known applications of the transport equation in neutronics and photonics either the exact solution or its first derivative is discontinuous in the spatial variable depending on the global boundary condition's continuity at the incoming ``corners''~\cite{Duo2009}.
 For problems with very little scattering and unequal angular flux on incoming faces, discontinuities of the angular flux or its spatial derivatives along the outgoing faces of computational cells intersected by singular characteristics are expected to occur.
-Thus, the use of a continuous polynomial basis will only approximately capture the true shape of the angular flux over such cells’ faces.
+Thus, the use of a continuous polynomial basis will only approximately capture the true shape of the angular flux over such cells' faces.
 
 Three important issues concerning Short Characteristics methods are flux positivity and solution accuracy, as noted by Lathrop~\cite{Lathrop1969}, and the asymptotic behavior of the discretization in thick diffusive problems.
-The first two  issues are tied to the order $p$ of the polynomial basis functions used to represent the angular flux over the cells’ faces and volume.
+The first two  issues are tied to the order $p$ of the polynomial basis functions used to represent the angular flux over the cells' faces and volume.
 Most of the early Short Characteristics methods relied on either a flat or linear flux representation of the flux spatial profile.
 The constant or flat flux representation on the face and volume of a computational cell, also known as the \ac{SC} method, has been shown to yield a positive angular flux for positive incoming angular flux and distributed source.
 However, the Short Characteristics method has also been shown to be only first order accurate, thus solution positivity comes at the expense of accuracy.
@@ -52,29 +52,29 @@ Finally, the behavior of discretizations based on general-order Short Characteri
 This analysis revealed that Short Characteristics methods behave almost exactly like \acs{DFEM}s in diffusive problems, and thus possess two classes of discretizations: those which fail on thick diffusive problems, and those that correctly limit to a discretized diffusion equation.
 The investigators proposed a family of reduced-order Short Characteristics methods which use less information on cell surfaces, and thus behave more robustly in the thick diffusive regime.
 
-A metrics based study in the context of a simple two-dimensional test problem configuration considered various desired features in the numerical solution to the transport equation based on the \ac{AHOT} class of methods of the Nodal (\ac{AHOT-N}) and Characteristics (\ac{AHOT-C}) types~\cite{Azmy1992}.
+A metrics-based study in the context of a simple two-dimensional test problem configuration considered various desired features in the numerical solution to the transport equation based on the \ac{AHOT} class of methods of the Nodal (\ac{AHOT-N}) and Characteristics (\ac{AHOT-C}) types~\cite{Azmy1992}.
 This study showed improving solution accuracy with rising local expansion order, specifically concluding that \ac{AHOT-N} provides more accurate scalar flux values while \ac{AHOT-C} computes more accurate current values, with the difference in accuracy level diminishing with increasing expansion order.
 Furthermore, that study established that even-order local expansion methods are less likely to produce negative values for the scalar flux.
 Note that \ac{AHOT-C} of order 0 is equivalent to the \ac{SC} methods that is positive.
 More recently, a wider collection of numerical methods employed in solving the transport equation, including \ac{AHOT-N} and \ac{DGFEM} both up to third order local expansions, among other methods, were applied to a three-dimensional, Method of Manufacture Solutions (MMS) configuration~\cite{Schunert2015}.
 Availability of the true, MMS solution enabled quantification of the true error for each tested method $vs$ various physical and numerical parameters.
 That study concluded that under discrete $L_p$ norms for configurations with a continuous exact angular flux, high-order \ac{AHOT-N} methods perform best, i.e. produce the most accurate numerical solution.
-Applying an integral error norm to the same collection of numerical solutions it was found that the Linear Nodal method (as simplification of the \ac{AHOT-N} method of first order~\cite{Azmy1988}) performs the best.
+By applying an integral error norm to the same collection of numerical solutions it was found that the Linear Nodal method (as simplification of the \ac{AHOT-N} method of first order~\cite{Azmy1988}) performs the best.
 In configurations where the exact angular flux suffers discontinuities, e.g. in certain shielding applications, the Singular Characteristic Tracking algorithm was found to perform best as it avoided smearing the incoming angular flux across the discontinuity that affects cells intersected by the singular characteristic by explicitly accounting for the location of these discontinuities~\cite{Duo2009}.
 
 \section{Low-Order Spatial Approximations}
 
 The use of constant or linear basis functions to represent the cell-face and cell-volume based variables constitute what is considered in this section to be the low-order spatial approximations within the family of Short Characteristics methods.
-The constant or \ac{SC} method is the earliest proposed method in which the streaming-plus-collision operator of the transport equation is formally inverted and the ‘characteristic’ formula is used to locally solve the transport equation.
+The constant or \ac{SC} method is the earliest proposed method in which the streaming-plus-collision operator of the transport equation is formally inverted and the `characteristic' formula is used to locally solve the transport equation.
 Issues of positivity and accuracy regarding the Step and \ac{LC} method in two-dimensional geometry were investigated by Lathrop~\cite{Lathrop1969}.
-While higher-order methods are suggested in Lathrop’s work, it is Larsen and Alcouffe~\cite{Larsen1981} that introduce the \ac{LC} method in two-dimensional Cartesian geometry, and later generalized to arbitrarily high order by Azmy~\cite{Azmy1992}.
+While higher-order methods are suggested in Lathrop's work, it is Larsen and Alcouffe~\cite{Larsen1981} that introduce the \ac{LC} method in two-dimensional Cartesian geometry, and later generalized to arbitrarily high order by Azmy~\cite{Azmy1992}.
 Numerical results reported in~\cite{Larsen1981} show that for shielding and deep-penetration problems, the \ac{LC} outperformed the DD method with respect to solution accuracy for both fine and coarse-mesh sizes.
 The acceleration of the inner iterations through the application of DSA is also presented by Larsen and Alcouffe in the same paper.
 Results and conclusions from the study reported in~\cite{Azmy1992} are summarized above.
 
 While much of the initial theoretical and numerical development of the \ac{SC} and \ac{LC} methods was performed in two-dimensional Cartesian geometry, the Short Characteristics approach has gained attention as an approach that can provide numerical solutions to the transport equation in general geometries.
 In fact, the so-called \ac{ESC} method developed by DeHart \textit{et al.}~\cite{DeHart1994}, is an \ac{LC} method for two-dimensional arbitrarily-shaped cells.
-The basic \ac{ESC} approach is to overlay an unstructured grid on an exact solid body geometric description of the domain, which gives rise to an arbitrarily connected polygonal grid in which the \ac{LC}-based method can be applied by splitting or ‘slicing’ each cell.
+The basic \ac{ESC} approach is to overlay an unstructured grid on an exact solid body geometric description of the domain, which gives rise to an arbitrarily connected polygonal grid in which the \ac{LC}-based method can be applied by splitting or `slicing' each cell.
 Thus, the arbitrarily-connected polygonal cells can be reduced to arbitrary triangles and/or quadrilaterals, each having a single incoming and a single outgoing face per discrete ordinate.
 Once all face fluxes are computed, based on incoming fluxes either from neighboring cells or external boundary conditions, the interior cell angular flux is computed by imposing the balance equation over the arbitrary polygonal cell.
 The \ac{SBA}, developed by Grove~\cite{Grove2005}, is a Short Characteristic-based discretization which can handle unstructured polyhedral meshes in a similar manner as the \ac{ESC} but in three-dimensional geometry.
@@ -93,14 +93,14 @@ Thus, in the next section high-order spatial approximations are discussed in the
 
 First introduced by Azmy~\cite{Azmy1992}, the Arbitrarily High-Order Transport Characteristic (\ac{AHOT-C}) method can be considered a generalization of the \ac{SC} and \ac{LC} methods into a general-order class of Short Characteristics methods which use a polynomial basis function for the cell-face and cell-volume angular fluxes.
 While the first high-order, multi-dimensional transport method was suggested by Lathrop~\cite{Lathrop1969}, it was in the context of nodal methods that consistent high-order methods were first conceived~\cite{Azmy1992} for structured Cartesian cells.
-By performing the moment-based transverse-averaging of the transport equation locally in a cell, a dimensionally-reduced equation could be solved ‘analytically’ for each coordinate direction separately.
+By performing the moment-based transverse-averaging of the transport equation locally in a cell, a dimensionally-reduced equation could be solved `analytically' for each coordinate direction separately.
 The solutions in the separate one-dimensional versions are coupled together via the leakage terms that are themselves represented as a local expansion on the cell-faces.
 All so-computed moments, within and on the faces of a cell, are subsequently used to perform a consistent balance over the cell's volume for all considered spatial moments.
 The introduction of the \ac{AHOT-N} method, cast into a Weighted Diamond Difference form by Azmy~\cite{Azmy1988a}, served as a motivation for developing an \ac{AHOT-C}.
 While consistent spatial moments are taken over the cell to apply the balance in both \ac{AHOT-N} and \ac{AHOT-C}, it is the latter that solves for the outgoing angular flux moments evaluated at the cell edges by applying a Short Characteristics approach.
 Unlike the traditional \ac{SC} and \ac{LC} methods, the \ac{AHOT-C} assumes a polynomial cross-product basis function in two-dimensional structured Cartesian cells.
 A numerical comparison between \ac{AHOT-N} and \ac{AHOT-C} has also been presented for a set of benchmark problems by Azmy~\cite{Azmy1992}, which concludes that for deep-penetration or shielding problems the \ac{AHOT-C} methodology is more accurate with respect to quantities such as leakage.
-On the other hand, for ‘neutron conserving systems’, the \ac{AHOT-N} methodology is found to be more accurate in terms of integral quantities, such as reaction rates.
+On the other hand, for `neutron conserving systems', the \ac{AHOT-N} methodology is found to be more accurate in terms of integral quantities, such as reaction rates.
 
 An early extension of the \ac{AHOT-C} formalism to unstructured tetrahedral grids,  referred  to as \acs{AHOT-C-UG}, was presented in~\cite{Azmy2001}.
 While numerical difficulties were encountered for optically thin cells and high-order spatial expansions beyond the lowest order of polynomial expansion, their first attempt to extend \ac{AHOT-C} to unstructured grids remains an important step in the generalization of Short Characteristics methods.
