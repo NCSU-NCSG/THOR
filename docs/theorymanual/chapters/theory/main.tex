@@ -44,13 +44,13 @@ This aspect is treated in \ac{THOR} using the traditional inner/outer iteration 
 
 Next, the discrete-ordinates approximation is introduced by applying Eq. \ref{eq:TE} to a pre-selected set of angles $\hat{\Omega} = ( \mu_1 , \mu_2 , \mu_3 )$, where $\mu_1$, $\mu_2$, and $\mu_3$, are angle-cosines of the vector $\hat{\Omega}$ with respect to the global orthogonal coordinate
 system's $x$, $y$, and $z$ axes, respectively.
-The discrete-ordinates or $S_N$ method required Eq. \ref{eq:TE} to be solved for a set of $M(N)$ discrete directions $\{ \hat{\Omega} _n \}$ associated, per individual angle, to a set of quadrature weights $\{ \omega_n \}$ such that the scalar flux definition, Eq. \ref{eq:scalarF}, is approximated by
+The discrete-ordinates, or $S_N$, method requires Eq. \ref{eq:TE} to be solved for a set of $M(N)$ discrete directions $\{ \hat{\Omega} _n \}$ associated, per individual angle, to a set of quadrature weights $\{ \omega_n \}$ such that the scalar flux definition, Eq. \ref{eq:scalarF}, is approximated by
 
 \begin{equation}
     \phi (\Vec{r} ) \approx \sum_{n=1}^{M(N)} \omega_n \psi_n ( \Vec{r} )
 \end{equation}
 
-\noindent where the $S_N$ angular flux approximates the angular flux along directions $\hat{\Omega}_n$, i.e. $\psi_n ( \Vec{r} ) \approx \psi ( \Vec{r} , \hat{\Omega_n} ) $, and the quadrature weights $\omega_n$ are normalized by $sum_{n=1}^{M(N)} \omega_n = 4 \pi$.
+\noindent where the $S_N$ angular flux approximates the angular flux along directions $\hat{\Omega}_n$, i.e. $\psi_n ( \Vec{r} ) \approx \psi ( \Vec{r} , \hat{\Omega_n} ) $, and the quadrature weights $\omega_n$ are normalized by $\sum_{n=1}^{M(N)} \omega_n = 4 \pi$.
 Thus, the $S_N$ approximation to the steady-state, mono-energetic transport equation is obtained
 
 \begin{equation}
@@ -63,14 +63,13 @@ Thus, the $S_N$ approximation to the steady-state, mono-energetic transport equa
     \psi_n ( \Vec{r} ) = \psi_{bc,n}, \Vec{r} \in \Gamma^- ( \hat{\Omega}_n )
 \end{equation}
 
-In order to lighten the notation, the scattering and external sources will be combined into a single term to define a \textit{total} source $Q_n ( \vec{r})$, and by assuming that the fixed source is isotropic we can write $Q ( \vec{r} ) = Q_n ( \vec{r})$ in the ensuing presentation, again without any loss of generality.
+In order to lighten the notation, the scattering and external sources will be combined into a single term to define a \textit{total} source $Q_n ( \vec{r})$, and by assuming that the fixed source is isotropic, we can write $Q ( \vec{r} ) = Q_n ( \vec{r})$ in the ensuing presentation, without any loss of generality.
 
 \section{Transformation Among Global, Cell, and \ac{CT} Coordinate Systems}
 
 Unlike the case of \ac{AHOT-C}, in which the computational cell boundaries coincide with a global Cartesian coordinate systems, \ac{THOR}'s tetrahedral mesh precludes such alignment.
 The \ac{AHOT-C-UG} formalism is greatly simplified via the transformation of an arbitrary tetrahedral cell into a unit tetrahedral cell.
-This transformation simplifies the derivation of the final set of discrete-variable equations and allows for a single series finite expansion of the ‘characteristic kernel’, i.e.
-Integral term of the characteristic relation along the streaming direction.
+This transformation simplifies the derivation of the final set of discrete-variable equations and allows for a single series finite expansion of the `characteristic kernel', i.e. integral term of the characteristic relation along the streaming direction.
 The transformation of an arbitrary tetrahedron, and subsequent integration of functions over its volume, has been successfully applied to the development of a \ac{LC} method for tetrahedral grids~\cite{Mathews2000}.
 In order to apply the necessary transformations to the \ac{AHOT-C-UG} approach, an analogous approach to the transformations presented in~\cite{Mathews2000} was developed.
 In summary, all transformations of the cells and \textit{Characteristic Tetrahedra} (\ac{CT}s), to be defined shortly, into local face- and volume-coordinate systems are performed numerically through the use of Jacobian matrices and utilizing their determinants.
@@ -107,7 +106,7 @@ In order to derive the formulas for $\tau$, it is necessary to consider every po
 
 The final standard configuration involves three incoming faces and a single outgoing face with respect to the angular direction.
 In order to split such tetrahedron into \ac{CT}s, it is necessary to determine the incoming position vector.
-It is worth noting that this particular case is identical to the standard configuration 1 with the “in” and “out” designations for the corresponding position vectors interchanged.
+It is worth noting that this particular case is identical to the standard configuration 1 with the ``in'' and ``out'' designations for the corresponding position vectors interchanged.
 
 In the event that the particle flight direction, $\vec{\Omega}$, is co-planar with one of the original tetrahedron's faces, or coincident with one of its edges the resulting set of potential \ac{CT} splits is illustrated in \ref{fig:planar_CTs}.
 
@@ -128,14 +127,14 @@ The third simplified configuration involves a single incoming face and a single 
 This particular case occurs when the angular direction $\vec{\Omega}$ is parallel to exactly one edge of the arbitrary tetrahedron.
 In this case, the arbitrary tetrahedron reduces to a \ac{CT} and as such, it does not require any splitting.
 This simplified configuration rarely occurs in actual applications, since the generation of the mesh and the selection of the angular quadrature are performed independently.
-However, this configuration is also particularly important due to the fact that the discrete-ordinates solution being approximated by the \ac{AHOT-C-UG} over the discrete mesh will be smooth, since all potential discontinuities or so-called ‘singular characteristics’~\cite{Duo2009} will lie along the no-flow faces of the subject tetrahedrons, and thus they make no contribution to the incoming and outgoing angular fluxes over a given cell.
+However, this configuration is also particularly important due to the fact that the discrete-ordinates solution being approximated by the \ac{AHOT-C-UG} over the discrete mesh will be smooth, since all potential discontinuities or so-called `singular characteristics'~\cite{Duo2009} will lie along the no-flow faces of the subject tetrahedrons, and thus they make no contribution to the incoming and outgoing angular fluxes over a given cell.
 This feature of the discrete problem, in which high-order convergence may be observed, is attained provided that the tetrahedral grid is constructed in such a way that every cell has at least one side that is parallel to the particle flow angular direction.
-This type of mesh generation strategy is termed "aligned mesh".
+This type of mesh generation strategy is termed ``aligned mesh''.
 
 With regards to implementation into \ac{THOR}, an algorithm that determines the applicable \ac{CT} configurations with respect to a given cell's orientation is devised by simply testing the number of incoming and outgoing cell faces.
 Since the unstructured nature of the geometric description makes it impossible to determine \textit{a priori} the sweeping order of the mesh in the context of a single inner iteration, each cell is examined throughout the mesh-sweep process to determine the applicable \ac{CT} configuration.
 This enables locally solving the moments-balance and Short Characteristics equations simultaneously for each resulting \ac{CT}, then the computed values are combined into face- and cell-moments of the angular flux valid for the original tetrahedral cell.
-Hence, the information regarding the number of incoming and outgoing faces is determined on the fly and need not be stored thus relieving the memory storage burden.
+Hence, the information regarding the number of incoming and outgoing faces is determined on the fly and need not be stored, thus relieving the memory storage burden.
 
 \section{The \ac{AHOT-C-UG} Formulation}
 
@@ -151,7 +150,7 @@ In order to develop these transformations, first it is necessary to define the f
 
 \subsection{Polynomial Basis Function Expansion}
 
-Let $B_{\vec{i}} (\vec{r})$ denote a polynomial basis function of order $\vec{i} = \{ i_j,j=1,2,3 \}$, where the $i_j$ satisfy the conditions $0 \leq i_1 + i_2 + i_3 \leq \Lambda '$ if a ‘complete’ basis is used or the conditions $0 \leq i_j \leq \Lambda , j = 1, 2, 3$ if a ‘double’ Pascal tetrahedron is used, in which case all mixed (or cross) moments that satisfy the corresponding conditions are retained by the expansion.
+Let $B_{\vec{i}} (\vec{r})$ denote a polynomial basis function of order $\vec{i} = \{ i_j,j=1,2,3 \}$, where the $i_j$ satisfy the conditions $0 \leq i_1 + i_2 + i_3 \leq \Lambda '$ if a `complete' basis is used or the conditions $0 \leq i_j \leq \Lambda , j = 1, 2, 3$ if a `double' Pascal tetrahedron is used, in which case all mixed (or cross) moments that satisfy the corresponding conditions are retained by the expansion.
 In both cases, $\Lambda$, and $\Lambda '$ denote the highest order of the polynomial basis, and thus determines the spatial expansion order of the method.
 The basis functions for \ac{AHOT-C-UG} in the cell coordinate system is the monomial basis
 
@@ -208,7 +207,7 @@ In addition, the overall results of early investigations reported in~\cite{Ferre
 While the structured grid-based formulation of \ac{AHOT-C} used Legendre polynomials as basis  functions, which retained mixed product terms, this is not generally a requirement.
 Due to the generality of the \ac{AHOT-C-UG} formalism, it is possible to experiment with both types of basis function expansions.
 
-The use of a ‘mixed’ or incomplete basis expansion introduces an additional complication that is not encountered in the case of a complete basis.
+The use of a `mixed' or incomplete basis expansion introduces an additional complication that is not encountered in the case of a complete basis.
 This additional complication stems from the fact that, given a particular incoming and outgoing direction in the cell coordinate system, the evaluation of the angular flux moments over the \ac{CT} volume and outgoing face in the \ac{CT} coordinate system must be consistent with the expansion in the cell coordinate system.
 For example, consider the $\Lambda = 1$ expansion, $\{1, x, y, z, xy, xz, yz, xyz \}$, over a normalized tetrahedron.
 Let $x = u_1, y = u_2$, and $z = u_3$ and consider the case in which the outgoing angular flux, determined by the local angular direction, exits the face defined by $u_3 = 0$, as represented by the \ac{CT} located inside the first tetrahedron on the left in Fig. \ref{fig:non_planar_CTs}.
@@ -233,9 +232,9 @@ and
     \bold{S}^v = \boldsymbol{M}^v \bold{s}^v
 \end{equation}
 
-\noindent respectively, where the $v$ superscript implies \ac{CT} coordinate system, and the $\vec{i}^{th}$ elements of $\bold{s}$ and $\bold{s}^v$ is $s_{\vec{i}}$ and $s_{\vec{i}}^v$, respectively, with analogous relationships for the moment vectors $\bold{S}$ and $\bold{S}^v$.
+\noindent respectively, where the $v$ superscript implies \ac{CT} coordinate system, and the $\vec{i}^{th}$ elements of $\bold{s}$ and $\bold{s}^v$ are $s_{\vec{i}}$ and $s_{\vec{i}}^v$, respectively, with analogous relationships for the moment vectors $\bold{S}$ and $\bold{S}^v$.
 The distributed source within a \ac{CT} is equal to the cell source distribution over the volume of the tetrahedron with respect to the global coordinate system, $S(\vec{r}) = S^v(\vec{r})$, where $S^v$ is the distributed source over the volume of the \ac{CT}.
-Thus, the spatial moments of the source over the \ac{CT} is obtained by integrating the product of the corresponding monomial and the cell distributed source over the domain of the \ac{CT}, i.e.,
+Thus, the spatial moments of the source over the \ac{CT} are obtained by integrating the product of the corresponding monomial and the cell distributed source over the domain of the \ac{CT}, i.e.,
 
 \begin{equation} \label{eq:defineSv}
     S^{v}_{\vec{i}} = \frac{1}{V^v} \int_{V^v} d V^v B_{\vec{i}}^{v} (\vec{r}) S (\vec{r})
@@ -255,7 +254,7 @@ The cell moments of the distributed source are expressed in the cell coordinate 
 In order to correctly evaluate matrix $\boldsymbol{P}$, the integration must be performed in the \ac{CT} coordinate system and the source expansion coefficients in the cell coordinate system must be transformed into the \ac{CT} coordinate system.
 
 In order to derive the characteristic equation, and determine the outgoing face angular fluxes, two more procedures are required.
-First, the upstream cell’s outgoing face angular flux moments from a neighboring cell must be transformed into downstream incoming face moments.
+First, the upstream cell's outgoing face angular flux moments from a neighboring cell must be transformed into downstream incoming face moments.
 Second, it is necessary to transform the incoming face angular flux moments into \ac{CT} face angular moments.
 Once these procedures are applied to the specified moments, the characteristic relation can be derived in the \ac{CT} coordinate system.
 
@@ -352,7 +351,7 @@ Evaluating Eq. \ref{eq:CC.relation} on the outgoing face of the \ac{CT} then tak
     \bold{\Psi}_{\vec{i}^f}^{f,out} = \frac{1}{A^f} \int_{A^f} dA^f B_{\vec{i}^F}^{F,out} \psi^{f,out} (\vec{r} )
 \end{equation}
 
-\noindent from which moments on the cell’s outgoing face, in the cell coordinate system, are accumulated via
+\noindent from which moments on the cell's outgoing face, in the cell coordinate system, are accumulated via
 
 \begin{equation}
     \bold{\Psi}_{\vec{i}^F}^{F,out} = \sum_f \frac{A^f}{A^F} \bold{\Psi}_{\vec{i}^f}^{f,out}
