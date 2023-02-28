@@ -1063,7 +1063,8 @@ CONTAINS
         IF(tempintarray(i) .GE. maxreg)maxreg=tempintarray(i)
         IF(tempintarray(i) .LE. minreg)minreg=tempintarray(i)
       ENDDO
-      IF(ABS(nwords-2*(maxreg-minreg+1)) .GT. 0)CALL raise_fatal_error("region map bounds and number of entries don't match")
+      IF(ABS(nwords-2*(maxreg-minreg+1)) .GT. 0)CALL raise_fatal_error("region map bounds, "// &
+          TRIM(STR(maxreg-minreg+1)) //", and number of entries, "// TRIM(STR(nwords/2)) //", don't match")
       ALLOCATE(reg2mat(minreg:maxreg))
       !assign region mapping
       DO i=1,nwords,2
