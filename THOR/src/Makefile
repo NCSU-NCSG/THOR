@@ -327,7 +327,7 @@ sweep_module.o sweep_module.mod: sweep_module.f90  \
   multindex_types.mod globals.mod cell_splitting_module.mod
 
 error_module.o error_module.mod: error_module.f90 \
-  globals.mod
+  globals.mod stringmod.mod
 
 adjoint_module.o adjoint_module.mod: adjoint_module.f90 \
   globals.mod

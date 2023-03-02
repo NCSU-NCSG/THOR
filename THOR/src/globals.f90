@@ -198,6 +198,9 @@ MODULE globals
   !logical to determine if the fixed source problem will have fission
   LOGICAL :: nonu=.FALSE.
 
+  !counter to check out many warnings there were
+  INTEGER(li) :: num_warnings=0
+
 CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

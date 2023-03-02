@@ -5,6 +5,7 @@ MODULE error_module
   !***********************************************************************
   USE globals
   USE mpi
+  USE stringmod
   IMPLICIT NONE
   PRIVATE
   !
@@ -139,6 +140,10 @@ CONTAINS
       CALL printlog('')
       CALL printlog("--------------------------------------------------------")
       CALL printlog("   Execution of THOR completed successfully  ")
+      IF(num_warnings .GT. 0)THEN
+        CALL raise_warning(TRIM(str(num_warnings))//" warning(s) were found during execution.")
+        CALL raise_warning("Review of log is recommended to avoid unexpected behavior.")
+      ENDIF
       CALL printlog("--------------------------------------------------------")
       CALL printlog('')
     ENDIF
@@ -161,6 +166,7 @@ CONTAINS
     CHARACTER(*), INTENT(IN):: message
 
     IF(rank .EQ. 0)CALL printlog('WARNING: '//TRIM(ADJUSTL(message)))
+    num_warnings=num_warnings+1
 
   END SUBROUTINE raise_warning
 END MODULE error_module
