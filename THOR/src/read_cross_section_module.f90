@@ -239,6 +239,12 @@ CONTAINS
     READ(words(2),*)num_mat
     READ(words(3),*)egmax
     READ(words(4),*)xs_ord
+    IF(xs_ord .LT. scatt_ord)THEN
+      CALL raise_warning("Given XS data has scattering order data for up to P"//TRIM(str(xs_ord))// &
+          " scattering, but user requested scattering order is P"//TRIM(str(scatt_ord))//".")
+      CALL raise_warning("Switching to P"//TRIM(str(xs_ord))//" scattering.")
+      scatt_ord=xs_ord
+    ENDIF
     ! Allocate cross-section arrays and check if enough memory is available
     ALLOCATE(xs_mat(num_mat),eg_bounds(egmax+1),stat=alloc_stat)
     IF(alloc_stat /= 0) CALL raise_fatal_error("*** Not enough memory ***")
