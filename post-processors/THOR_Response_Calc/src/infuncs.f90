@@ -81,7 +81,10 @@ CONTAINS
       IF(t_int .NE. 0)STOP 'response_func not found'
       IF(t_char .EQ. 'response_func')THEN
         BACKSPACE(in_unit)
-        READ(in_unit,*)t_char,t_char2
+        READ(in_unit,'(A)')t_char
+        t_char=TRIM(ADJUSTL(t_char))
+        t_char2=t_char(14:200)
+        t_char2=TRIM(ADJUSTL(t_char2))
         SELECT CASE(response_type)
           CASE('cell_wise')
             CALL read_in_map_cell(t_char2)
