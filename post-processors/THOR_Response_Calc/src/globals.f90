@@ -11,6 +11,9 @@ MODULE globals
 
   CHARACTER(64) :: response_type
 
+  !input filename
+  CHARACTER(64) :: response_inp
+
 CONTAINS
 
 END MODULE globals

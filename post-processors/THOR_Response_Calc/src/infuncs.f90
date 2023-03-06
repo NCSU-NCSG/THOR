@@ -11,7 +11,6 @@ CONTAINS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !Gets command line arguments and read input file
   SUBROUTINE readinp()
-    CHARACTER(64) :: response_inp
     INTEGER(ki4) :: arg_count
 
     arg_count = COMMAND_ARGUMENT_COUNT()
@@ -20,13 +19,12 @@ CONTAINS
 
     CALL GET_COMMAND_ARGUMENT(1,response_inp)
 
-    CALL read_input_file(response_inp)
+    CALL read_input_file()
   ENDSUBROUTINE readinp
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !read in the input file
-  SUBROUTINE read_input_file(response_inp)
-    CHARACTER(*),INTENT(IN) :: response_inp
+  SUBROUTINE read_input_file()
     CHARACTER(200) :: t_char,t_char2
     INTEGER(ki4) :: in_unit=22,t_int,num_flux_files,i
 

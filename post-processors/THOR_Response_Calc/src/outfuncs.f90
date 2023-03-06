@@ -10,5 +10,9 @@ CONTAINS
   !outputs response
   SUBROUTINE outputresp()
     WRITE(*,'(A,ES16.8)')'Response: ',resp_value
+
+    OPEN(UNIT=30,FILE=TRIM(ADJUSTL(response_inp))//'_response.out',ACTION='WRITE',STATUS='REPLACE')
+    WRITE(30,'(A,ES24.16)')'Computed Response: ',resp_value
+    CLOSE(30)
   ENDSUBROUTINE outputresp
 END MODULE outfuncs
