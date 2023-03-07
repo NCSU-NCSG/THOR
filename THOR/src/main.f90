@@ -125,6 +125,25 @@ PROGRAM ahot_c_ug
   IF (do_timing .EQ. 1) parallel_timing(2,1) = MPI_WTIME()
   CALL setup
   IF (do_timing .EQ. 1) parallel_timing(2,2) = MPI_WTIME()
+  IF(num_p .GT. quad_ord*4)THEN
+    CALL raise_warning(TRIM(str(num_p))//" MPI processes requested. But the angular quadrature &
+        &order is "//TRIM(str(quad_ord))//".")
+    CALL raise_warning("THOR performance is poor for more than 4*n (where n is the quadrature &
+        &order) processes.")
+    CALL raise_warning(TRIM(str(quad_ord*4))//" or less MPI processes are recommended for this &
+        &input.")
+  ENDIF
+  ! If execution is not desired then stop here
+  IF(execution .EQ. 0)THEN
+    call sleep(2)
+    CALL printlog("*****************************************************************************")
+    CALL printlog("*****************************************************************************")
+    CALL printlog("*****************************************************************************")
+    CALL printlog("User specified no execution. Finalizing THOR and stopping.")
+    CALL printlog("*****************************************************************************")
+    CALL MPI_FINALIZE(mpi_err)
+    CALL thor_success
+  ENDIF
 
   !***********************************************************************
   ! Allocate scalar flux
