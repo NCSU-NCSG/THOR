@@ -1,3 +1,7 @@
+!THOR is licensed under the MIT License.
+!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
+!> @brief Program driver.
+!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
 !-------------------------------------------------------------------------------
 ! THOR_Response_calc to calculate a response function from THOR outputs
 !> @author Nicholas F. Herring
