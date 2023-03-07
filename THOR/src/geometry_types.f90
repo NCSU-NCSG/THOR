@@ -1,3 +1,7 @@
+!THOR is licensed under the MIT License.
+!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
+!> @brief Geometry types.
+!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
 MODULE geometry_types
   !***********************************************************************
   ! Derived types for geometry (algorithm was built around these!)
