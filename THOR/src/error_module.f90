@@ -139,7 +139,11 @@ CONTAINS
       END IF
       CALL printlog('')
       CALL printlog("--------------------------------------------------------")
-      CALL printlog("   Execution of THOR completed successfully  ")
+      IF(execution .EQ. 1)THEN
+        CALL printlog("   Execution of THOR completed successfully  ")
+      ELSE
+        CALL printlog("   THOR stopped successfully  ")
+      ENDIF
       IF(num_warnings .GT. 0)THEN
         CALL raise_warning(TRIM(str(num_warnings))//" warning(s) were found during execution.")
         CALL raise_warning("Review of log is recommended to avoid unexpected behavior.")
