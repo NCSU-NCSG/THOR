@@ -1,3 +1,7 @@
+!THOR is licensed under the MIT License.
+!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
+!> @brief Outer iteration module.
+!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
 !>Outer iteration module contains the subroutines necessary to perform
 !>multi-group iteration operations for both eigenvalue and fixed
 !>source problems.

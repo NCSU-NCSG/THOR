@@ -1,3 +1,7 @@
+!THOR is licensed under the MIT License.
+!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
+!> @brief Legacy input reading module.
+!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
 !***********************************************************************
 !
 ! The module contains all legacy subroutines for old yaml_input versions. These

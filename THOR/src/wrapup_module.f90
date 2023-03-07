@@ -1,7 +1,11 @@
+!THOR is licensed under the MIT License.
+!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
+!> @brief Module to perform system wrapup.
+!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
 MODULE wrapup_module
   !***********************************************************************
   !
-  ! Wraup module contains all subroutines to finish up problem and echo
+  ! Wrapup module contains all subroutines to finish up problem and echo
   ! output
   !
   !***********************************************************************

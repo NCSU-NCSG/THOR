@@ -1,3 +1,7 @@
+!THOR is licensed under the MIT License.
+!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
+!> @brief General types.
+!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
 MODULE types
   !***********************************************************************
   ! This derived type sets the precision of other declared variables

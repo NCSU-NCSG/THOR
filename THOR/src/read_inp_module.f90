@@ -1,3 +1,7 @@
+!THOR is licensed under the MIT License.
+!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
+!> @brief Input reader module.
+!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
 !***********************************************************************
 !
 ! The module contains all current subroutines for input file reading
