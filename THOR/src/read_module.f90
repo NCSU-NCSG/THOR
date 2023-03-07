@@ -81,10 +81,6 @@ CONTAINS
       IF(vtk_reg_output .EQ. 1) CALL plot_region
     END IF
 
-    ! If execution is not desired then stop here
-
-    IF(execution .EQ. 0) CALL raise_fatal_error('*** Not enough memory ***')
-
     !set the namom here so we know for the source file
     namom=(scatt_ord+1)**2
 
@@ -115,6 +111,17 @@ CONTAINS
     IF(finflow /= 0 .AND. problem .EQ. 0)THEN
       CALL read_finflow
     END IF
+
+    ! If execution is not desired then stop here
+    IF(execution .EQ. 0)THEN
+      CALL printlog("*****************************************************************************")
+      CALL printlog("*****************************************************************************")
+      CALL printlog("*****************************************************************************")
+      CALL printlog("User specified no execution. Finalizing THOR and stopping.")
+      CALL printlog("*****************************************************************************")
+      CALL MPI_FINALIZE(mpi_err)
+      CALL thor_success
+    ENDIF
 
   END SUBROUTINE READ
 
