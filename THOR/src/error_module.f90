@@ -145,7 +145,7 @@ CONTAINS
         CALL printlog("   THOR stopped successfully  ")
       ENDIF
       IF(num_warnings .GT. 0)THEN
-        CALL raise_warning(TRIM(str(num_warnings))//" warning(s) were found during execution.")
+        CALL raise_warning(TRIM(str(num_warnings))//" warning messages were found during execution.")
         CALL raise_warning("Review of log is recommended to avoid unexpected behavior.")
       ENDIF
       CALL printlog("--------------------------------------------------------")

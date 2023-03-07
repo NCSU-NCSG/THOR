@@ -112,17 +112,6 @@ CONTAINS
       CALL read_finflow
     END IF
 
-    ! If execution is not desired then stop here
-    IF(execution .EQ. 0)THEN
-      CALL printlog("*****************************************************************************")
-      CALL printlog("*****************************************************************************")
-      CALL printlog("*****************************************************************************")
-      CALL printlog("User specified no execution. Finalizing THOR and stopping.")
-      CALL printlog("*****************************************************************************")
-      CALL MPI_FINALIZE(mpi_err)
-      CALL thor_success
-    ENDIF
-
   END SUBROUTINE READ
 
   SUBROUTINE generate_num_moments(spord,numv,numf)
