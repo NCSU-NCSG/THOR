@@ -389,23 +389,25 @@ CONTAINS
 
 
     ! write a csv output file containing all region averaged information
-    OPEN(unit=20, file=TRIM(jobname)//TRIM('_out.csv'), status='unknown', action='write')
-    IF(problem == 1)WRITE(20,'(A,F20.16)')'k-eff Eigenvalue: ',keff
-    WRITE(20, 502, ADVANCE = "NO") "Region, Material, "
-    DO eg = 1, egmax - 1
-      WRITE(20, 505, ADVANCE = "NO") " flux g = ", eg, ","
-    END DO
-    WRITE(20, 506) " flux g = ", eg
-
-    DO region=minreg,maxreg
-      WRITE(20, 509, ADVANCE = "NO") region, ", ", &
-        TRIM(xs_mat(material_ids(reg2mat(region)))%mat_name),','
-      DO eg= 1, egmax - 1
-        WRITE(20, 507, ADVANCE = "NO") reac_rates(1, region, eg), ","
+    IF(rank .EQ. 0)THEN
+      OPEN(unit=20, file=TRIM(jobname)//TRIM('_out.csv'), status='unknown', action='write')
+      IF(problem == 1)WRITE(20,'(A,F20.16)')'k-eff Eigenvalue: ',keff
+      WRITE(20, 502, ADVANCE = "NO") "Region, Material, "
+      DO eg = 1, egmax - 1
+        WRITE(20, 505, ADVANCE = "NO") " flux g = ", eg, ","
       END DO
-      WRITE(20, 508) reac_rates(1, region, egmax)
-    END DO
-    CLOSE(20)
+      WRITE(20, 506) " flux g = ", eg
+
+      DO region=minreg,maxreg
+        WRITE(20, 509, ADVANCE = "NO") region, ", ", &
+          TRIM(xs_mat(material_ids(reg2mat(region)))%mat_name),','
+        DO eg= 1, egmax - 1
+          WRITE(20, 507, ADVANCE = "NO") reac_rates(1, region, eg), ","
+        END DO
+        WRITE(20, 508) reac_rates(1, region, egmax)
+      END DO
+      CLOSE(20)
+    ENDIF
 
 499 FORMAT(3I6,6ES18.8)
 501 FORMAT(A,I4,3A,ES14.6)
