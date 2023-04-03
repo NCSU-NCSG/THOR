@@ -3,7 +3,7 @@
 THOR is a discrete ordinates radiation transport code using the AHOT-C method on unstructured meshes (can be generated using [Gmsh](https://gmsh.info/) and converted using [OpenMeshConverter](https://github.com/nfherrin/OpenMeshConverter)) and multigroup XS (can be generated using [OpenMC](https://github.com/openmc-dev/openmc) and converted using [OpenXSConverter](https://github.com/nfherrin/OpenXSConverter)).
 
 For usage, see the user's manual in `<THOR_dir>/docs/usermanual/CurrentVersion/usermanual.pdf`.
-This can be found online at https://github.com/NCSU-NCSG/THOR/raw/v1.0.2/docs/usermanual/CurrentVersion/usermanual.pdf .
+This can be found online at https://github.com/NCSU-NCSG/THOR/raw/v1.1.0/docs/usermanual/CurrentVersion/usermanual.pdf .
 The theory manual can be found in `<THOR_dir>/docs/theorymanual/CurrentVersion/theorymanual.pdf`.
 The programmer's manual is currently just an outline and is not yet considered released.
 
