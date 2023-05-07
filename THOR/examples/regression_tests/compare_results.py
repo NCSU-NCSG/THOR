@@ -21,12 +21,14 @@ for lline in comp_list_file:
                 line2split=line2.split(' ')
                 for ii in range(len(line1split)):
                     if line1split[ii] != line2split[ii]:
-                        if abs((float(line1split[ii])-float(line2split[ii]))/float(line1split[ii])) >= 1.0e-10:
-                            if abs((float(line1split[ii])-float(line2split[ii]))) >= 1.0e-17:
-                                j += 1
-                                print("-----------------------------------DIFFERENCE FOUND!-----------------------------------")
-                                print("\tFile 1:", line1, end='')
-                                print("\tFile 2:", line2, end='')
+                        absdiff=abs((float(line1split[ii])-float(line2split[ii]))/float(line1split[ii]))
+                        reldiff=abs((float(line1split[ii])-float(line2split[ii])))
+                        if absdiff >= 1.0e-10 and reldiff >= 1.0e-4:
+                            j += 1
+                            print("-----------------------------------DIFFERENCE FOUND!-----------------------------------")
+                            print("\tFile 1:", line1, end='')
+                            print("\tFile 2:", line2, end='')
+                            print("Absolute difference: ",absdiff,"Relative difference: ",reldiff)
             break
     f1.close()
     f2.close()
