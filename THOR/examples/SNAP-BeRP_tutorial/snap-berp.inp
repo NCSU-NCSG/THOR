@@ -1,12 +1,12 @@
   problem_type          fsrc
   lambda                0
   piacc                 errmode
-  innerconv             1e-8
-  outerconv             1e-7
+  innerconv             1e-4
+  outerconv             1e-4
   maxinner              4
   maxouter              50000
   pnorder               2
-  mesh                  ./snap-berp.thrm
+  mesh                  ./snap-berp_out.thrm
   density_factor        ./snap-berp.dens
   xs                    ./snap-berp.xs
   source                ./snap-berp.src
@@ -37,6 +37,6 @@
                         23 1
                         24 6
                         25 6
-  vtk_flux_out          no
-  vtk_mat_out           no
-  vtk_src_out           no
+  vtk_flux_out          yes
+  vtk_mat_out           yes
+  vtk_src_out           yes
