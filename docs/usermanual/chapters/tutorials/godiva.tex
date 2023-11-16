@@ -11,7 +11,7 @@ The energy domain is discretized with six energy groups, and cross sections are 
 This tutorial first explains how a tetrahedral mesh is created for the Godiva problem, then the cross sections data input is discussed, and finally the standard input to \ac{THOR} is covered.
 The input files discussed below for the Godiva tutorial are located in:
 \begin{verbatim}
-    >> <thor_dir>/THOR/examples/Godiva_tutorial
+    >> <thor_dir>/THOR/examples/tutorials/Godiva
 \end{verbatim}
 
 \subsection{Godiva Mesh}\label{ch:tuts:sec:godiva:ssec:mesh}
@@ -21,7 +21,7 @@ Any version 4 Gmsh should work, but the example specifically performed here was 
 
 Begin by navigating to the location of the Godiva Gmsh geometry files, which are found in:
 \begin{verbatim}
-  <thor_dir>/THOR/examples/Godiva_tutorial/mesh_create/
+  <thor_dir>/THOR/examples/tutorials/Godiva/mesh_create/
 \end{verbatim}
 Opening the file geometry file \verb"godiva_octant.geo" in a text editor, it can be observed that the model is created by removing the negative portions of each direction from a sphere centered at the origin.
 For more details on creating original Gmsh inputs, see the \href{https://gmsh.info/doc/texinfo/gmsh.html}{Gmsh reference manual}.
@@ -68,7 +68,7 @@ This concludes the mesh generation step for this tutorial.
 
 The user should now move \verb"godiva_octant_out.thrm" to the input file location
 \begin{verbatim}
-  <thor_dir>/THOR/examples/Godiva_tutorial/
+  <thor_dir>/THOR/examples/tutorials/Godiva/
 \end{verbatim}
 and navigate there to continue the tutorial.
 

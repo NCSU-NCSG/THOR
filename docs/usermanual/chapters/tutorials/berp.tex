@@ -19,7 +19,7 @@ This tutorial includes the 3 inch polyethylene shield as the shell for the BeRP 
 This tutorial first explains how a tetrahedral mesh is created for the BeRP ball surrounded by a poly shield, then the cross sections data input is discussed, the source specification is discussed, and finally the standard input to THOR is covered.
 The input files discussed below for the BeRP tutorial are located in:
 \begin{verbatim}
-    >> <thor_dir>/THOR/examples/BeRP_tutorial
+    >> <thor_dir>/THOR/examples/tutorials/BeRP
 \end{verbatim}
 
 \subsection{BeRP Ball Mesh}\label{ch:tuts:sec:berp:ssec:mesh}
@@ -29,7 +29,7 @@ Any version 4 Gmsh should work, but the example specifically performed here was 
 
 Begin by navigating to the location of the BeRP Gmsh geometry files, which are found in:
 \begin{verbatim}
-  <thor_dir>/THOR/examples/BeRP_tutorial/mesh_create/
+  <thor_dir>/THOR/examples/tutorials/BeRP/mesh_create/
 \end{verbatim}
 Opening the file geometry file \verb"berp_octant.geo" in a text editor, it can be observed that the model is created by removing the negative portions of each direction from a sphere centered at the origin surrounded by another sphere centered at the origin.
 For more details on creating original Gmsh inputs, see the \href{https://gmsh.info/doc/texinfo/gmsh.html}{Gmsh reference manual}.
@@ -79,7 +79,7 @@ This concludes the mesh generation step for this tutorial.
 
 The user should now move \verb"berp_octant_out.thrm" to the input file location
 \begin{verbatim}
-  <thor_dir>/THOR/examples/BeRP_tutorial/
+  <thor_dir>/THOR/examples/tutorials/BeRP/
 \end{verbatim}
 and navigate there to continue the tutorial.
 
