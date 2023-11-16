@@ -23,4 +23,4 @@ Box(4) = {0,-10,0, 10,10,10};
 BooleanDifference(5) = { Volume{1}; Delete; }{ Volume{2:4}; Delete; };
 
 // Assign a mesh size to all the points of all the volumes:
-MeshSize{ PointsOf{ Volume{:}; } } = 0.1;
+MeshSize{ PointsOf{ Volume{:}; } } = 4;

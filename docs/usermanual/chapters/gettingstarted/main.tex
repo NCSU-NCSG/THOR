@@ -270,11 +270,12 @@ THOR\_MESH\_Generator is an older pre-processor that converts \textit{exodus} an
 It is currently undergoing maintenance and will likely have important capabilities simply added to OpenMeshConverter after which it may be removed.
 As such, use of the THOR\_MESH\_Generator is not currently recommended.
 
-\subsection{THOR\_Response\_Calc}
+\subsection{THOR\_Response\_Calc}\label{ch:getstart:sec:preproc:subsec:respcalc}
 
 THOR\_Response\_Calc is a post-processor for THOR that computes a response using a response function and flux results from THOR.
 THOR\_Response\_Calc can compute responses using either a cell based or a region based response function.
-The post-processor takes in a single input file which specifies the flux file name \verb"flux_file", the response function type \verb"response_type", and the response function file \verb"response_func".
+The post-processor takes in a given number of input files which specifies the flux file names to read in \verb"flux_files" which begins with the number of flux input files to sum up followed by the input file names on each line following the keyword.
+The post-processor also takes in a response function type \verb"response_type", and the response function file \verb"response_func".
 For the \verb"response_type" the user has either the option of a cell based response function, \verb"cell_wise", or a region based response function \verb"region_wise".
 Note that region based response calculations must include the mesh file name (and path to it) at the top of the \verb"response_func" file.
 

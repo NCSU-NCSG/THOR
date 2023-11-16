@@ -1,0 +1,4 @@
+flux_files 1
+snap-berp_flux.out
+response_type region_wise
+response_func response_function.resp

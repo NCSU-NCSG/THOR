@@ -1,0 +1,21 @@
+problem_type          keig
+keigsolver            pi
+lambda                0
+piacc                 none
+kconv                 1e-7
+innerconv             1e-8
+outerconv             1e-7
+maxinner              4
+maxouter              50000
+pnorder               1
+mesh                  3D_beavrs_out.thrm
+density_factor        3D_beavrs.dens
+xs                    3D_beavrs.xs
+qdtype                levelsym
+qdorder               8
+region_map            1 1
+                      2 2
+                      3 3
+                      4 4
+vtk_flux_out yes
+vtk_mat_out yes
