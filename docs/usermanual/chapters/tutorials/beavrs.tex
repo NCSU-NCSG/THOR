@@ -75,7 +75,7 @@ This mesh may be compared to the provided \verb"3D_beavrs_thrm.ref", which it sh
 As with previous tutorials, the meshed volumes do not match the expected volumes.
 This concludes the mesh generation step for this tutorial.
 
-% \subsection{Cross section data}
+\subsection{Cross section data}
 
 The user should now move \verb"3D_beavrs_out.thrm" to the input file location
 \begin{verbatim}
@@ -86,6 +86,7 @@ and navigate there to continue the tutorial.
 
 The \ac{THOR} cross section file for the BeRP benchmark is provided by \verb"berp.xs".
 \ac{THOR} uses a custom cross section format that is explained in detail in Section~\ref{ch:inp:sec:xsfile}.
+These particular cross sections were generated using OpenMC~\cite{openmc} for the model shown and converted using the OpenXSConverter (see Sec.~\ref{ch:getstart:sec:preproc:subsec:xsconv}) included as a THOR submodule.
 
 At the end of Section~\ref{ch:tuts:sec:beavrs:ssec:mesh}, it was stated that there was a discrepancy in the volume of the BEAVRS mesh regions compared to the original problem.
 To preserve material mass, the cross sections must be altered.
