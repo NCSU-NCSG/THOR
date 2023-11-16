@@ -86,5 +86,12 @@ THOR/examples/regression_tests/**/*.outodd
 THOR/examples/*_tutorial/**/*.thrm
 THOR/examples/*_tutorial/**/*.msh
 THOR/examples/*_tutorial/**/*.vtk
+THOR/examples/*_tutorial/**/*.vtkeven
+THOR/examples/*_tutorial/**/*.vtkodd
 THOR/examples/*_tutorial/**/*.log
 THOR/examples/*_tutorial/**/*out.csv
+THOR/examples/*_tutorial/**/*.convergence
+THOR/examples/*_tutorial/**/*.outeven
+THOR/examples/*_tutorial/**/*.outodd
+THOR/examples/*_tutorial/**/*even.dat
+THOR/examples/*_tutorial/**/*odd.dat

@@ -5,7 +5,7 @@
   innerconv 1E-8 ; outerconv 1E-6
   maxinner 5 ; maxouter 5000
 
-  mesh ./berp_octant.thrm
+  mesh ./berp_octant_out.thrm
   xs ./berp.xs
   source ./berp.src
   density_factor berp_octant.dens

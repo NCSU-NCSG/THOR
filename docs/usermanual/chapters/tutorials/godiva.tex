@@ -47,18 +47,18 @@ Progress:***********************************************************************
 Progress:***********************************************************************
 ----------------------- Calculating volumes:
 Progress:***********************************************************************
+Region 5 tets: 77
 Region 5 volume:   3.3099604624050352E+02
-Region 5 equivalent radius:   4.2911933629822876E+00
+Total number of tets: 77
 Total system volume:   3.3099604624050352E+02
-Equivalent radius:   4.2911933629822876E+00
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 ------------------------- OpenMeshConverter successful -------------------------
------------------------ Output written to godiva_octant.thrm
+----------------------- Output written to godiva_octant_out.thrm
 \end{verbatim}
 
-The file \verb"godiva_octant.thrm" should result from this execution for use by THOR.
+The file \verb"godiva_octant_out.thrm" should result from this execution for use by THOR.
 This mesh may be compared to the provided \verb"godiva_octant_thrm.ref", which it should match if \verb"godiva_octant.msh" matches \verb"godiva_octant_msh.ref".
 Notice that the given volume for Region 5 (the Godiva eighth of a sphere as seen in \verb"godiva_octant.geo") is 330.996~cm$^3$, but the actual octant volume for the Godiva sphere is 349.653~cm$^3$.
 The ratio of the actual volume to the meshed volume is then 1.056366, which will come in handy later.
@@ -66,7 +66,7 @@ This concludes the mesh generation step for this tutorial.
 
 \subsection{Cross section data}
 
-The user should now move \verb"godiva_octant.thrm" to the input file location
+The user should now move \verb"godiva_octant_out.thrm" to the input file location
 \begin{verbatim}
   <thor_dir>/THOR/examples/Godiva_tutorial/
 \end{verbatim}
@@ -112,7 +112,7 @@ ipiter                0
 print_conv            yes
 density_factor        godiva_octant.dens
 execution             yes
-mesh                  ./godiva_octant.thrm
+mesh                  ./godiva_octant_out.thrm
 source                source.dat
 flux_out              no
 xs                    ./godiva.xs
@@ -143,7 +143,9 @@ The Godiva tutorial is solved with \ac{THOR} via the command line:
 Completion of execution of the Godiva tutorial is indicated by the printout:
 \begin{verbatim}
 --------------------------------------------------------
-   Execution of THOR completed successfully
+  Execution of THOR completed successfully
+WARNING: 1 warning messages were found during execution.
+WARNING: Review of log is recommended to avoid unexpected behavior.
 --------------------------------------------------------
 \end{verbatim}
 
@@ -168,19 +170,19 @@ A plot of the fast flux using ParaView 5.10.0 for this run is shown in Figure~\r
 
 The reaction rate summary is given by:
 \begin{verbatim}
---------------------------------------------------------
-   Region averaged reaction rates
+  --------------------------------------------------------
+  Region averaged reaction rates
 --------------------------------------------------------
 
 -- Region --   5 -- Material -- mat_1 Volume =   3.309960E+02
-   Group          Flux       Fission    Absorption      Fiss Src
-       1  8.317355E-01  1.381271E-01  4.883317E-02  1.381271E-01
-       2  1.549185E+00  2.298278E-01  9.364997E-02  2.298278E-01
-       3  9.627054E-01  1.353285E-01  5.854598E-02  1.353285E-01
-       4  1.585196E+00  2.152633E-01  9.782396E-02  2.152633E-01
-       5  1.137791E+00  1.819135E-01  8.630310E-02  1.819135E-01
-       6  1.682607E-01  4.366399E-02  2.265428E-02  4.366399E-02
-   Total  6.234875E+00  9.441242E-01  4.078105E-01  9.441242E-01
+  Group          Flux       Fission    Absorption      Fiss Src
+      1  8.317355E-01  1.381271E-01  4.883317E-02  1.381271E-01
+      2  1.549185E+00  2.298278E-01  9.364997E-02  2.298278E-01
+      3  9.627054E-01  1.353285E-01  5.854598E-02  1.353285E-01
+      4  1.585196E+00  2.152633E-01  9.782396E-02  2.152633E-01
+      5  1.137791E+00  1.819135E-01  8.630310E-02  1.819135E-01
+      6  1.682607E-01  4.366399E-02  2.265428E-02  4.366399E-02
+  Total  6.234875E+00  9.441242E-01  4.078105E-01  9.441242E-01
 \end{verbatim}
 
 The results can be improved by increasing the refinement of the mesh.
