@@ -779,10 +779,12 @@ CONTAINS
     TYPE(vector), INTENT(in) :: omega, omega_local, v0, v1, v2, v3, &
           n0,n1,n2,n3
     TYPE(vector), DIMENSION(2),INTENT(inout) :: r0, r1, r2, r3
+    REAL(kind=d_t) :: eps
 
     ! Split cell and define subcell vertices r0, r1, r2, & r3
 
-    IF((face0 .EQ. 0) .AND. ABS(omega .dot. n0) .GT. 0.0)THEN
+    eps = 1.0D-5 ! Tolerance criteria
+    IF((face0 .EQ. 0) .AND. ABS(omega .dot. n0) .GT. eps)THEN
       t=1.0_d_t/(omega_local%x1)
       Rin=v0
       Rout=Rin+t*omega
@@ -832,7 +834,7 @@ CONTAINS
         r2(2)=Rin
         r3(2)=Rout
       ENDIF
-    ELSEIF((face1 .EQ. 0) .AND. ABS(omega .dot. n1) .GT. zero)THEN
+    ELSEIF((face1 .EQ. 0) .AND. ABS(omega .dot. n1) .GT. eps)THEN
       t=1.0_d_t/(omega_local%x2-omega_local%x1)
       Rin=v1
       Rout=Rin+t*omega
@@ -882,7 +884,7 @@ CONTAINS
         r2(2)=Rin
         r3(2)=Rout
       ENDIF
-    ELSEIF((face2 .EQ. 0) .AND. ABS(omega .dot. n2) .GT. 0.0)THEN
+    ELSEIF((face2 .EQ. 0) .AND. ABS(omega .dot. n2) .GT. eps)THEN
       t=1.0_d_t/(omega_local%x3-omega_local%x2)
       Rin=v2
       Rout=Rin+t*omega
@@ -932,7 +934,7 @@ CONTAINS
         r2(2)=Rin
         r3(2)=Rout
       ENDIF
-    ELSEIF((face3 .EQ. 0) .AND. ABS(omega .dot. n3) .GT. 0.0)THEN
+    ELSEIF((face3 .EQ. 0) .AND. ABS(omega .dot. n3) .GT. eps)THEN
       t=1.0_d_t/(-1.0_d_t*omega_local%x3)
       Rin=v3
       Rout=Rin+t*omega
@@ -1004,14 +1006,16 @@ CONTAINS
     TYPE(vector), INTENT(in) :: omega, omega_local, v0, v1, v2, v3, &
           n0,n1,n2,n3
     TYPE(vector), DIMENSION(2),INTENT(inout) :: r0, r1, r2, r3
+    REAL(kind=d_t) :: eps
 
     ! Split cell and define subcell vertices r0, r1, r2, & r3
 
+    eps = 1.0D-5 ! Tolerance criteria
     IF(face0 .EQ. 1)THEN
       t=1.0_d_t/(-1.0_d_t*omega_local%x1)
       Rout=v0
       Rin=Rout-t*omega
-      IF(ABS(omega .dot. n1) .LE. 1.0D-16)THEN
+      IF(ABS(omega .dot. n1) .LE. eps)THEN
         ! Subcell 1
         incoming_face(1)=0
         outgoing_face(1)=3
@@ -1026,7 +1030,7 @@ CONTAINS
         r1(2)=v3
         r2(2)=Rin
         r3(2)=Rout
-      ELSEIF(ABS(omega .dot. n2) .LE. 1.0D-16)THEN
+      ELSEIF(ABS(omega .dot. n2) .LE. eps)THEN
         ! Subcell 1
         incoming_face(1)=0
         outgoing_face(1)=1
@@ -1041,7 +1045,7 @@ CONTAINS
         r1(2)=v1
         r2(2)=Rin
         r3(2)=Rout
-      ELSEIF(ABS(omega .dot. n3) .LE. 1.0D-16)THEN
+      ELSEIF(ABS(omega .dot. n3) .LE. eps)THEN
         ! Subcell 1
         incoming_face(1)=0
         outgoing_face(1)=2
@@ -1061,7 +1065,7 @@ CONTAINS
       t=1.0_d_t/(omega_local%x1-omega_local%x2)
       Rout=v1
       Rin=Rout-t*omega
-      IF(ABS(omega .dot. n0) .LE. 1.0D-16)THEN
+      IF(ABS(omega .dot. n0) .LE. eps)THEN
         ! Subcell 1
         incoming_face(1)=1
         outgoing_face(1)=2
@@ -1076,7 +1080,7 @@ CONTAINS
         r1(2)=v2
         r2(2)=Rin
         r3(2)=Rout
-      ELSEIF(ABS(omega .dot. n2) .LE. 1.0D-16)THEN
+      ELSEIF(ABS(omega .dot. n2) .LE. eps)THEN
         ! Subcell 1
         incoming_face(1)=1
         outgoing_face(1)=3
@@ -1091,7 +1095,7 @@ CONTAINS
         r1(2)=v3
         r2(2)=Rin
         r3(2)=Rout
-      ELSEIF(ABS(omega .dot. n3) .LE. 1.0D-16)THEN
+      ELSEIF(ABS(omega .dot. n3) .LE. eps)THEN
         ! Subcell 1
         incoming_face(1)=1
         outgoing_face(1)=0
@@ -1111,7 +1115,7 @@ CONTAINS
       t=1.0_d_t/(omega_local%x2-omega_local%x3)
       Rout=v2
       Rin=Rout-t*omega
-      IF(ABS(omega .dot. n0) .LE. 1.0D-16)THEN
+      IF(ABS(omega .dot. n0) .LE. eps)THEN
         ! Subcell 1
         incoming_face(1)=2
         outgoing_face(1)=3
@@ -1126,7 +1130,7 @@ CONTAINS
         r1(2)=v3
         r2(2)=Rin
         r3(2)=Rout
-      ELSEIF(ABS(omega .dot. n1) .LE. 1.0D-16)THEN
+      ELSEIF(ABS(omega .dot. n1) .LE. eps)THEN
         ! Subcell 1
         incoming_face(1)=2
         outgoing_face(1)=0
@@ -1141,7 +1145,7 @@ CONTAINS
         r1(2)=v0
         r2(2)=Rin
         r3(2)=Rout
-      ELSEIF(ABS(omega .dot. n3) .LE. 1.0D-16)THEN
+      ELSEIF(ABS(omega .dot. n3) .LE. eps)THEN
         ! Subcell 1
         incoming_face(1)=2
         outgoing_face(1)=1
@@ -1161,7 +1165,7 @@ CONTAINS
       t=1.0_d_t/(omega_local%x3)
       Rout=v3
       Rin=Rout-t*omega
-      IF(ABS(omega .dot. n0) .LE. 1.0D-16)THEN
+      IF(ABS(omega .dot. n0) .LE. eps)THEN
         ! Subcell 1
         incoming_face(1)=3
         outgoing_face(1)=1
@@ -1176,7 +1180,7 @@ CONTAINS
         r1(2)=v1
         r2(2)=Rin
         r3(2)=Rout
-      ELSEIF(ABS(omega .dot. n1) .LE. 1.0D-16)THEN
+      ELSEIF(ABS(omega .dot. n1) .LE. eps)THEN
         ! Subcell 1
         incoming_face(1)=3
         outgoing_face(1)=2
@@ -1191,7 +1195,7 @@ CONTAINS
         r1(2)=v2
         r2(2)=Rin
         r3(2)=Rout
-      ELSEIF(ABS(omega .dot. n2) .LE. 1.0D-16)THEN
+      ELSEIF(ABS(omega .dot. n2) .LE. eps)THEN
         ! Subcell 1
         incoming_face(1)=3
         outgoing_face(1)=0
@@ -1230,10 +1234,12 @@ CONTAINS
     TYPE(vector), INTENT(in) :: omega, omega_local, v0, v1, v2, v3, &
           n0,n1,n2,n3
     TYPE(vector), DIMENSION(1), INTENT(inout) :: r0, r1, r2, r3
+    REAL(kind=d_t) :: eps
 
     ! Split cell and define subcell vertices r0, r1, r2, & r3
 
-    IF((face0 .EQ. 0) .AND. ABS(omega .dot. n0) .GT. 0.0)THEN
+    eps = 1.0D-5 ! Tolerance criteria
+    IF((face0 .EQ. 0) .AND. ABS(omega .dot. n0) .GT. eps)THEN
       t=1.0_d_t/(omega_local%x1)
       Rin=v0
       Rout=Rin+t*omega
@@ -1262,7 +1268,7 @@ CONTAINS
         r2(1)=Rin
         r3(1)=Rout
       ENDIF
-    ELSEIF((face1 .EQ. 0) .AND. ABS(omega .dot. n1) .GT. 0.0)THEN
+    ELSEIF((face1 .EQ. 0) .AND. ABS(omega .dot. n1) .GT. eps)THEN
       t=1.0_d_t/(omega_local%x2-omega_local%x1)
       Rin=v1
       Rout=Rin+t*omega
@@ -1291,7 +1297,7 @@ CONTAINS
         r2(1)=Rin
         r3(1)=Rout
       ENDIF
-    ELSEIF((face2 .EQ. 0) .AND. ABS(omega .dot. n2) .GT. 0.0)THEN
+    ELSEIF((face2 .EQ. 0) .AND. ABS(omega .dot. n2) .GT. eps)THEN
       t=1.0_d_t/(omega_local%x3-omega_local%x2)
       Rin=v2
       Rout=Rin+t*omega
@@ -1320,7 +1326,7 @@ CONTAINS
         r2(1)=Rin
         r3(1)=Rout
       ENDIF
-    ELSEIF((face3 .EQ. 0) .AND. ABS(omega .dot. n3) .GT. 0.0)THEN
+    ELSEIF((face3 .EQ. 0) .AND. ABS(omega .dot. n3) .GT. eps)THEN
       t=1.0_d_t/(-1.0_d_t*omega_local%x3)
       Rin=v3
       Rout=Rin+t*omega

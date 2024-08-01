@@ -192,6 +192,7 @@ CONTAINS
     REAL(kind=d_t)              :: FV
     REAL(kind=d_t)              :: F
     REAL(kind=d_t)              :: V
+    REAL(kind=d_t)              :: eps
 
     e2=e*e
     e3=e*e2
@@ -200,10 +201,15 @@ CONTAINS
     e6=e*e5
 
     IF(e > 0.25_d_t)THEN
-      FF=2.0/e-2.0/e2+2.0*EXP(-e)/e2
-      FV=1.0/e-2.0/e2+2.0/e3-2.0*EXP(-e)/e3
-      F=3.0/e-6.0/e2+6.0/e3-6.0*EXP(-e)/e3
-      V=1.0/e-3.0/e2+6.0/e3-6.0/e4+6.0*EXP(-e)/e4
+      IF(ABS(e) > 1.0e14) THEN
+        eps=0.0_d_t
+      ELSE
+        eps=EXP(-e)
+      END IF
+      FF=2.0/e-2.0/e2+2.0*eps/e2
+      FV=1.0/e-2.0/e2+2.0/e3-2.0*eps/e3
+      F=3.0/e-6.0/e2+6.0/e3-6.0*eps/e3
+      V=1.0/e-3.0/e2+6.0/e3-6.0/e4+6.0*eps/e4
     ELSE
       FF=1.0-0.333333*e+0.0833333*e2-0.0166667*e3+&
             0.00277778*e4-0.000396825*e5+0.0000496032*e6

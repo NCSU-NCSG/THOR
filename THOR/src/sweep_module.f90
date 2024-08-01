@@ -413,36 +413,38 @@ CONTAINS
     INTEGER(kind=li), INTENT(inout) :: CASE
     TYPE(vector), INTENT(inout) :: omega
     TYPE(vector), INTENT(in) :: n0, n1, n2, n3
+    REAL(kind=d_t) :: eps
 
     ! Determine which case cell corresponds with respect to current ordinate
 
+    eps = 1.0D-5 ! Tolerance critera
     incoming=0
     outgoing=0
 
-    IF((omega .dot. n0) < 0.0)THEN
+    IF((omega .dot. n0) < -eps)THEN
       incoming=incoming+1
-    ELSEIF(ABS(omega .dot. n0) .LE. 1.0D-16)THEN
+    ELSEIF(ABS(omega .dot. n0) .LE. eps)THEN
     ELSE
       outgoing=outgoing+1
     END IF
 
-    IF((omega .dot. n1) < 0.0)THEN
+    IF((omega .dot. n1) < -eps)THEN
       incoming=incoming+1
-    ELSEIF(ABS(omega .dot. n1) .LE. 1.0D-16)THEN
+    ELSEIF(ABS(omega .dot. n1) .LE. eps)THEN
     ELSE
       outgoing=outgoing+1
     END IF
 
-    IF((omega .dot. n2) < 0.0)THEN
+    IF((omega .dot. n2) < -eps)THEN
       incoming=incoming+1
-    ELSEIF(ABS(omega .dot. n2) .LE. 1.0D-16)THEN
+    ELSEIF(ABS(omega .dot. n2) .LE. eps)THEN
     ELSE
       outgoing=outgoing+1
     END IF
 
-    IF((omega .dot. n3) < 0.0)THEN
+    IF((omega .dot. n3) < -eps)THEN
       incoming=incoming+1
-    ELSEIF(ABS(omega .dot. n3) .LE. 1.0D-16)THEN
+    ELSEIF(ABS(omega .dot. n3) .LE. eps)THEN
     ELSE
       outgoing=outgoing+1
     END IF

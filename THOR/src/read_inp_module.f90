@@ -27,10 +27,10 @@ INTEGER,PARAMETER :: num_cards=45
 !> The number of cards for deprecated info
 INTEGER,PARAMETER :: num_dep_cards=5
 !> The maximum length of a line in the input file
-INTEGER,PARAMETER :: ll_max=200
+INTEGER,PARAMETER :: ll_max=5000
 !(need to change in interface IFchanged)
 !> The maximum number of params on a given line or inputs for a param
-INTEGER,PARAMETER :: lp_max=100
+INTEGER,PARAMETER :: lp_max=1000
 !(also need to change in interface IFchanged)
 !> The local unit for the input file
 INTEGER :: local_unit
@@ -57,7 +57,7 @@ ABSTRACT INTERFACE
   SUBROUTINE prototype_wordarg(thisCard,twords)
     IMPORT :: cardType
     CLASS(cardType),INTENT(INOUT) :: thisCard
-    CHARACTER(200),INTENT(INOUT) :: twords(100)
+    CHARACTER(5000),INTENT(INOUT) :: twords(1000)
   ENDSUBROUTINE prototype_wordarg
 ENDINTERFACE
 
@@ -1013,8 +1013,8 @@ CONTAINS
     CLASS(cardType),INTENT(INOUT) :: this_card
     CHARACTER(ll_max),INTENT(INOUT) :: wwords(lp_max)
     CHARACTER(65000) :: regmap
-    CHARACTER(200) :: line
-    CHARACTER(MAX_CARDNAME_LEN) :: words(200)
+    CHARACTER(3000) :: line
+    CHARACTER(MAX_CARDNAME_LEN) :: words(3000)
     INTEGER :: rank,mpi_err,local_unit,i,l,lr,nwords,ios
     INTEGER,ALLOCATABLE :: tempintarray(:)
 
