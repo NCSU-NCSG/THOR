@@ -1,20 +1,20 @@
 !A Hello World example for THOR
 
-  execution  yes
-  lambda     0
-  type       keig
-  page_refl  save
-  innerconv  1e-12
-  outerconv  1e-7
-  maxinner   4
-  maxouter   500
+  execution     yes
+  lambda        0
+  problem_type  keig
+  page_refl     save
+  innerconv     1e-12
+  outerconv     1e-7
+  maxinner      4
+  maxouter      500
 
-  mesh       hello_world.thrm
-  xs         hello_world.xs
-  flux_out   hello_world.flux
-  print_xs   yes
+  mesh          hello_world.thrm
+  xs            hello_world.xs
+  flux_out      hello_world.flux
+  print_xs      yes
 
-  qdtype     levelsym
-  qdorder    2
+  qdtype        levelsym
+  qdorder       2
 
   region_map 0 1
